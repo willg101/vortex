@@ -1,91 +1,187 @@
-(function( $ )
+dpoh = (function( $ )
 {
 	var identifier = 0;
-	var interval = null;
-
-	function init()
+	var empty_function = function(){};
+	
+	var subscribable = {
+		before_send : [],
+		after_send : [],
+		session_init : [],
+		response_recevied : [],
+	};
+	
+	var transaction_callbacks = {};
+	
+	function subscribe( key, callback )
 	{
-		interval = setInterval( sendCommand.bind( undefined, "get" ), 100 );
-	}
-
-
-	function sendCommand( command )
-	{
-		if ( command != "get" && command != "quit" )
+		if ( typeof callback != "function" )
+			
 		{
-			command = "send " + command + " -i " + identifier++;
+			throw new Error( "`callback` must be a function" );
+		}
+	
+		if ( subscribable[ key ] instanceof Array )
+		{
+			if ( subscribable[ key ].indexOf( callback ) == -1 )
+			{
+				subscribable[ key ].push( callback );
+			}
+		}
+		else
+		{
+			throw new Error( "Unrecognized event `" + key + "`" );
+		}
+	}
+	
+	function unsubscribe( key, callback )
+	{
+		if ( typeof callback != "function" )
+		{
+			console.warn( "`callback` is not a function" );
+			return;
+		}
+	
+		if ( subscribable[ key ] instanceof Array )
+		{
+			var index = subscribable[ key ].indexOf( callback );
+			if ( index != -1 )
+			{
+				subscribable[ key ] = subscribable[ key ].splice( index, 1 );
+			}
+		}
+		else
+		{
+			throw new Error( "Unrecognized event `" + key + "`" );
+		}		
+	}
+	
+	function fireEvent( key, args )
+	{
+		if ( ! ( args instanceof Array ) )
+		{
+			args = [];
 		}
 
-		if ( command == "quit" )
+		if ( subscribable[ key ] instanceof Array )
 		{
-			clearInterval( interval );
-			$( "#debugger_output" ).append( '<p style="color: red">Server killed</p>' );
+			for ( var i in subscribable[ key ] )
+			{
+				subscribable[ key ][ i ].apply( undefined, args );
+			}
 		}
-
-		$.post( '/xdebug_http/connect.php', { commands: [ command ] }, onResponseReceived.bind( undefined, command ) );
+		else
+		{
+			throw new Error( "Unrecognized event `" + key + "`" );
+		}
 	}
 
-	function onResponseReceived( command, data )
+	function sendCommand( command, callback )
 	{
-		for ( var i in data )
+		var alter_data = {
+			allow_send : true,
+			command : command,
+			callback : callback,
+		};
+		fireEvent( 'before_send', [ alter_data, identifier ] );
+		if ( !alter_data.allow_send )
 		{
-			if ( command != "get" )
+			return;
+		}
+		
+		callback = alter_data.callback;
+		command  = alter_data.command;
+		
+		if ( typeof callback == "function" )
+		{
+			transaction_callbacks[ identifier ] = callback;
+		}
+		
+		delete alter_data.allow_send;
+		fireEvent( 'after_send', [ alter_data, identifier ] );
+
+		if ( command != "get" && command != "quit" && command )
+		{
+			command = "send " + command + " -i " + identifier;
+		}
+
+		$.post( '/xdebug_http/connect.php', { commands: [ command ] },
+			onResponseReceived.bind( undefined, command, identifier, alter_data.immediate_callback ) );
+			
+		return identifier++;
+	}
+	
+	function onResponseReceived( command, original_tid, cb, data )
+	{
+		typeof cb == "function" && cb( data );
+
+		if ( !data || !(data instanceof Array) )
+		{
+			return;
+		}
+		
+		data.forEach( function( message )
+		{
+			// Skip responses that contain little data
+			if ( ! message || message == "NO_DATA" || message == "SEND_ACK" )
 			{
-				return;
+				return /* continue */;
 			}
-
-			if ( ! data[ i ] )
+			
+			var message_parts = message.split( String.fromCharCode( 0 ) );
+			var message_length = Number( message_parts[ 0 ] );
+			var message_data = message_parts[ 1 ];
+			
+			if ( message_data.length != message_length )
 			{
-				continue;
+				throw new Error( "Data length mismatch" );
 			}
-
-			var message = "<p>Message from debugger engine:</p>";
-
-			var null_char_pos = data[ i ].indexOf( String.fromCharCode( 0 ) );
-			if ( null_char_pos >= 0 )
+			
+			var jq_message = $( message_data );
+			var jq_response_element = jq_message.find( '[command],init' );
+			if ( !jq_response_element.length && jq_message.is( '[command],init' ) )
 			{
-				data[ i ] = data[ i ].substring( null_char_pos + 1 );
-			}
-
-			if ( data[ i ] == "NO_DATA" )
-			{
-				//message = '<p style="color: #888; font-style: italic">No data available.</p>';
-				return;
-			}
-			else
-			{
-				var jq_message = $( data[ i ] );
-				var attributes = [ 'fileuri', 'filename', 'lineno' ];
-
-				for ( var j in attributes )
+				jq_message.each( function( index, value )
 				{
-					jq_message.each( function( index, el )
+					if ( $( value ).is( '[command],init' ) )
 					{
-						var selector = '[' + attributes[ j ] + ']';
-						if ( $( el ).is( selector ) )
-						{
-							message += "<p>-- " + attributes[ j ] + ": " + $( el ).attr( attributes[ j ] ) + "<p>";
-						}
-						else if ( $( el ).find( selector ).length )
-						{
-							message += "<p>-- " + attributes[ j ] + ": " + $( el ).find( selector ).attr( attributes[ j ] ) + "<p>";
-						}
-					} );
-				}
+						jq_response_element = $( value );
+						return false;
+					}
+				} );
 			}
-
-			$( "#debugger_output" ).append( message );
-		}
+	
+			if ( !jq_response_element.length )
+			{
+				console.warn( 'Unrecognized response from server: ' + message_data );
+			}
+			
+			if ( jq_response_element.is( 'init' ) )
+			{
+				fireEvent( 'session_init', [ jq_response_element ] );
+				return;
+			}
+			
+			var tid = jq_response_element.attr( 'transaction_id' );
+			if ( transaction_callbacks[ tid ] )
+			{
+				transaction_callbacks[ tid ]( jq_response_element );
+				delete transaction_callbacks[ tid ];
+			}
+			
+			fireEvent( 'response_recevied', [ jq_response_element, tid ] );
+		} );
 	}
 
-	function onCommandButtonClicked( e )
+	function listRecentFiles( dir, callback )
 	{
-		var command_name = $( e.target ).attr( 'data-command' );
-		sendCommand( command_name );
+		$.post( '/xdebug_http/connect.php', { commands: [ 'list_recent_files ' + dir ] }, callback );
 	}
 
-	$( document ).on( 'click', '[data-command]', onCommandButtonClicked );
-	$( init );
-
+	return {
+		sendCommand : sendCommand,
+		subscribe : subscribe,
+		unsubscribe : unsubscribe,
+		listRecentFiles : listRecentFiles,
+	};
+	
 }( jQuery ) );
-

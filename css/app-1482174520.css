@@ -1,0 +1,220 @@
+html:before {
+  position: fixed;
+  left: -5px;
+  top: -5px;
+  z-index: 0;
+  display: block;
+  background-image: url('../img/background.jpg');
+  background-position: center center;
+  background-size: cover;
+  width: calc(100% + 10px);
+  height: calc(100% + 10px);
+  content: " ";
+}
+.window-glass {
+  background-size: cover;
+  position: relative;
+  background-position: center center;
+  display: block;
+  position: absolute;
+  background-image: url('../img/background.jpg');
+  -webkit-filter: blur(10px);
+  -moz-filter: blur(10px);
+  -o-filter: blur(10px);
+  -ms-filter: blur(10px);
+  filter: blur(50px);
+}
+body {
+  margin: 0;
+  font-family: "Open Sans", sans-serif;
+  position: relative;
+}
+.main-table {
+  padding: 0;
+  border-collapse: collapse;
+}
+.toolbar {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1;
+  display: table;
+  box-shadow: 0 0 30px #000;
+}
+.toolbar .left {
+  text-align: left;
+}
+.toolbar .right {
+  text-align: right;
+}
+.toolbar .left,
+.toolbar .right {
+  position: relative;
+  display: table-cell;
+}
+.toolbar .connection-status {
+  padding: 15px;
+}
+.toolbar .connection-status.connected {
+  color: #5F5;
+}
+.toolbar .connection-status.error {
+  color: #F55;
+}
+.toolbar .btn {
+  background: none;
+  cursor: pointer;
+  color: #FFF;
+  padding: 15px;
+  display: inline-block;
+  border: none;
+}
+.toolbar .btn:hover {
+  background: rgba(255,255,255,0.2);
+  text-shadow: #000;
+}
+.windows {
+  width: 100%;
+  height: 100%;
+  padding: 30px;
+  position: relative;
+  box-sizing: border-box;
+  vertical-align: top;
+}
+.windows .window {
+  display: inline-block;
+  position: relative;
+  width: 30%;
+  height: 100%;
+  box-shadow: 0 0 30px #000;
+  background: rgba(0,0,0,0.7);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.windows .window:not(:last-child) {
+  margin-right: 30px;
+  width: calc(70% - 35px);
+}
+.windows .window .window-title {
+  color: #FFF;
+  padding: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.windows .window .window-title .icon {
+  margin-right: 10px;
+}
+.windows .window .window-title .text,
+.windows .window .window-title .icon {
+  color: #FFF;
+  text-shadow: 0 0 10px #000, 0 0 20px #000, 0 0 30px #000;
+  position: relative;
+}
+.windows .window .window-content-outer {
+  width: calc(100% - 10px);
+  height: calc(100% - 58px);
+  position: relative;
+  padding: 5px;
+}
+.windows .window .window-content-outer .window-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding-top: 5px;
+}
+#editor {
+  margin: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: none;
+}
+#editor .ace_gutter {
+  background: rgba(0,0,0,0.3);
+}
+.context {
+  width: 20%;
+  max-width: 20%;
+  overflow: scroll;
+}
+#context {
+  max-width: 0;
+}
+.ace_gutter-cell.ace_breakpoint {
+  background: #C22;
+}
+.ace_gutter-cell.pending-breakpoint {
+  animation: pending-breakpoint 1s infinite;
+}
+@keyframes pending-breakpoint {
+  0% {
+    background: rgba(0,0,0,0);
+  }
+  50% {
+    background: #CC2;
+    color: #000;
+  }
+  100% {
+    background: rgba(0,0,0,0);
+  }
+}
+.modal-overlay {
+  background: rgba(0,0,0,0.5);
+  z-index: 9;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.modal {
+  background: #FFF;
+  box-shadow: 0 0 10px #000;
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 200px auto;
+}
+.modal-title-bar {
+  position: relative;
+  background: #CCC;
+  height: 20px;
+  padding: 10px;
+}
+.modal-exit {
+  padding: 10px;
+  background: #B33;
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #FFF;
+  height: 20px;
+  cursor: pointer;
+}
+.modal-exit:hover {
+  background: #d55;
+}
+.modal-content {
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+input[type=text] {
+  box-sizing: border-box;
+  padding: 10px;
+  width: 100%;
+  display: block;
+}
+.cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: block;
+  content: " ";
+}

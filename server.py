@@ -16,6 +16,8 @@ import sys
 import Queue
 import errno
 from time import sleep
+import xml.etree.ElementTree as ET
+from websocket import create_connection
 
 class ThreadedServer( object) :
     def __init__( self, host, xdebug_port, controller_port ):
@@ -42,7 +44,7 @@ class ThreadedServer( object) :
             for s in inputready:
                 if s == self.controller_socket:
                     client, address = self.controller_socket.accept()
-                    client.settimeout( 0 );
+                    #client.settimeout( 0 );
                     threading.Thread(target = self.listenToPhpClient,args = (client,address)).start()
                 elif s == self.xdebug_socket:
                     client, address = self.xdebug_socket.accept()
@@ -50,6 +52,10 @@ class ThreadedServer( object) :
                     threading.Thread(target = self.listenToXdebugClient,args = (client,address)).start()
 
     def listenToXdebugClient( self, client, address ):
+        #print "clearing..."
+        #self.xdebug_inbox = Queue.Queue();
+        #self.xdebug_outbox = Queue.Queue();
+
         while True:
             while not self.xdebug_outbox.empty():
                 client.send( self.xdebug_outbox.get() + "\0" )
@@ -57,11 +63,22 @@ class ThreadedServer( object) :
             try:
                 data = client.recv( 4096 )
                 if data:
-                    if data.find( 'connect.php' ) >= 0:
-                        client.send( "detach -i 0\0" )
-                        client.close()
-                        return
+                    try:
+                        root = ET.fromstring(data.split( "\0" )[1])
+                        if root.attrib['fileuri']:
+                            with open( root.attrib['fileuri'].replace( 'file://', '') , 'r' ) as f:
+                                first_line = f.readline();
+                                if first_line.startswith( '<?php /* dpoh: ignore */' ):
+                                    client.send( "detach -i 0\0" )
+                                    client.close()
+                                    return
+                    except:
+                        pass
+                    print "\nincoming: " + data
                     self.xdebug_inbox.put( data )
+                    ws = create_connection("ws://localhost:3001/bridge");
+                    ws.send( data );
+                    ws.close
                 else:
                     raise Exception( 'Client disconnected' )
             except socket.timeout, e:
@@ -87,15 +104,23 @@ class ThreadedServer( object) :
                         client.send( "NO_DATA" )
                     else:
                         while not self.xdebug_inbox.empty():
-                            client.send( self.xdebug_inbox.get() )
+                            to_send = self.xdebug_inbox.get()
+                            print "\noutgoing: " + to_send
+                            client.send( to_send )
+                            print "sent!\n"
                 elif data.startswith( "send " ):
                     self.xdebug_outbox.put( data[5:] )
                     client.send( "SEND_ACK" );
                 else:
-                    raise error( 'PHP Client disconnected' )
-            except:
-                client.close()
-                return False
+                    raise Exception( 'PHP Client disconnected' )
+            except Exception as e:
+                err = e.args[0]
+                if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
+                    sleep(1)
+                    print "3"
+                else:
+                    client.close()
+                    return False
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
