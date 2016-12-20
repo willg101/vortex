@@ -6,16 +6,21 @@ modal = (function( $ )
 		exit_button : '.modal-exit',
 		modal : '.modal',
 		modal_content : '.modal-content',
+		blurable : '.blurable',
 	}
 	
 	function hide()
 	{
-		$( selectors.overlay ).fadeOut();
+		$( selectors.overlay ).fadeOut( setContent.bind( undefined, '' ) );
+		$( selectors.modal ).addClass( 'modal-hidden' );
+		$( selectors.blurable ).removeClass( 'blurred' );
 	}
 		
 	function show()
 	{
 		$( selectors.overlay ).fadeIn();
+		$( selectors.modal ).removeClass( 'modal-hidden' );
+		$( selectors.blurable ).addClass( 'blurred' );
 	}
 	
 	function setContent( html )
@@ -25,7 +30,7 @@ modal = (function( $ )
 	
 	function setTitle( html )
 	{
-		$( selectors.modal_content ).html( html )
+		$( selectors.title ).html( html )
 	}
 	
 	function set( options )

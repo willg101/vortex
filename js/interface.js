@@ -1,106 +1,109 @@
 Interface = (function( $ )
 {
-	var interval = null;
-	var editor = null;
-	var interval = null;
-	var poll_delay_ms = 1000;
+	var reconnect_delay_ms = 5000;
+	var active_session = false;
 
 	var pending_breakpoints = {};
 	var confirmed_breakpoints = {};
 	var xdebug_response_handlers = {
-		breakpoint_set : onBreakpointSet,
+		breakpoint_set    : onBreakpointSet,
 		breakpoint_remove : onBreakpointRemoved,
-		context_get : onContextGet,
-
+		context_get       : onContextGet,
+		stack_get         : onStackGet,
 	};
 
-	var file_cache = {};
-	var current_file = '';
 	var get_tids = {};
+	
+	var self = {};
 
 	function init()
 	{
+		CodePanel.init( self );
+		StatusPanel.init( self );
+
 		dpoh.subscribe( 'response_recevied', onResponseReceived );
 		dpoh.subscribe( 'session_init',      onSessionInit );
-		/*dpoh.subscribe( 'before_send',       function( alter_data )
+		dpoh.subscribe( 'connection_error',  function()
 		{
-			if ( alter_data.command == 'get' )
-			{
-				alter_data.immediate_callback = function(){
-					setTimeout( function(){
-						dpoh.sendCommand( "get" )
-					} , poll_delay_ms ) };
-			}
-		} );*/
+			CodePanel.updateStatusIndicator( 'disconnected' );
+			StatusPanel.toggleIndicators( false );
+			console.error( "Connection failed; retrying in " + (reconnect_delay_ms / 1000) + " seconds." );
+			setTimeout( dpoh.openConnection, reconnect_delay_ms );
+			active_session = false;
+		} );
+		dpoh.subscribe( 'connection_opened',  function()
+		{
+			console.log( "Connection succeeded!" );
+			CodePanel.updateStatusIndicator( 'connected' );
+			dpoh.sendCommand( 'status' );
+		} );
+		dpoh.subscribe( 'connection_closed',  function()
+		{
+			CodePanel.updateStatusIndicator( 'disconnected' );
+			console.warn( "Connection closed." );
+			StatusPanel.toggleIndicators( false );
+			active_session = false;
+		} );
 
-		dpoh.listRecentFiles( '/srv/preachingandworship.org', onRecentFilesReceived );
+		dpoh.openConnection();
 
-		editor = ace.edit( "editor" );
-		editor.setTheme( "ace/theme/solarized_dark" );
-		editor.session.setMode( "ace/mode/php" );
-		editor.setOption("showPrintMargin", false);
-
-		editor.setReadOnly( true );
-
-		editor.on( "guttermousedown", function(e) {
-		    var target = e.domEvent.target;
-		    if (target.className.indexOf("ace_gutter-cell") == -1)
-			return;
-		    //if (!editor.isFocused())
-			//return;
-
-			if ( !confirmed_breakpoints[ current_file ] )
-			{
-				confirmed_breakpoints[ current_file ] = {};
-			}
-
-			var breakpoints = e.editor.session.getBreakpoints(row, 0);
-			var row = e.getDocumentPosition().row;
-			if ( !confirmed_breakpoints[ current_file ][ row + 1 ] )
-			{
-
-				var tid = dpoh.sendCommand( "breakpoint_set -t line -n " + (row + 1) + " -f " + current_file );
-				e.editor.getSession().addGutterDecoration( row, "pending-breakpoint" );
-				confirmed_breakpoints[ current_file ][ row + 1 ] = "pending";
-				pending_breakpoints[ tid ] = {
-					file : current_file,
-					line : row + 1,
-				};
-			}
-			else if ( confirmed_breakpoints[ current_file ][ row + 1 ] != "pending" )
-			{
-				e.editor.session.clearBreakpoint( row );
-				e.editor.getSession().addGutterDecoration( row, "pending-breakpoint" );
-				var tid = dpoh.sendCommand( "breakpoint_remove -d " + confirmed_breakpoints[ current_file ][ row + 1 ] );
-				confirmed_breakpoints[ current_file ][ row + 1 ] = "pending";
-				pending_breakpoints[ tid ] = {
-					file : current_file,
-					line : row + 1,
-				};
-			}
-			else
-			{
-				alert( "we're still working on that breakpoint" );
-			}
-		    e.stop();
-		});
-		
-		dpoh.sendCommand( "get" );
-
-		window.setTimeout( glassifyWindows, 200 );
 		window.setTimeout( ajdustHeight, 100 );
 	}
 	
-	function onCommandButtonClicked( e )
+	function doCommand( command )
 	{
-		var command_name = $( e.target ).closest( '[data-command]' ).attr( 'data-command' );
-		dpoh.sendCommand( command_name );
+		dpoh.sendCommand( command );
 	}
 
-	function stopPolling()
+	function toggleBreakpoint( current_file, row )
 	{
-		allow_polling = false;
-		clearInterval( interval );
+		if ( !CodePanel.getCurrentFile() )
+		{
+			return;
+		}
+
+		if ( !confirmed_breakpoints[ current_file ] )
+		{
+			confirmed_breakpoints[ current_file ] = {};
+		}
+
+		if ( !active_session )
+		{
+			create = !confirmed_breakpoints[ current_file ][ row ];
+			if ( create )
+			{
+				confirmed_breakpoints[ current_file ][ row ] = true;
+			}
+			else
+			{
+				delete confirmed_breakpoints[ current_file ][ row ];
+			}
+				
+			CodePanel.updateBreakpoint( ( create ? 'confirmed' : 'removed' ), row );
+			return;
+		}
+
+		if ( !confirmed_breakpoints[ current_file ][ row ] )
+		{
+
+			var tid = dpoh.sendCommand( "breakpoint_set -t line -n " + row + " -f " + current_file );
+			CodePanel.updateBreakpoint( 'pending', row );
+			confirmed_breakpoints[ current_file ][ row ] = "pending";
+			pending_breakpoints[ tid ] = {
+				file : current_file,
+				line : row,
+			};
+		}
+		else if ( confirmed_breakpoints[ current_file ][ row ] != "pending" )
+		{
+			CodePanel.updateBreakpoint( 'pending', row );
+			var tid = dpoh.sendCommand( "breakpoint_remove -d " + confirmed_breakpoints[ current_file ][ row ] );
+			confirmed_breakpoints[ current_file ][ row ] = "pending";
+			pending_breakpoints[ tid ] = {
+				file : current_file,
+				line : row,
+			};
+		}
 	}
 
 	function onResponseReceived( jq_message, tid )
@@ -123,10 +126,23 @@ Interface = (function( $ )
 		if ( jq_message.is( '[status=stopping]' ) )
 		{
 			dpoh.sendCommand( "run" );
+			CodePanel.updateStatusIndicator( 'connected' );
+			StatusPanel.toggleIndicators( false );
+			CodePanel.clearCurrentLineIndicator();
+			active_session = false;
 		}
-		else if ( command != "context_get" && filename && lineno )
+		else if ( jq_message.is( '[status=break]' ) )
 		{
-			dpoh.sendCommand( "context_get" );
+			active_session = true;
+			CodePanel.updateStatusIndicator( 'session-in-progress' );
+			StatusPanel.toggleIndicators( true );
+			dpoh.sendCommand( 'stack_get' );
+			dpoh.sendCommand( 'context_get' );
+			dpoh.sendCommand( 'eval', function( data )
+			{
+				var bytes = data.find('property').html().replace( '<!--[CDATA[', '' ).replace( /]]-->$/, '' );
+				StatusPanel.updateMemoryUsage( bytes );
+			}, 'memory_get_usage()' );
 		}
 	}
 	
@@ -135,10 +151,9 @@ Interface = (function( $ )
 		var bp_id = jq_message.attr( 'id' );
 		if ( pending_breakpoints[ tid ] )
 		{
-			if ( current_file == pending_breakpoints[ tid ].file )
+			if ( CodePanel.getCurrentFile() == pending_breakpoints[ tid ].file )
 			{
-				editor.getSession().removeGutterDecoration( pending_breakpoints[ tid ].line - 1, "pending-breakpoint" );
-				editor.session.setBreakpoint( pending_breakpoints[ tid ].line - 1 );
+				CodePanel.updateBreakpoint( 'confirmed', pending_breakpoints[ tid ].line );
 			}
 			confirmed_breakpoints[ pending_breakpoints[ tid ].file ][ pending_breakpoints[ tid ].line ] = bp_id;
 			delete pending_breakpoints[ tid ];
@@ -150,9 +165,9 @@ Interface = (function( $ )
 		var bp_id = jq_message.attr( 'id' );
 		if ( pending_breakpoints[ tid ] )
 		{
-			if ( current_file == pending_breakpoints[ tid ].file )
+			if ( CodePanel.getCurrentFile() == pending_breakpoints[ tid ].file )
 			{
-				editor.getSession().removeGutterDecoration( pending_breakpoints[ tid ].line - 1, "pending-breakpoint" );
+				CodePanel.updateBreakpoint( 'removed', pending_breakpoints[ tid ].line );
 			}
 			delete confirmed_breakpoints[ pending_breakpoints[ tid ].file ][ pending_breakpoints[ tid ].line ];
 			delete pending_breakpoints[ tid ];
@@ -161,65 +176,43 @@ Interface = (function( $ )
 	
 	function onContextGet( jq_message )
 	{
-		$( '#context' ).jstree( "destroy" );
-		$( '#context' ).html( buildContextTree( $( jq_message ) ) ).jstree({"core" : { "themes" : { "name" : "default-light" } } } );
+		StatusPanel.validateContext( jq_message );
 	}
-		
-	function onLoadFileChanged( e )
+
+	function onStackGet( jq_message )
 	{
-		if ( e.which == 13 )
-		{
-			var file_name = $( e.target ).val();
-			goToFile( 'file://' + file_name );
-			$( e.target ).val( "" );
-			modal.hide();
-		}
+		StatusPanel.validateStack( jq_message );
+	}
+
+	function updateVariable( identifier, value )
+	{
+		dpoh.sendCommand( 'property_set -n ' + identifier, dpoh.sendCommand.bind( dpoh, 'context_get' ), value );
 	}
 
 	function goToFile( file, line )
 	{
-		if ( ! line || ! ( line = Number( line ) ) || line % 1 != 0 || line < 1 )
+		var onFileReceived = function( success, data )
 		{
-			line = 1;
-		}
-
-		var onFileReceived = function( data )
-		{
-			if ( ! file_cache[ file ] )
+			if ( !success )
 			{
-				file_cache[ file ] = data;
-			}
-
-			if ( file != current_file )
-			{
-				current_file = file;
-				editor.setValue( data )
-				showBreakpointsForFile( file );
+				return;
 			}
 			
-			editor.resize( true );
-			editor.scrollToLine( line, true, true, function(){} );
-			editor.gotoLine( line, 10, true );
+			CodePanel.showFile( file, data.files[ file ], line );
 		};
 		
-		if ( ! file_cache[ file ] )
-		{
-			$.post( '/xdebug_http/connect.php', { commands: [ 'get_file ' + file ] }, onFileReceived );
-		}
-		else
-		{
-			onFileReceived( file_cache[ file ] );
-		}
+		files.load( file, onFileReceived )
 	}
-	
+
 	function showBreakpointsForFile( filename )
 	{
-		editor.session.clearBreakpoints();
+		CodePanel.clearBreakpoints();
+		var current_file = CodePanel.getCurrentFile();
 		if ( confirmed_breakpoints[ current_file ] )
 		{
 			for ( var line in confirmed_breakpoints[ current_file ] )
 			{
-				editor.session.setBreakpoint( line - 1 );
+				CodePanel.updateBreakpoint( 'confirmed', line );
 			}
 		}
 	}
@@ -237,110 +230,34 @@ Interface = (function( $ )
 	
 	function onSessionInit( jq_message )
 	{
-		alert( 'init' );
-		dpoh.sendCommand( 'feature_set -n max_depth -v 1' );
+		active_session = true;
+		CodePanel.updateStatusIndicator( 'session-in-progress' );
+		StatusPanel.toggleIndicators( true );
+		dpoh.sendCommand( 'feature_set -n max_depth -v 5' );
 		dpoh.sendCommand( 'step_into' );
 		sendAllBreakpoints();
-	}
-	
-	function buildContextTree( jq_element, is_recursive )
-	{
-		var html = '';
-		
-		jq_element.children( 'property' ).each( function( index, element )
-		{
-			if ( ! html )
-			{
-				html = '<ul>';
-			}
-
-			var value = $( element ).find( 'property' ).length
-				? '' // nested values
-				: element.innerHTML.replace( '<!--[CDATA[', '' ).replace( /]]-->$/, '' );
-
-			if ( $( element ).is( '[encoding=base64]' ) )
-			{
-				value = atob( value );
-			}
-			
-			value = $('<div>').text( value ).html(); 
-			
-			html += '<li>'
-				+ $( element ).attr( is_recursive ? 'name' :'fullname' )
-				+ " ("
-				+ $( element ).attr( 'type' )
-				+ "): "
-				+ value
-				+ buildContextTree( $( element ), true )
-				+ '</li>';
-		} );
-		
-		return html && html + '</ul>';
-	}
-	
-	function onRecentFilesReceived( data )
-	{
-		var html = '';
-		for ( var i in data )
-		{
-			if ( ! data[ i ].match( /\.(php|module|inc)$/ ) )
-			{
-				continue;
-			}
-			var last_slash = data[ i ].lastIndexOf( '/' ) + 1;
-			var short_name = data[ i ].substr( last_slash );
-			html += '<button data-file="' + data[ i ] + '">' + short_name + '</button>';
-		}
-		$( "#recents" ).html( html ); 
-	}
-	
-	function onRecentFileClicked( e )
-	{
-		var file = $( e.target ).attr( 'data-file' );
-		goToFile( file );
-	}
-	
-	function onDocumentKeyPressed( e )
-	{
-		if ( e.ctrlKey && e.which == 'O'.charCodeAt( 0 ) )
-		{
-			e.preventDefault();
-			modal.set( {
-				title : 'Open File',
-				content : '<input type="text" id="load_file" placeholder="/abs/path/to/file"/>'
-			} );
-			modal.show();
-		}
-	}
-
-	function glassifyWindows()
-	{
-		var width  = $( window ).width() + 10;
-		var height = $( window ).height() + 10;
-		$( '.window-glass' ).css( 'left', null ).css( 'top', null )
-		.each( function( i, element )
-		{
-			element = $( element );
-			var offset = element.offset();
-			element.width( width ).height( height );
-			element.css( 'left', - ( Math.abs( offset.left ) + 10 ) + 'px' );
-			element.css( 'top',  - ( Math.abs( offset.top ) + 10 ) + 'px' );
-		} );
 	}
 
 	function ajdustHeight()
 	{
 		var total_height = $(window).height();
-		var toolbar_height = $( '.toolbar' ).height();
-		$( '.windows' ).css( "max-height", (window.innerHeight - toolbar_height)  + "px" );
+		var toolbar_height = 0;//$( '.toolbar' ).height();
+		$( '.layout-table' ).css( "height", (window.innerHeight - toolbar_height)  + "px" );
 	}
 	
+	function navigateStack( file, line )
+	{
+		goToFile( file, line );
+	}
+	
+	self.doCommand        = doCommand;
+	self.toggleBreakpoint = toggleBreakpoint;
+	self.updateVariable   = updateVariable;
+	self.navigateStack    = navigateStack;
+
 	$( init );
-	$( document ).on( 'click', '[data-command]', onCommandButtonClicked );
-	$( document ).on( 'click', '[data-file]', onRecentFileClicked );
-	$( document ).on( 'keypress', '#load_file', onLoadFileChanged );
-	$( document ).on( 'keydown', onDocumentKeyPressed )
-	$( window   ).on( 'resize', ajdustHeight );
-	return { g : glassifyWindows };
+	$( window ).on( 'resize', ajdustHeight );
+	
+	return self;
 
 }( jQuery ));

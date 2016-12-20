@@ -1,16 +1,55 @@
 dpoh = (function( $ )
 {
-	var identifier = 0;
-	var empty_function = function(){};
+	var identifier         = 0;
+	var empty_function     = function(){};
+	var current_connection = null;
+	var ws_path = '/bridge'
+	
+	var pending_data = '';
+	var pending_data_length;
 	
 	var subscribable = {
-		before_send : [],
-		after_send : [],
-		session_init : [],
+		connection_opened : [],
+		connection_closed : [],
+		connection_error  : [],
+		before_send       : [],
+		after_send        : [],
+		session_init      : [],
 		response_recevied : [],
 	};
 	
 	var transaction_callbacks = {};
+	
+	var onConnectionOpened = fireEvent.bind( undefined, 'connection_opened' );
+	
+	function onConnectionClosed()
+	{
+		current_connection = null;
+		fireEvent( 'connection_closed' );
+	}
+
+	function onConnectionError()
+	{
+		current_connection = null;
+		fireEvent( 'connection_error' );
+	}
+	
+	function openConnection()
+	{
+		if ( current_connection )
+		{
+			return false;
+		}
+
+		current_connection = new WebSocket( 'ws://' + location.host + ws_path );
+
+		current_connection.onopen    = onConnectionOpened;
+		current_connection.onclose   = onConnectionClosed;
+		current_connection.onerror   = onConnectionError;
+		current_connection.onmessage = onMessageReceived;
+		
+		return true;
+	}
 	
 	function subscribe( key, callback )
 	{
@@ -75,12 +114,13 @@ dpoh = (function( $ )
 		}
 	}
 
-	function sendCommand( command, callback )
+	function sendCommand( command, callback, debugger_data )
 	{
 		var alter_data = {
 			allow_send : true,
 			command : command,
 			callback : callback,
+			debugger_data : debugger_data,
 		};
 		fireEvent( 'before_send', [ alter_data, identifier ] );
 		if ( !alter_data.allow_send )
@@ -95,93 +135,100 @@ dpoh = (function( $ )
 		{
 			transaction_callbacks[ identifier ] = callback;
 		}
-		
-		delete alter_data.allow_send;
-		fireEvent( 'after_send', [ alter_data, identifier ] );
 
-		if ( command != "get" && command != "quit" && command )
+		if ( alter_data.allow_send )
 		{
-			command = "send " + command + " -i " + identifier;
-		}
-
-		$.post( '/xdebug_http/connect.php', { commands: [ command ] },
-			onResponseReceived.bind( undefined, command, identifier, alter_data.immediate_callback ) );
+			command += " -i " + identifier;
 			
-		return identifier++;
+			if ( debugger_data )
+			{
+				command += ' -- ' + btoa( debugger_data );
+			}
+			
+			current_connection.send( command );
+			
+			delete alter_data.allow_send;
+			fireEvent( 'after_send', [ alter_data, identifier ] );
+
+			return identifier++;
+		}
 	}
 	
-	function onResponseReceived( command, original_tid, cb, data )
+	function onMessageReceived( data )
 	{
-		typeof cb == "function" && cb( data );
+		var message = data.data;
 
-		if ( !data || !(data instanceof Array) )
+		// Skip responses that contain no data
+		if ( !message )
 		{
 			return;
 		}
 		
-		data.forEach( function( message )
+		var message_parts = message.split( String.fromCharCode( 0 ) );
+		message_parts.forEach( function( part )
 		{
-			// Skip responses that contain little data
-			if ( ! message || message == "NO_DATA" || message == "SEND_ACK" )
+			if ( pending_data_length )
 			{
-				return /* continue */;
-			}
-			
-			var message_parts = message.split( String.fromCharCode( 0 ) );
-			var message_length = Number( message_parts[ 0 ] );
-			var message_data = message_parts[ 1 ];
-			
-			if ( message_data.length != message_length )
-			{
-				throw new Error( "Data length mismatch" );
-			}
-			
-			var jq_message = $( message_data );
-			var jq_response_element = jq_message.find( '[command],init' );
-			if ( !jq_response_element.length && jq_message.is( '[command],init' ) )
-			{
-				jq_message.each( function( index, value )
+				if ( pending_data_length == ( pending_data + part ).length )
 				{
-					if ( $( value ).is( '[command],init' ) )
-					{
-						jq_response_element = $( value );
-						return false;
-					}
-				} );
+					processMessage( pending_data + part );
+					pending_data_length = false;
+					pending_data = '';
+				}
+				else
+				{
+					pending_data += part;
+				}
 			}
-	
-			if ( !jq_response_element.length )
+			else if ( Number( part ) )
 			{
-				console.warn( 'Unrecognized response from server: ' + message_data );
+				pending_data_length = Number( part )
 			}
-			
-			if ( jq_response_element.is( 'init' ) )
-			{
-				fireEvent( 'session_init', [ jq_response_element ] );
-				return;
-			}
-			
-			var tid = jq_response_element.attr( 'transaction_id' );
-			if ( transaction_callbacks[ tid ] )
-			{
-				transaction_callbacks[ tid ]( jq_response_element );
-				delete transaction_callbacks[ tid ];
-			}
-			
-			fireEvent( 'response_recevied', [ jq_response_element, tid ] );
 		} );
 	}
 
-	function listRecentFiles( dir, callback )
+	function processMessage( message )
 	{
-		$.post( '/xdebug_http/connect.php', { commands: [ 'list_recent_files ' + dir ] }, callback );
+		var jq_message = $( message );
+		var jq_response_element = jq_message.find( '[command],init' );
+		if ( !jq_response_element.length && jq_message.is( '[command],init' ) )
+		{
+			jq_message.each( function( index, value )
+			{
+				if ( $( value ).is( '[command],init' ) )
+				{
+					jq_response_element = $( value );
+					return false;
+				}
+			} );
+		}
+
+		if ( !jq_response_element.length )
+		{
+			console.warn( 'Unrecognized response from server: ' + message );
+		}
+
+		if ( jq_response_element.is( 'init' ) )
+		{
+			fireEvent( 'session_init', [ jq_response_element ] );
+			return;
+		}
+		
+		var tid = jq_response_element.attr( 'transaction_id' );
+		if ( transaction_callbacks[ tid ] )
+		{
+			transaction_callbacks[ tid ]( jq_response_element );
+			delete transaction_callbacks[ tid ];
+		}
+		
+		fireEvent( 'response_recevied', [ jq_response_element, tid ] );
 	}
 
 	return {
-		sendCommand : sendCommand,
-		subscribe : subscribe,
-		unsubscribe : unsubscribe,
-		listRecentFiles : listRecentFiles,
+		sendCommand     : sendCommand,
+		subscribe       : subscribe,
+		unsubscribe     : unsubscribe,
+		openConnection  : openConnection,
 	};
 	
 }( jQuery ) );

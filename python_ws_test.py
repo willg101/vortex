@@ -29,6 +29,7 @@ from autobahn.twisted.websocket import WebSocketServerProtocol, \
 from twisted.internet.protocol import Factory, Protocol
 import time
 from threading import Thread
+import xml.etree.ElementTree as ET
 
 to_websocket = None
 to_debugger  = None
@@ -39,32 +40,53 @@ def psend():
         if callable(sender):
             sender( "Timed call...", False );
 
-
 class DbgpServerProtocol(Protocol):
 
     def __init__(self, factory):
         self.factory = factory
+        self.connected_to_client = False
 
     def connectionMade(self):
         global to_debugger
         print("Debug Client connecting:")
-        if callable(to_websocket) and not callable(to_debugger):
+        if callable(to_websocket):
+            if callable(to_debugger):
+                print( 'We already have an active debugger client; detaching' )
+                self.transport.loseConnection()
+                return
             print("We have a websocket client and a debug client")
             to_debugger = self.transport.write
+            self.connected_to_client = True;
         else:
-            print("No websocket client, detch")
-            self.transport.write( "detach -i 0\0" );
+            print("No websocket client, detching...")
+            #self.transport.write( "detach -i 0\0" );
             self.transport.loseConnection()
 
     def connectionLost(self, reason):
-        global to_debugger
-        to_debugger = None
+        if self.connected_to_client:
+            global to_debugger
+            to_debugger = None
+            print("Removing callback bridge...")
         print("Debug Client disconnecting:")
 
     def dataReceived(self, data):
         global to_debugger
         if callable(to_websocket):
-           to_websocket(data)
+            try:
+                root = ET.fromstring(data.split( "\0" )[1])
+                if root.attrib['fileuri']:
+                    with open( root.attrib['fileuri'].replace( 'file://', '') , 'r' ) as f:
+                        first_line = f.readline();
+                        if first_line.startswith( '<?php /* dpoh: ignore */' ):
+                            print("File is marked to be ignored, deatching...")
+                            self.transport.write( "detach -i 0\0" );
+                            self.transport.loseConnection()
+                            return
+            except:
+                print "Unknown parse error"
+                pass
+            print data;
+            to_websocket(data)
         else:
             self.transport.write( "detach -i 0\0" );
             self.transport.loseConnection()
