@@ -1,110 +1,6 @@
 Interface = (function( $ )
 {
 	var reconnect_delay_ms = 5000;
-	var active_session = false;
-
-	var pending_breakpoints = {};
-	var confirmed_breakpoints = {};
-	var xdebug_response_handlers = {
-		breakpoint_set    : onBreakpointSet,
-		breakpoint_remove : onBreakpointRemoved,
-		context_get       : onContextGet,
-		stack_get         : onStackGet,
-	};
-
-	var get_tids = {};
-	
-	var self = {};
-
-	function init()
-	{
-		CodePanel.init( self );
-		StatusPanel.init( self );
-
-		dpoh.subscribe( 'response_recevied', onResponseReceived );
-		dpoh.subscribe( 'session_init',      onSessionInit );
-		dpoh.subscribe( 'connection_error',  function()
-		{
-			CodePanel.updateStatusIndicator( 'disconnected' );
-			StatusPanel.toggleIndicators( false );
-			console.error( "Connection failed; retrying in " + (reconnect_delay_ms / 1000) + " seconds." );
-			setTimeout( dpoh.openConnection, reconnect_delay_ms );
-			active_session = false;
-		} );
-		dpoh.subscribe( 'connection_opened',  function()
-		{
-			console.log( "Connection succeeded!" );
-			CodePanel.updateStatusIndicator( 'connected' );
-			dpoh.sendCommand( 'status' );
-		} );
-		dpoh.subscribe( 'connection_closed',  function()
-		{
-			CodePanel.updateStatusIndicator( 'disconnected' );
-			console.warn( "Connection closed." );
-			StatusPanel.toggleIndicators( false );
-			active_session = false;
-		} );
-
-		dpoh.openConnection();
-
-		window.setTimeout( ajdustHeight, 100 );
-	}
-	
-	function doCommand( command )
-	{
-		dpoh.sendCommand( command );
-	}
-
-	function toggleBreakpoint( current_file, row )
-	{
-		if ( !CodePanel.getCurrentFile() )
-		{
-			return;
-		}
-
-		if ( !confirmed_breakpoints[ current_file ] )
-		{
-			confirmed_breakpoints[ current_file ] = {};
-		}
-
-		if ( !active_session )
-		{
-			create = !confirmed_breakpoints[ current_file ][ row ];
-			if ( create )
-			{
-				confirmed_breakpoints[ current_file ][ row ] = true;
-			}
-			else
-			{
-				delete confirmed_breakpoints[ current_file ][ row ];
-			}
-				
-			CodePanel.updateBreakpoint( ( create ? 'confirmed' : 'removed' ), row );
-			return;
-		}
-
-		if ( !confirmed_breakpoints[ current_file ][ row ] )
-		{
-
-			var tid = dpoh.sendCommand( "breakpoint_set -t line -n " + row + " -f " + current_file );
-			CodePanel.updateBreakpoint( 'pending', row );
-			confirmed_breakpoints[ current_file ][ row ] = "pending";
-			pending_breakpoints[ tid ] = {
-				file : current_file,
-				line : row,
-			};
-		}
-		else if ( confirmed_breakpoints[ current_file ][ row ] != "pending" )
-		{
-			CodePanel.updateBreakpoint( 'pending', row );
-			var tid = dpoh.sendCommand( "breakpoint_remove -d " + confirmed_breakpoints[ current_file ][ row ] );
-			confirmed_breakpoints[ current_file ][ row ] = "pending";
-			pending_breakpoints[ tid ] = {
-				file : current_file,
-				line : row,
-			};
-		}
-	}
 
 	function onResponseReceived( jq_message, tid )
 	{
@@ -138,11 +34,6 @@ Interface = (function( $ )
 			StatusPanel.toggleIndicators( true );
 			dpoh.sendCommand( 'stack_get' );
 			dpoh.sendCommand( 'context_get' );
-			dpoh.sendCommand( 'eval', function( data )
-			{
-				var bytes = data.find('property').html().replace( '<!--[CDATA[', '' ).replace( /]]-->$/, '' );
-				StatusPanel.updateMemoryUsage( bytes );
-			}, 'memory_get_usage()' );
 		}
 	}
 	
@@ -197,8 +88,12 @@ Interface = (function( $ )
 			{
 				return;
 			}
-			
+						
 			CodePanel.showFile( file, data.files[ file ], line );
+			if ( !line )
+			{
+				StatusPanel.stackDeviated();
+			}
 		};
 		
 		files.load( file, onFileReceived )
@@ -237,27 +132,13 @@ Interface = (function( $ )
 		dpoh.sendCommand( 'step_into' );
 		sendAllBreakpoints();
 	}
-
-	function ajdustHeight()
-	{
-		var total_height = $(window).height();
-		var toolbar_height = 0;//$( '.toolbar' ).height();
-		$( '.layout-table' ).css( "height", (window.innerHeight - toolbar_height)  + "px" );
-	}
 	
 	function navigateStack( file, line )
 	{
 		goToFile( file, line );
 	}
-	
-	self.doCommand        = doCommand;
-	self.toggleBreakpoint = toggleBreakpoint;
-	self.updateVariable   = updateVariable;
-	self.navigateStack    = navigateStack;
 
 	$( init );
 	$( window ).on( 'resize', ajdustHeight );
-	
-	return self;
 
 }( jQuery ));

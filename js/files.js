@@ -1,4 +1,4 @@
-files = (function( $ )
+Files = (function( $ )
 {
 	var api_url = 'files.php';
 	var empty_fn = function(){};
@@ -58,18 +58,13 @@ files = (function( $ )
 		}
 	}
 	
-	function getRecentFiles( n, cb )
+	function getRecentFiles( cb )
 	{
-		n = typeof n == 'number'
-			? n
-			: default_n_recent;
-			
 		if ( typeof cb != 'function' )
 		{
 			throw new Error( 'Expected function; received' + typeof cb );
 		}
-		
-		performApiRequest( { list_recent_files : n }, cb );
+		performApiRequest( { list_recent_files : true }, cb );
 	}
 	
 	function performApiRequest( params, cb )
@@ -82,10 +77,16 @@ files = (function( $ )
 		filecache = {};
 	}
 	
+	function listFilesInCache()
+	{
+		return Object.keys( filecache );
+	}
+	
 	return {
-		load           : load,
-		getRecentFiles : getRecentFiles,
-		clearCache     : clearCache
+		load             : load,
+		getRecentFiles   : getRecentFiles,
+		clearCache       : clearCache,
+		listFilesInCache : listFilesInCache,
 	};
 	
 }( jQuery ) );

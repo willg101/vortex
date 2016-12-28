@@ -1,8 +1,68 @@
+/*************************************************************************************************
+ * Global variables
+ *************************************************************************************************/
+
+@primary-color: #21599f;
+@secondary-color: #3ca6de;
+@tertiary-color: #59c203;
+
+/*************************************************************************************************
+ * Mixins
+ *************************************************************************************************/
+
+.transition(@time: 200ms)
+{
+	-webkit-transition: all @time ease;
+	transition:         all @time ease;
+	-webkit-backface-visibility: hidden;
+	-webkit-transform: translateZ(0) scale(1.0, 1.0);
+}
+
+.bouncy(@max-scale : 1.5; @min-scale: 0.7; @border-width: 3px)
+{
+	.transition();
+	border: none; // For <button> elements, to which some browsers add a cheesy 3D-ish border
+	border-bottom: @border-width solid transparent;
+	
+	.fa
+	{
+		.transition();
+	}
+	
+	&:hover
+	{
+		background: rgba(0,0,0,0.1);
+		border-bottom: @border-width solid @tertiary-color;
+
+		.fa
+		{
+			color: @tertiary-color - #222;
+			-webkit-transform: scale(@max-scale, @max-scale);
+			transform:  scale(@max-scale, @max-scale);
+		}
+	}
+	
+	&:active
+	{			
+		.fa
+		{
+			-webkit-transform: scale(@min-scale, @min-scale);
+			transform:  scale(@min-scale, @min-scale);
+		}
+	}
+	
+	&:focus
+	{
+		outline: none;
+	}
+}
+
 body
 {
 	margin: 0;
 	font-family: "Open Sans", sans-serif;
 	position: relative;
+	background: #666;
 }
 
 .css-table
@@ -39,8 +99,7 @@ body
 {
 	padding: 15px;
 	position: relative;
-	-webkit-transition: all 400ms ease;
-	transition:         all 400ms ease;
+	.transition();
 
 	&.disconnected
 	{
@@ -78,7 +137,6 @@ body
 	height: 0;
 	position: relative;
 	text-align: center;
-	box-shadow: 0 0 10px rgba(0,0,0,0.4);
 	z-index: 2;
 	
 	.css-cell
@@ -102,64 +160,35 @@ body
 			color: #F55;
 		}
 	}
-	
-	.btn
-	{
-		background: none;
-		cursor: pointer;
-		color: #555;
-		padding: 15px;
-		display: inline-block;
-		border: none;
-		-webkit-transition: .2s;
-		transition: .2s;
-		transition-timing-function: ease;
-		border-bottom: 3px solid transparent;
-		
-		.fa
-		{
-			-webkit-transition: .2s;
-			transition: .2s;
-			transition-timing-function: ease;
-			-webkit-backface-visibility: hidden;
-			-webkit-transform: translateZ(0) scale(1.0, 1.0);
-		}
-		
-		&:hover
-		{
-			background: rgba(0,0,0,0.1);
-			border-bottom: 3px solid #59c203;
+}
 
-			.fa
-			{
-				@scale: 1.5;
-				color: #59c203 - #222;
-				-webkit-transform: scale(@scale, @scale);
-				transform:  scale(@scale, @scale);
-			}
-		}
-		
-		&:focus
-		{
-			outline: none;
-		}
-		
-		&:active
-		{			
-			.fa
-			{
-				@scale: 0.7;
-				-webkit-transform: scale(@scale, @scale);
-				transform:  scale(@scale, @scale);
-			}
-		}
-		
-		&.active,
-		&.active:hover .fa
-		{
-			color: #FFF;
-			background: #21599f;
-		}
+.btn
+{
+	.bouncy();
+
+	background: none;
+	cursor: pointer;
+	color: #111;
+	padding: 15px;
+	display: inline-block;
+
+	&.active,
+	&.active:hover .fa
+	{
+		color: #FFF;
+		background: @primary-color;
+	}
+}
+
+.side-nav-btn
+{
+	font-size: 25px;
+	color: #FFF;
+	display: block;
+	
+	&:hover .fa
+	{
+		color: #FFF;
 	}
 }
 
@@ -179,8 +208,7 @@ body
 .status-indicators,
 .status-panel .scroller
 {
-	-webkit-transition: all 400ms ease;
-	transition:         all 400ms ease;
+	.transition();
 }
 
 .hidden
@@ -194,13 +222,11 @@ body
 	
 	.css-row 
 	{
-		-webkit-transition: .2s;
-		transition: .2s;
+		.transition();
 		
 		.css-cell
 		{
-			-webkit-transition: all 400ms ease;
-			transition:         all 400ms ease;
+			.transition();
 			border-bottom: 1px solid #F0F0F0;
 			padding: 5px 10px;
 			font-family: consola, monospace;
@@ -222,6 +248,7 @@ body
 			&.file
 			{
 				width: 0;
+				white-space: nowrap
 			}
 			
 			&.line
@@ -232,8 +259,7 @@ body
 		
 		.css-cell:after
 		{
-			-webkit-transition: all 400ms ease;
-			transition:         all 400ms ease;
+			.transition();
 			position: absolute;
 			bottom: 0;
 			width: 100%;
@@ -248,13 +274,13 @@ body
 
 			&.depth
 			{
-				background: #21599f - #111;
+				background: @primary-color - #111;
 			}
 			
 			&.file,
 			&.line
 			{
-				background: #21599f;
+				background: @primary-color;
 			}
 		}
 	}
@@ -266,7 +292,7 @@ body
 
 		&:after
 		{
-			border-color: #59c203;
+			border-color: @tertiary-color;
 		}
 	}
 	
@@ -294,15 +320,18 @@ body
 {
 	position: relative;
 	z-index: 1;
+
+	.files-top
+	{
+		background: @secondary-color;
+		border: none;
+	}
+	
 	.files-cell
 	{
-		width: 20%;
-		/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#3ca6de+0,21599f+100 */
-		background: #3ca6de; /* Old browsers */
-		background: -moz-linear-gradient(top,  #3ca6de 0%, #21599f 100%); /* FF3.6-15 */
-		background: -webkit-linear-gradient(top,  #3ca6de 0%,#21599f 100%); /* Chrome10-25,Safari5.1-6 */
-		background: linear-gradient(to bottom,  #3ca6de 0%,#21599f 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3ca6de', endColorstr='#21599f',GradientType=0 ); /* IE6-9 */
+		width: 0;
+		background: @secondary-color;
+		vertical-align: middle;
 	}
 
 	.relative-container
@@ -314,7 +343,7 @@ body
 	
 	.editor-cell
 	{
-		width: 50%;
+		width: 70%;
 	}
 
 	.context-cell
@@ -324,11 +353,7 @@ body
 		.scroller
 		{
 			position: absolute;
-			height: 100%;
-			width: 100%;
-			overflow: scroll;
 		}
-
 
 		.identifier-icon
 		{
@@ -366,81 +391,249 @@ body
 	}
 }
 
+.jstree-default>.jstree-container-ul .jstree-loading>.jstree-ocl
+{
+	background: none;
+	
+	display: inline-block;
+    font: normal normal normal ~"14px/1 FontAwesome";
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+	vertical-align: baseline;
+	
+	&:before
+	{
+		position: relative;
+		content: "\f254";
+		color: rgba( 0,0,0,0.5);
+		animation: throbber 1.5s;
+	}
+}
+
+.scroller
+{
+	height: 100%;
+	width: 100%;
+	overflow: auto;
+}
+
+.center
+{
+	width: 100%;
+	color: #FFF;
+	text-align: center;
+	margin-top: 20px;
+}
+
+.nav-panel
+{
+	.transition(100ms);
+	color: #FFF;
+	width: 300px;
+	height: 100%;
+	z-index: 1;
+	position: fixed;
+	top: 0;
+	background: @secondary-color;
+	-webkit-backface-visibility: hidden;
+	-webkit-transform: translate3d(100%, 0, 0);
+	transform: translate3d(-300px, 0, 0);
+	opacity: 0;
+	
+	&.showing
+	{
+		-webkit-backface-visibility: hidden;
+		-webkit-transform: translate3d(0, 0, 0);
+		transform: translate3d(0, 0, 0);
+		box-shadow: 0 0 50px -5px #000;
+		opacity: 1;
+	}
+	
+	.label-row
+	{
+		height: 0;
+		
+		.css-cell
+		{
+			border: 1px solid rgba(0,0,0,0.1);
+			border-width: 0 0 1px 0;
+			background: none;
+			color: #FFF;
+			padding: 10px;
+		}
+	}
+
+	.open-file
+	{
+		font-family: consolas, monospace;
+		cursor: pointer;
+		padding: 5px 10px;
+		.transition();
+		background: rgba( 0, 0, 0, 0.1 );
+		width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		box-sizing: border-box;
+		position: relative;
+		margin-bottom: 1px;
+		border-bottom: 3px solid transparent;
+		
+		&:hover
+		{
+			border-color: @tertiary-color;
+		}
+		
+		&:active
+		{
+			@scale: 0.7;
+			-webkit-transform: translateZ(0) scale(@scale, @scale);
+			transform: translateZ(0) scale(@scale, @scale);
+		}
+		
+		&.active
+		{
+			background: @primary-color;
+		}
+	}
+	
+	.content
+	{
+		box-sizing: border-box;
+		padding: 5px;
+		width: 100%;
+	}
+}
+
+#console
+{
+	box-sizing: border-box;
+	width: 100%;
+	left: 0;
+	bottom: 0;
+	position: fixed;
+	height: 33%;
+	max-height: 350px;
+	border: 10px solid @secondary-color;
+	display: flex;
+	flex-direction: column;
+	z-index: 2;
+	.transition(100ms);
+	-webkit-backface-visibility: hidden;
+	-webkit-transform: translate3d(0, 350px, 0);
+	transform: translate3d(0, 350px, 0);
+	opacity: 0;
+	
+	&.showing
+	{
+		-webkit-backface-visibility: hidden;
+		-webkit-transform: translate3d(0, 0, 0);
+		transform: translate3d(0, 0, 0);
+		box-shadow: 0 0 50px -5px #000;
+		opacity: 1;
+	}
+
+	.history
+	{
+		flex-grow: 1; 
+		background: #FFF;
+		overflow: auto;
+		font-family: consolas, monospace;
+		padding: 10px;
+		
+		.message-meta
+		{
+			color: #999;
+			display: inline-block;
+			margin-right: 10px;
+		}
+		
+		.message-text
+		{
+			white-space: pre;
+		}
+		
+		.debugger-message
+		{
+			color: #822;
+		}
+	}
+	
+	.input
+	{
+	    resize: none;
+		box-sizing: border-box;
+		flex-grow: 0; 
+		position: relative;
+		border: none;
+		background: @secondary-color - #111;
+		width: 100%;
+		max-height: 100%;
+		padding: 10px;
+		color: #FFF;
+		font-size: 16px;
+		font-family: consolas, monospace;
+		overflow: auto;
+		height: 39px;
+		min-height: 39px;
+		
+		&:focus
+		{
+			background: @secondary-color - #222;
+			outline: none;
+		}
+	}
+}
+
+.layout
+{
+	position: relative;
+	height: 100%;
+}
+.ui-layout-resizer
+{
+	box-sizing: border-box;
+	background: #E0E0E0;
+	
+	.ui-layout-toggler
+	{
+		background:  @tertiary-color;
+
+		&:before
+		{
+			content: "\f077";
+			width: 100%;
+			color: #FFF;
+			font-family: FontAwesome;
+			font-size: 16px;
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+	}
+}
+
+#open_files_panel
+{
+	color: #333;
+	
+	.css-cell
+	{
+		max-width: 300px;
+	}
+}
+
 .identifier-leaf,
 .identifier
 {
 	font-family: consolas, monospace;
 }
+
 .identifier
 {
 	color: #555;
 	
-}
-
-.windows
-{
-	width: 100%;
-	height: 100%;
-	padding: 30px;
-	position: relative;
-	box-sizing: border-box;
-	vertical-align: top;
-	
-	.window
-	{
-		display: inline-block;
-		position: relative;
-		width: 30%;
-		height: 100%;
-		box-shadow: 0 0 30px #000;
-		background: rgba( 0,0,0,0.7 );
-		box-sizing: border-box;
-		overflow: hidden;
-		
-		&:not(:last-child)
-		{
-			margin-right: 30px;
-			width: ~"calc(70% - 35px)";
-		}
-		
-		.window-title
-		{
-			color: #FFF;
-			padding: 10px;
-			position: relative;
-			overflow: hidden;
-			
-			.icon
-			{
-				margin-right: 10px;
-
-			}
-			
-			.text,
-			.icon
-			{
-				color: #FFF;
-				text-shadow: 0 0 10px #000, 0 0 20px #000, 0 0 30px #000;
-				position: relative;
-			}
-		}
-		
-		.window-content-outer
-		{
-			width: ~"calc(100% - 10px)";
-			height: ~"calc(100% - 58px)";
-			position: relative;
-			padding: 5px;
-
-			.window-content
-			{
-				position: relative;
-				width: 100%;
-				height: 100%;
-				padding-top: 5px;
-			}
-		}
-	}
 }
 
 #editor
@@ -497,10 +690,38 @@ body
   }
 }
 
+@keyframes throbber
+{
+  0% {
+    opacity: 0;
+  }
+   80% {
+    opacity: 0;
+  }
+  100% {
+   opacity: 1;
+  }
+}
+
+ul.jqueryFileTree li.directory
+{
+	background-size: 16px;
+}
+
 .ace_gutter-cell.ace_breakpoint
 {
 	background: #C22;
 	color: #FFF;
+	
+	&.conditional-breakpoint
+	{
+		background: #44B;
+	}
+}
+
+.ui-layout-south
+{
+	height: 200px;
 }
 
 .ace_gutter-cell.pending-breakpoint
@@ -510,7 +731,7 @@ body
 
 .ace_gutter-cell.gutter-current-line
 {
-	background: #59c203;
+	background: @tertiary-color;
 }
 
 @keyframes pending-breakpoint
@@ -540,10 +761,9 @@ body
 
 .modal
 {
-	-webkit-transition: all 400ms ease;
-	transition:         all 400ms ease;
-	background: #FFF;
-	box-shadow: 0 0 10px #000;
+	.transition();
+	background: @secondary-color;
+	box-shadow: 0 0 30px #000;
 	position: relative;
 	width: 100%;
 	max-width: 400px;
@@ -552,23 +772,49 @@ body
 	opacity: 1;
 }
 
-#new_value
+#settings_panel
 {
-	border: 1px solid #888;
-	padding: 10px;
-	font-family: consolas, monospace;
-	max-height: 5em;
-	overflow: auto;
-	
-	&:focus
+	.css-cell
 	{
-		box-shadow: 0 0 5px #369;
+		vertical-align: top;
+		padding: 5px;
+	}
+
+	.switch
+	{
+		cursor: pointer;
+		width: 0;
+		
+		color: #FFF;
+		font-size: 25px;
+		
+		&.on
+		{
+			.switched-off
+			{
+				display: none;
+			}
+		}
+		
+		&.off
+		{
+			.switched-on
+			{
+				display: none;
+			}
+		}
+	}
+	
+	.description
+	{
+		font-size: 80%;
+		color: #444;
 	}
 }
 
 .ace-current-line
 {
-	background: #59c203 + #444;
+	background: @tertiary-color + #444;
 	position: absolute;
 	z-index: 0;
 }
@@ -576,52 +822,31 @@ body
 .modal-title-bar
 {
 	position: relative;
-	background: #21599f;
+	background: @secondary-color;
 	height: 20px;
-	padding: 10px;
-	color: #FFF;
+	padding: 15px;
+	color: #333;
 }
 
 .modal-exit
 {
-	padding: 10px;
-	background: #21599f;
+	padding: 15px;
+	background: @secondary-color;
 	position: absolute;
 	top: 0;
 	right: 0;
 	color: #FFF;
 	height: 20px;
 	cursor: pointer;
-	-webkit-transition: .2s;
-	transition: .2s;
+	.bouncy(@border-width: 0);
 	
-	.fa
-	{
-		-webkit-transition: .2s;
-		transition: .2s;
-	}
-	
-	&:hover
-	{
-		background: #A33;
-		
-		.fa
-		{
-			@scale: 1.5;
-			-webkit-transform: scale(@scale, @scale);
-			transform:  scale(@scale, @scale);
-		}
-	}
-	
+	&:hover,
 	&:active
 	{
 		background: #A33;
-
 		.fa
 		{
-			@scale: .5;
-			-webkit-transform: scale(@scale, @scale);
-			transform:  scale(@scale, @scale);
+			color: #FFF;
 		}
 	}
 }
@@ -635,9 +860,35 @@ body
 
 .modal-content
 {
-	padding: 10px;
+	padding: 15px;
 	width: 100%;
 	box-sizing: border-box;
+	
+	.value-input,
+	.bp-expression-input
+	{
+		position: relative;
+		background: @secondary-color - #111;
+		max-height: 4em;
+		max-width: 100%;
+		border: none;
+		color: #FFF;
+		font-family: consolas, monospace;
+		padding: 10px;
+		overflow: auto;
+		
+		&:focus
+		{
+			background: @secondary-color - #222;
+			outline: none;
+		}
+	}
+}
+
+.value-input::selection,
+#console .input::selection
+{
+	background: @secondary-color - #444;
 }
 
 input[type=text]
@@ -660,17 +911,9 @@ input[type=text]
 	content: " ";
 }
 
-body
-{
-	background: #666;
-}
-
 .blurable
 {
-	-webkit-transition: all 500ms;
-	transition:         all 500ms;
-	-webkit-backface-visibility: hidden;
-	-webkit-transform: translateZ(0) scale(1.0, 1.0);
+	.transition();
 	@scale: 1;
 	transform:  scale(@scale, @scale);
 	background: #FFF;
