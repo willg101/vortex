@@ -9,9 +9,16 @@ modal = (function( $ )
 		blurable : '.blurable',
 	}
 	
+	var on_hide = false;
+	
 	function hide()
 	{
-		$( selectors.overlay ).fadeOut( setContent.bind( undefined, '' ) );
+		$( selectors.overlay ).fadeOut( function()
+		{
+			setContent( '' );
+			on_hide && on_hide();
+			setOnHide( false );
+		} );
 		$( selectors.modal ).addClass( 'modal-hidden' );
 		$( selectors.blurable ).removeClass( 'blurred' );
 	}
@@ -32,11 +39,19 @@ modal = (function( $ )
 	{
 		$( selectors.title ).html( html )
 	}
+
+	function setOnHide( fn )
+	{
+		on_hide = typeof fn == "function"
+			? fn
+			: false;
+	}
 	
 	function set( options )
 	{
 		setTitle( options.title || '' );
 		setContent( options.content || '' );
+		setOnHide( options.on_hide );
 	}
 	
 	function onDocumentClicked( e )

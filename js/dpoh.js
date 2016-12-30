@@ -70,7 +70,15 @@ dpoh = (function( $ )
 			} );
 			return stack;
 		},
-		
+
+		/**
+		 * @brief
+		 *	Parses the response from a context_names command
+		 *
+		 * @param jQuery jq_message
+		 *
+		 * @retval object
+		 */			
 		context_names     : function( jq_message )
 		{
 			var data = [];

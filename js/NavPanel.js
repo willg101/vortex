@@ -16,6 +16,7 @@ NavPanel = (function( $ )
 				}
 			}
 		} );
+		resizeCell();
 	}
 
 	function onDocumentClick( e )
@@ -213,7 +214,6 @@ NavPanel = (function( $ )
 				addConsoleText( 'in',  '<i class="fa fa-spin fa-circle-o-notch"></i>', false );
 			dpoh.sendCommand( 'eval', function( data )
 			{
-				from_debugger.updateTime();
 				if ( data.parsed.value && data.parsed.value.length )
 				{
 					var message_text = from_debugger.getjQuery().find( '.message-text' );
@@ -268,37 +268,21 @@ NavPanel = (function( $ )
         }
 	}
 	
-	function getTime()
-	{
-		var d     = new Date();
-		var hours = d.getHours();
-		var am_pm = hours > 11 ? 'PM' : 'AM';
-		hours     = ( hours % 12 ) || 12;
-		var min   = d.getMinutes();
-		min       = min < 10 ? '0' + min : min;
-		return hours + ':' + min + ' ' + am_pm;
-	}
-	
 	function addConsoleText( direction, text, escape )
 	{
-		var arrow = direction == 'in' ? 'right' : 'left';
+		var arrow = direction == 'in' ? 'left' : 'right';
 		if ( direction == 'out' )
 		{
 			history_stack.push( text );
 			pending_message = '';
 			history_pos = 0;
 		}
-		var new_line = $( '<div class="message ' + direction + '"><span class="message-meta"><i class="fa fa-arrow-' + arrow + '"></i> <span class="time">' + getTime()
-			+ '</span></span> <span class="message-text"></span></div>' );
+		var new_line = $( '<div class="message ' + direction + '"><span class="message-meta"><i class="fa fa-fw fa-chevron-'
+			+ arrow + '"></i></span><span class="message-text"></span></div>' );
 		new_line.find( '.message-text' )[ escape ? 'text' : 'html' ]( text );
 		$( '#console .history' ).append( new_line ).scrollTop( $( '#console .history' )[0].scrollHeight );
 
 		return {
-			updateTime : function( new_time )
-			{
-				new_line.find( '.time' ).text( new_time || getTime() );
-				return this;
-			},
 			updateMessage : function( new_message, escape )
 			{
 				new_line.find( '.message-text' )[ escape ? 'text' : 'html' ]( new_message );
@@ -311,6 +295,12 @@ NavPanel = (function( $ )
 		}
 	}
 	
+	function resizeCell()
+	{
+		var height = $( '.toolbar .css-cell:not(.match-height)' ).height();
+		$( '.toolbar .css-cell.match-height' ).height( height + 1 );
+	}
+	
 	$( init );
 
 	$( document ).on( 'keypress',          '#console .input',    onConsoleKeypress );	
@@ -321,5 +311,6 @@ NavPanel = (function( $ )
 	$( document ).on( 'click',                                   onDocumentClick );
 	$( document ).on( 'click', '[data-open-nav-panel]',          onNavButtonClicked );
 	$( document ).on( 'click', '.open-file',                     onOpenFileClicked );
+	$( window   ).on( 'resize',                                  resizeCell );
 	
 }( jQuery ));

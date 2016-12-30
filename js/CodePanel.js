@@ -6,7 +6,7 @@ CodePanel = (function( $ )
 	var current_file          = false;
 	var pending_breakpoints   = {};
 	var confirmed_breakpoints = {};
-	
+		
 	function init()
 	{
 		editor = ace.edit( "editor" );
@@ -382,6 +382,11 @@ CodePanel = (function( $ )
 		}
 	}
 	
+	function onLayoutChanged()
+	{
+		editor.resize();
+	}
+	
 	$( init );
 	$( document ).on( 'click',    '[data-command]',       onCommandButtonClicked );
 	$( document ).on( 'keypress', '.bp-expression-input', onNewExpressionGiven )
@@ -390,6 +395,7 @@ CodePanel = (function( $ )
 	$( document ).on( 'dpoh:connection-status-changed',  onConnectionStatusChanged )
 	$( document ).on( 'dpoh:response-received',          onResponseReceived )
 	$( document ).on( 'dpoh-interface:file-nav-request', onFileNavRequest )
+	$( document ).on( 'dpoh-interface:layout-changed',   onLayoutChanged )
 	
 	return {
 		clearBreakpoints          : clearBreakpoints,

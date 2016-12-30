@@ -74,7 +74,7 @@ StatusPanel = (function( $ )
 	
 	function validateStack( stack_array )
 	{
-		var html = '<div class="css-table stack-table">';
+		var html = '<div class="css-table stack-table no-max-height">';
 		var max_depth = 0;
 		var active = 'active';
 		stack_array.forEach( function( data )

@@ -69,7 +69,11 @@ body
 {
 	display: table;
 	width: 100%;
-	height: 100%;
+	
+	&:not(.no-max-height)
+	{
+		height: 100%;
+	}
 	
 	.css-row
 	{
@@ -77,6 +81,7 @@ body
 		
 		.css-cell
 		{
+			vertical-align: top;
 			position: relative;
 			display: table-cell;
 		}
@@ -93,6 +98,12 @@ body
 {
 	float: right;
 	text-align: right;
+}
+
+.ui-layout-pane.ui-layout-west,
+.ui-layout-pane.ui-layout-south
+{
+	overflow: hidden;
 }
 
 #status_indicator
@@ -321,19 +332,6 @@ body
 	position: relative;
 	z-index: 1;
 
-	.files-top
-	{
-		background: @secondary-color;
-		border: none;
-	}
-	
-	.files-cell
-	{
-		width: 0;
-		background: @secondary-color;
-		vertical-align: middle;
-	}
-
 	.relative-container
 	{
 		width: 100%;
@@ -350,43 +348,41 @@ body
 	{
 		width: 30%;
 		
-		.scroller
-		{
-			position: absolute;
-		}
-
 		.identifier-icon
 		{
 			color: #AAA;
 		}
 	}
+}
+
+.scroller
+{
+	position: absolute;
+}
+
+.label-row
+{
+	height: 0;
 	
-	.label-row
+	.css-cell
 	{
-		height: 0;
+		border: 1px solid #E0E0E0;
+		border-width: 0 1px 1px 0;
+		background: #F8F8F8;
+		box-sizing: border-box;
+		padding: 10px;
+		color: #000;
+		font-size: 14px;
+		width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		
-		.css-cell
+		.secondary
 		{
-			border: 1px solid #E0E0E0;
-			border-width: 0 1px 1px 0;
-			background: #F8F8F8;
-			box-sizing: border-box;
-			padding: 15px;
-			color: #000;
-			font-size: 17px;
-			width: 100%;
-			font-weight: bold;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			
-			.secondary
-			{
-				color: #888;
-				display: inline-block;
-				margin-left: 10px;
-				font-weight: normal;
-				float: right;
-			}
+			color: #888;
+			display: inline-block;
+			font-weight: normal;
+			float: right;
 		}
 	}
 }
@@ -429,41 +425,8 @@ body
 
 .nav-panel
 {
-	.transition(100ms);
-	color: #FFF;
-	width: 300px;
+	background: #FFF;
 	height: 100%;
-	z-index: 1;
-	position: fixed;
-	top: 0;
-	background: @secondary-color;
-	-webkit-backface-visibility: hidden;
-	-webkit-transform: translate3d(100%, 0, 0);
-	transform: translate3d(-300px, 0, 0);
-	opacity: 0;
-	
-	&.showing
-	{
-		-webkit-backface-visibility: hidden;
-		-webkit-transform: translate3d(0, 0, 0);
-		transform: translate3d(0, 0, 0);
-		box-shadow: 0 0 50px -5px #000;
-		opacity: 1;
-	}
-	
-	.label-row
-	{
-		height: 0;
-		
-		.css-cell
-		{
-			border: 1px solid rgba(0,0,0,0.1);
-			border-width: 0 0 1px 0;
-			background: none;
-			color: #FFF;
-			padding: 10px;
-		}
-	}
 
 	.open-file
 	{
@@ -508,45 +471,57 @@ body
 
 #console
 {
+	background: #FFF;
 	box-sizing: border-box;
 	width: 100%;
-	left: 0;
-	bottom: 0;
-	position: fixed;
-	height: 33%;
-	max-height: 350px;
-	border: 10px solid @secondary-color;
 	display: flex;
 	flex-direction: column;
 	z-index: 2;
-	.transition(100ms);
-	-webkit-backface-visibility: hidden;
-	-webkit-transform: translate3d(0, 350px, 0);
-	transform: translate3d(0, 350px, 0);
-	opacity: 0;
+	height: ~"calc( 100% - 40px )";
 	
-	&.showing
+	.input-table
 	{
-		-webkit-backface-visibility: hidden;
-		-webkit-transform: translate3d(0, 0, 0);
-		transform: translate3d(0, 0, 0);
-		box-shadow: 0 0 50px -5px #000;
-		opacity: 1;
-	}
+		border: 1px solid #EEE;
+		border-width: 1px 0 0;
 
+		.css-cell
+		{
+			width: 100%;
+		}
+
+		.active-line
+		{
+			vertical-align: middle;
+			width: 0;
+			padding: 8px 0 10px 10px;
+			color: @primary-color;
+			font-size: 13px;
+		}
+	}
+	
 	.history
 	{
+		font-size: 13px;
+		font-family: consolas, monospace;
 		flex-grow: 1; 
 		background: #FFF;
 		overflow: auto;
-		font-family: consolas, monospace;
 		padding: 10px;
 		
-		.message-meta
+		.in .message-meta
 		{
-			color: #999;
+			color: #BBB;
+		}
+		
+		.out .message-meta
+		{
+			color: #777;
+		}
+		
+		.message-meta
+		{			
 			display: inline-block;
-			margin-right: 10px;
+			margin-right: 5px;
 		}
 		
 		.message-text
@@ -562,17 +537,17 @@ body
 	
 	.input
 	{
+		border: none;
 	    resize: none;
 		box-sizing: border-box;
 		flex-grow: 0; 
 		position: relative;
-		border: none;
-		background: @secondary-color - #111;
 		width: 100%;
 		max-height: 100%;
 		padding: 10px;
-		color: #FFF;
-		font-size: 16px;
+		padding-left: 5px;
+		color: #000;
+		font-size: 13px;
 		font-family: consolas, monospace;
 		overflow: auto;
 		height: 39px;
@@ -580,47 +555,135 @@ body
 		
 		&:focus
 		{
-			background: @secondary-color - #222;
 			outline: none;
 		}
 	}
 }
 
-.layout
+.status-layout
 {
 	position: relative;
 	height: 100%;
 }
+
+.main-layout
+{
+	height: 100%;
+	width: 100%;
+}
+
+.logo-cell.logo-cell.logo-cell.logo-cell
+{
+	vertical-align: middle;
+	text-align: left;
+	padding-left: 10px;
+	font-family: 'Press Start 2P';
+	background-color: @primary-color;
+	color: #FFF;
+}
+
+body
+{
+	position: relative;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}
+
+.nav-panel .css-cell
+{
+	border-right: none;
+}
+
+.introjs-hint-pulse
+{
+	border-color: @secondary-color;
+}
+
+.introjs-hint-dot
+{
+	border-color: @tertiary-color;
+}
+
+.introjs-tooltip
+{
+	p
+	{
+		margin-top: 0;
+	}
+	font-size: 13px;
+}
+
 .ui-layout-resizer
 {
 	box-sizing: border-box;
 	background: #E0E0E0;
 	
-	.ui-layout-toggler
+	&.ui-layout-resizer-south,
+	&.ui-layout-resizer-north
 	{
-		background:  @tertiary-color;
+		width: 100%;
 
-		&:before
+		.ui-layout-toggler
 		{
-			content: "\f077";
-			width: 100%;
-			color: #FFF;
-			font-family: FontAwesome;
-			font-size: 16px;
-			position: absolute;
-			top: 0;
-			left: 0;
+			height: 100% !important;
+		}
+
+		&:not(.ui-layout-resizer-closed):hover,
+		&.ui-layout-resizer-dragging
+		{
+			min-height: 10px !important;
 		}
 	}
-}
 
-#open_files_panel
-{
-	color: #333;
-	
-	.css-cell
+	&.ui-layout-resizer-east,
+	&.ui-layout-resizer-west
 	{
-		max-width: 300px;
+		height: 100%;
+
+		.ui-layout-toggler
+		{
+			width: 100% !important;
+		}
+
+		&:not(.ui-layout-resizer-closed):hover,
+		&.ui-layout-resizer-dragging
+		{
+			min-width: 10px !important;
+		}
+	}
+	
+	.ui-layout-toggler
+	{
+		background:  @primary-color;
+
+		&:not(.ui-layout-toggler-open)
+		{
+			&.ui-layout-toggler-south:before
+			{
+				content: "\f077";
+				width: 100%;
+				height: 100%;
+				color: #FFF;
+				font-family: FontAwesome;
+				font-size: 16px;
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
+			
+			&.ui-layout-toggler-west:before
+			{
+				content: "\f054";
+				width: 100%;
+				color: #FFF;
+				font-family: FontAwesome;
+				font-size: 16px;
+				position: absolute;
+				top: ~"calc( 50% - 8px )";
+				left: 0;
+			}
+		}			
 	}
 }
 
@@ -888,7 +951,8 @@ ul.jqueryFileTree li.directory
 .value-input::selection,
 #console .input::selection
 {
-	background: @secondary-color - #444;
+	background: @primary-color;
+	color: #FFF;
 }
 
 input[type=text]
