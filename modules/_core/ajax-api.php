@@ -1,34 +1,19 @@
 <?php
 
-function error( $msg )
-{
-	header('HTTP/1.1 400 Bad Request' );
-	header("Content-Type: application/json;charset=utf-8");
-	echo json_encode( [
-		'error' => $msg,
-	] );
-	exit;
-}
-
 $params_required = [ 'file_names', 'list_recent_files', 'fetch_tree' ];
 if ( !array_intersect_key( $_GET, array_flip( $params_required ) ) )
 {	
-	error( 'Expected one or more of the following GET parameters: '
+	error_response( 'Expected one or more of the following GET parameters: '
 		. implode( ', ', $params_required ) );
 }
 
 $response = [];
 
-if ( isset( $_GET[ 'list_recent_files' ] ) )
+if ( $file_names = input( 'file_names' ) )
 {
-	$response[ 'recent_files' ] = [];
-}
-
-if ( isset( $_GET[ 'file_names' ] ) )
-{
-	$file_names = is_array( $_GET[ 'file_names' ] )
-		? $_GET[ 'file_names' ]
-		: [ $_GET[ 'file_names' ] ];
+	$file_names = is_array( $file_names )
+		? $file_names
+		: [ $file_names ];
 
 	$response[ 'files' ] = [];
 	foreach ( $file_names as $file_name )
@@ -40,19 +25,19 @@ if ( isset( $_GET[ 'file_names' ] ) )
 	}
 }
 
-if ( isset( $_GET[ 'fetch_tree' ] ) )
+if ( $fetch_tree = input( 'fetch_tree' ) )
 {
-	if ( $_GET[ 'fetch_tree' ] == '~ROOT~' || $_GET[ 'fetch_tree' ] == '~RECENTLY_MODIFIED~'
+	if ( in_array( $fetch_tree, [ '~ROOT~', '~RECENTLY_MODIFIED~' ] )
 		|| client_can_access_path( $_GET[ 'fetch_tree' ] ) )
 	{
-		$settings = settings();
-		$dir = $_GET[ 'fetch_tree' ] == '~ROOT~'
-			? $settings[ 'tree_root' ]
-			: realpath( $_GET[ 'fetch_tree' ] );
+		$dir = $fetch_tree == '~ROOT~'
+			? settings( 'tree_root' )
+			: realpath( $fetch_tree );
 
 		$contents = NULL;
 		$response = [];
-		if ( $_GET[ 'fetch_tree' ] == '~ROOT~' )
+
+		if ( $fetch_tree == '~ROOT~' )
 		{
 			$response[] = [
 				'text' => 'Recently modified',
@@ -66,15 +51,33 @@ if ( isset( $_GET[ 'fetch_tree' ] ) )
 				],
 			];
 		}
-		else if ( $_GET[ 'fetch_tree' ] == '~RECENTLY_MODIFIED~' )
+		else if ( $fetch_tree == '~RECENTLY_MODIFIED~' )
 		{
 			$contents = [];
-			foreach ( $settings[ 'recent_dirs' ] as $current_dir )
+			foreach ( settings( 'recent_dirs' ) as $current_dir )
 			{
-				$extensions = implode( '\|', $settings[ 'allowed_extensions' ] );
+				$extensions = implode( '\|', settings( 'allowed_extensions' ) );
 				$files = shell_exec( "find $current_dir -type f -mmin -480 | grep '\.\($extensions\)'" );
 				$files = array_filter( explode( "\n", $files ) );
 				$contents = array_merge( $contents, $files );
+				
+				usort( $contents, function( $a, $b )
+				{
+					$a = strtolower( basename( $a ) );
+					$b = strtolower( basename( $b ) );
+					if ( $a > $b )
+					{
+						return 1;
+					}
+					else if ( $b > $a )
+					{
+						return -1;
+					}
+					else
+					{
+						return 0;
+					}
+				} );
 			}
 		}
 		

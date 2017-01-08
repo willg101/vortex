@@ -1,0 +1,58 @@
+/*************************************************************************************************
+ * Global variables
+ *************************************************************************************************/
+
+@primary-color: #21599f;
+@secondary-color: #3ca6de;
+@tertiary-color: #59c203;
+
+/*************************************************************************************************
+ * Mixins
+ *************************************************************************************************/
+
+.transition(@time: 200ms)
+{
+	-webkit-transition: all @time ease;
+	transition:         all @time ease;
+	-webkit-backface-visibility: hidden;
+	-webkit-transform: translateZ(0) scale(1.0, 1.0);
+}
+
+.bouncy(@max-scale : 1.5; @min-scale: 0.7; @border-width: 3px)
+{
+	.transition();
+	border: none; // For <button> elements, to which some browsers add a cheesy 3D-ish border
+	border-bottom: @border-width solid transparent;
+	
+	.fa
+	{
+		.transition();
+	}
+	
+	&:hover
+	{
+		background: rgba(0,0,0,0.1);
+		border-bottom: @border-width solid @tertiary-color;
+
+		.fa
+		{
+			color: @tertiary-color - #222;
+			-webkit-transform: scale(@max-scale, @max-scale);
+			transform:  scale(@max-scale, @max-scale);
+		}
+	}
+	
+	&:active
+	{			
+		.fa
+		{
+			-webkit-transform: scale(@min-scale, @min-scale);
+			transform:  scale(@min-scale, @min-scale);
+		}
+	}
+	
+	&:focus
+	{
+		outline: none;
+	}
+}

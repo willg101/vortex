@@ -1,0 +1,397 @@
+@import "module_defaults";
+ 
+.layout-table
+{
+	position: relative;
+	z-index: 1;
+
+	.relative-container
+	{
+		width: 100%;
+		height: 100%;
+		position: relative;
+	}
+	
+	.editor-cell
+	{
+		width: 70%;
+	}
+
+	.context-cell
+	{
+		width: 30%;
+		
+		.identifier-icon
+		{
+			color: #AAA;
+		}
+	}
+}
+
+.main-layout
+{
+	height: 100%;
+	width: 100%;
+}
+
+body
+{
+	margin: 0;
+	font-family: "Open Sans", sans-serif;
+	position: relative;
+	background: #666;
+	position: relative;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}
+
+.value-input::selection,
+#console .input::selection
+{
+	background: @primary-color;
+	color: #FFF;
+}
+
+input[type=text]
+{
+	box-sizing: border-box;
+	padding: 10px;
+	width: 100%;
+	display: block;
+}
+
+/**************************************************************************************************
+ * UI-Layout default styles
+ **************************************************************************************************/
+
+.ui-layout-resizer
+{
+	box-sizing: border-box;
+	background: #E0E0E0;
+	overflow: visible !important;
+	@grace: 10px;
+	
+	&.ui-layout-resizer-south,
+	&.ui-layout-resizer-north
+	{
+		width: 100%;
+
+		&:after
+		{
+			position: absolute;
+			height: 1px + (2 * @grace);
+			width: 100%;
+			left: 0;
+			top: -@grace;
+			content: "";
+		}
+		
+		.ui-layout-toggler
+		{
+			height: 100% !important;
+		}
+
+		&:not(.ui-layout-resizer-closed):hover,
+		&.ui-layout-resizer-dragging
+		{
+			min-height: 10px !important;
+		}
+	}
+
+	&.ui-layout-resizer-east,
+	&.ui-layout-resizer-west
+	{
+		height: 100%;
+		
+		&:after
+		{
+			position: absolute;
+			width: 1px + (2 * @grace);
+			height: 100%;
+			top: 0;
+			left: -@grace;
+			content: "";
+		}
+		
+		.ui-layout-toggler
+		{
+			width: 100% !important;
+		}
+
+		&:not(.ui-layout-resizer-closed):hover,
+		&.ui-layout-resizer-dragging
+		{
+			min-width: 10px !important;
+		}
+	}
+	
+	.ui-layout-toggler
+	{
+		background:  @secondary-color;
+
+		&:not(.ui-layout-toggler-open)
+		{
+			&.ui-layout-toggler-south:before
+			{
+				content: "\f077";
+				width: 100%;
+				height: 100%;
+				color: #FFF;
+				font-family: FontAwesome;
+				font-size: 16px;
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
+			
+			&.ui-layout-toggler-west:before
+			{
+				content: "\f054";
+				width: 100%;
+				color: #FFF;
+				font-family: FontAwesome;
+				font-size: 16px;
+				position: absolute;
+				top: ~"calc( 50% - 8px )";
+				left: 0;
+			}
+		}			
+	}
+}
+
+.ui-layout-pane
+{
+	overflow: hidden;
+	height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+/**************************************************************************************************
+ * JS Tree derfault styles
+ **************************************************************************************************/
+ 
+.jstree-default > .jstree-container-ul .jstree-loading > .jstree-ocl
+{
+	background: none;
+	
+	display: inline-block;
+    font: normal normal normal 14px FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+	vertical-align: baseline;
+	
+	&:before
+	{
+		position: relative;
+		content: "\f254";
+		color: rgba( 0,0,0,0.5);
+		animation: throbber 1.5s;
+	}
+}
+
+html
+{
+	height: 100%;
+}
+
+/**************************************************************************************************
+ * General Layout - Utility classes
+ **************************************************************************************************/
+ 
+.css-table
+{
+	display: table;
+	width: 100%;
+	
+	&:not(.no-max-height)
+	{
+		height: 100%;
+	}
+	
+	.css-row
+	{
+		display: table-row;
+		
+		.css-cell
+		{
+			vertical-align: top;
+			position: relative;
+			display: table-cell;
+		}
+	}
+}
+
+.left
+{
+	float: left;
+	text-align: left;
+}
+
+.right
+{
+	float: right;
+	text-align: right;
+}
+
+.toolbar
+{
+	height: 0;
+	position: relative;
+	text-align: center;
+	z-index: 2;
+	
+	.css-cell
+	{
+		vertical-align:	top;
+		border: 1px solid #E0E0E0;
+		border-width: 0 1px 1px 0;
+	}
+	
+	.connection-status
+	{
+		padding: 15px;
+		
+		&.connected
+		{
+			color: #5F5;
+		}
+		
+		&.error
+		{
+			color: #F55;
+		}
+	}
+}
+
+.btn
+{
+	.bouncy();
+
+	background: none;
+	cursor: pointer;
+	color: #111;
+	padding: 15px;
+	display: inline-block;
+
+	&.active,
+	&.active:hover .fa
+	{
+		color: #FFF;
+		background: @primary-color;
+	}
+}
+
+.h-padding
+{
+	padding-right: 15px;
+}
+
+.v-padding
+{
+	box-sizing: border-box;
+	padding-top: 15px;
+	display: inline-block;
+	border-bottom: 3px solid transparent;
+}
+
+.hidden
+{
+	display: none;
+}
+
+.blur-hidden
+{
+	@blur: 3px;
+	position: relative;
+	-webkit-filter: blur(@blur);
+	-moz-filter: blur(@blur);
+	-o-filter: blur(@blur);
+	-ms-filter: blur(@blur);
+	filter: blur(@blur);
+	opacity: 0;
+}
+
+.scroller
+{
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	overflow: auto;
+}
+
+.label-row
+{
+	height: 0;
+	
+	.css-cell
+	{
+		border: 1px solid #E0E0E0;
+		border-width: 0 1px 1px 0;
+		background: #F8F8F8;
+		box-sizing: border-box;
+		padding: 10px;
+		color: #000;
+		font-size: 14px;
+		width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		
+		.secondary
+		{
+			color: #888;
+			display: inline-block;
+			font-weight: normal;
+			float: right;
+		}
+	}
+}
+
+.identifier-leaf,
+.identifier
+{
+	font-family: consolas, monospace;
+}
+
+.identifier
+{
+	color: #555;
+}
+
+/**************************************************************************************************
+ * Animations
+ **************************************************************************************************/
+
+@keyframes pulsing-background
+{
+  0% {
+    @scale: 0;
+	opacity: 1;
+	-webkit-transform: scale(@scale, @scale);
+	transform:  scale(@scale, @scale);
+  }
+  100% {
+    @scale: 1;
+	opacity: 0;
+				-webkit-transform: scale(@scale, @scale);
+			transform:  scale(@scale, @scale);
+  }
+}
+
+@keyframes throbber
+{
+  0% {
+    opacity: 0;
+  }
+   80% {
+    opacity: 0;
+  }
+  100% {
+   opacity: 1;
+  }
+}

@@ -1,0 +1,15 @@
+{
+	"external_dependencies" : {
+		"js" : [
+			"//use.fontawesome.com/b2e4717b55.js",
+			"//cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js",
+			"//cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js",
+			"//cdnjs.cloudflare.com/ajax/libs/jquery-layout/1.4.3/jquery.layout.min.js"
+		],
+		"css" : [
+			"//cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css",
+			"//fonts.googleapis.com/css?family=Open+Sans",
+			"//fonts.googleapis.com/css?family=Press+Start+2P"
+		]
+	}
+}

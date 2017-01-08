@@ -1,0 +1,36 @@
+body
+{
+	background: #224d72;
+	padding: 150px;
+	font-family: sans-serif;
+}
+
+h1
+{
+	color: #AAA;
+}
+
+h2
+{
+	color: #EEE;
+}
+
+p
+{
+	color: #EEE;
+}
+
+.trace
+{
+	background: #EEE;
+	padding: 10px;
+	color: #333;
+}
+
+.trace-title
+{
+	background: #CCC;
+	display: block;
+	padding: 10px;
+	margin: -10px -10px 10px;
+}
