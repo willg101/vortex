@@ -189,9 +189,12 @@ CodePanel = (function( $ )
 				current_line_marker = editor.session.addMarker( new Range( line - 1, 0, line - 1, 1),
 					"ace-current-line", "fullLine" );
 				editor.getSession().addGutterDecoration( line-1, "gutter-current-line" );
-				editor.clearSelection();
 				editor.scrollToLine( line , true, true, function(){} );
 				current_line = line;
+			}
+			else
+			{
+				editor.scrollToLine( 1 , true, true, function(){} );
 			}
 
 			showBreakpointsForFile();
@@ -200,6 +203,8 @@ CodePanel = (function( $ )
 			{
 				cb( filename, line, text );
 			}
+
+			editor.clearSelection();
 		} );
 	}
 
