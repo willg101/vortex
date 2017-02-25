@@ -23,4 +23,4 @@ class LoginPlugin:
                 print("cookie error: {0}".format(e))
                 data['connection'].transport.loseConnection()
 
-plugin_manager.register( LoginPlugin() )
+plugin_manager.register( 'login', LoginPlugin() )

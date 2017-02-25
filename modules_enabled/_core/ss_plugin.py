@@ -183,4 +183,4 @@ class CorePlugin:
             ws_factory.dpoh_plugin_manager = plugin_manager 
             data['connections'].append( { 'port' : 3001, 'factory' : ws_factory } )
 
-plugin_manager.register( CorePlugin( plugin_manager ) )
+plugin_manager.register( '_core', CorePlugin( plugin_manager ) )
