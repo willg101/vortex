@@ -1,0 +1,70 @@
+@import "@{defaults}";
+
+#splash
+{
+	.transition();
+	transform:  scale(1, 1);
+	top:0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	position: fixed;
+	z-index: 999;
+	background: #FFF;
+
+	&.done
+	{
+		@scale: 0.95;
+		@blur: 3px;
+		transform:  scale(@scale, @scale);
+		-webkit-filter: blur(@blur);
+		-moz-filter: blur(@blur);
+		-o-filter: blur(@blur);
+		-ms-filter: blur(@blur);
+		filter: blur(@blur);
+		opacity: 0;
+	}
+
+	.css-cell
+	{
+		text-align: center;
+		vertical-align: middle;
+	}
+
+	h1,
+	h2
+	{
+		font-family: 'Press Start 2P';
+		color: @primary-color;
+		text-align: center;
+	}
+
+	h1
+	{
+		font-size: 60px;
+	}
+
+	h2
+	{
+		animation: prim-sec 1s infinite;
+	}
+
+	@keyframes prim-sec
+	{
+		0%
+		{
+			color: @primary-color;
+		}
+
+		50%
+		{
+			color: @tertiary-color;
+		}
+
+		100%
+		{
+			color: @primary-color;
+		}
+	}
+
+}

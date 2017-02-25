@@ -1,0 +1,67 @@
+#!/usr/bin/php
+<?php
+
+require_once 'hooks.php';
+require_once '../../includes/files.php';
+
+function get_password()
+{
+	shell_exec('stty -echo');
+	$password = trim( fgets( STDIN ), "\n" );
+	shell_exec('stty echo');
+	return $password;
+}
+
+echo "\nExisting users: \n";
+$existing = [];
+foreach ( glob( __DIR__ . '/users/*' ) as $user )
+{
+	$user = basename( $user );
+	if ( $user != '.htaccess' )
+	{
+		echo "\t- $user\n";
+		$existing[ $user ] = TRUE;
+	}
+}
+
+while( TRUE )
+{
+	$username = readline( "\n- To update an existing user's password, enter the user's name"
+		. "\n- To create a user, enter a new name"
+		. "\n- Enter 'quit' to exit: " );
+	$username = trim( $username );
+	if ( strtolower( $username == 'quit' ) )
+	{
+		exit;
+	}
+
+	if ( preg_match( '/^[\w\d_\-\.]+$/', $username ) )
+	{
+		break;
+	}
+	else
+	{
+		echo "\nYou have entered an invalid username; please try again.\n";
+	}
+}
+
+$password = FALSE;
+while( TRUE )
+{
+	echo empty( $existing[ $username ] )
+		? "Create new user '$username' with password: "
+		: "Update existing user $username's password to: ";
+	$password = get_password();
+	echo "\nConfirm password: ";
+	if ( $password != get_password() )
+	{
+		echo "\nPasswords don't match; please try again.\n";
+	}
+	else
+	{
+		break;
+	}
+}
+
+file_put_contents_safe( __DIR__ . "/users/$username", login_generate_hashed_password( $username, $password ) );
+echo "\n";

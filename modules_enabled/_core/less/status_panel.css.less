@@ -1,0 +1,101 @@
+@import "@{defaults}";
+
+.status-indicators,
+.status-panel .scroller
+{
+	.transition();
+}
+
+.stack-table
+{
+	height: 0;
+	
+	.css-row 
+	{
+		.transition();
+		
+		.css-cell
+		{
+			.transition();
+			border-bottom: 1px solid #F0F0F0;
+			padding: 5px 10px;
+			font-family: consola, monospace;
+	
+			&.depth
+			{
+				background: rgba(0,0,0,0.15);
+				text-align: right;
+			}
+			
+			&.file,
+			&.line
+			{
+				background: rgba(0,0,0,0.1);
+				text-align: left;
+			}
+			
+			&.depth,
+			&.file
+			{
+				width: 0;
+				white-space: nowrap
+			}
+			
+			&.line
+			{
+				width: 100%;
+			}
+		}
+		
+		.css-cell:after
+		{
+			.transition();
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			border-bottom: 3px solid transparent;
+			content: ' ';
+			left: 0;
+		}
+		
+		&.active .css-cell
+		{
+			color: #FFF;
+
+			&.depth
+			{
+				background: @primary-color - #111;
+			}
+			
+			&.file,
+			&.line
+			{
+				background: @primary-color;
+			}
+		}
+	}
+	
+	.css-row:hover .css-cell
+	{
+		background: rgba(0,0,0,0.2);
+		cursor: pointer;
+
+		&:after
+		{
+			border-color: @tertiary-color;
+		}
+	}
+	
+	.css-row:active
+	{
+		@scale: .95;
+		-webkit-backface-visibility: hidden;
+		-webkit-transform: translateZ(0) scale(@scale, @scale);
+	}
+}
+	
+.status-layout
+{
+	position: relative;
+	height: 100%;
+}
