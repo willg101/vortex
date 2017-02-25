@@ -1,6 +1,6 @@
 var send_api_request_original = (function( $ )
 {
-	var api_base_url = 'ajax-api-main.php';
+	var api_base_url = window.location;
 
 	function processCallbackArray( cb_array /*, ... */ )
 	{

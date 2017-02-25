@@ -1,6 +1,7 @@
 <?php /* dpoh: ignore */
 
 define( 'DPOH_ROOT', __DIR__ );
+define( 'IS_AJAX_REQUEST', !empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) );
 
 $handler = function( $e )
 {
@@ -9,7 +10,17 @@ $handler = function( $e )
 		'message' => $e->getMessage(),
 		'trace'   => $e->getTraceAsString(),
 	];
-	echo render_template( 'crash.tpl.php', $vars );
+
+	header( 'HTTP/1.0 500 Internal server error' );
+
+	if ( IS_AJAX_REQUEST )
+	{
+		echo json_encode( $vars );
+	}
+	else
+	{
+		echo render_template( 'crash.tpl.php', $vars );
+	}
 };
 set_exception_handler( $handler );
 unset( $handler );

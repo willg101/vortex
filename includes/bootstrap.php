@@ -14,20 +14,41 @@
  *	- boot: Perform initialization tasks. So that other modules can safely make decisions based on
  *		MUCS, avoid altering MUCS at or after this stage.
  *
- * @param bool $do_render (OPTIONAL) When TRUE, renders a response based on the current theme
- *	module's page
- *
  * @throws FatalConfigError
  *
  * @retval string|NULL
  */
-function bootstrap( $do_render = TRUE )
+function bootstrap()
 {
 	$boot_vars = [ 'do_render' => &$do_render ];
 	fire_hook( 'preboot', $boot_vars );
 	fire_hook( 'boot',    $boot_vars, TRUE );
 
-	if ( $do_render )
+	if ( IS_AJAX_REQUEST )
+	{
+		$route_to_module = NULL;
+		try
+		{
+			$route_to_module = input( 'route_to_module' );
+			$route_to_module = preg_replace( '/\..*/', '', $route_to_module );
+		}
+		catch ( HttpException $e )
+		{
+			error_response( $e->getMessage() );
+		}
+
+		$module_ajax_api_script = array_get( modules()->get(), "$route_to_module.ajax_api_script" );
+		if ( $module_ajax_api_script )
+		{
+			include $module_ajax_api_script;
+			exit;
+		}
+		else
+		{
+			error_response( "Module '$route_to_module' does not exist or does not define an Ajax API" );
+		}
+	}
+	else
 	{
 		$theme_module  = user_config( 'theme_module' );
 		$page_template = modules( "$theme_module.page_template" );
