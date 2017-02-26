@@ -31,6 +31,7 @@ class Bridge:
 
     def sendToWs( self, data ):
         if self.hasWsConnection():
+            data = str( len( data ) ) + '\0' + data + '\0'
             self._wsConnection.sendMessage( data )
 
     def sendToDbg( self, data ):
@@ -78,9 +79,7 @@ class DbgpServerProtocol(Protocol):
                 self.sendMessageToWebsocket( '<wsserver status="session_end"></wsserver>' )
 
     def sendMessageToWebsocket(self, message):
-        if self._bridge.hasWsConnection():
-            message = str( len( message ) ) + '\0' + message + '\0'
-            self._bridge.sendToWs( message )
+        self._bridge.sendToWs( message )
 
     def dataReceived(self, data):
         if self._bridge.hasWsConnection():
