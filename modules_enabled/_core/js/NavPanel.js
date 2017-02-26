@@ -4,6 +4,10 @@ NavPanel = (function( sendApiRequest, $ )
 	var history_pos   = 0; 
 	var pending_message = '';
 
+	// TODO: Add interface for updating these
+	var dir_aliases = {
+	};
+
 	function init()
 	{
 		$( '#file_tree' ).jstree( {
@@ -151,6 +155,18 @@ NavPanel = (function( sendApiRequest, $ )
 			$( '#console' ).addClass( 'showing' );
 			$( '#console .input' ).focus();
 		}
+		else if ( e.which == 191 && e.ctrlKey )
+		{
+			if ( $( '.modal-hidden' ).length )
+			{
+				modal.set( {
+					content : '<input class="glob-input" id="globber" />',
+					title   : 'Open file',
+				} );
+				modal.show();
+				$( '#globber' ).focus();
+			}
+		}
 		else if ( e.which == 27 )
 		{
 			$( '.showing' ).removeClass( 'showing' );
@@ -270,7 +286,46 @@ NavPanel = (function( sendApiRequest, $ )
 		var height = $( '.toolbar .css-cell:not(.match-height)' ).height();
 		$( '.toolbar .css-cell.match-height' ).height( height + 1 );
 	}
-	
+
+	function onGlobberKeydown( e )
+	{
+		if ( e.which == 9 )
+		{
+			e.preventDefault();
+			current_val = $( e.target ).val();
+			if ( dir_aliases[ current_val ] )
+			{
+				$( e.target ).val( dir_aliases[ current_val ] );
+				e.target.scrollLeft = e.target.scrollWidth;
+			}
+			else
+			{
+				dpoh.command( 'X_glob ', { pattern : current_val }, function( e )
+				{
+					var message = $( e.message_raw );
+					if ( message.text() != 'FALSE' )
+					{
+						$( '#globber' ).blur().focus().val( '' ).val( message.text() );
+						input = $( '#globber' )[ 0 ];
+
+						// Warning: doesn't work in IE/Opera
+						input.scrollLeft = input.scrollWidth;
+					}
+				} );
+			}
+		}
+		else if ( e.which == 13 )
+		{
+			e.preventDefault();
+			$( document ).trigger( {
+				type     : 'dpoh-interface:file-nav-request',
+				filename : $( e.target ).val(),
+				source   : 'glob',
+			} );
+			modal.hide();
+		}
+	}
+
 	$( init );
 
 	$( document ).on( 'keypress',          '#console .input',    onConsoleKeypress );	
@@ -282,5 +337,6 @@ NavPanel = (function( sendApiRequest, $ )
 	$( document ).on( 'click', '[data-open-nav-panel]',          onNavButtonClicked );
 	$( document ).on( 'click', '.open-file',                     onOpenFileClicked );
 	$( window   ).on( 'resize',                                  resizeCell );
-	
+	$( document ).on( 'keydown',           '#globber',           onGlobberKeydown );
+
 }( send_api_request, jQuery ));

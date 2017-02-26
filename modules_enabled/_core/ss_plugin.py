@@ -1,5 +1,7 @@
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
 from twisted.internet.protocol  import Factory, Protocol
+import glob
+import argparse
 
 class Bridge:
 
@@ -119,8 +121,6 @@ class DpohWsProtocol(WebSocketServerProtocol):
     def onConnect(self, request):
         self._bridge = self.factory.dpoh_bridge
         self._pluginManager = self.factory.dpoh_plugin_manager
-        print("Client connecting: {0}".format(request.peer))
-        print(" - Headers: {0}".format(request.headers['cookie']))
         data = {
             'request'    : request,
             'connection' : self,
@@ -180,7 +180,38 @@ class CorePlugin:
             ws_factory = WebSocketServerFactory( u"ws://127.0.0.1:3001/bridge" )
             ws_factory.protocol = DpohWsProtocol
             ws_factory.dpoh_bridge = bridge
-            ws_factory.dpoh_plugin_manager = plugin_manager 
+            ws_factory.dpoh_plugin_manager = plugin_manager
             data['connections'].append( { 'port' : 3001, 'factory' : ws_factory } )
+
+        def onWsMessage( self, data ):
+            if data['message'].startswith( 'X_glob ' ):
+                print( "caught glob request" )
+                args_raw = data['message'][7:]
+                data['message'] = ''
+                parser = argparse.ArgumentParser()
+                parser.add_argument( '-i', dest='id' )
+                parser.add_argument( '-p', dest='pattern', default='/', type=str )
+                args, unknown = parser.parse_known_args( args_raw.split() )
+                print(args)
+                results = glob.glob( args.pattern + '*' )
+                print( results )
+                response = results[0] if len( results ) == 1 else self.findPartialGlob( results )
+                print( response )
+                try:
+                    data['bridge'].sendToWs( '<modulemessage from_module="_core" transaction_id="{0}" pattern="{1}">{2}</glob>'.format( args.id, args.pattern, response ) )
+                except Exception as e:
+                    print( e )
+                print( "sending glob response: {0}".format( response ) )
+
+        def findPartialGlob( self, results ):
+            if len( results ) == 0:
+                return 'FALSE'
+            last   = results.pop()
+            length = len( last )
+            for item in results:
+                differences = [i for i in xrange( min( len( item ), length ) ) if item[i] != last[ i ] ]
+                if len( differences ):
+                    length = min( differences.pop(0), length-1 )
+            return last[:length]
 
 plugin_manager.register( '_core', CorePlugin( plugin_manager ) )

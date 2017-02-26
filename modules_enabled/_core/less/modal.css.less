@@ -70,12 +70,14 @@
 	box-sizing: border-box;
 	
 	.value-input,
-	.bp-expression-input
+	.bp-expression-input,
+	.glob-input
 	{
 		position: relative;
 		background: @secondary-color - #111;
 		max-height: 4em;
-		max-width: 100%;
+		width: 100%;
+		box-sizing: border-box;
 		border: none;
 		color: #FFF;
 		font-family: consolas, monospace;

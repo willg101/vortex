@@ -446,6 +446,7 @@ dpoh = (function( $ )
 		type        : 't',
 		value       : 'v',
 		transaction : 'i',
+		pattern     : 'p',
 	};
 
 	function buildArgs( args_object )
@@ -625,7 +626,7 @@ dpoh = (function( $ )
 		var jq_message = $( message ).each( function( i, el )
 		{
 			el = $( el );
-			if ( el.is( '[command],init,wsserver' ) )
+			if ( el.is( '[command],init,wsserver,modulemessage' ) )
 			{
 				jq_response_element = el;
 				return false;
@@ -637,10 +638,11 @@ dpoh = (function( $ )
 			console.warn( 'Unrecognized response from server: ' + message );
 		}
 
-		var is_stopping   = jq_response_element.is( '[status=stopping]' );
-		var is_stopped    = jq_response_element.is( '[status=stopped]' );
-		var session_ended = jq_response_element.is( '[status=session_end]' );
-		setActiveSessionStatus( !(is_stopping || is_stopped || session_ended) );
+		var is_stopping    = jq_response_element.is( '[status=stopping]' );
+		var is_stopped     = jq_response_element.is( '[status=stopped]' );
+		var session_ended  = jq_response_element.is( '[status=session_end]' );
+		var is_mod_message = jq_response_element.is( 'modulemessage' );
+		setActiveSessionStatus( !(is_stopping || is_stopped || session_ended || is_mod_message) );
 
 		// Determine which command (if any) the response is for
 		var response_type = determineMessageType( jq_response_element );
