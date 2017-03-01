@@ -1,7 +1,7 @@
 NavPanel = (function( sendApiRequest, $ )
 {
 	var history_stack = [];
-	var history_pos   = 0; 
+	var history_pos   = 0;
 	var pending_message = '';
 
 	// TODO: Add interface for updating these
@@ -35,7 +35,7 @@ NavPanel = (function( sendApiRequest, $ )
 			$( '.showing' ).removeClass( 'showing' );
 		}
 	}
-	
+
 	function onLoading( a, b, c ,d )
 	{
 		console.log( arguments );
@@ -115,11 +115,11 @@ NavPanel = (function( sendApiRequest, $ )
 		$( '.nav-panel.showing' ).removeClass( 'showing' );
 	}
 
-	function getShortFileName( filename ) 
+	function getShortFileName( filename )
 	{
 		return filename.replace( /^.*\//, '' );
 	}
-	
+
 	function onNodeDoubleClicked( e, data )
 	{
 		var li = $( e.target ).closest( 'li' );
@@ -146,7 +146,6 @@ NavPanel = (function( sendApiRequest, $ )
 			e.preventDefault();
 			$( '.showing' ).removeClass( 'showing' );
 			$( '#open_files_panel' ).addClass( 'showing' );
-			
 		}
 		else if ( e.which == 'E'.charCodeAt( 0 ) && e.ctrlKey )
 		{
@@ -223,8 +222,7 @@ NavPanel = (function( sendApiRequest, $ )
 				addConsoleText( 'in',  '<i class="fa fa-warning"></i> No session is currently active', false );
 			}
 		}
-
-    }
+	}
 
 	function onConsoleKeyup( e )
 	{
@@ -328,8 +326,8 @@ NavPanel = (function( sendApiRequest, $ )
 
 	$( init );
 
-	$( document ).on( 'keypress',          '#console .input',    onConsoleKeypress );	
-	$( document ).on( 'keyup',             '#console .input',    onConsoleKeyup );	
+	$( document ).on( 'keypress',          '#console .input',    onConsoleKeypress );
+	$( document ).on( 'keyup',             '#console .input',    onConsoleKeyup );
 	$( document ).on( 'dblclick.jstree',   '#open_files_panel',  onNodeDoubleClicked );
 	$( document ).on( 'loading.jstree',    '#breakpoints_panel', onLoading );
 	$( document ).on( 'keydown',                                 onDocumentKeydown );
