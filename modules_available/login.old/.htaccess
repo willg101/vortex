@@ -1,7 +1,0 @@
-<Files ~ "^\..*">
-	Deny from all
-</Files>
-
-<Files ~ "^.*\.jpg$">
-	Allow from all
-</Files>
