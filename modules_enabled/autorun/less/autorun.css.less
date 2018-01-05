@@ -1,0 +1,31 @@
+@import "@{defaults}";
+
+.autorun-modes
+{
+	[type=radio]
+	{
+		display: none;
+
+		& + label
+		{
+			display: block;
+			cursor: pointer;
+
+			&:before
+			{
+				.transition( 300ms );
+				margin: 0 5px 0 10px;
+				font-family: FontAwesome;
+				content: "\f10c";
+				color: @primary-color;
+			}
+		}
+
+		&:checked + label:before
+		{
+			content: "\f058";
+			color: @tertiary-color;
+		}
+
+	}
+}

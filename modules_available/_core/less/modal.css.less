@@ -13,38 +13,50 @@
 
 .modal
 {
+	border-radius: 3px;
 	.transition();
-	background: @secondary-color;
+	background: #FFF;
 	box-shadow: 0 0 30px #000;
 	position: relative;
 	width: 100%;
-	max-width: 400px;
+	max-width: 600px;
 	margin: 200px auto;
 	transform:  scale(1, 1);
 	opacity: 1;
+
+	&.modal-hidden
+	{
+		@scale: 1.5;
+		transform:  scale(@scale, @scale);
+		opacity: 0;
+	}
 }
 
 .modal-title-bar
 {
 	position: relative;
-	background: @secondary-color;
+	background: #E0E0E0;
 	height: 20px;
-	padding: 15px;
+	padding: 10px;
 	color: #333;
+	border-radius: 3px 3px 0 0 ;
+	font-size: 14px;
 }
 
 .modal-exit
 {
-	padding: 15px;
-	background: @secondary-color;
+	border-radius: 0 3px 0 0 ;
+	padding: 10px;
+	background: #E0E0E0;
 	position: absolute;
+	font-size: 14px;
 	top: 0;
 	right: 0;
-	color: #FFF;
+	color: #333;
 	height: 20px;
 	cursor: pointer;
 	.bouncy(@border-width: 0);
-	
+
 	&:hover,
 	&:active
 	{
@@ -54,13 +66,7 @@
 			color: #FFF;
 		}
 	}
-}
 
-.modal-hidden
-{
-	@scale: 1.5;
-	transform:  scale(@scale, @scale);
-	opacity: 0;
 }
 
 .modal-content
@@ -68,24 +74,28 @@
 	padding: 15px;
 	width: 100%;
 	box-sizing: border-box;
-	
+	border-radius: 0 0 3px 3px;
+
 	.value-input,
-	.bp-expression-input
+	.bp-expression-input,
+	.glob-input
 	{
 		position: relative;
-		background: @secondary-color - #111;
 		max-height: 4em;
-		max-width: 100%;
-		border: none;
-		color: #FFF;
+		width: 100%;
+		background: #E0E0E0;
+		box-sizing: border-box;
+		border: 2px solid #AAA;
+		border-width: 0 0 2px 0;
+		color: #000;
 		font-family: consolas, monospace;
 		padding: 10px;
 		overflow: auto;
 		
 		&:focus
 		{
-			background: @secondary-color - #222;
 			outline: none;
+			border-color: @tertiary-color;
 		}
 	}
 }
@@ -101,25 +111,11 @@
 	height: 100%;
 }
 
-.modal
-{
-	.transition();
-	background: @secondary-color;
-	box-shadow: 0 0 30px #000;
-	position: relative;
-	width: 100%;
-	max-width: 400px;
-	margin: 200px auto;
-	transform:  scale(1, 1);
-	opacity: 1;
-}
-
 .blurable
 {
 	.transition();
 	@scale: 1;
 	transform:  scale(@scale, @scale);
-	background: #FFF;
 	position: relative;
 }
 
@@ -135,3 +131,30 @@
 	-ms-filter: blur(@blur);
 	filter: blur(@blur);
 }
+
+.shake
+{
+	animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+	transform: translate3d(0, 0, 0);
+	backface-visibility: hidden;
+	perspective: 1000px;
+}
+
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+

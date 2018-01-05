@@ -1,0 +1,20 @@
+<div id="open_files_panel" class="nav-panel">
+	<div class="css-table">
+		<div class="css-row toolbar">
+			<div class="css-cell logo-cell match-height">
+				DPOH_
+			</div>
+		</div>
+		<div class="css-row">
+			<div class="css-cell west-nav-cell">
+				<div class="nav-main nav-main-button nav-open-file" data-modal-role="open">
+					<span class="fa fa-fw fa-folder-open"></span> Open...
+				</div>
+				<div class="currently-open-files"></div>
+				<div class="nav-main nav-main-button open-settings" data-modal-role="open">
+					<span class="fa fa-fw fa-gear"></span> Settings...
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

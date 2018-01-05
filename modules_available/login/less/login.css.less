@@ -1,44 +1,164 @@
 @import "@{defaults}";
 
+.reset-pw-form,
+.login-form
+{
+	&.inactive
+	{
+		display:none;
+	}
+
+	animation-fill-mode: both;
+}
+
+.all-user-accounts
+{
+	max-height: 400px;
+	overflow: auto;
+
+	table
+	{
+		width: 100%;
+		text-align: left;
+
+		th
+		{
+			background: #444;
+			color: #FFF;
+		}
+
+		&,th,td
+		{
+			border-bottom: 1px solid #444;
+		}
+
+		td
+		{
+			background: #EEE;
+		}
+
+		tr:hover td
+		{
+			background: #DDD;
+		}
+
+		th,td
+		{
+			padding: 5px 10px;
+		}
+
+		border-collapse: collapse;
+
+		.rm-cell
+		{
+			padding: 0;
+			padding-right: 10px;
+			width: 0;
+		}
+
+		td:not(.rm-cell),
+		th:not(.rm-cell)
+		{
+			width: 50%;
+		}
+	}
+}
+
+.margin-top
+{
+	margin-top: 20px;
+}
+
+.user-accounts-listing + .flex-container
+{
+	display: flex;
+	margin: 20px 0 0;
+
+	& > :not(.input-group)
+	{
+		flex-grow: 0;
+		flex-shrink: 0;
+	}
+
+	.input-group
+	{
+		flex-grow: 1;
+		flex-shrink: 1;
+		margin-left: 0;
+	}
+}
+
+.btn-group
+{
+	display: flex;
+	flex-direction: row;
+	border: 1px solid #EEE;
+
+	&:not(:first-child)
+	{
+		margin-top: 10px;
+	}
+
+	&.extra-margin-top
+	{
+		&:not(:first-child),
+		.force
+		{
+			margin-top: 20px;
+		}
+	}
+
+	& > *
+	{
+		flex-basis: 0;
+
+		&:not(.no-grow)
+		{
+			flex-grow: 1;
+		}
+
+		&.no-grow
+		{
+			white-space: nowrap;
+		}
+
+		&:not(:last-child)
+		{
+			border-right: 1px solid #EEE;
+		}
+
+		&.dpoh-input
+		{
+			padding: 5px 10px;
+			border: none;
+			background: #E8E8E8;
+		}
+	}
+
+	&.black
+	{
+		.btn
+		{
+			color: #000;
+		}
+	}
+}
+
+html
+{
+	position: relative;
+	height: 100%;
+}
+
 body#login_page
 {
 	position: relative;
-/*
-	#circle
-	{
-		@width: 10%;
-		position: fixed;
-		top: -(@width/2);
-		left: -18%;
-		padding: 30%;
-		border-radius: 10000px;
-		z-index: -1;
 
-		@c1: @primary-color;
-		@c2: @tertiary-color;
-		background: @c1; / Old browsers /
-		background: -moz-linear-gradient(top,  @c1 0%, @c2 100%); /* FF3.6-15 /
-		background: -webkit-linear-gradient(top,  @c1 0%, @c2 100%); /* Chrome10-25,Safari5.1-6 /
-		background: linear-gradient(to bottom,  @c1 0%, @c2 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ /
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='@c1', endColorstr='@c2',GradientType=0 ); /* IE6-9 /
-
-		&:after
-		{
-			position: absolute;
-			content: "";
-			top: @width;
-			left: @width;
-			padding: 50% - @width;
-			border-radius: 10000px;
-			background: #FFF;
-			display: block;
-		}
-	}
-*/
-	margin: 0;
-	padding: 0;
-	background: #FFF;
+	// TODO: this should not be hard-coded in like this!
+	background: url('/dpoh/modules_enabled/theme_2/img/bg.jpg');
 	background-size: cover;
+	background-position: center;	margin: 0;
+	padding: 0;
 	font-family: "Open Sans", sans-serif;
 
 	.css-table
@@ -56,57 +176,50 @@ body#login_page
 		}
 	}
 
-	#form_container
+	#login_form_container
 	{
 		width: 300px;
 		max-width: 300px;
 		margin: auto;
+		background: #FFF;
+		border-radius: 3px;
+		box-shadow: 0 0 25px -3px #000;
+		padding: 20px;
+		box-sizing: border-box;
 
-		.login-text
+		&.shake
 		{
-			animation: prim-sec 10s infinite;
-			color: #AAA;
-			font-family: 'Press Start 2P';
-			font-size: 20px;
+			animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+			transform: translate3d(0, 0, 0);
+			backface-visibility: hidden;
+			perspective: 1000px;
 		}
 
-		.login-form
+		.login-form,
+		.create-account-form,
+		.reset-pw-form
 		{
-			background: #FFF;
-			box-shadow: 0 0 30px rgba(0,0,0,0.3);
-			border-radius: 2px;
 			z-index: 999;
-
-			&.shake
-			{
-				animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-				transform: translate3d(0, 0, 0);
-				backface-visibility: hidden;
-				perspective: 1000px;
-			}
-
+			margin-top: 20px;
 			input
 			{
+				.transition( 300ms );
 				padding: 10px;
 				display: block;
-				border: none;
+				border-width: 0 0 2px;
+				border-bottom: 2px solid #BBB;
 				width: 100%;
 				box-sizing: border-box;
 				margin: 0;
 				&:not(:last-child)
 				{
-					border-bottom: 1px solid #CCC;
-				}
-
-				&:first-child,
-				&:last-child
-				{
-					border-radius: 2px;
+					margin-bottom: 5px;
 				}
 
 				&:focus
 				{
 					outline: none;
+					border-color: @tertiary-color;
 				}
 			}
 		}
@@ -118,7 +231,6 @@ body#login_page
 	.transition();
 	@scale: 1;
 	transform:  scale(@scale, @scale);
-	background: #FFF;
 	position: relative;
 
 	&.big

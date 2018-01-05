@@ -22,7 +22,7 @@ function build_css_requirements()
 
 		foreach ( $module[ 'css' ] as $css_file )
 		{
-			$result[] = '<link rel="stylesheet" href="' . $css_file . '"/>';
+			$result[] = '<link rel="stylesheet" href="' . base_path() . $css_file . '"/>';
 		}
 	}
 

@@ -23,34 +23,33 @@
 	.transition();
 	border: none; // For <button> elements, to which some browsers add a cheesy 3D-ish border
 	border-bottom: @border-width solid transparent;
-	
+
 	.fa
 	{
 		.transition();
 	}
-	
+
 	&:hover
 	{
-		background: rgba(0,0,0,0.1);
+		background: rgba(0,0,0,0.2);
 		border-bottom: @border-width solid @tertiary-color;
 
 		.fa
 		{
-			color: @tertiary-color - #222;
 			-webkit-transform: scale(@max-scale, @max-scale);
 			transform:  scale(@max-scale, @max-scale);
 		}
 	}
-	
+
 	&:active
-	{			
+	{
 		.fa
 		{
 			-webkit-transform: scale(@min-scale, @min-scale);
 			transform:  scale(@min-scale, @min-scale);
 		}
 	}
-	
+
 	&:focus
 	{
 		outline: none;

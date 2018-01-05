@@ -1,0 +1,17 @@
+{
+	"allowed_directories" : [ "/srv" ],
+	"tree_root"           : "/srv",
+	"allowed_extensions"  : [ "php", "inc", "module", "" ],
+	"recent_dirs"         : [
+		"/srv"
+	],
+	"core_js"             : [
+		"//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js",
+		"//code.jquery.com/ui/1.12.1/jquery-ui.js",
+		"//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js",
+		"js/core.js"
+	],
+	"database" : {
+		"default" : "db/vortex.db"
+	}
+}

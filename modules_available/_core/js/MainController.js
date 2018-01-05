@@ -15,17 +15,16 @@ MainController = (function( $ )
 
 	function init()
 	{
-		dpoh.openConnection();
+		BasicApi.SocketServer.openConnection();
 		var on_resize = function( pane_name )
 		{
-			$( document ).trigger( {
-				type : 'dpoh-interface:layout-changed',
+			publish( 'layout-changed', {
 				pane : pane_name,
 			} );
 		};
 		$( window ).on( 'load', function()
 		{
-			$( '.main-layout' ).layout( {
+			/*$( '.main-layout' ).layout( {
 				spacing_open   : 1,
 				spacing_closed : 18,
 				onresize_end    : on_resize,
@@ -39,8 +38,8 @@ MainController = (function( $ )
 					initClosed   : true,
 					size : '30%',
 				},
-			} );
-			$( '.status-layout' ).layout( { south : { size : '50%' }, spacing_open : 1, spacing_closed: 18 } );
+			} );*/
+			//$( '.status-layout' ).layout( { south : { size : '50%' }, spacing_open : 1, spacing_closed: 18 } );
 			window.setTimeout( on_resize.bind( undefined, '*' ), 150 );
 		} );
 	}
@@ -49,11 +48,11 @@ MainController = (function( $ )
 	{
 		if ( e.status == 'error' || e.status == 'closed' )
 		{
-			setTimeout( dpoh.openConnection, reconnect_delay_ms );
 			PageTitle.update( 'status', 'disconnected' );
+			setTimeout( BasicApi.SocketServer.openConnection, reconnect_delay_ms );
 			if ( was_connected )
 			{
-				modal.set( {
+				Theme.Modal.set( {
 					title : 'No connection',
 					content : 'DPOH can\'t connect to the websocket server, which most likely means one '
 						+ 'of the following: <ul><li>The server is not running</li><li>There is a '
@@ -62,20 +61,31 @@ MainController = (function( $ )
 					on_hide : function(){ showing_no_connection_modal = false; },
 				} );
 				showing_no_connection_modal = true
-				modal.show();
+				Theme.Modal.show();
 			}
 			was_connected = false;
+		}
+		else if ( e.status == 'no-exclusive-access' )
+		{
+			PageTitle.update( 'status', 'disconnected' );
+			was_connected = false;
+
+			Theme.Modal.set( {
+				title : 'Vortex is already is use',
+				content : 'Vortex is already in use in another browser or tab, or on another computer.',
+			} );
+			Theme.Modal.show();
 		}
 		else if ( e.status == 'connected' )
 		{
 			if ( showing_no_connection_modal )
 			{
-				//modal.hide();
+				Theme.Modal.hide();
 			}
 
 			// Probe for an existing session; allows us to pick up where we left off if the user
 			// left the page and has now returned or lost their connection and has now regained it
-			dpoh.command( 'status' );
+			BasicApi.Debugger.command( 'status' );
 			PageTitle.update( 'status', 'waiting' );
 			was_connected = true;
 		}
@@ -83,16 +93,19 @@ MainController = (function( $ )
 
 	function onSessionStatusChanged( e )
 	{
+		BasicApi.Debugger.command( 'ctrl:peek_queue' );
+
 		if ( e.status == 'active' )
 		{
 			PageTitle.update( 'status', 'active' );
-			dpoh.command( 'feature_set', { name : 'max_data',  value : 2048 } );
-			dpoh.command( 'feature_set', { name : 'max_depth', value : 1 } );
-			dpoh.command( 'status' );
+			BasicApi.Debugger.command( 'feature_set', { name : 'max_data',  value : 2048 } );
+			BasicApi.Debugger.command( 'feature_set', { name : 'max_children',  value : 128 } );
+			BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
+			BasicApi.Debugger.command( 'status' );
 		}
 		else
 		{
-			PageTitle.update( 'status', ( dpoh.isConnected() ? 'waiting' : 'disconnected' ) );
+			PageTitle.update( 'status', ( BasicApi.SocketServer.isConnected() ? 'waiting' : 'disconnected' ) );
 		}
 	}
 
@@ -100,19 +113,20 @@ MainController = (function( $ )
 	{
 		if ( e.is_stopping )
 		{
-			dpoh.command( 'run' );
+			BasicApi.Debugger.command( 'run' );
 		}
 	}
 
 	function onSessionInit()
 	{
-		dpoh.command( 'step_into' )
+		BasicApi.Debugger.command( 'step_into' );
 	}
 
-	$( document ).on( 'dpoh:connection-status-changed',  onConnectionStatusChanged );
-	$( document ).on( 'dpoh:session-status-changed',     onSessionStatusChanged );
-	$( document ).on( 'dpoh:session-init',               onSessionInit );
-	$( document ).on( 'dpoh:response-received',          onResponseReceived );
+	subscribe( 'connection-status-changed', onConnectionStatusChanged );
+	subscribe( 'session-status-changed',    onSessionStatusChanged );
+	subscribe( 'session-init',              onSessionInit );
+	subscribe( 'response-received',         onResponseReceived );
+
 	$( init );
 
 }( jQuery ));

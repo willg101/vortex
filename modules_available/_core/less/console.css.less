@@ -1,92 +1,49 @@
 @import "@{defaults}";
 
-#console
+#console_container
 {
-	background: #FFF;
-	box-sizing: border-box;
+	position: relative;
+	height: 100%;
+	top: 0;
 	width: 100%;
-	display: flex;
-	flex-direction: column;
-	z-index: 3;
-	height: ~"calc( 100% - 40px )";
-	
-	.input-table
+	overflow: auto;
+
+	.terminal
 	{
-		border: 1px solid #EEE;
-		border-width: 1px 0 0;
-
-		.css-cell
-		{
-			width: 100%;
-		}
-
-		.active-line
-		{
-			vertical-align: middle;
-			width: 0;
-			padding: 8px 0 10px 10px;
-			color: @primary-color;
-			font-size: 13px;
-		}
+		overflow-y: show;
 	}
-	
-	.history
+
+	#console
 	{
-		font-size: 13px;
-		font-family: consolas, monospace;
-		flex-grow: 1; 
-		background: #FFF;
-		overflow: auto;
-		padding: 10px;
-		
-		.in .message-meta
+		position:relative;
+		height: 100%;
+
+			a:hover
+			{
+				text-decoration: underline;
+				color: #369;
+				background: none;
+			}
+		&.terminal
 		{
-			color: #BBB;
+			background: #FFF;
+			color: #444;
 		}
-		
-		.out .message-meta
+
+		.terminal,
+		.cmd
 		{
-			color: #777;
+			background: white;
+			color: #21599f;
 		}
-		
-		.message-meta
-		{			
+
+		.cmd
+		{
 			display: inline-block;
-			margin-right: 5px;
-		}
-		
-		.message-text
-		{
-			white-space: pre;
-		}
-		
-		.debugger-message
-		{
-			color: #822;
-		}
-	}
-	
-	.input
-	{
-		border: none;
-	    resize: none;
-		box-sizing: border-box;
-		flex-grow: 0; 
-		position: relative;
-		width: 100%;
-		max-height: 100%;
-		padding: 10px;
-		padding-left: 5px;
-		color: #000;
-		font-size: 13px;
-		font-family: consolas, monospace;
-		overflow: auto;
-		height: 39px;
-		min-height: 39px;
-		
-		&:focus
-		{
-			outline: none;
+			width: 100%;
+			height: 100%:
+			position: relative;
+			z-index: 999999999;
 		}
 	}
 }

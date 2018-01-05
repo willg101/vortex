@@ -89,10 +89,11 @@ function file_put_contents_safe( $file_name, $data_to_save )
  *
  * @param string $extenstion (OMIT the leading '.'; e.g., 'ini' for ini files, not '.ini')
  * @param string $dir
- * @param array  $dirs_seen  OPTIONAL. Should only be passed when calling this function recursively
+ * @param array  $dirs_seen       OPTIONAL. Should only be passed when calling this function
+ *                                recursively
  *
  * @retval array
- *	An indexed array where each element is the absolute path of a file within $dir with the
+ *	An array where each element is the absolute path of a file within $dir with the
  *	extension $extension
  */
 function recursive_file_scan( $extension, $dir, &$dirs_seen = [] )

@@ -14,6 +14,22 @@
 	width: 100%;
 }
 
+:empty + .show-currently-open-files
+{
+	display: none;
+}
+
+.show-currently-open-files
+{
+	.transition();
+	cursor: pointer;
+
+	&:hover
+	{
+		color: #666;
+	}
+}
+
 .ace_gutter-cell.ace_breakpoint
 {
 	background: #C22;
@@ -50,9 +66,21 @@
 	animation: pending-breakpoint 1s infinite;
 }
 
+@keyframes running-in-out
+{
+	0%  { background: @tertiary-color }
+	50% { background: transparent }
+	100%{ background: @tertiary-color }
+}
+
 .ace_gutter-cell.gutter-current-line
 {
 	background: @tertiary-color;
+
+	&.current-line-running
+	{
+		animation: 1s running-in-out infinite ease-in-out;
+	}
 }
 
 .ace-current-line

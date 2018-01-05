@@ -1,0 +1,99 @@
+.settings-container
+{
+	display: flex;
+	flex-direction: column;
+
+	.settings-nav
+	{
+		flex-grow: 0;
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: row;
+		margin: 0 -15px 10px;
+		padding: 0 15px 10px;
+		border-bottom: 1px solid #CCC;
+
+		.settings-page
+		{
+			flex-grow: 1;
+			flex-shrink: 1;
+			padding: 5px 10px;
+			border: 1px solid #CCC;
+			background: none;
+			text-align: left;
+			position: relative;
+			margin-left: 0;
+
+			&:after
+			{
+				content: "\f0d7";
+				color: #000;
+				position: absolute;
+				top: ~"calc(50% - .5em)";
+				right: 5px;
+				font-family: FontAwesome;
+			}
+
+			&:focus
+			{
+				outline: none;
+				background: #CCC;
+			}
+		}
+
+		button
+		{
+			flex-grow: 0;
+			flex-shrink: 0;
+			color: #000;
+			margin-left: 10px;
+		}
+	}
+
+	table
+	{
+		width: 100%;
+		text-align: left;
+
+		th
+		{
+			background: #444;
+			color: #FFF;
+		}
+
+		td
+		{
+			background: #EEE;
+		}
+
+		tr:hover td
+		{
+			background: #DDD;
+		}
+
+		th,td
+		{
+			padding: 5px 10px;
+		}
+
+		border-collapse: collapse;
+
+		.sm-cell
+		{
+			padding: 0;
+			width: 0;
+		}
+
+		td:not(.sm-cell),
+		th:not(.sm-cell)
+		{
+			width: 100%;
+		}
+	}
+
+	.settings-widgets
+	{
+		flex-grow: 1;
+		flex-shrink: 1;
+	}
+}

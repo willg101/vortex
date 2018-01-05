@@ -8,7 +8,14 @@
  */
 function build_script_requirements()
 {
-	$result = [];
+	$result = [
+		'<script>Dpoh = ' . json_encode( [
+			'settings' => [
+				'base_path' => base_path(),
+			],
+			'templates' => load_handlebar_templates(),
+		] ) . ';</script>'
+	];
 
 	// Include each "core"/"internal"/absolutely required JS file
 	foreach ( settings( 'core_js', [] ) as $js_file )
@@ -16,8 +23,6 @@ function build_script_requirements()
 		$result[] = '<script src="' . $js_file . '"></script>';
 	}
 
-	// Include every JavaScript file from each module. Define a module_settings object and
-	// send_api_request function specific to each module prior to including a module's scripts
 	foreach ( modules()->get() as $module_name => $module )
 	{
 		foreach ( $module[ 'settings' ][ 'external_dependencies' ][ 'js' ] as $js_file )
@@ -25,36 +30,41 @@ function build_script_requirements()
 			$result[] = '<script src="' . $js_file . '"></script>';
 		}
 
-		if ( count( $module[ 'js' ] ) )
+		foreach ( $module[ 'js' ] as $js_file )
 		{
-			if ( $module[ 'ajax_api_script' ] )
-			{
-				$result[] = "<script>send_api_request = send_api_request_original.bind( undefined, '$module_name' );</script>";
-			}
-			else
-			{
-				$result[] = '<script>send_api_request = undefined;</script>';
-			}
+			$result[] = '<script src="' . base_path() . $js_file . '"></script>';
+		}
+	}
 
-			if ( !empty( $module[ 'settings' ][ 'js_settings' ] ) )
-			{
-				$result[] = "<script>module_settings = " . json_encode( $module[ 'settings' ][ 'js_settings' ] ) . ";</script>";
-			}
-			else
-			{
-				$result[] = '<script>module_settings = undefined;</script>';
-			}
 
-			foreach ( $module[ 'js' ] as $js_file )
+	return implode( "\n\t\t", $result );
+}
+
+/**
+ * @retval array
+ */
+function load_handlebar_templates()
+{
+	static $templates;
+
+	$filename_to_key = function( $filename )
+	{
+		$filename = preg_replace( '#/{2,}#', '/', $filename );
+		$filename = preg_replace( "#(^modules_enabled/ [^/]+? / | hbs/ | \.hbs$)#x", '', $filename );
+		return str_replace( '/', '.', $filename );
+	};
+
+	if ( $templates === NULL )
+	{
+		foreach ( modules()->get() as $module_name => $module )
+		{
+			foreach ( $module[ 'hbs' ] as $file )
 			{
-				$result[] = '<script src="' . $js_file . '"></script>';
+				$key = $module_name . '.' . $filename_to_key( $file );
+				$templates[ $key ] = file_get_contents( $file );
 			}
 		}
 	}
 
-	// Destroy send_api_request and module_settings
-	$result[] = '<script>send_api_request = undefined;</script>';
-	$result[] = '<script>module_settings  = undefined;</script>';
-
-	return implode( "\n\t\t", $result );
+	return $templates;
 }

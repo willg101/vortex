@@ -1,4 +1,4 @@
-AutoIgnore = (function( $ )
+(function( $ )
 {
 	var interval           = null;
 	var poll_delay         = 100;
@@ -20,7 +20,7 @@ AutoIgnore = (function( $ )
 	{
 		if ( document.visibilityState == 'hidden' )
 		{
-			if ( !dpoh.sessionIsActive() )
+			if ( !BasicApi.Debugger.sessionIsActive() )
 			{
 				countdown_start = getSeconds();
 				PageTitle.update( 'auto_ignore_status', seconds + 's' );
@@ -62,7 +62,7 @@ AutoIgnore = (function( $ )
 	{
 		if ( currently_ignoring )
 		{
-			dpoh.command( 'detach' );
+			BasicApi.Debugger.command( 'detach' );
 		}
 		else
 		{

@@ -5,7 +5,7 @@
 		<meta charset="UTF-8">
 		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 		<link rel="icon" href="favicon.ico" type="image/x-icon">
-		<link rel="stylesheet" href="css/crash.css">
+		<link rel="stylesheet" href="<?php echo $base_path ?>css/crash.css">
 	</head>
 	<body>
 		<h1>Well, this isn't good...</h1>

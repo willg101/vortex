@@ -1,0 +1,139 @@
+<?php
+
+/**
+ * @brief
+ *	Builds the script tags for the response
+ *
+ * @retval string
+ */
+function build_script_requirements()
+{
+	$result = [
+		'<script>Dpoh = ' . json_encode( [ 
+			'settings' => [
+				'base_path' => base_path(),
+			],
+			'templates' => load_handlebar_templates(), 
+		] ) . ';</script>'
+	];
+
+	// Include each "core"/"internal"/absolutely required JS file
+	foreach ( settings( 'core_js', [] ) as $js_file )
+	{
+		$result[] = '<script src="' . $js_file . '"></script>';
+	}
+	
+	foreach ( modules()->get() as $module_name => $module )
+	{
+		foreach ( $module[ 'settings' ][ 'external_dependencies' ][ 'js' ] as $js_file )
+		{
+			$result[] = '<script src="' . $js_file . '"></script>';
+		}
+	}
+
+	foreach ( get_js_order() as $js_file )
+	{
+		$result[] = '<script src="' . base_path() . $js_file . '"></script>';
+	}
+
+	return implode( "\n\t\t", $result );
+}
+
+function get_js_dependency_graph()
+{
+	static $graph;
+	if ( $graph === NULL )
+	{
+		foreach ( modules()->get() as $module_name => $info )
+		{
+			foreach ( $info[ 'js' ] as $file )
+			{
+				// TODO: Handle collsions better
+				$graph[ convert_to_js_dependency_key( $file ) ] = [
+					'dependencies' => determine_js_dependencies( $file ),
+					'file'         => $file,
+				];
+			}
+		}
+	}
+	return $graph;
+}
+
+function determine_js_dependencies( $file )
+{
+	$content = file_get_contents( $file );
+
+	$first_docblock_comment = [];
+	if ( preg_match( '#/\*\* .*? \*/#xs', $content, $first_docblock_comment ) )
+	{
+		$require_annotations = [];
+		if ( preg_match_all( '/@req_uire \s+ ([^\s]+)/xs', $first_docblock_comment[ 0 ], $require_annotations ) )
+		{
+			return $require_annotations[ 1 ];
+		}
+	}
+	else
+	{
+		return [];
+	}
+}
+
+function convert_to_js_dependency_key( $filename )
+{
+	$filename = preg_replace( '#/{2,}#', '/', $filename );
+	$filename = preg_replace( "#(^modules_enabled/ [^/]+? / (js|hbs) / | (\.min)?\.(js|hbs)$)#x", '', $filename );
+	return str_replace( '/', '.', $filename );
+}
+
+function get_js_order()
+{
+	$graph = get_js_dependency_graph();
+
+	$output   = [];
+	$add_recursive = function( $file ) use( &$output, $graph, &$add_recursive )
+	{
+		static $seen = [];
+		if ( !empty( $seen[ $file ] ) )
+		{
+			return;
+		}
+		$seen[ $file ] = TRUE;
+
+		foreach ( array_get( $graph, convert_to_js_dependency_key( $file ) . '.dependencies' ) ?: [] as $dep )
+		{
+			if ( !empty( $graph[ $dep ][ 'file' ] ) )
+			{
+				$add_recursive( $graph[ $dep ][ 'file' ] );
+			}
+		}
+		$output[ $file ] = $file;
+	};
+
+	foreach ( modules()->get() as $module_name => $module )
+	{
+		foreach ( $module[ 'js' ] as $file )
+		{
+			$add_recursive( $file );
+		}
+	}
+
+	return $output;
+}
+
+function load_handlebar_templates()
+{
+	static $templates;
+	if ( $templates === NULL )
+	{
+		foreach ( modules()->get() as $module_name => $module )
+		{
+			foreach ( $module[ 'hbs' ] as $file )
+			{
+				$key = $module_name . '.' . convert_to_js_dependency_key( $file );
+				$templates[ $key ] = file_get_contents( $file );
+			}
+		}
+	}
+
+	return $templates;
+}

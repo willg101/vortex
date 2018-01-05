@@ -53,7 +53,7 @@ class DataStorage
 	{
 		return $key !== NULL
 			? array_get( $this->get(), $key, $default_val )
-			: $this->data;
+			: array_filter( $this->data, function( $a ){ return $a !== NULL; } );
 	}
 
 	/**
@@ -126,6 +126,7 @@ class DataStorage
 	protected function commitChange( $key, $value )
 	{
 		array_set( $this->data, $key, $value );
+		return $this;
 	}
 
 	/**

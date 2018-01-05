@@ -2,6 +2,7 @@
 
 use Dpoh\DataStorage;
 use Dpoh\PersistentDataStorage;
+use Dpoh\RequestHandlers;
 
 define( 'USER_CONFIG_FILE', 'user-config.json' );
 define( 'SETTINGS_FILE',    'settings-global.json' );
@@ -9,6 +10,7 @@ define( 'MODULES_PATH',     'modules_enabled' );
 
 require_once 'DataStorage.class.php';
 require_once 'PersistentDataStorage.class.php';
+require_once 'RequestHandlers.class.php';
 
 /**
  * @brief
@@ -37,9 +39,10 @@ function load_all_modules()
 {
 	$standard_dirs  = [
 		'js'      => 'js',
+		'hbs'     => 'hbs',
 		'css'     => 'css',
 		'less'    => 'less',
-		'tpl.php' => 'templates'
+		'tpl.php' => 'templates',
 	];
 	$standard_files        = [
 		'hook_implementations' => 'hooks.php',
@@ -172,8 +175,7 @@ function user_config( $key = NULL, $default_val = NULL )
 
 	if ( $user_config_model === NULL )
 	{
-		$default_config = [ 'theme_module' => '_core' ];
-		$user_config_model = new PersistentDataStorage( 'user_config', $default_config, FALSE,
+		$user_config_model = new PersistentDataStorage( 'user_config', [], FALSE,
 			USER_CONFIG_FILE );
 	}
 
@@ -182,3 +184,14 @@ function user_config( $key = NULL, $default_val = NULL )
 		: $user_config_model;
 }
 
+function request_handlers()
+{
+	static $model;
+
+	if ( $model === NULL )
+	{
+		$model = new RequestHandlers;
+	}
+
+	return $model;
+}

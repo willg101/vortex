@@ -10,12 +10,15 @@
 	width: 100%;
 	position: fixed;
 	z-index: 999;
-	background: #FFF;
+	background: url('/dpoh/modules_enabled/theme_2/img/bg.jpg');
+	background-size: cover;
+	background-position: center;	margin: 0;
 
 	&.done
 	{
 		@scale: 0.95;
 		@blur: 3px;
+		background: none;
 		transform:  scale(@scale, @scale);
 		-webkit-filter: blur(@blur);
 		-moz-filter: blur(@blur);
@@ -35,7 +38,7 @@
 	h2
 	{
 		font-family: 'Press Start 2P';
-		color: @primary-color;
+		color: #FFF;
 		text-align: center;
 	}
 
@@ -53,17 +56,17 @@
 	{
 		0%
 		{
-			color: @primary-color;
+			color: #FFF;
 		}
 
 		50%
 		{
-			color: @tertiary-color;
+			color: rgba(255,255,255,0);
 		}
 
 		100%
 		{
-			color: @primary-color;
+			color: #FFF;
 		}
 	}
 

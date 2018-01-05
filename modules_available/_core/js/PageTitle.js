@@ -1,8 +1,11 @@
+/**
+ * @require Modal
+ */
 PageTitle = (function( $ )
 {
 	var title_vars = {
 		init   : 'DPOH',
-		statuc : 'initializing',
+		status : 'initializing',
 	};
 	var title_format = false;
 	var title_format_default = '{init} ({status})';

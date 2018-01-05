@@ -1,4 +1,8 @@
 @import "module_defaults";
+.status-inidicator
+{
+	display: none;
+}
 
 .layout-table
 {
@@ -30,7 +34,7 @@
 
 .main-layout
 {
-	height: 100%;
+	height: ~"calc( 100% - 46px )";
 	width: 100%;
 }
 
@@ -53,7 +57,7 @@ body
 	color: #FFF;
 }
 
-input[type=text]
+[type=text]
 {
 	box-sizing: border-box;
 	padding: 10px;
@@ -232,30 +236,49 @@ html
 
 .left
 {
-	float: left;
 	text-align: left;
+	flex-grow: 0;
+}
+
+.center
+{
+	text-align: center;
+	flex-grow: 1;
 }
 
 .right
 {
-	float: right;
 	text-align: right;
+	flex-grow: 0;
+}
+
+#file_finder
+{
+	border: none;
+	display: inline-block;
+	background: #E0E0E0;
+	font-family: consolas, monospace;
+	box-sizing: border-box;
+
+	&:active,
+	&:focus
+	{
+		outline: none;
+		background: #E8E8E8;
+	}
 }
 
 .toolbar
 {
-	height: 0;
+	height: 46px;
 	position: relative;
 	text-align: center;
+	background: @secondary-color;
 	z-index: 2;
-	
-	.css-cell
-	{
-		vertical-align:	top;
-		border: 1px solid #E0E0E0;
-		border-width: 0 1px 1px 0;
-	}
-	
+	box-shadow: 0 0 30px rgba(0,0,0,0.5);
+	display: flex;
+
+
 	.connection-status
 	{
 		padding: 15px;
@@ -272,21 +295,75 @@ html
 	}
 }
 
+.theme-2-popover
+{
+	position: relative;
+	width: 400px;
+	max-height: 500px;
+	overflow-x: hidden;
+	text-overflow: ellipsis;
+	overflow-y: auto;
+	background-color: #FFF;
+	box-shadow: 0 0 30px rgba(0,0,0,0.3);
+	padding: 10px;
+	box-sizing: border-box;
+	z-index: 99999;
+	h2
+	{
+		margin: 0;
+		font-size: 15px;
+		color: @secondary-color;
+	}
+
+	&.auto-size
+	{
+		float: left;
+		width: auto;
+	}
+
+	[data-open-file],
+	.globber-option,
+	.popover-list-option
+	{
+		.bouncy();
+		padding: 5px;
+		cursor: pointer;
+		font-family: consolas, monospace;
+		background: #EEE;
+		display:block;
+		width: 100%;
+		box-sizing: border-box;
+
+		&:active
+		{
+			transform: scale( .95, .95 );
+		}
+	}
+}
+
 .btn
 {
 	.bouncy();
 
 	background: none;
 	cursor: pointer;
-	color: #111;
+	color: #FFF;
 	padding: 15px;
 	display: inline-block;
 
-	&.active,
-	&.active:hover .fa
+	&.sm
 	{
-		color: #FFF;
-		background: @primary-color;
+		padding: 10px;
+	}
+
+	&.black,
+	&.black:hover,
+	&.black:active
+	{
+		.fa
+		{
+			color: #333;
+		}
 	}
 }
 
@@ -331,7 +408,7 @@ html
 .label-row
 {
 	height: 0;
-	
+
 	.css-cell
 	{
 		border: 1px solid #E0E0E0;
@@ -344,13 +421,13 @@ html
 		width: 100%;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		
+
 		.secondary
 		{
 			color: #888;
 			display: inline-block;
 			font-weight: normal;
-			float: right;
+			margin-left: 10px;
 		}
 	}
 }

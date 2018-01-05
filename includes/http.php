@@ -18,11 +18,11 @@ function input( $key, $default = NULL )
 	{
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' )
 		{
-			$request_data  = $_POST;
+			$request_data = $_POST;
 		}
 		else if ( $_SERVER[ 'REQUEST_METHOD' ] === 'GET' )
 		{
-			$request_data  = $_GET;
+			$request_data = $_GET;
 		}
 		else
 		{
@@ -30,7 +30,16 @@ function input( $key, $default = NULL )
 		}
 	}
 
-	return array_get( $request_data, $key, $default );
+	return trim( array_get( $request_data, $key, $default ) );
+}
+
+function base_url()
+{
+	return sprintf( "%s://%s%s",
+		isset( $_SERVER[ 'HTTPS' ] ) && $_SERVER[ 'HTTPS' ] != 'off' ? 'https' : 'http',
+		$_SERVER[ 'SERVER_NAME' ],
+		base_path()
+	);
 }
 
 /**
@@ -49,4 +58,131 @@ function error_response( $message, $code = 400, $http_message = 'Bad Request' )
 		'error' => $message,
 	] );
 	exit;
+}
+
+/**
+ * Returns the requested URL path of the page being viewed.
+ *
+ * Examples:
+ * - http://example.com/node/306 returns "node/306".
+ * - http://example.com/drupalfolder/node/306 returns "node/306" while
+ *	 base_path() returns "/drupalfolder/".
+ * - http://example.com/path/alias (which is a path alias for node/306) returns
+ *	 "path/alias" as opposed to the internal path.
+ * - http://example.com/index.php returns an empty string (meaning: front page).
+ * - http://example.com/index.php?page=1 returns an empty string.
+ *
+ * @return
+ *	 The requested Drupal URL path 
+ */
+function request_path() {
+	static $path;
+
+	if (isset($path)) {
+		return $path;
+	}
+
+	if (isset($_GET['q']) && is_string($_GET['q'])) {
+		// This is a request with a ?q=foo/bar query string. $_GET['q'] is
+		// overwritten in drupal_path_initialize(), but request_path() is called
+		// very early in the bootstrap process, so the original value is saved in
+		// $path and returned in later calls.
+		$path = $_GET['q'];
+	}
+	elseif ( isset($_SERVER['REQUEST_URI'] ) )
+	{
+		// This request is either a clean URL, or 'index.php', or nonsense.
+		// Extract the path from REQUEST_URI.
+		$request_path = strtok($_SERVER['REQUEST_URI'], '?');
+		$base_path_len = strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '\/'));
+		// Unescape and strip $base_path prefix, leaving q without a leading slash.
+		$path = substr(urldecode($request_path), $base_path_len + 1);
+		// If the path equals the script filename, either because 'index.php' was
+		// explicitly provided in the URL, or because the server added it to
+		// $_SERVER['REQUEST_URI'] even when it wasn't provided in the URL (some
+		// versions of Microsoft IIS do this), the front page should be served.
+		if ($path == basename($_SERVER['PHP_SELF']))
+		{
+			$path = '';
+		}
+	}
+	else
+	{
+		// This is the front page.
+		$path = '';
+	}
+
+	// Under certain conditions Apache's RewriteRule directive prepends the value
+	// assigned to $_GET['q'] with a slash. Moreover we can always have a trailing
+	// slash in place, hence we need to normalize $_GET['q'].
+	$path = trim($path, '/');
+
+	return $path;
+}
+
+function send_json( $data, $die = TRUE )
+{
+	header( "Content-Type: application/json; charset=utf-8" );
+	echo json_encode( $data );
+
+	if ( $die )
+	{
+		die;
+	}
+}
+
+function base_path()
+{
+  static $base_path;
+
+  if ( !isset( $base_path ) )
+  {
+    // $_SERVER['SCRIPT_NAME'] can, in contrast to $_SERVER['PHP_SELF'], not
+    // be modified by a visitor.
+    if ( $dir = rtrim( dirname( $_SERVER[ 'SCRIPT_NAME' ] ), '\/' ) )
+	{
+      $base_path = $dir;
+      $base_path .= '/';
+    }
+    else
+	{
+      $base_path = '/';
+    }
+  }
+
+  return $base_path;
+}
+
+function require_method( $methods )
+{
+	if ( !is_array( $methods ) )
+	{
+		$methods = [ $methods ];
+	}
+
+	if ( in_array( $_SERVER[ 'REQUEST_METHOD' ], $methods ) )
+	{
+		return;
+	}
+	else
+	{
+		$method_list = implode( ', ', $methods );
+		$headers = [
+			'HTTP/1.1 405 Not allowed',
+			"Allow: $method_list",
+		];
+		throw new HttpException( "Method '$_SERVER[REQUEST_METHOD]' not allowed. "
+			. "Allowed methods: $method_list", $headers );
+	}
+}
+
+function parse_cookie_str( $str )
+{
+	$cookies = [];
+	foreach ( explode( '; ', $str ) as $raw_cookie )
+	{
+		preg_match( '/^(?P<key>.*?)=(?P<value>.*?)$/i', trim( $raw_cookie ), $matches );
+		$cookies[ trim( $matches[ 'key' ] ) ]  = urldecode( $matches[ 'value' ] );
+	}
+	return $cookies;
 }

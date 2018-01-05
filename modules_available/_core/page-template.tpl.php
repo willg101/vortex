@@ -18,7 +18,7 @@
 <?php var_export( $errs ) ?></pre>
 		<?php endif ?>
 		<div class="main-layout <?php $show( 'main_classes' ) ?>">
-			<?php foreach ( [ 'north', 'south', 'east', 'west' ] as $pos ): ?>
+			<?php foreach ( [ 'north', 'south', 'east' ] as $pos ): ?>
 				<?php if ( $has( "main_$pos" ) ): ?>
 				<div class="ui-layout-<?php echo $pos ?>">
 					<?php $show( "main_$pos" ) ?>
@@ -26,22 +26,21 @@
 				<?php endif ?>
 			<?php endforeach ?>
 			<div class="ui-layout-center">
-				<div class="css-table layout-table">
-					<div class="css-row toolbar">
-						<div class="css-cell">
-							<div class="left">
-								<?php $show( 'toolbar_buttons' ) ?>
-							</div>
-							<div class="right" >
-								<?php $show( 'connection_summary' ) ?>
-							</div>
-						</div>
-						<div class="css-cell">
-							<div class="right status-indicators blur-hidden">
-								<?php $show( 'status_summary' ) ?>
+				<div class="toolbar">
+					<div class="css-table">
+						<div class="css-row">
+							<div class="css-cell">
+								<div class="left">
+									<?php $show( 'toolbar_buttons' ) ?>
+								</div>
+								<div class="right" >
+									<?php $show( 'connection_summary' ) ?>
+								</div>
 							</div>
 						</div>
 					</div>
+				</div>
+				<div class="css-table layout-table">
 					<div class="css-row">
 						<div class="css-cell editor-cell">
 							<?php $show( 'code_cell' ) ?>

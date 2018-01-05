@@ -1,63 +1,67 @@
-var send_api_request_original = (function( $ )
+function RenderError( message )
 {
-	var api_base_url = window.location;
+	this.name = 'RenderError';
+	this.message = message;
+	this.stack = (new Error()).stack;
+}
+RenderError.prototype = new Error;
 
-	function processCallbackArray( cb_array /*, ... */ )
+function namespace( ns, context )
+{
+	if ( !context || typeof context != "object" )
 	{
-		var args = Array.prototype.slice.call( arguments );
-		args.shift();
-		cb_array.forEach( function( fn )
-		{
-			if ( typeof fn == "function" )
-			{
-				fn.apply( undefined, args );
-			}
-		} );
+		context = window;
 	}
 
-	function send_api_request_original( module, type, params, success_cb, error_cb, url_only )
+	ns.split( '.' ).forEach( function( part )
 	{
-		params = params || {};
-		params.route_to_module = module;
-
-		if ( url_only )
+		if ( typeof context[ part ] == "undefined" )
 		{
-			return (type && type.toLowerCase() ) == 'get'
-				? api_base_url + '?' + jQuery.param( params )
-				: api_base_url;
+			context[ part ] = {};
 		}
-		else
-		{
-			var alter_data = {
-				request_type : type,
-				params       : params,
-				success      : success_cb ? [ success_cb ] : [],
-				error        : error_cb   ? [ error_cb ]   : [],
-				prevent_send : false,
-			};
-			send_api_request_original.emitAjaxEvent( 'request-presend', alter_data );
+		context = context[ part ];
+	} );
 
-			if ( alter_data.prevent_send )
-			{
-				return null;
-			}
-			else
-			{
-				return jQuery[ alter_data.request_type ]( api_base_url, alter_data.params,
-					processCallbackArray.bind( undefined, alter_data.success ) ).fail(
-					processCallbackArray.bind( undefined, alter_data.error ) );
-			}
-		}
-	}
+	return context;
+}
 
-	send_api_request_original.emitAjaxEvent = function( name, data )
+function makeUrl( path )
+{
+	var settings = typeof dpoh_settings == 'object'
+		? dpoh_settings
+		: {};
+
+	return Dpoh.settings.base_path + path;
+}
+
+render = (function()
+{
+	var cache = {};
+
+	return function( template_name, vars )
 	{
-		$( document ).trigger( {
-			type       : 'dpoh-interface:' + name,
-			alter_data : data,
-		} );
+		if ( !cache[ template_name ] )
+		{
+			if ( !Dpoh.templates[ template_name ] )
+			{
+				throw new RenderError( 'Unknown template "' + template_name + '"' );
+			}
+			cache[ template_name ] = Handlebars.compile( Dpoh.templates[ template_name ] );
+		}
+
+		return cache[ template_name ]( vars );
 	};
+}())
 
-	return send_api_request_original;
-}( jQuery ));
+function publish( name, data )
+{
+	data = data || {};
+	data.type = 'dpoh:' + name;
+	$( document ).trigger( data );
+}
 
+function subscribe( name, callback )
+{
+	name = 'dpoh:' + name;
+	$( document ).on( name, callback );
+}

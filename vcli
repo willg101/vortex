@@ -1,0 +1,22 @@
+#!/usr/bin/env php
+<?php
+// application.php
+
+define( 'DPOH_ROOT', __DIR__ );
+
+require __DIR__.'/vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+use Vortex\Cli\SocketServerStartCommand;
+use Vortex\Cli\SocketServerRunCommand;
+use Vortex\Cli\SocketServerRestartCommand;
+use Vortex\Cli\SocketServerStopCommand;
+
+require_once 'vendor/paragonie/random_compat/lib/random.php';
+
+$application = new Application();
+
+$application->add( new SocketServerStartCommand() );
+$application->add( new SocketServerRunCommand() );
+
+$application->run();

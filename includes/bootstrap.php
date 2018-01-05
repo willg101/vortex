@@ -24,62 +24,9 @@ function bootstrap()
 	fire_hook( 'preboot', $boot_vars );
 	fire_hook( 'boot',    $boot_vars, TRUE );
 
-	if ( IS_AJAX_REQUEST )
+	if ( !request_handlers()->handle() )
 	{
-		$route_to_module = NULL;
-		try
-		{
-			$route_to_module = input( 'route_to_module' );
-			$route_to_module = preg_replace( '/\..*/', '', $route_to_module );
-		}
-		catch ( HttpException $e )
-		{
-			error_response( $e->getMessage() );
-		}
-
-		$module_ajax_api_script = array_get( modules()->get(), "$route_to_module.ajax_api_script" );
-		if ( $module_ajax_api_script )
-		{
-			include $module_ajax_api_script;
-			exit;
-		}
-		else
-		{
-			error_response( "Module '$route_to_module' does not exist or does not define an Ajax API" );
-		}
-	}
-	else
-	{
-		$theme_module  = user_config( 'theme_module' );
-		$page_template = modules( "$theme_module.page_template" );
-		if ( !$page_template )
-		{
-			throw new FatalConfigError( "No template file in '$theme_module' module for rendering the page" );
-			exit;
-		}
-		else if ( !is_readable( $page_template ) )
-		{
-			throw new FatalConfigError( "Can't read page template file '$page_template'" );
-			exit;
-		}
-
-		// Render the page elements and allow modules to alter these renderings
-		$renderings = get_renderings();
-		fire_hook( 'alter_renderings', $renderings );
-
-		$vars = [
-			'show' => function( $key ) use ( $renderings )
-			{
-				echo isset( $renderings[ $key ] )
-					? implode( '', $renderings[ $key ] )
-					: NULL;
-			},
-			'has' => function( $key ) use ( $renderings )
-			{
-				return !empty( $renderings[ $key ] );
-			},
-		];
-		return render_template( $page_template, $vars );
+		throw new HttpException( "Page not found: " . request_path(), [ 'HTTP/1.1 404 Not found' ] );
 	}
 }
 
