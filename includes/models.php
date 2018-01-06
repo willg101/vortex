@@ -134,6 +134,15 @@ function settings( $key = NULL, $default_val = NULL )
 	static $settings_model;
 	if ( $settings_model === NULL )
 	{
+		if ( !is_readable( SETTINGS_FILE ) )
+		{
+			$uid = posix_getuid();
+			$info = $uid ? posix_getpwuid( $uid ) : [];
+			$user_name = array_get( $info, 'name' );
+			$user_name = $user_name ? "the user '$user_name'" : 'the current user';
+			throw new FatalConfigError( 'The global settings file (' . SETTINGS_FILE . ') does '
+				. "not exist or cannot be read by $user_name." );
+		}
 		$settings = json_decode( file_get_contents( SETTINGS_FILE ), TRUE ) ?: [];
 		$default_settings = [
 			'allowed_directories' => [],
