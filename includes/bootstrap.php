@@ -20,6 +20,7 @@
  */
 function bootstrap()
 {
+	spl_autoload_register( 'vortex_autoloader' );
 	$boot_vars = [];
 	fire_hook( 'preboot', $boot_vars );
 	fire_hook( 'boot',    $boot_vars, TRUE );

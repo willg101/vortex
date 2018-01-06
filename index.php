@@ -58,6 +58,7 @@ set_exception_handler( function( $e )
 } );
 
 require_once 'includes/arrays.php';
+require_once 'includes/autoloader.php';
 require_once 'includes/bootstrap.php';
 require_once 'includes/database.php';
 require_once 'includes/exceptions.php';

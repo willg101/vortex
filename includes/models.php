@@ -43,6 +43,7 @@ function load_all_modules()
 		'css'     => 'css',
 		'less'    => 'less',
 		'tpl.php' => 'templates',
+		'php'     => 'classes',
 	];
 	$standard_files        = [
 		'hook_implementations' => 'hooks.php',
