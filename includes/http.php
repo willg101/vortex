@@ -26,7 +26,7 @@ function input( $key, $default = NULL )
 		}
 		else
 		{
-			throw new HttpException( 'Unsupport request method' );
+			throw new HttpException( 'Unsupported request method' );
 		}
 	}
 
