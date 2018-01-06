@@ -20,7 +20,7 @@
  */
 function bootstrap()
 {
-	$boot_vars = [ 'do_render' => &$do_render ];
+	$boot_vars = [];
 	fire_hook( 'preboot', $boot_vars );
 	fire_hook( 'boot',    $boot_vars, TRUE );
 
