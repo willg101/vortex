@@ -1,5 +1,42 @@
 @import "@{defaults}";
 
+.main-layout
+{
+	height: ~"calc( 100% - 46px )";
+	width: 100%;
+}
+
+body
+{
+	margin: 0;
+	font-family: "Open Sans", sans-serif;
+	position: relative;
+	position: relative;
+	height: 100%;
+	width: 100%;
+	overflow: hidden; // No scroll bars
+}
+
+.value-input::selection,
+#console .input::selection
+{
+	background: @primary-color;
+	color: #FFF;
+}
+
+[type=text]
+{
+	box-sizing: border-box;
+	padding: 10px;
+	width: 100%;
+	display: block;
+}
+
+html
+{
+	height: 100%;
+}
+
 #connection_queue_indicator
 {
 	.transition();
@@ -977,6 +1014,194 @@
 			-ms-filter: blur(@blur);
 			filter: blur(@blur);
 			opacity: .5;
+		}
+	}
+}
+
+/**************************************************************************************************
+ * General Layout - Utility classes
+ **************************************************************************************************/
+ 
+.css-table
+{
+	display: table;
+	width: 100%;
+	
+	&:not(.no-max-height)
+	{
+		height: 100%;
+	}
+	
+	.css-row
+	{
+		display: table-row;
+		
+		.css-cell
+		{
+			vertical-align: top;
+			position: relative;
+			display: table-cell;
+		}
+	}
+}
+
+.left
+{
+	text-align: left;
+	flex-grow: 0;
+}
+
+.center
+{
+	text-align: center;
+	flex-grow: 1;
+}
+
+.right
+{
+	text-align: right;
+	flex-grow: 0;
+}
+
+.theme-2-popover
+{
+	position: relative;
+	width: 400px;
+	max-height: 500px;
+	overflow-x: hidden;
+	text-overflow: ellipsis;
+	overflow-y: auto;
+	background-color: #FFF;
+	box-shadow: 0 0 30px rgba(0,0,0,0.3);
+	padding: 10px;
+	box-sizing: border-box;
+	z-index: 99999;
+	h2
+	{
+		margin: 0;
+		font-size: 15px;
+		color: @secondary-color;
+	}
+
+	&.auto-size
+	{
+		float: left;
+		width: auto;
+	}
+
+	[data-open-file],
+	.globber-option,
+	.popover-list-option
+	{
+		.bouncy();
+		padding: 5px;
+		cursor: pointer;
+		font-family: consolas, monospace;
+		background: #EEE;
+		display:block;
+		width: 100%;
+		box-sizing: border-box;
+		color: @primary-color;
+
+		&.globber-dir
+		{
+			color: @tertiary-color - #333;
+		}
+
+		&:active
+		{
+			transform: scale( .95, .95 );
+		}
+	}
+}
+
+.btn
+{
+	.bouncy();
+
+	background: none;
+	cursor: pointer;
+	color: #FFF;
+	padding: 15px;
+	display: inline-block;
+
+	&.sm
+	{
+		padding: 10px;
+	}
+
+	&.black,
+	&.black:hover,
+	&.black:active
+	{
+		.fa
+		{
+			color: #333;
+		}
+	}
+}
+
+.h-padding
+{
+	padding-right: 15px;
+}
+
+.v-padding
+{
+	box-sizing: border-box;
+	padding-top: 15px;
+	display: inline-block;
+	border-bottom: 3px solid transparent;
+}
+
+.hidden
+{
+	display: none;
+}
+
+.blur-hidden
+{
+	@blur: 3px;
+	position: relative;
+	-webkit-filter: blur(@blur);
+	-moz-filter: blur(@blur);
+	-o-filter: blur(@blur);
+	-ms-filter: blur(@blur);
+	filter: blur(@blur);
+	opacity: 0;
+}
+
+.scroller
+{
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	overflow: auto;
+}
+
+.label-row
+{
+	height: 0;
+
+	.css-cell
+	{
+		border: 1px solid #E0E0E0;
+		border-width: 0 1px 1px 0;
+		background: #F8F8F8;
+		box-sizing: border-box;
+		padding: 10px;
+		color: #000;
+		font-size: 14px;
+		width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+		.secondary
+		{
+			color: #888;
+			display: inline-block;
+			font-weight: normal;
+			margin-left: 10px;
 		}
 	}
 }

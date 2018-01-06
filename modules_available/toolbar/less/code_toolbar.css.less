@@ -1,0 +1,84 @@
+@import "@{defaults}";
+
+@keyframes pulsing-background
+{
+	0%
+	{
+		@scale: 0;
+		opacity: 1;
+		-webkit-transform: scale(@scale, @scale);
+		transform:  scale(@scale, @scale);
+	}
+
+	100%
+	{
+		@scale: 1;
+		opacity: 0;
+		-webkit-transform: scale(@scale, @scale);
+		transform:  scale(@scale, @scale);
+	}
+}
+
+.toolbar
+{
+	height: 46px;
+	position: relative;
+	text-align: center;
+	background: @secondary-color;
+	z-index: 2;
+	box-shadow: 0 0 30px rgba(0,0,0,0.5);
+	display: flex;
+
+
+	.connection-status
+	{
+		padding: 15px;
+		
+		&.connected
+		{
+			color: #5F5;
+		}
+		
+		&.error
+		{
+			color: #F55;
+		}
+	}
+}
+
+#status_indicator
+{
+	padding: 15px;
+	position: relative;
+	.transition();
+
+	&.disconnected
+	{
+		color: #C32;
+	}
+
+	&.connected
+	{
+		color: #FF2;
+	}
+ 
+	&.session-in-progress
+	{
+		color: #281;
+		position: relative;
+
+		&:after
+		{
+			display: block;
+			content: " ";
+			position: absolute;
+			top: 0;
+			left: 0;
+			animation: pulsing-background 2s infinite;
+			background-color: #281;
+			width: 100%;
+			height: 100%;
+			border-radius: 50px;
+		}
+	}
+}

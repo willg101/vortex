@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="theme-2">
 	<head>
-		<title>DPOH</title>
+		<title>Vortex</title>
 		<meta charset="UTF-8">
 		<link rel="shortcut icon" href="<?php echo base_path() ?>favicon.ico" type="image/x-icon">
 		<link rel="icon" href="<?php echo base_path() ?>favicon.ico" type="image/x-icon">

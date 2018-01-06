@@ -216,6 +216,11 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 
 	}
 
+	function onSessionStatusChanged( e )
+	{
+		BasicApi.Debugger.command( 'ctrl:peek_queue' );
+	}
+
 	function onGlobberBlur()
 	{
 		$( '#file_buttons' ).removeClass( 'blur-hidden' );
@@ -291,6 +296,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 	$( init );
 	$( window ).load( showFileButtons );
 	$( window ).on( 'resize', function(){ setTimeout( repositionFileButtons, 500 ) } );
+	subscribe( 'session-status-changed',    onSessionStatusChanged );
 
 	$( document ).on( 'keydown',  '#file_finder',     onGlobberKeydown );
 	$( document ).on( 'click',    '.show-tree',       onShowTreeClicked );

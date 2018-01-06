@@ -1,13 +1,51 @@
+namespace
 
 namespace( 'Theme2' ).Splash = (function( $ )
 {
 	var did_load = false;
+	var last_timeout;
+
+	function onWindowLoad()
+	{
+		did_load = true;
+
+		$( window ).on( 'load', function()
+		{
+			clearTimeout( last_timeout );
+			last_timeout = setTimeout( function()
+			{
+				onWindowResized( '*' );
+				last_timeout = undefined;
+			}, 150 );
+		} );
+	}
+
+	function onSessionStatusChanged( e )
+	{
+		if ( e.status == 'active' )
+		{
+			Theme.PageTitle.update( 'status', 'active' );
+		}
+		else
+		{
+			Theme.PageTitle.update( 'status', ( BasicApi.SocketServer.isConnected() ? 'waiting' : 'disconnected' ) );
+		}
+	}
+
+	function onWindowResized( pane_name )
+	{
+		publish( 'layout-changed', {
+			pane : pane_name,
+		} );
+	};
 
 	function onAnimationEnd()
 	{
 		if ( did_load )
 		{
-			$( '.splash-outermost' ).addClass( 'out' ).find( '.full' ).css( 'animation-fill-mode', 'none' );
+			$( '.splash-outermost' ).addClass( 'out' )
+				.find( '.full' )
+				.css( 'animation-fill-mode', 'none' );
 		}
 		else
 		{
@@ -20,15 +58,11 @@ namespace( 'Theme2' ).Splash = (function( $ )
 		$( e.target ).remove();
 	}
 
-	$( window ).on( 'load', function(){ did_load = true; } );
+	subscribe( 'session-status-changed',    onSessionStatusChanged );
+	$( window ).on( 'load', onWindowLoad );
 	$( document ).on( 'animationend', '.v.v1', onAnimationEnd );
 	$( document ).on( 'transitionend', '.splash-outermost', onTransitionEnd );
 }( jQuery ));
-
-namespace( 'Theme2' ).LayoutElement = (function( $ )
-{
-	function LayoutElement(){};
-} );
 
 namespace( 'Theme2' ).Pane = (function( $ )
 {

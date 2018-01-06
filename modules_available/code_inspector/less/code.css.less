@@ -1,5 +1,21 @@
 @import "@{defaults}";
 
+#file_finder
+{
+	border: none;
+	display: inline-block;
+	background: #E0E0E0;
+	font-family: consolas, monospace;
+	box-sizing: border-box;
+
+	&:active,
+	&:focus
+	{
+		outline: none;
+		background: #E8E8E8;
+	}
+}
+
 #editor
 {
 	margin: 0;
@@ -34,7 +50,7 @@
 {
 	background: #C22;
 	color: #FFF;
-	
+
 	&.conditional-breakpoint
 	{
 		background: #44B;
@@ -44,16 +60,16 @@
 .ace-solarized-light.ace-solarized-light
 {
 	background: #FFF;
-	
+
 	.ace_marker-layer .ace_active-line
 	{
 		background: rgba( 0,0,0,0.1);
 	}
-	
+
 	.ace_gutter.ace_gutter
 	{
 		background: #F0F0F0;
-		
+
 		.ace_gutter-active-line
 		{
 			background: rgba( 0,0,0,0.1);

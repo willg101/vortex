@@ -1,10 +1,10 @@
 /**
  * @require Modal
  */
-PageTitle = (function( $ )
+namespace( 'Theme' ).PageTitle = (function( $ )
 {
 	var title_vars = {
-		init   : 'DPOH',
+		init   : 'DP-OH',
 		status : 'initializing',
 	};
 	var title_format = false;
