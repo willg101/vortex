@@ -13,11 +13,16 @@ function build_css_requirements()
 {
 	$result = [];
 
+	$included_external_assets = [];
 	foreach ( modules()->get() as $module )
 	{
 		foreach ( $module[ 'settings' ][ 'external_dependencies' ][ 'css' ] as $css_file )
 		{
-			array_unshift( $result, '<link rel="stylesheet" href="' . $css_file . '">' );
+			if ( empty( $included_external_assets[ $css_file ] ) )
+			{
+				array_unshift( $result, '<link rel="stylesheet" href="' . $css_file . '">' );
+				$included_external_assets[ $css_file ] = TRUE;
+			}
 		}
 
 		foreach ( $module[ 'css' ] as $css_file )

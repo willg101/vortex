@@ -23,11 +23,16 @@ function build_script_requirements()
 		$result[] = '<script src="' . $js_file . '"></script>';
 	}
 
+	$included_external_assets = [];
 	foreach ( modules()->get() as $module_name => $module )
 	{
 		foreach ( $module[ 'settings' ][ 'external_dependencies' ][ 'js' ] as $js_file )
 		{
-			$result[] = '<script src="' . $js_file . '"></script>';
+			if ( empty( $included_external_assets[ $js_file ] ) )
+			{
+				$result[] = '<script src="' . $js_file . '"></script>';
+				$included_external_assets[ $js_file ] = TRUE;
+			}
 		}
 
 		foreach ( $module[ 'js' ] as $js_file )
