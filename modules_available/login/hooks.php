@@ -400,17 +400,10 @@ function login_create_tables()
 			);
 		" );
 	}
-	catch ( DatabaseException $e )
+	catch ( Exception $e )
 	{
-		if ( !input( 'use-default-error-msg' ) )
-		{
-			echo render( 'safety_warning', [ 'msg' => $e->getMessage() ] );
-			exit;
-		}
-		else
-		{
-			throw $e;
-		}
+		throw new LoginException( 'A problem occurred while initializing the login system. As a '
+			. ' safety precaution, Vortex will not start up until this is fixed.', 0, $e );
 	}
 }
 
