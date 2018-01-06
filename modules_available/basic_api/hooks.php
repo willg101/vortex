@@ -1,5 +1,8 @@
 <?php
 
+use Vortex\Cli\SocketServerStartCommand;
+use Vortex\Cli\SocketServerRunCommand;
+
 /**
  * @brief
  *	Implements hook_boot(). Adds request handlers for the files and config APIs
@@ -120,4 +123,11 @@ function basic_api_recent_files_api( $path )
 	}
 
 	send_json( $response );
+}
+
+function basic_api_provide_console_commands( $data )
+{
+	$data[ 'application' ]->add( new SocketServerStartCommand() );
+	$data[ 'application' ]->add( new SocketServerRunCommand() );
+	$data[ 'application' ]->setDefaultCommand( 'socket-server:start' );
 }

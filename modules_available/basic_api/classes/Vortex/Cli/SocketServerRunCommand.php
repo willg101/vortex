@@ -15,7 +15,7 @@ use Ratchet\Server\IoServer;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
-chdir( __DIR__ . '/../../../' );
+//chdir( __DIR__ . '/../../../' );
 
 require_once 'includes/arrays.php';
 require_once 'includes/database.php';
