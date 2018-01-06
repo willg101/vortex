@@ -9,8 +9,12 @@
 	</head>
 	<body>
 		<h1>Well, this isn't good...</h1>
-		<h2><?php echo $title ?></h2>
-		<p><?php echo $message ?></p>
-		<pre class="trace"><b class="trace-title">Stack trace</b><?php echo $trace ?></pre>
+		<?php foreach ( $exceptions as $i => $exception ): ?>
+			<section>
+				<h2><?php echo $exception[ 'title' ] ?></h2>
+				<p><?php echo $exception[ 'message' ] ?></p>
+				<pre class="trace"><b class="trace-title">Stack trace</b><?php echo $exception[ 'trace' ] ?></pre>
+			</section>
+		<?php endforeach ?>
 	</body>
 </html>

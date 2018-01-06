@@ -5,18 +5,42 @@ define( 'IS_AJAX_REQUEST', !empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) );
 
 set_exception_handler( function( $e )
 {
+	$exceptions = [];
+
+	$headers_applied = FALSE;
+	$current = $e;
+	do
+	{
+		$exceptions[] = [
+			'title'     => get_class( $current ),
+			'message'   => $current->getMessage(),
+			'trace'     => $current->getTraceAsString(),
+		];
+
+		if ( $current instanceof HttpException )
+		{
+			$current->applyHeaders();
+			$headers_applied = TRUE;
+		}
+
+	} while( $current = $current->getPrevious() );
+
+	if ( ($c = count( $exceptions ) ) > 1 )
+	{
+		foreach ( $exceptions as $i => $exception )
+		{
+			$i++;
+			$exceptions[ $i - 1 ][ 'title' ] .= " ($i of $c)";
+		}
+	}
+
 	$vars = [
-		'title'     => get_class( $e ),
-		'message'   => $e->getMessage(),
-		'trace'     => $e->getTraceAsString(),
-		'base_path' => is_callable( 'base_path' ) ? base_path() : '',
+		'exceptions'   => $exceptions,
+		'n_exceptions' => count( $exceptions ),
+		'base_path'    => is_callable( 'base_path' ) ? base_path() : '',
 	];
 
-	if ( $e instanceof HttpException )
-	{
-		$e->applyHeaders();
-	}
-	else
+	if ( !$headers_applied )
 	{
 		header( 'HTTP/1.0 500 Internal server error' );
 	}
