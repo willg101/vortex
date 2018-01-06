@@ -1,0 +1,8 @@
+{
+	"external_dependencies" : {
+		"js" : [
+			"//use.fontawesome.com/b2e4717b55.js"
+		],
+		"css" : []
+	}
+}

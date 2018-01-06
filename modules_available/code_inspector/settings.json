@@ -1,0 +1,11 @@
+{
+	"external_dependencies" : {
+		"js" : [
+			"//cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js",
+			"//cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js"
+		],
+		"css" : [
+			"//cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css"
+		]
+	}
+}
