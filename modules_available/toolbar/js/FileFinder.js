@@ -4,10 +4,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 
 	function init()
 	{
-		BasicApi.Config.get( 'file_aliases', function( success, data )
-		{
-			dir_aliases = ( success && data ) || {};
-		} );
+		// TODO: Add settings UI for file aliases
 	}
 
 	function showFileButtons()

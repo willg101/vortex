@@ -167,32 +167,6 @@ function settings( $key = NULL, $default_val = NULL )
 		: $settings_model;
 }
 
-/**
- * @brief
- *	Looks up a user config data value or returns the user config data model
- *
- * @param string $key         (OPTIONAL)
- * @param string $default_val (OPTIONAL)
- *
- * @retval mixed
- *	If $key is given, this acts as an alias to $user_config_model->get(); otherwise this returns
- *	$user_config_model
- */
-function user_config( $key = NULL, $default_val = NULL )
-{
-	static $user_config_model;
-
-	if ( $user_config_model === NULL )
-	{
-		$user_config_model = new PersistentDataStorage( 'user_config', [], FALSE,
-			USER_CONFIG_FILE );
-	}
-
-	return $key !== NULL
-		? $user_config_model->get( $key, $default_val )
-		: $user_config_model;
-}
-
 function request_handlers()
 {
 	static $model;

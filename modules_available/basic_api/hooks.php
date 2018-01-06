@@ -8,7 +8,6 @@ function basic_api_boot()
 {
 	request_handlers()->register( '/file/',         'basic_api_file_api' );
 	request_handlers()->register( '/recent_files/', 'basic_api_recent_files_api' );
-	request_handlers()->register( '/config/',       'basic_api_config_api' );
 }
 
 /**
@@ -121,36 +120,4 @@ function basic_api_recent_files_api( $path )
 	}
 
 	send_json( $response );
-}
-
-/**
- * @brief
- *	Request handler for the config API; fetches, updates, and deletes config items
- *
- * @param string $path The request path
- */
-function basic_api_config_api( $path )
-{
-	require_method( [ 'GET', 'POST', 'DELETE' ] );
-
-	// Strip off the leading 'config/' from $path and convert the rest of $path to "dot" notation
-	$key = array_get( explode( '/', $path, 2 ), 1, '' );
-	$key = str_replace( '/', '.', $key );
-
-	switch ( $_SERVER[ 'REQUEST_METHOD' ] )
-	{
-		case 'GET':
-			send_json( $key ? user_config( $key ) : user_config()->get() );
-			break;
-
-		case 'POST':
-			user_config()->set( $key, input( 'payload' ) ?: NULL )->save();
-			send_json( [ 'success' => TRUE ] );
-			break;
-
-		case 'DELETE':
-			user_config()->del( $key )->save();
-			send_json( [ 'success' => TRUE ] );
-			break;
-	}
 }
