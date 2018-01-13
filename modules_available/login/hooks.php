@@ -27,6 +27,8 @@ function login_boot()
 	}
 	else
 	{
+		login_postpone_session_expiration();
+
 		request_handlers()->register( 'logout',             'login_handle_logout' );
 		request_handlers()->register( 'api/users/list',     'login_handle_list_users_api' );
 		request_handlers()->register( 'api/users/invite/%', 'login_handle_invite_user_api' );
@@ -37,7 +39,7 @@ function login_boot()
 	request_handlers()->register( 'api/reset-password', 'login_handle_new_password_api' );
 	request_handlers()->register( 'api/users/%/reset-password', 'login_handle_reset_password_api' );
 
-	login_expire_old_sessions();
+	login_clear_expired_sessions_and_tokens();
 }
 
 function login_preprocess_request( &$options )
@@ -54,6 +56,20 @@ function login_preprocess_request( &$options )
 	{
 		login_render_interface();
 		exit;
+	}
+}
+
+function login_postpone_session_expiration()
+{
+	if ( dpoh_session_id_is_valid() )
+	{
+		$sid = array_get( $_COOKIE, 'dpoh_session_id' );
+		db_query( '
+			UPDATE sessions
+			SET expires = date( expires, "+3 day" )
+			WHERE id = :sid',
+			[ ':sid' => $sid ]
+		);
 	}
 }
 
@@ -373,6 +389,7 @@ function login_create_tables()
 				user_id       INTEGER      NOT NULL,
 				session_token VARCHAR(128) NOT NULL,
 				user_ip       VARCHAR(15)  NOT NULL,
+				expires       DATETIME     DEFAULT CURRENT_TIMESTAMP,
 				CONSTRAINT      fk_users
 					FOREIGN KEY (user_id)
 					REFERENCES  users(id)
@@ -423,10 +440,17 @@ function login_handle_login()
 	send_json( [ 'login_result' => $result ] );
 }
 
-function login_expire_old_sessions()
+function login_clear_expired_sessions_and_tokens()
 {
-	$dir = escapeshellarg( __DIR__ . '/sessions/' );
-	exec( "find $dir* -mtime +3 -exec rm {} \;" );
+	$tables = [
+		'login_tokens',
+		'invitation_tokens',
+		'sessions',
+	];
+	foreach ( $tables as $table )
+	{
+		db_query( "DELETE FROM `$table` WHERE expires < CURRENT_timestamp" );
+	}
 }
 
 function login_render_interface()
@@ -445,8 +469,8 @@ function login_user( $username, $password = NULL )
 
 	$session_token = bin2hex( openssl_random_pseudo_bytes( 25 ) );
 	db_query( '
-		INSERT INTO sessions (user_id, session_token, user_ip)
-		VALUES (:user_id, :session_token, :user_ip)',
+		INSERT INTO sessions (user_id, session_token, user_ip, expires)
+		VALUES (:user_id, :session_token, :user_ip, date( CURRENT_TIMESTAMP, "+3 day"))',
 		[
 			':user_id'       => $account[ 'id' ],
 			':session_token' => login_hash_password( $session_token ),
