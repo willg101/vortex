@@ -139,13 +139,16 @@ class DbgpApp implements MessageComponentInterface
 	{
 		if ( !empty( $this->queue[ $conn->resourceId ] ) )
 		{
-			$msg = explode( "\0", $msg )[ 1 ];
-			$this->queue[ $conn->resourceId ][ 'messages' ][] = $msg;
-			if ( count( $this->queue[ $conn->resourceId ][ 'messages' ] ) == 1 )
+			$msg = array_get( explode( "\0", $msg ), 1 );
+			if ( $msg )
 			{
-				$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $this->peekQueue() ) . "</wsserver>" );
+				$this->queue[ $conn->resourceId ][ 'messages' ][] = $msg;
+				if ( count( $this->queue[ $conn->resourceId ][ 'messages' ] ) == 1 )
+				{
+					$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $this->peekQueue() ) . "</wsserver>" );
+				}
+				$this->logger->debug( "Stashing message from queued connection #$conn->resourceId" );
 			}
-			$this->logger->debug( "Stashing message from queued connection #$conn->resourceId" );
 			return;
 		}
 
@@ -153,15 +156,18 @@ class DbgpApp implements MessageComponentInterface
 		{
 			try
 			{
-				$root = explode( "\0", $msg )[ 1 ];
-				$root = simplexml_load_string( $root );
-				if ( !empty( $root[ 'fileuri' ] ) && is_readable( $root[ 'fileuri' ] ) )
+				$root = array_get( explode( "\0", $msg ), 1 );
+				if ( $root )
 				{
-					$file_contents = file_get_contents( $root[ 'fileuri' ] );
-					if ( preg_match( '#^<?php /\*(dpoh|vortex):ignore\*/#', $file_contents ) )
+					$root = simplexml_load_string( $root );
+					if ( !empty( $root[ 'fileuri' ] ) && is_readable( $root[ 'fileuri' ] ) )
 					{
-						$this->logger->debug( "$root[fileuri] is marked to be ignored; detaching" );
-						$conn->close();
+						$file_contents = file_get_contents( $root[ 'fileuri' ] );
+						if ( preg_match( '#^<?php /\*(dpoh|vortex):ignore\*/#', $file_contents ) )
+						{
+							$this->logger->debug( "$root[fileuri] is marked to be ignored; detaching" );
+							$conn->close();
+						}
 					}
 				}
 			}
