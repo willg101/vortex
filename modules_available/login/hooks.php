@@ -106,7 +106,7 @@ function login_verify_otlt( $otlt, $tid )
 	{
 		$record = db_query( 'SELECT * FROM login_tokens WHERE id = :id AND expires > CURRENT_TIMESTAMP', [ ':id' => $tid ] );
 		$otlt_hash = array_get( $record, '0.token' );
-		if ( login_check_password( $otlt, $otlt_hash ) )
+		if ( password_verify( $otlt, $otlt_hash ) )
 		{
 			return TRUE;
 		}
@@ -180,7 +180,7 @@ function login_verify_it( $it = FALSE, $iid = FALSE )
 	{
 		$record = db_query( 'SELECT * FROM invitation_tokens WHERE id = :id AND expires > CURRENT_TIMESTAMP', [ ':id' => $iid ] );
 		$it_hash = array_get( $record, '0.token' );
-		if ( login_check_password( $it, $it_hash ) )
+		if ( password_verify( $it, $it_hash ) )
 		{
 			return TRUE;
 		}
@@ -302,14 +302,13 @@ function login_create_account( $username, $email, $password )
 	{
 		throw new LoginException( "An account already exists with the username '$username'" );
 	}
-	$pw = login_hash_password( $password );
 	db_query( '
 		INSERT INTO users (username, email, password)
 		VALUES (:username, :email, :password);',
 		[
 			':username'     => $username,
 			':email'        => $email,
-			':password'     => $pw,
+			':password'     => login_hash_password( $password ),
 		]
 	);
 }
@@ -439,7 +438,7 @@ function login_user( $username, $password = NULL )
 {
 	$account = login_load_account( $username );
 
-	if ( !$account || ( $password !== NULL && !login_check_password( $password, $account ) ) )
+	if ( !$account || ( $password !== NULL && !password_verify( $password, $account[ 'password' ] ) ) )
 	{
 		return FALSE;
 	}
@@ -474,7 +473,7 @@ function dpoh_session_id_is_valid( $session_id = FALSE, $session_token = FALSE, 
 		return FALSE;
 	}
 	$session_token_hashed = array_get( $session_record, '0.session_token' );
-	return login_check_password( $session_token, $session_token_hashed )
+	return password_verify( $session_token, $session_token_hashed )
 		&& $user_ip == array_get( $session_record, '0.user_ip' );
 }
 
@@ -483,25 +482,7 @@ function any_users_exist()
 	return !!db_query( 'SELECT COUNT(*) count FROM users;' )[ 0 ][ 'count' ];
 }
 
-function login_load_drupal_password_functions()
-{
-	require_once( 'password.inc' );
-}
-
 function login_hash_password( $password )
 {
-	login_load_drupal_password_functions();
-	return user_hash_password( $password );
-}
-
-function login_check_password( $cleartext, $account_or_password  )
-{
-	login_load_drupal_password_functions();
-
-	$password_hash = is_array( $account_or_password )
-		? array_get( $account_or_password, 'password' )
-		: $account_or_password;
-
-	$faux_account = (object) [ 'pass' => $password_hash ];
-	return user_check_password( $cleartext, $faux_account );
+	return password_hash( $password, PASSWORD_BCRYPT );
 }
