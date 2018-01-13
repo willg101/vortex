@@ -4,7 +4,8 @@
         "symfony/console": "3.4",
         "symfony/yaml":"3.4",
         "monolog/monolog": "^1.23",
-        "paragonie/random_compat": "^2.0"
+        "paragonie/random_compat": "^2.0",
+        "sentry/sentry": "^1.8"
     },
     "autoload": {
         "psr-4": { "Vortex\\": "src/Vortex" }
