@@ -332,7 +332,7 @@ function login_handle_delete_account_api( $url )
 
 	$url  = explode( '/', $url );
 	$user = $url[ 2 ];
-	try 
+	try
 	{
 		send_json( login_delete_account( $user ) );
 	}
@@ -361,41 +361,41 @@ function login_create_tables()
 	{
 		db_query( "
 			CREATE TABLE IF NOT EXISTS users (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				username VARCHAR(30) NOT NULL UNIQUE,
-				email VARCHAR(128) NOT NULL,
-				password VARCHAR(128) NOT NULL
+				id       INTEGER      PRIMARY KEY AUTOINCREMENT,
+				username VARCHAR(30)  NOT NULL    UNIQUE,
+				email    VARCHAR(128) NOT NULL,
+				password VARCHAR(60) NOT NULL
 			);
 		" );
 		db_query( "
 			CREATE TABLE IF NOT EXISTS sessions (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				user_id INTEGER NOT NULL,
+				id            INTEGER      PRIMARY KEY AUTOINCREMENT,
+				user_id       INTEGER      NOT NULL,
 				session_token VARCHAR(128) NOT NULL,
-				user_ip VARCHAR(15) NOT NULL,
-				CONSTRAINT fk_users
+				user_ip       VARCHAR(15)  NOT NULL,
+				CONSTRAINT      fk_users
 					FOREIGN KEY (user_id)
-					REFERENCES users(id)
-					ON DELETE CASCADE
+					REFERENCES  users(id)
+					ON DELETE   CASCADE
 			);
 		" );
 		db_query( "
 			CREATE TABLE IF NOT EXISTS login_tokens (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				token VARCHAR(128) NOT NULL,
-				user_id INTEGER NOT NULL,
-				expires DATETIME DEFAULT CURRENT_TIMESTAMP,
-				CONSTRAINT fk_tokens
+				id      INTEGER      PRIMARY KEY AUTOINCREMENT,
+				token   VARCHAR(60) NOT NULL,
+				user_id INTEGER      NOT NULL,
+				expires DATETIME     DEFAULT CURRENT_TIMESTAMP,
+				CONSTRAINT      fk_tokens
 					FOREIGN KEY (user_id)
-					REFERENCES users(id)
-					ON DELETE CASCADE
+					REFERENCES  users(id)
+					ON DELETE   CASCADE
 			);
 		" );
 		db_query( "
 			CREATE TABLE IF NOT EXISTS invitation_tokens (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				token VARCHAR(128) NOT NULL,
-				expires DATETIME DEFAULT CURRENT_TIMESTAMP
+				id      INTEGER      PRIMARY KEY AUTOINCREMENT,
+				token   VARCHAR(60) NOT NULL,
+				expires DATETIME     DEFAULT CURRENT_TIMESTAMP
 			);
 		" );
 	}
