@@ -197,6 +197,8 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 			line = undefined;
 		}
 
+		filename = normalizeFilename( filename );
+
 		BasicApi.RemoteFiles.get( filename, function( data )
 		{
 			if ( data === false )
@@ -377,12 +379,18 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}
 	}
 
+	function normalizeFilename( fn )
+	{
+		return fn.replace( /^file:\/\//, '' ).replace( /\/{2,}/, '/' );
+	}
+
 	function onBreakpointList( data )
 	{
 		var import_each = function( bp )
 		{
-			confirmed_breakpoints[ bp.filename ] = confirmed_breakpoints[ bp.filename ] || {};
-			confirmed_breakpoints[ bp.filename ][ bp.lineno ] = {
+			var filename = normalizeFilename( bp.filename );
+			confirmed_breakpoints[ filename ] = confirmed_breakpoints[ filename ] || {};
+			confirmed_breakpoints[ filename ][ bp.lineno ] = {
 				status     : 'confirmed',
 				id         : bp.id,
 				expression : bp.expression || bp.expression_element,
@@ -416,7 +424,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 			case 'debugger_command:stack_get':
 				if ( !current_file && e.parsed[ 0 ] )
 				{
-					var filename = e.parsed[ 0 ].filename;
+					var filename = normalizeFilename( e.parsed[ 0 ].filename );
 					var lineno = e.parsed[ 0 ].lineno;
 					showFile( filename, lineno );
 				}
@@ -426,10 +434,11 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 	function onFileNavRequest( e )
 	{
-		showFile( e.filename, e.lineno, function()
+		var filename = normalizeFilename( e.filename );
+		showFile( filename, e.lineno, function()
 		{
 			publish( 'file-changed', {
-				file   : e.filename,
+				file   : filename,
 				lineno : e.lineno,
 				source : e.source,
 			} );
