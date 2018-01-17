@@ -4,7 +4,6 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	var current_line_marker   = '';
 	var current_line          = false;
 	var current_file          = false;
-	var pending_breakpoints   = {};
 	var confirmed_breakpoints = {};
 	var open_files            = {};
 
