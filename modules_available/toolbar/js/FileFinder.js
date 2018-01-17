@@ -77,20 +77,17 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 				BasicApi.SocketServer.send( 'X_glob', { p : current_val }, function( e )
 				{
 					var items = $( e.message_raw ).find( '[type]' );
-					var popover = $( '#file_finder' ).data( 'toggles_popover' )
-						|| new Theme.PopoverList( false, false, [], { my : 'left top', at : 'left bottom', of : '#file_finder' }, $( '#file_finder' ) );
-
-					popover.setContent( '' );
+					var popover = $( '#file_finder' ).data( 'toggles_popover' );
 
 					if ( items.length == 0 )
 					{
-						popover.remove();
+						popover && popover.remove();
 					}
 					else if ( items.length == 1 )
 					{
 						$( '#file_finder' ).blur().focus().val( '' ).val( items.text()
 							+ ( items.attr( 'type' ) == 'dir' ? '/' : '' ) );
-						popover.remove()
+						popover && popover.remove()
 					}
 					else if ( items.length > 1 )
 					{
@@ -141,6 +138,10 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 								return 0;
 							}
 						} );
+						if ( !popover )
+						{
+							popover = new Theme.PopoverList( false, false, [], { my : 'left top', at : 'left bottom', of : '#file_finder' }, $( '#file_finder' ) )
+						}
 						popover.setList( items_for_rendering );
 						$( '#file_finder' ).blur().focus().val( '' ).val( base.substr( 0, min ) );
 					}
