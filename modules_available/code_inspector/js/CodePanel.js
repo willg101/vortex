@@ -10,12 +10,19 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 	function init()
 	{
+		var data = {
+			options : { theme : 'solarized_light', language : 'php' }
+		};
+		publish( 'alter-editor-options', data );
+
 		editor = ace.edit( "editor" );
-		editor.setTheme( "ace/theme/solarized_light" );
-		editor.session.setMode( "ace/mode/php" );
+		editor.setTheme( "ace/theme/" + data.options.theme );
+		editor.session.setMode( "ace/mode/"  + data.options.language );
 		editor.setOption( "showPrintMargin", false );
 		editor.on( "guttermousedown", onGutterClicked );
 		editor.setReadOnly( true );
+
+		publish( 'editor-ready', { editor : editor } );
 	}
 
 	/**
