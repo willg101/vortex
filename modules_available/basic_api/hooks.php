@@ -136,6 +136,8 @@ function basic_api_ws_message_received( &$data )
 {
 	if ( preg_match( '/^X_glob /', $data[ 'message' ] ) )
 	{
+		$data[ 'abort' ] = TRUE; // Don't pass this on to the DE
+
 		$args = basic_api_parse_glob_command( $data[ 'message' ] );
 		if ( $args[ 'id' ] && $args[ 'pattern' ] )
 		{
