@@ -209,11 +209,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		{
 			if ( data === false )
 			{
-				Theme.Modal.set( {
-					title : 'Error loading file',
-					content : '<b>' + filename.replace( /^.*\//, '' ) + '</b> failed to load',
-				} );
-				Theme.Modal.show();
+				Theme.notify( 'error', 'The file <b>' + filename.replace( /^.*\//, '' ) + '</b> failed to load' );
 				return;
 			}
 

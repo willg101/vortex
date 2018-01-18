@@ -1,5 +1,40 @@
 @import "@{defaults}";
 
+#toast-container
+{
+	.toast-error,
+	.toast-info,
+	.toast-warning,
+	.toast-success
+	{
+		background-image: none !important;
+		padding: 15px;
+		border-radius: 3px;
+		opacity: 1;
+		box-shadow: 0 0 10px #000;
+	}
+
+	.toast-error
+	{
+		background: #F55 - #333;
+	}
+
+	.toast-success
+	{
+		background: #59c203;
+	}
+
+	.toast-info
+	{
+		background: @secondary-color;
+	}
+
+	.toast-warning
+	{
+		background: #FF5 - #333;
+	}
+}
+
 .main-layout
 {
 	height: ~"calc( 100% - 46px )";

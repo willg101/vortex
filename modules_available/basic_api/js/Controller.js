@@ -17,37 +17,23 @@ namespace( 'BasicApi' ).Controller = (function( $ )
 			setTimeout( BasicApi.SocketServer.openConnection, reconnect_delay_ms );
 			if ( was_connected )
 			{
-				Theme.Modal.set( {
-					title : 'No connection',
-					content : 'DPOH can\'t connect to the websocket server, which most likely means one '
-						+ 'of the following: <ul><li>The server is not running</li><li>There is a '
-						+ 'proxy or firewall misconfiguration</li><li>You have lost your network '
-						+ 'connection</li></ul>',
-					on_hide : function(){ showing_no_connection_modal = false; },
-				} );
-				showing_no_connection_modal = true
-				Theme.Modal.show();
+				Theme.notify( 'error', 'No websocket connection is available' );
 			}
 			was_connected = false;
 		}
 		else if ( e.status == 'no-exclusive-access' )
 		{
 			Theme.PageTitle.update( 'status', 'disconnected' );
-			was_connected = false;
 
-			Theme.Modal.set( {
-				title : 'Vortex is already is use',
-				content : 'Vortex is already in use in another browser or tab, or on another computer.',
-			} );
-			Theme.Modal.show();
+			if ( was_connected )
+			{
+				Theme.notify( 'error', 'Vortex is already in use in another browser or tab, or on another computer.' );
+			}
+
+			was_connected = false;
 		}
 		else if ( e.status == 'connected' )
 		{
-			if ( showing_no_connection_modal )
-			{
-				Theme.Modal.hide();
-			}
-
 			// Probe for an existing session; allows us to pick up where we left off if the user
 			// left the page and has now returned or lost their connection and has now regained it
 			BasicApi.Debugger.command( 'status' );
