@@ -25,7 +25,7 @@ function basic_api_file_api( $path )
 
 	// Strip off the leadin 'file/' from the path and check if the corresponding file exists
 	$file = '/' . ( array_get( explode( '/', $path, 2 ), 1, '' ) );
-	if ( !file_exists( $file ) )
+	if ( !is_readable( $file ) )
 	{
 		error_response( "$file does not exist", 404, 'Not found' );
 	}
