@@ -410,9 +410,9 @@ namespace( 'BasicApi' ).Debugger = (function( $ )
 			return;
 		}
 
-		var is_stopping    = jq_response_element.is( '[status=stopping]' );
-		var is_stopped     = jq_response_element.is( '[status=stopped]' );
-		var session_ended  = jq_response_element.is( '[status=session_end]' );
+		var is_stopping   = jq_response_element.is( '[status=stopping]' );
+		var is_stopped    = jq_response_element.is( '[status=stopped]' );
+		var session_ended = jq_response_element.is( '[status=session_end]' );
 
 		if ( !jq_response_element.is( '[session-status-change=neutral]' ) )
 		{
