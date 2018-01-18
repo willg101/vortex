@@ -246,8 +246,9 @@ namespace( 'BasicApi' ).Debugger = (function( $ )
 	 *	to this function actually alters the flag, an event is published
 	 *
 	 * @param bool session_is_active_local
+	 * @param bool is_new_session          ignored when `session_is_active_local` is true
 	 */
-	function setActiveSessionStatus( session_is_active_local )
+	function setActiveSessionStatus( session_is_active_local, is_new_session )
 	{
 		if ( (!!session_is_active_local) != session_is_active )
 		{
@@ -257,6 +258,7 @@ namespace( 'BasicApi' ).Debugger = (function( $ )
 				status : session_is_active
 					? 'active'
 					: 'inactive',
+				is_new_session : session_is_active_local && is_new_session,
 			} );
 		}
 	}
@@ -414,7 +416,7 @@ namespace( 'BasicApi' ).Debugger = (function( $ )
 
 		if ( !jq_response_element.is( '[session-status-change=neutral]' ) )
 		{
-			setActiveSessionStatus( !(is_stopping || is_stopped || session_ended) );
+			setActiveSessionStatus( !(is_stopping || is_stopped || session_ended), type == 'init' );
 		}
 
 		// The type of data for 'session-init' and 'response-received' events is nearly identical,

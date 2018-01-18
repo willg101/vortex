@@ -7,6 +7,12 @@ namespace( 'Autorun' ).Controller = (function( $ )
 
 	function onSessionStatusChanged( e )
 	{
+		// If we're joining an exisiting debug session, don't ever autorun
+		if ( !e.is_new_session )
+		{
+			return;
+		}
+
 		var mode = getCurrentMode();
 
 		if ( mode != 'disabled' && e.status == 'active'
