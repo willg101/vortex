@@ -83,23 +83,30 @@
 					}
 
 					term.echo( 'No debug session is active; creating dummy session...' );
-					$.get( 'dummy.php?XDEBUG_SESSION_START' );
+					var options = {
+						url    : 'dummy.php',
+						params : {
+							XDEBUG_SESSION_START : 1,
+						}
+					};
+					publish( 'alter-dummy-session-request', { options : options } );
+					var url = options.url + '?' + $.param( options.params );
+					$.get( url );
 
 					var timeout;
-					function tryInitiateAgain()
+					function tryProcessing()
 					{
-						clearInterval( timeout );
 						if ( !BasicApi.Debugger.sessionIsActive() )
 						{
-							$.get( 'dummy.php?XDEBUG_SESSION_START' );
+							term.echo( "Could not initiate a new session (timed out)" );
+							term.resume();
 						}
 						else
 						{
-							clearInterval( dummy_session_timeout );
 							process_command();
 						}
 					}
-					timeout = setInterval( tryInitiateAgain, 250 );
+					timeout = setTimeout( tryProcessing, 250 );
 				}
 				else
 				{
