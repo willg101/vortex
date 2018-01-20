@@ -6,6 +6,10 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	var current_file          = false;
 	var confirmed_breakpoints = {};
 	var open_files            = {};
+	var module_initialized    = false;
+	var after_init_cb         = false;
+
+	var TimedCoordinator = Vortex.TimedCoordinator;
 
 	function init()
 	{
@@ -367,6 +371,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 			updateStatusIndicator( 'active-session' );
 			if ( Object.keys( confirmed_breakpoints ).length )
 			{
+				module_initialized = false;
 				sendAllBreakpoints();
 			}
 			else
@@ -473,21 +478,37 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 	function sendAllBreakpoints()
 	{
-		for ( var filename in confirmed_breakpoints )
+		var coordinator = new TimedCoordinator;
+		Object.keys( confirmed_breakpoints ).forEach( function( filename )
 		{
-			for ( var lineno in confirmed_breakpoints[ filename ] )
+			Object.keys( confirmed_breakpoints[ filename ] ).forEach( function( lineno )
 			{
-				var expression = confirmed_breakpoints[ filename ][ lineno ].expression;
-				var callback = function( filename, lineno, data )
+				coordinator.register( function( activate )
 				{
-					confirmed_breakpoints[ filename ][ lineno ].id = data.parsed.id;
-				}.bind( undefined, filename, lineno );
-				BasicApi.Debugger.command( 'breakpoint_set' , {
- 					type : expression ? 'line' : 'conditional',
-					line : lineno,
-					file : filename,
-					}, callback, expression );
-			}
+					var expression = confirmed_breakpoints[ filename ][ lineno ].expression;
+					var callback   = function( filename, lineno, data )
+					{
+						confirmed_breakpoints[ filename ][ lineno ].id = data.parsed.id;
+						activate();
+					}.bind( undefined, filename, lineno );
+					BasicApi.Debugger.command( 'breakpoint_set' , {
+						type : expression ? 'line' : 'conditional',
+						line : lineno,
+						file : filename,
+						}, callback, expression );
+				} );
+			} );
+		} );
+		coordinator.activate( onBreakpointsInitialized );
+	}
+
+	function onBreakpointsInitialized()
+	{
+		module_initialized = true;
+		if ( after_init_cb )
+		{
+			after_init_cb();
+			after_init_cb = false;
 		}
 	}
 
@@ -540,18 +561,34 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}, true )
 	}
 
+	function preprocessAutorun( e )
+	{
+		e.waitForMe( function( signaler )
+		{
+			if ( module_initialized )
+			{
+				signaler();
+			}
+			else
+			{
+				after_init_cb = signaler;
+			}
+		} );
+	}
+
 	$( init );
 	$( document ).on( 'click',    '[data-command]',       onCommandButtonClicked );
 	$( document ).on( 'click',    '.show-currently-open-files', onShowCurrentlyOpenFilesClicked );
 	$( document ).on( 'keypress', '.bp-expression-input', onNewExpressionGiven )
 	$( document ).on( 'click',    '.refresh-file',        onRefereshFileClicked )
 
-	subscribe( 'session-status-changed',    onSessionStatusChanged )
-	subscribe( 'connection-status-changed', onConnectionStatusChanged )
-	subscribe( 'response-received',         onResponseReceived )
-	subscribe( 'file-nav-request',          onFileNavRequest )
-	subscribe( 'layout-changed',            onLayoutChanged )
-	subscribe( 'before-send',               onBeforeSend );
+	subscribe( 'register-preprocess-autorun', preprocessAutorun )
+	subscribe( 'session-status-changed',      onSessionStatusChanged )
+	subscribe( 'connection-status-changed',   onConnectionStatusChanged )
+	subscribe( 'response-received',           onResponseReceived )
+	subscribe( 'file-nav-request',            onFileNavRequest )
+	subscribe( 'layout-changed',              onLayoutChanged )
+	subscribe( 'before-send',                 onBeforeSend );
 
 	return {
 		clearBreakpoints          : clearBreakpoints,

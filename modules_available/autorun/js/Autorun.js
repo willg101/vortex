@@ -5,23 +5,27 @@ namespace( 'Autorun' ).Controller = (function( $ )
 		return localStorage.getItem( 'vortex_autoplay_mode' ) || 'not_focused';
 	}
 
-	function onSessionStatusChanged( e )
+	var TimedCoordinator = Vortex.TimedCoordinator;
+
+	function onSessionInit( e )
 	{
-		// If we're joining an exisiting debug session, don't ever autorun
-		if ( !e.is_new_session )
+		BasicApi.Debugger.command( 'property_get', { name : '$_GET["VORTEX_NO_AUTORUN"]' }, function( data )
 		{
-			return;
-		}
+			if ( !data.parsed || !data.parsed[ 0 ] )
+			{
+				var mode = getCurrentMode();
 
-		var mode = getCurrentMode();
-
-		if ( mode != 'disabled' && e.status == 'active'
-			 && ( document.visibilityState == 'hidden' || mode == 'always' ) )
-		{
-			// Give other modules a chance to send breakpoints, etc. If we don't do this, then
-			// breakpoints might not be sent, and so we'll never break.
-			setTimeout( BasicApi.Debugger.command.bind( BasicApi.Debugger.command, 'run' ), 100 );
-		}
+				if ( mode != 'disabled' && ( document.visibilityState == 'hidden' || mode == 'always' ) )
+				{
+					var coordinator = new TimedCoordinator;
+					publish( 'register-preprocess-autorun', { waitForMe : coordinator.getPublicApi() } );
+					// Give other modules a chance to send breakpoints, etc. If we don't do this, then
+					// breakpoints might not be sent, and so we'll never break.
+					coordinator.activate( BasicApi.Debugger.command.bind( BasicApi.Debugger.command, 'run' ),
+						1000 );
+				}
+			}
+		} );
 	}
 
 	function getModes()
@@ -94,11 +98,16 @@ namespace( 'Autorun' ).Controller = (function( $ )
 		selected_item = false;
 	}
 
+	function alterDummySessionRequest( e )
+	{
+		e.options.params.VORTEX_NO_AUTORUN = 1;
+	}
+
 	subscribe( 'gather-settings-pages', provideSettingsPage );
 	subscribe( 'gather-settings-page-widgets', provideSettingsPageWidgets );
 	subscribe( 'save-settings', saveSettings );
 	subscribe( 'cache-settings', cacheSettings );
 	subscribe( 'clear-cached-settings', clearCachedSettings );
-	subscribe( 'session-status-changed', onSessionStatusChanged );
-
+	subscribe( 'session-init', onSessionInit );
+	subscribe( 'alter-dummy-session-request', alterDummySessionRequest );
 }( jQuery ));
