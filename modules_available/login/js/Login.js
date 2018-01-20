@@ -24,7 +24,7 @@ Login = (function( $ )
 		{
 			if ( data.login_result )
 			{
-				$( '#form_container' ).addClass( 'small' );
+				$( '#login_form_container' ).addClass( 'small' );
 				location.reload();
 			}
 			else
