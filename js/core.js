@@ -27,11 +27,11 @@ function namespace( ns, context )
 
 function makeUrl( path )
 {
-	var settings = typeof dpoh_settings == 'object'
-		? dpoh_settings
-		: {};
+	var settings = typeof Dpoh.settings == 'object'
+		? Dpoh.settings
+		: { base_path : '/' };
 
-	return Dpoh.settings.base_path + path;
+	return settings.base_path + path;
 }
 
 render = (function()
