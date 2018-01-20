@@ -26,11 +26,11 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 			indicator.find( '.n' ).text( known_sessions.length );
 			if ( known_sessions.length )
 			{
-				indicator.removeClass( 'no-queued-connections' );
+				indicator.removeClass( 'inactive' );
 			}
 			else
 			{
-				indicator.addClass( 'no-queued-connections' );
+				indicator.addClass( 'inactive' );
 			}
 		}
 	}
