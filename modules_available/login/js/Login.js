@@ -141,28 +141,6 @@ Login = (function( $ )
 		$.get( makeUrl( 'api/users/list' ), cb.bind( undefined, true ) ).fail( cb.bind( undefined, false, {} ) );
 	}
 
-	var selected_item = false;
-	function saveSettings( e )
-	{
-		if ( selected_item && selected_item != getCurrentMode() )
-		{
-			localStorage.setItem( 'vortex_autoplay_mode', selected_item );
-		}
-	}
-
-	function cacheSettings( e )
-	{
-		if ( e.page == 'autorun' )
-		{
-			selected_item = $( '[name=autorun_mode]:checked' ).val();
-		}
-	}
-
-	function clearCachedSettings()
-	{
-		selected_item = false;
-	}
-
 	function switchToReset()
 	{
 		$( '.reset-pw-form, .login-form' ).toggleClass( 'inactive' );
@@ -198,9 +176,4 @@ Login = (function( $ )
 
 	subscribe( 'gather-settings-pages', provideSettingsPage );
 	subscribe( 'gather-settings-page-widgets', provideSettingsPageWidgets );
-	subscribe( 'save-settings', saveSettings );
-	subscribe( 'cache-settings', cacheSettings );
-	subscribe( 'clear-cached-settings', clearCachedSettings );
-
-
 }( jQuery ));
