@@ -45,7 +45,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	 */
 	function onGutterClicked( e )
 	{
-		// Ensue a line number cell was clicked (this should always be true)
+		// Ensure a line number cell was clicked (this should always be true)
 		var target = e.domEvent.target;
 		if ( target.className.indexOf( "ace_gutter-cell" ) == -1 )
 		{
