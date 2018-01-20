@@ -43,7 +43,6 @@ function build_script_requirements()
 		}
 	}
 
-
 	return implode( "\n\t\t", $result );
 }
 
