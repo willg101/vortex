@@ -137,6 +137,39 @@ class DbgpApp implements MessageComponentInterface
 
 	public function onMessage( ConnectionInterface $conn, $msg )
 	{
+		if ( $this->bridge->hasWsConnection() )
+		{
+			try
+			{
+				$root = array_get( explode( "\0", $msg ), 1 );
+				if ( $root )
+				{
+					$root = simplexml_load_string( $root );
+					if ( !empty( $root[ 'fileuri' ] ) && is_readable( $root[ 'fileuri' ] ) )
+					{
+						$file_contents = file_get_contents( $root[ 'fileuri' ] );
+						if ( preg_match( '#^<\?php\s*/\*\s*(dpoh|vortex):\s*ignore\s*\*/#', $file_contents ) )
+						{
+							$this->logger->debug( "$root[fileuri] is marked to be ignored; detaching" );
+							unset( $this->queue[ $conn->resourceId ] );
+							$conn->close();
+							$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $this->peekQueue() ) . "</wsserver>" );
+							return;
+						}
+					}
+				}
+			}
+			catch ( Exception $e )
+			{
+				$this->logger->error( 'Exception in ' . __CLASS__ . '::' . __FUNCTION__ . '(): ' . $e );
+			}
+		}
+		else
+		{
+			$conn->send( "detach -i 0\0" );
+			$conn->close();
+		}
+
 		if ( !empty( $this->queue[ $conn->resourceId ] ) )
 		{
 			$msg = array_get( explode( "\0", $msg ), 1 );
@@ -152,48 +185,19 @@ class DbgpApp implements MessageComponentInterface
 			return;
 		}
 
-		if ( $this->bridge->hasWsConnection() )
+		$data = [
+			'connection' => $conn,
+			'message'    => $msg,
+			'abort'      => FALSE,
+			'bridge'     => $this->bridge,
+			'logger'     => $this->logger,
+		];
+		fire_hook( 'dbg_message_received', $data );
+		if ( !$data[ 'abort' ] && $data[ 'message' ] )
 		{
-			try
-			{
-				$root = array_get( explode( "\0", $msg ), 1 );
-				if ( $root )
-				{
-					$root = simplexml_load_string( $root );
-					if ( !empty( $root[ 'fileuri' ] ) && is_readable( $root[ 'fileuri' ] ) )
-					{
-						$file_contents = file_get_contents( $root[ 'fileuri' ] );
-						if ( preg_match( '#^<?php /\*(dpoh|vortex):ignore\*/#', $file_contents ) )
-						{
-							$this->logger->debug( "$root[fileuri] is marked to be ignored; detaching" );
-							$conn->close();
-						}
-					}
-				}
-			}
-			catch ( Exception $e )
-			{
-				$this->logger->error( 'Exception in ' . __CLASS__ . '::' . __FUNCTION__ . '(): ' . $e );
-			}
+			$this->bridge->sendToWs( $data[ 'message' ], TRUE );
+		}
 
-			$data = [
-				'connection' => $conn,
-				'message'    => $msg,
-				'abort'      => FALSE,
-				'bridge'     => $this->bridge,
-				'logger'     => $this->logger,
-			];
-			fire_hook( 'dbg_message_received', $data );
-			if ( !$data[ 'abort' ] && $data[ 'message' ] )
-			{
-				$this->bridge->sendToWs( $data[ 'message' ], TRUE );
-			}
-		}
-		else
-		{
-			$conn->send( "detach -i 0\0" );
-			$conn->close();
-		}
 	}
 
 	public function onError( ConnectionInterface $conn, Exception $e )
