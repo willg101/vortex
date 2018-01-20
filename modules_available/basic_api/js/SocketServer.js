@@ -66,6 +66,14 @@ namespace( 'BasicApi' ).SocketServer = (function( $ )
 	 */
 	function openConnection()
 	{
+		// Allow connections to be aborted by other modules
+		var options = { 'abort' : false };
+		publish( 'attempt-connection', { options : options } );
+		if ( options.abort )
+		{
+			return;
+		}
+
 		// Don't open a new connection if one is currently open
 		if ( current_connection )
 		{
