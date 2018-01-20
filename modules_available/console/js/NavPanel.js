@@ -287,19 +287,6 @@
 		} );
 	}
 
-	function onStartDummySessionClicked( e )
-	{
-		if ( !BasicApi.Debugger.sessionIsActive() )
-		{
-			e.preventDefault();
-			clearInterval( dummy_session_timeout );
-			dummy_session_timeout = setInterval( function()
-			{
-				$.get( 'dummy.php?XDEBUG_SESSION_START' );
-			}, 250 );
-		}
-	}
-
 	function onSessionStatusChanged()
 	{
 		clearInterval( dummy_session_timeout );
@@ -316,7 +303,6 @@
 	$( document ).on( 'click',             '[data-open-file]',   onOpenFileClicked );
 	$( document ).on( 'click',             '#console_container', onConsoleClicked );
 	$( document ).on( 'keydown',                                 onDocumentKeydown );
-	$( document ).on( 'click', '.start-dummy-session',           onStartDummySessionClicked );
 	$( document ).on( 'click', '[data-open-nav-panel]',          onNavButtonClicked );
 	$( document ).on( 'click', '[data-open-file]',               onOpenFileClicked );
 	$( window   ).on( 'resize load',                             resizeCell );
