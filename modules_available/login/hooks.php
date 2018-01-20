@@ -42,6 +42,11 @@ function login_boot()
 	login_clear_expired_sessions_and_tokens();
 }
 
+function login_alter_js_options( &$options )
+{
+	$options[ 'authenticated' ] = dpoh_session_id_is_valid();
+}
+
 function login_render_preprocess( &$data )
 {
 	if ( $data[ 'template' ] == 'toolbar_right' )

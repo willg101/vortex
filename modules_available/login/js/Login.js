@@ -29,6 +29,14 @@ Login = (function( $ )
 		} );
 	}
 
+	function onAttemptConnection( e )
+	{
+		if ( !userIsLoggedIn() )
+		{
+			e.options.abort = true;
+		}
+	}
+
 	function shakeForm()
 	{
 		$( '#login_form_container' ).removeClass( 'shake' );
@@ -141,6 +149,13 @@ Login = (function( $ )
 		$( '.reset-pw-form, .login-form' ).toggleClass( 'inactive' );
 	}
 
+	function userIsLoggedIn()
+	{
+		return typeof Dpoh == 'object'
+			? Dpoh.authenticated
+			: false;
+	}
+
 	function inviteUser( e )
 	{
 		if ( e.type == 'keypress' && e.which != 13 )
@@ -169,6 +184,7 @@ Login = (function( $ )
 	$( document ).on( 'click', '.invite-user', inviteUser );
 	$( document ).on( 'keypress', '#invite_user', inviteUser );
 
+	subscribe( 'attempt-connection',    onAttemptConnection );
 	subscribe( 'gather-settings-pages', provideSettingsPage );
 	subscribe( 'gather-settings-page-widgets', provideSettingsPageWidgets );
 }( jQuery ));
