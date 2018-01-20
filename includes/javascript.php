@@ -8,13 +8,15 @@
  */
 function build_script_requirements()
 {
+	$options = [
+		'settings' => [
+			'base_path' => base_path(),
+		],
+		'templates' => load_handlebar_templates()
+	];
+	fire_hook( 'alter_js_options', $options );
 	$result = [
-		'<script>Dpoh = ' . json_encode( [
-			'settings' => [
-				'base_path' => base_path(),
-			],
-			'templates' => load_handlebar_templates(),
-		] ) . ';</script>'
+		'<script>Dpoh = ' . json_encode( $options ) . ';</script>'
 	];
 
 	// Include each "core"/"internal"/absolutely required JS file
