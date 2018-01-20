@@ -2,9 +2,9 @@
 
 function toolbar_render_preprocess( &$data )
 {
-	if ( $data[ 'template' ] != 'main_center' )
+	if ( $data[ 'template' ] == 'toolbar_right' )
 	{
-		return;
+		$data[ 'implementations' ][ 'toolbar' ][ 'weight' ] = 10;
 	}
 
 	$reordered = [
