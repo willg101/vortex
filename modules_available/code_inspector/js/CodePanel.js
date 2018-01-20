@@ -576,11 +576,28 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		} );
 	}
 
+	function onClearBpClicked()
+	{
+		Object.keys( confirmed_breakpoints ).forEach( function( filename )
+		{
+			Object.keys( confirmed_breakpoints[ filename ] ).forEach( function( lineno )
+			{
+				toggleBreakpoint( lineno, undefined, filename );
+			} );
+		} );
+	}
+
+	function alterUserMenuItems( e )
+	{
+		e.items.push( { content : 'Clear all breakpoints', attr : { 'data-action' : 'clear-all-breakpoints' } } );
+	}
+
 	$( init );
 	$( document ).on( 'click',    '[data-command]',       onCommandButtonClicked );
 	$( document ).on( 'click',    '.show-currently-open-files', onShowCurrentlyOpenFilesClicked );
 	$( document ).on( 'keypress', '.bp-expression-input', onNewExpressionGiven )
 	$( document ).on( 'click',    '.refresh-file',        onRefereshFileClicked )
+	$( document ).on( 'click',    '[data-action=clear-all-breakpoints]', onClearBpClicked )
 
 	subscribe( 'register-preprocess-autorun', preprocessAutorun )
 	subscribe( 'session-status-changed',      onSessionStatusChanged )
@@ -589,6 +606,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	subscribe( 'file-nav-request',            onFileNavRequest )
 	subscribe( 'layout-changed',              onLayoutChanged )
 	subscribe( 'before-send',                 onBeforeSend );
+	subscribe( 'alter-user-menu-items',       alterUserMenuItems );
 
 	return {
 		clearBreakpoints          : clearBreakpoints,
