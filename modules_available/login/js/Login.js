@@ -1,10 +1,5 @@
 Login = (function( $ )
 {
-	$( document ).on( 'click', '.login-sign-out', function( e )
-	{
-		$.post( makeUrl( 'logout' ), function(){ location.reload(); } );
-	} );
-
 	$( document ).on( 'keypress', '.login-form input', tryLogin );
 	$( document ).on( 'click', 'button.login', tryLogin );
 

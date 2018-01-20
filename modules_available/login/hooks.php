@@ -42,6 +42,14 @@ function login_boot()
 	login_clear_expired_sessions_and_tokens();
 }
 
+function login_render_preprocess( &$data )
+{
+	if ( $data[ 'template' ] == 'toolbar_right' )
+	{
+		$data[ 'vars' ][ 'user_name' ] = user( 'username' );
+	}
+}
+
 function login_preprocess_request( &$options )
 {
 	$is_logged_in = dpoh_session_id_is_valid();
