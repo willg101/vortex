@@ -2,6 +2,19 @@
 {
 	var dummy_session_timeout = null;
 
+	const MAGIC_EVAL_VAR_NAME = '$__';
+	const HEREDOC_PREFIX      = 'eval(<<<\'VORTEXEVAL\'\n';
+	const HEREDOC_SUFFIX      = '\nreturn ' + MAGIC_EVAL_VAR_NAME + ';\nVORTEXEVAL\n);';
+	var eval_magic_var_regex  = new RegExp( '\\' + MAGIC_EVAL_VAR_NAME + '($|[^_\\w])' )
+
+	function prepareCommand( command_str )
+	{
+		command_str = typeof command_str == 'string' ? command_str : '';
+		return command_str.match( eval_magic_var_regex )
+			? HEREDOC_PREFIX + command_str + HEREDOC_SUFFIX
+			: command_str;
+	}
+
 	function init()
 	{
 
@@ -56,7 +69,7 @@
 							$( '#' + id ).html( '<span class="no-debugger-message">Empty response '
 								+ 'received</span>' );
 						}
-					}, command );
+					}, prepareCommand( command ) );
 					BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 					term.resume();
 				};
@@ -94,7 +107,10 @@
 				}
 		},
 		{
-			greetings: false,
+			greetings: function( cb ){ cb( 'Tip: if you have trouble running a multi-statement '
+				+ 'snippet, try including the magic variable [[b;#21599f;]' + MAGIC_EVAL_VAR_NAME
+				+ ']. This will cause your code to be processed slightly differently and will '
+				+ '[[b;;]output the final value of ][[b;#21599f;]' + MAGIC_EVAL_VAR_NAME + '].' ); },
 			prompt : 'php> ',
 			name : 'console',
 			enabled : false,
