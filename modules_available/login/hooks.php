@@ -423,6 +423,28 @@ function login_create_tables()
 	}
 }
 
+function user( $key = NULL)
+{
+	static $user = NULL;
+	if ( $user === NULL )
+	{
+		if ( dpoh_session_id_is_valid() )
+		{
+			$sid     = array_get( $_COOKIE, 'dpoh_session_id' );
+			$results = db_query( 'SELECT user_id FROM sessions WHERE id = :sid', [ ':sid' => $sid ] );
+			$uid     = array_get( $results, '0.user_id', -1 );
+			$user    = login_load_account( $uid );
+		}
+		else
+		{
+			$user = [];
+		}
+	}
+	return $key !== NULL
+		? array_get( $user, $key )
+		: $user;
+}
+
 function login_handle_login()
 {
 	if ( $_SERVER[ 'REQUEST_METHOD' ] != 'POST' )
