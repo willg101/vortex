@@ -9,8 +9,6 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	var module_initialized    = false;
 	var after_init_cb         = false;
 
-	var TimedCoordinator = Vortex.TimedCoordinator;
-
 	function init()
 	{
 		var data = {
@@ -369,12 +367,9 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		if ( e.status == 'active' )
 		{
 			updateStatusIndicator( 'active-session' );
-			if ( Object.keys( confirmed_breakpoints ).length )
-			{
-				module_initialized = false;
-				sendAllBreakpoints();
-			}
-			else
+			module_initialized = false;
+			sendAllBreakpoints();
+			if ( !Object.keys( confirmed_breakpoints ).length )
 			{
 				BasicApi.Debugger.command( 'breakpoint_list' );
 			}
@@ -478,28 +473,27 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 	function sendAllBreakpoints()
 	{
-		var coordinator = new TimedCoordinator;
+		var deferreds = [];
 		Object.keys( confirmed_breakpoints ).forEach( function( filename )
 		{
 			Object.keys( confirmed_breakpoints[ filename ] ).forEach( function( lineno )
 			{
-				coordinator.register( function( activate )
+				var deferred = $.Deferred();
+				var expression = confirmed_breakpoints[ filename ][ lineno ].expression;
+				var callback   = function( filename, lineno, data )
 				{
-					var expression = confirmed_breakpoints[ filename ][ lineno ].expression;
-					var callback   = function( filename, lineno, data )
-					{
-						confirmed_breakpoints[ filename ][ lineno ].id = data.parsed.id;
-						activate();
-					}.bind( undefined, filename, lineno );
-					BasicApi.Debugger.command( 'breakpoint_set' , {
-						type : expression ? 'line' : 'conditional',
-						line : lineno,
-						file : filename,
-						}, callback, expression );
-				} );
+					confirmed_breakpoints[ filename ][ lineno ].id = data.parsed.id;
+					deferred.resolve();
+				}.bind( undefined, filename, lineno );
+				BasicApi.Debugger.command( 'breakpoint_set' , {
+					type : expression ? 'line' : 'conditional',
+					line : lineno,
+					file : filename,
+					}, callback, expression );
+				deferreds.push( deferred );
 			} );
 		} );
-		coordinator.activate( onBreakpointsInitialized );
+		$.when.apply( $, deferreds ).then( onBreakpointsInitialized );
 	}
 
 	function onBreakpointsInitialized()
@@ -561,19 +555,12 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}, true )
 	}
 
-	function preprocessAutorun( e )
+	function beforeAutorun( e )
 	{
-		e.waitForMe( function( signaler )
+		if ( !module_initialized )
 		{
-			if ( module_initialized )
-			{
-				signaler();
-			}
-			else
-			{
-				after_init_cb = signaler;
-			}
-		} );
+			after_init_cb = e.register();
+		}
 	}
 
 	function onClearBpClicked()
@@ -599,14 +586,14 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	$( document ).on( 'click',    '.refresh-file',        onRefereshFileClicked )
 	$( document ).on( 'click',    '[data-action=clear-all-breakpoints]', onClearBpClicked )
 
-	subscribe( 'register-preprocess-autorun', preprocessAutorun )
-	subscribe( 'session-status-changed',      onSessionStatusChanged )
-	subscribe( 'connection-status-changed',   onConnectionStatusChanged )
-	subscribe( 'response-received',           onResponseReceived )
-	subscribe( 'file-nav-request',            onFileNavRequest )
-	subscribe( 'layout-changed',              onLayoutChanged )
-	subscribe( 'before-send',                 onBeforeSend );
-	subscribe( 'alter-user-menu-items',       alterUserMenuItems );
+	subscribe( 'before-autorun',            beforeAutorun )
+	subscribe( 'session-status-changed',    onSessionStatusChanged )
+	subscribe( 'connection-status-changed', onConnectionStatusChanged )
+	subscribe( 'response-received',         onResponseReceived )
+	subscribe( 'file-nav-request',          onFileNavRequest )
+	subscribe( 'layout-changed',            onLayoutChanged )
+	subscribe( 'before-send',               onBeforeSend );
+	subscribe( 'alter-user-menu-items',     alterUserMenuItems );
 
 	return {
 		clearBreakpoints          : clearBreakpoints,

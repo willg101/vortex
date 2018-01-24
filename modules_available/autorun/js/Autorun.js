@@ -5,26 +5,22 @@ namespace( 'Autorun' ).Controller = (function( $ )
 		return localStorage.getItem( 'vortex_autoplay_mode' ) || 'not_focused';
 	}
 
-	var TimedCoordinator = Vortex.TimedCoordinator;
-
 	function onSessionInit( e )
 	{
-		BasicApi.Debugger.command( 'property_get', { name : '$_GET["VORTEX_NO_AUTORUN"]' }, function( data )
+		whenReadyTo( 'inspect-context' ).then( function()
 		{
-			if ( !data.parsed || !data.parsed[ 0 ] )
+			BasicApi.Debugger.command( 'property_get', { name : '$_GET["VORTEX_NO_AUTORUN"]' }, function( data )
 			{
-				var mode = getCurrentMode();
-
-				if ( mode != 'disabled' && ( document.visibilityState == 'hidden' || mode == 'always' ) )
+				if ( !data.parsed || !data.parsed[ 0 ] )
 				{
-					var coordinator = new TimedCoordinator;
-					publish( 'register-preprocess-autorun', { waitForMe : coordinator.getPublicApi() } );
-					// Give other modules a chance to send breakpoints, etc. If we don't do this, then
-					// breakpoints might not be sent, and so we'll never break.
-					coordinator.activate( BasicApi.Debugger.command.bind( BasicApi.Debugger.command, 'run' ),
-						1000 );
+					var mode = getCurrentMode();
+
+					if ( mode != 'disabled' && ( document.visibilityState == 'hidden' || mode == 'always' ) )
+					{
+						whenReadyTo( 'autorun' ).then( BasicApi.Debugger.command.bind( null, 'run' ) );
+					}
 				}
-			}
+			} );
 		} );
 	}
 
