@@ -1,20 +1,13 @@
 (function( $ )
 {
-	function getMenuItems()
+	function provideSettingsQuickActions( e )
 	{
-		var items = [ {
+		e.items.unshift( {
 			content : 'Log out',
-			attr : { 'data-action' : 'logout' },
-		} ];
-		publish( 'alter-user-menu-items', { items : items } );
-		return items;
-	}
-
-	function onIndicatorClicked()
-	{
-		var indicator = $( '#login_indicator' );
-		var items = getMenuItems();
-		new Theme.PopoverList( '', items , [ 'auto-size' ], { my : 'right top', at : 'right bottom', of : indicator }, indicator );
+			attr : {
+				'data-action' : 'logout'
+			},
+		} );
 	}
 
 	function onLogoutClicked()
@@ -26,6 +19,6 @@
 		} );
 	}
 
-	$( document ).on( 'click', '#login_indicator',     onIndicatorClicked );
+	subscribe( 'alter-settings-quick-actions', provideSettingsQuickActions );
 	$( document ).on( 'click', '[data-action=logout]', onLogoutClicked )
 }( jQuery ));

@@ -84,11 +84,22 @@ namespace( 'BasicApi' ).Controller = (function( $ )
 		}
 	}
 
-	subscribe( 'connection-status-changed', onConnectionStatusChanged );
-	subscribe( 'session-status-changed',    onSessionStatusChanged );
-	subscribe( 'before-inspect-context',    beforeInspectContext );
-	subscribe( 'session-init',              onSessionInit );
-	subscribe( 'response-received',         onResponseReceived );
+	function alterQuickActions( e )
+	{
+		e.items.unshift( {
+			content : 'Restart socket bridge',
+			attr : {
+				'data-command' : 'ctrl:restart',
+			},
+		} );
+	}
+
+	subscribe( 'connection-status-changed',    onConnectionStatusChanged );
+	subscribe( 'session-status-changed',       onSessionStatusChanged );
+	subscribe( 'before-inspect-context',       beforeInspectContext );
+	subscribe( 'session-init',                 onSessionInit );
+	subscribe( 'response-received',            onResponseReceived );
+	subscribe( 'alter-settings-quick-actions', alterQuickActions );
 	$( init );
 
 }( jQuery) );

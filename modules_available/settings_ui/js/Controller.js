@@ -2,6 +2,27 @@ namespace( 'SettingsUI' ).Controller = (function( $ )
 {
 	var most_recent_page;
 
+	function getQuickActions()
+	{
+		var items = [
+			{
+				content : 'All settings...',
+				attr : {
+					'data-action' : 'open-settings',
+				},
+			},
+		];
+		publish( 'alter-settings-quick-actions', { items : items } );
+		return items;
+	}
+
+	function onSettingsToolbarClicked()
+	{
+		var indicator = $( '#settings_toolbar' );
+		var items = getQuickActions();
+		new Theme.PopoverList( '', items , [ 'auto-size' ], { my : 'right top', at : 'right bottom', of : indicator }, indicator );
+	}
+
 	function gatherSettingsPages()
 	{
 		var event = {
@@ -57,7 +78,7 @@ namespace( 'SettingsUI' ).Controller = (function( $ )
 		return event.widgets.join( '' );
 	}
 
-	function onSettingsClicked()
+	function onShowSettingsClicked()
 	{
 		clearCachedSettings();
 
@@ -113,11 +134,6 @@ namespace( 'SettingsUI' ).Controller = (function( $ )
 	function provideSettingsPages( e )
 	{
 		e.pages.push( {
-			val   : 'general',
-			icon  : 'gear',
-			title : 'General Settings',
-		} );
-		e.pages.push( {
 			val   : 'about',
 			icon  : 'info-circle',
 			title : 'About',
@@ -129,10 +145,6 @@ namespace( 'SettingsUI' ).Controller = (function( $ )
 		if ( e.page == 'about' )
 		{
 			e.widgets.push( 'Vortex Debugger &copy; 2017 Will Groenendyk.' );
-		}
-		else if ( e.page == 'general' )
-		{
-			e.widgets.push( '<table><tr><td class="sm-cell"><button class="btn black" data-command="ctrl:restart"><span class="fa fa-fw fa-undo"></span></button></td><td>Restart the socket bridge</td></tr></table>' );
 		}
 	}
 
@@ -159,13 +171,13 @@ namespace( 'SettingsUI' ).Controller = (function( $ )
 		new Theme.PopoverList( '', list_processed, [], { my : 'left top', at : 'left bottom', of : $( '.settings-page' ) }, $( '.settings-page' ) );
 	}
 
-	$( document ).on( 'click',  '.show-settings', onSettingsClicked );
+	$( document ).on( 'click',  '[data-action=open-settings]', onShowSettingsClicked );
 	$( document ).on( 'click',  '.save-settings', onSaveClicked );
 	$( document ).on( 'click',  '.settings-page', onSettingsSelectorClicked );
 	$( document ).on( 'click',  '[data-show-settings-page]', onSettingsPageClicked );
 	$( document ).on( 'change', '.settings-page', onSettingsPageChanged );
+	$( document ).on( 'click',  '#settings_toolbar',    onSettingsToolbarClicked );
 
 	subscribe( 'gather-settings-pages',        provideSettingsPages );
 	subscribe( 'gather-settings-page-widgets', provideSettingsPageWidgets );
-
 }( jQuery ));

@@ -574,9 +574,14 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		} );
 	}
 
-	function alterUserMenuItems( e )
+	function alterQuickActions( e )
 	{
-		e.items.push( { content : 'Clear all breakpoints', attr : { 'data-action' : 'clear-all-breakpoints' } } );
+		e.items.unshift( {
+			content : 'Clear all breakpoints',
+			attr : {
+				'data-action' : 'clear-all-breakpoints'
+			}
+		} );
 	}
 
 	$( init );
@@ -586,14 +591,14 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	$( document ).on( 'click',    '.refresh-file',        onRefereshFileClicked )
 	$( document ).on( 'click',    '[data-action=clear-all-breakpoints]', onClearBpClicked )
 
-	subscribe( 'before-autorun',            beforeAutorun )
-	subscribe( 'session-status-changed',    onSessionStatusChanged )
-	subscribe( 'connection-status-changed', onConnectionStatusChanged )
-	subscribe( 'response-received',         onResponseReceived )
-	subscribe( 'file-nav-request',          onFileNavRequest )
-	subscribe( 'layout-changed',            onLayoutChanged )
-	subscribe( 'before-send',               onBeforeSend );
-	subscribe( 'alter-user-menu-items',     alterUserMenuItems );
+	subscribe( 'before-autorun',               beforeAutorun )
+	subscribe( 'session-status-changed',       onSessionStatusChanged )
+	subscribe( 'connection-status-changed',    onConnectionStatusChanged )
+	subscribe( 'response-received',            onResponseReceived )
+	subscribe( 'file-nav-request',             onFileNavRequest )
+	subscribe( 'layout-changed',               onLayoutChanged )
+	subscribe( 'before-send',                  onBeforeSend );
+	subscribe( 'alter-settings-quick-actions', alterQuickActions );
 
 	return {
 		clearBreakpoints          : clearBreakpoints,
