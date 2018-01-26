@@ -8,9 +8,39 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	var open_files            = {};
 	var module_initialized    = false;
 	var after_init_cb         = false;
+	var recent_files          = [];
+
+	function loadRecentFiles()
+	{
+		try
+		{
+			recent_files = JSON.parse( localStorage.getItem( 'vortex_recent_files' ) );
+		}
+		catch ( e )
+		{
+			recent_files = [];
+		}
+	}
+
+	function addRecentFile( normalized_filename )
+	{
+		var current_index = recent_files.indexOf( normalized_filename );
+		if ( current_index >= 0 )
+		{
+			recent_files.splice( current_index, 1 );
+		}
+		else if ( recent_files.length >= 10 )
+		{
+			recent_files.pop();
+		}
+		recent_files.unshift( normalized_filename );
+		localStorage.setItem( 'vortex_recent_files', JSON.stringify( recent_files ) );
+	}
 
 	function init()
 	{
+		loadRecentFiles();
+
 		var data = {
 			options : { theme : 'solarized_light', language : 'php' }
 		};
@@ -206,6 +236,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}
 
 		filename = normalizeFilename( filename );
+		addRecentFile( filename );
 
 		BasicApi.RemoteFiles.get( filename, function( data )
 		{
@@ -506,16 +537,16 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}
 	}
 
-	function listCurrentlyOpenFiles()
+	function listRecentlyOpenFiles()
 	{
 		var list = [];
 
-		for ( var filename in open_files )
+		for ( var i in recent_files )
 		{
 			list.push( {
-				content : open_files[ filename ],
+				content : recent_files[ i ].replace( /^.*\//, '' ),
 				attr : {
-					'data-open-file' : filename
+					'data-open-file' : recent_files[ i ],
 				},
 			} );
 		}
@@ -612,7 +643,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 					options : false,
 				},
 			];
-			var recent_files = listCurrentlyOpenFiles();
+			var recent_files = listRecentlyOpenFiles();
 			if ( recent_files.length )
 			{
 				lists.push( {
