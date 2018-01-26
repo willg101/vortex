@@ -202,8 +202,6 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 		}
 	}
 
-	$( init );
-	$( window ).load( showFileButtons );
 	subscribe( 'session-status-changed',    onSessionStatusChanged );
 
 	$( document ).on( 'keydown',  '#file_finder',     onGlobberKeydown );
