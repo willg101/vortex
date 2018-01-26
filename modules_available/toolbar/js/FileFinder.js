@@ -1,70 +1,13 @@
 namespace( 'CodeInspector' ).FileFinder = (function( $ )
 {
 	var dir_aliases = {};
-
-	function init()
-	{
-		// TODO: Add settings UI for file aliases
-	}
-
-	function showFileButtons()
-	{
-		/*$( '<span id="file_buttons">'
-				+ '<i class="fa fa-folder show-tree no-close-popover"></i>'
-				+ '<i class="fa fa-history recent-file closed no-close-popover"></i>'
-			+ '</span>'
-		).appendTo( $( '#file_finder' ).parent() );
-		repositionFileButtons();*/
-	}
-
-	function repositionFileButtons()
-	{
-		/*$( '#file_buttons' ).position( {
-			my : 'right center',
-			of : '#file_finder',
-			at : 'right center'
-		} );*/
-	}
-
-	function onRecentFilesClicked( e )
-	{
-		var recent_files_popover = $( e.target ).data( 'toggles_popover' );
-		if ( !recent_files_popover )
-		{
-			BasicApi.RemoteFiles.listRecent( function( success, data )
-			{
-				if ( success )
-				{
-					var list = [];
-					for ( var i in data )
-					{
-						list.push( {
-							attr : {
-								'data-open-file' : data[ i ].fullpath,
-							},
-							content : data[ i ].name,
-						} );
-					}
-					recent_files_popover.setList( list );
-				}
-				else
-				{
-					recent_files_popover.setContent( '<i class="fa fa-warning"></i> An error occured.' );
-				}
-			} );
-
-			recent_files_popover = new Theme.PopoverList( 'Recently Edited Files', false, [], { 'of' : e.currentTarget }, $( e.currentTarget ) );
-		}
-		else
-		{
-			recent_files_popover.remove();
-		}
-	}
+	var tab_pressed = false;
 
 	function onGlobberKeydown( e )
 	{
-		if ( e.which == 9 )
+		if ( e.which == 9 ) // tab
 		{
+			tab_pressed = true;
 			e.preventDefault();
 			current_val = $( e.target ).val();
 			if ( dir_aliases[ current_val ] )
@@ -206,7 +149,6 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 
 	function onGlobberFocus( e )
 	{
-		$( '#file_buttons' ).addClass( 'blur-hidden' );
 		if ( ! $( '#file_finder' ).val().trim() )
 		{
 			var def = (CodeInspector.CodePanel.getCurrentFile() || '').replace( /^file:\/\//, '' ).replace( /\/+[^\/]*$/, '' );
@@ -237,50 +179,6 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 		$( '#file_buttons' ).removeClass( 'blur-hidden' );
 	}
 
-	function onShowTreeClicked( e )
-	{
-		var tree_popover = $( e.target ).data( 'toggles_popover' );
-		if ( !tree_popover )
-		{
-			var html = '<div class="file-tree popover"><h2>All Files</h2><div id="file_tree"></div></div>';
-			tree_popover = new Theme.Popover( html, [], { 'of' : e.currentTarget }, $( e.currentTarget ) );
-
-			$( '#file_tree' ).jstree( {
-				'core' : {
-					'data' : {
-						'url' : function( node )
-						{
-							var path =  node.id == '#'
-								? ''
-								: node.li_attr[ 'data-full-path' ];
-							return BasicApi.RemoteFiles.apiPath( path, { view : 'jstree' } );
-						},
-					}
-				}
-			} );
-		}
-		else
-		{
-			tree_popover.remove();
-		}
-	}
-
-	function onNodeDoubleClicked( e, data )
-	{
-		var li = $( e.target ).closest( 'li' );
-		var is_file = li.attr( 'data-is-file' );
-		if ( !is_file || is_file === "false" )
-		{
-			return;
-		}
-
-		var filename = li.attr( 'data-full-path' );
-		publish( 'file-nav-request', {
-			filename : filename,
-			source   : 'tree',
-		} );
-	}
-
 	function onGlobberOptionClicked( e )
 	{
 		var target = $( e.target ).closest( '.globber-option' );
@@ -306,15 +204,11 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 
 	$( init );
 	$( window ).load( showFileButtons );
-	$( window ).on( 'resize', function(){ setTimeout( repositionFileButtons, 500 ) } );
 	subscribe( 'session-status-changed',    onSessionStatusChanged );
 
 	$( document ).on( 'keydown',  '#file_finder',     onGlobberKeydown );
-	$( document ).on( 'click',    '.show-tree',       onShowTreeClicked );
 	$( document ).on( 'click',    '.globber-option',  onGlobberOptionClicked );
-	$( document ).on( 'click',    '.recent-file',     onRecentFilesClicked );
 	$( document ).on( 'focusin',  '#file_finder',     onGlobberFocus );
 	$( document ).on( 'focusout', '#file_finder',     onGlobberBlur );
-	$( document ).on( 'dblclick.jstree',              onNodeDoubleClicked );
 
 }( jQuery ));

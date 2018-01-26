@@ -2,17 +2,33 @@
 
 #file_finder
 {
-	border: none;
+	border: 1px solid #CCC;
 	display: inline-block;
-	background: #E0E0E0;
+	background: transparent;
 	font-family: consolas, monospace;
 	box-sizing: border-box;
+	padding: 5px 10px;
+	margin: 10px;
 
 	&:active,
 	&:focus
 	{
 		outline: none;
-		background: #E8E8E8;
+	}
+}
+
+.file-bar
+{
+	flex-grow: 0;
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: row;
+	border-bottom: 1px solid #CCC;
+
+	.btn
+	{
+		flex-grow: 0;
+		flex-shrink: 0;
 	}
 }
 

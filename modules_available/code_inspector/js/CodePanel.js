@@ -506,26 +506,21 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}
 	}
 
-	function onShowCurrentlyOpenFilesClicked( e )
+	function listCurrentlyOpenFiles()
 	{
-		var target = $( e.target ).closest( '.no-close-popover' );
-		var open_files_popover = target.data( 'toggles_popover' );
-		if ( !open_files_popover )
-		{
-			var html = '';
-			for ( var filename in open_files )
-			{
-				html += '<a data-open-file="' + filename + '">' + open_files[ filename ] + '</a>';
-			}
+		var list = [];
 
-			html = '<h2>Currenly Open</h2>' + (html || 'No files are open right now');
-			open_files_popover = new Theme.Popover( html, [], { of : target }, $( target ) );
-			$( e.target ).data( 'toggles_popover', open_files_popover )
-		}
-		else
+		for ( var filename in open_files )
 		{
-			open_files_popover.remove();
+			list.push( {
+				content : open_files[ filename ],
+				attr : {
+					'data-open-file' : filename
+				},
+			} );
 		}
+
+		return list;
 	}
 
 	function onLayoutChanged()
@@ -584,12 +579,66 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		} );
 	}
 
+	function showQuickFiles()
+	{
+		var recent_files_popover = $( '#file_finder' ).data( 'toggles_popover' );
+		if ( !recent_files_popover )
+		{
+			BasicApi.RemoteFiles.listRecent( function( success, data )
+			{
+				if ( success )
+				{
+					var list = [];
+					for ( var i in data )
+					{
+						list.push( {
+							attr : {
+								'data-open-file' : data[ i ].fullpath,
+							},
+							content : data[ i ].name,
+						} );
+					}
+					recent_files_popover.setList( 0, { title : 'Recently Edited', options: list } );
+				}
+				else
+				{
+					recent_files_popover.setContent( '<i class="fa fa-warning"></i> An error occured.' );
+				}
+			} );
+
+			var lists = [
+				{
+					title : 'Recently Edited',
+					options : false,
+				},
+			];
+			var recent_files = listCurrentlyOpenFiles();
+			if ( recent_files.length )
+			{
+				lists.push( {
+					title : 'Recently Viewed',
+					options : recent_files,
+				} );
+			}
+			recent_files_popover = new Theme.PopoverList( {
+				lists   : lists,
+				classes : [],
+				el      : $( '#file_finder' ),
+				side    : 'left',
+			} );
+		}
+		else
+		{
+			recent_files_popover.remove();
+		}
+	}
+
 	$( init );
 	$( document ).on( 'click',    '[data-command]',       onCommandButtonClicked );
-	$( document ).on( 'click',    '.show-currently-open-files', onShowCurrentlyOpenFilesClicked );
 	$( document ).on( 'keypress', '.bp-expression-input', onNewExpressionGiven )
 	$( document ).on( 'click',    '.refresh-file',        onRefereshFileClicked )
 	$( document ).on( 'click',    '[data-action=clear-all-breakpoints]', onClearBpClicked )
+	$( document ).on( 'click',    '#file_finder',         showQuickFiles );
 
 	subscribe( 'before-autorun',               beforeAutorun )
 	subscribe( 'session-status-changed',       onSessionStatusChanged )
@@ -608,6 +657,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		updateStatusIndicator     : updateStatusIndicator,
 		updateBreakpoint          : updateBreakpoint,
 		addBreakpoint             : addBreakpoint,
+		showQuickFiles            : showQuickFiles
 	}
 
 }( jQuery ));
