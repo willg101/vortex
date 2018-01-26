@@ -5,14 +5,7 @@
 	</div>
 	<div class="relative-container">
 		<div class="editor-layout">
-			<pre id="editor" >// ██████╗ ██████╗  ██████╗ ██╗  ██╗
-// ██╔══██╗██╔══██╗██╔═══██╗██║  ██║
-// ██║  ██║██████╔╝██║   ██║███████║
-// ██║  ██║██╔═══╝ ██║   ██║██╔══██║
-// ██████╔╝██║     ╚██████╔╝██║  ██║ ████████╗
-// ╚═════╝ ╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═══════╝
-//                                 
-// Start an Xdebug session in order to begin</pre>
+			<pre id="editor" >Start an Xdebug session in order to begin.</pre>
 		</div>
 	</div>
 </div>
