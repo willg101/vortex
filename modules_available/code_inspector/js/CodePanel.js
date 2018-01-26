@@ -664,12 +664,22 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}
 	}
 
+	function onDocumentKeypress( e )
+	{
+		console.log( e.which, e.ctrlKey, e );
+		if ( e.which == 'O'.charCodeAt( 0 ) && e.ctrlKey )
+		{
+			$( '#file_finder' ).click().focus();
+		}
+	}
+
 	$( init );
 	$( document ).on( 'click',    '[data-command]',       onCommandButtonClicked );
 	$( document ).on( 'keypress', '.bp-expression-input', onNewExpressionGiven )
 	$( document ).on( 'click',    '.refresh-file',        onRefereshFileClicked )
 	$( document ).on( 'click',    '[data-action=clear-all-breakpoints]', onClearBpClicked )
 	$( document ).on( 'click',    '#file_finder',         showQuickFiles );
+	$( document ).on( 'keyup',                         onDocumentKeypress );
 
 	subscribe( 'before-autorun',               beforeAutorun )
 	subscribe( 'session-status-changed',       onSessionStatusChanged )
