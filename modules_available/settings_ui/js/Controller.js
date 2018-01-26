@@ -20,7 +20,17 @@ namespace( 'SettingsUI' ).Controller = (function( $ )
 	{
 		var indicator = $( '#settings_toolbar' );
 		var items = getQuickActions();
-		new Theme.PopoverList( '', items , [ 'auto-size' ], { my : 'right top', at : 'right bottom', of : indicator }, indicator );
+		new Theme.PopoverList( {
+			lists : [
+				{
+					title : '',
+					options : items,
+				},
+			],
+			classes : [ 'auto-size' ],
+			el      : indicator,
+			side    : 'right',
+		} );
 	}
 
 	function gatherSettingsPages()
@@ -168,7 +178,17 @@ namespace( 'SettingsUI' ).Controller = (function( $ )
 				attr : { 'data-show-settings-page' : list[i].val },
 			} );
 		}
-		new Theme.PopoverList( '', list_processed, [], { my : 'left top', at : 'left bottom', of : $( '.settings-page' ) }, $( '.settings-page' ) );
+		new Theme.PopoverList( {
+			lists : [
+				{
+					title : '',
+					options : list_processed,
+				},
+			],
+			classes : [],
+			el      : $( '.settings-page' ),
+			side    : 'left',
+		} );
 	}
 
 	$( document ).on( 'click',  '[data-action=open-settings]', onShowSettingsClicked );

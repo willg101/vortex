@@ -50,7 +50,17 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 					},
 				} );
 			}
-			new Theme.PopoverList( 'Queued Sessions', sessions_for_list , [ 'auto-size' ], { my : 'right top', at : 'right bottom', of : $( '#connection_queue_indicator' ) }, $( '#connection_queue_indicator' ) );
+			new Theme.PopoverList( {
+				lists : [
+					{
+						title : 'Queued Sessions',
+						options : sessions_for_list,
+					},
+				],
+				classes : [ 'auto-size' ],
+				el      : $( '#connection_queue_indicator' ),
+				side    : 'right',
+			} );
 		}
 		else
 		{

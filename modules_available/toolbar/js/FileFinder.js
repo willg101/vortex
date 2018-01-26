@@ -140,9 +140,19 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 						} );
 						if ( !popover )
 						{
-							popover = new Theme.PopoverList( false, false, [], { my : 'left top', at : 'left bottom', of : '#file_finder' }, $( '#file_finder' ) )
+							popover = new Theme.PopoverList( {
+								lists : [
+									{
+										title : '',
+										options : false,
+									},
+								],
+								classes : [ '' ],
+								el      : $( '#file_finder' ),
+								side    : 'left',
+							} );
 						}
-						popover.setList( items_for_rendering );
+						popover.setList( 0, { title : '', options : items_for_rendering } );
 						$( '#file_finder' ).blur().focus().val( '' ).val( base.substr( 0, min ) );
 					}
 					input = $( '#file_finder' )[ 0 ];
