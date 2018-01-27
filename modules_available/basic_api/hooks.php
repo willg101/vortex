@@ -3,6 +3,8 @@
 use Vortex\Cli\SocketServerStartCommand;
 use Vortex\Cli\SocketServerRunCommand;
 
+define( 'BASIC_API_N_MOST_RECENT_FILES', 10 );
+
 /**
  * @brief
  *	Implements hook_boot(). Adds request handlers for the files and config APIs
@@ -82,35 +84,15 @@ function basic_api_recent_files_api( $path )
 {
 	require_method( 'GET' );
 
-	$contents = [];
+	$extensions = implode( '\|', settings( 'allowed_extensions' ) );
+	$dirs = implode( ' ', array_map( 'escapeshellarg', settings( 'recent_dirs' ) ) );
+	$n_files = BASIC_API_N_MOST_RECENT_FILES;
+	$files = [];
+	exec( "find $dirs -type f -regextype sed -regex '.*\.\($extensions\)' -printf '%T@ %p\n' | sort -n | tail -n $n_files | cut -f2- -d\" \"", $files );
+	$files = array_filter( array_map( 'trim', $files ) );
+
 	$response = [];
-	foreach ( settings( 'recent_dirs' ) as $current_dir )
-	{
-		$extensions = implode( '\|', settings( 'allowed_extensions' ) );
-		$files = shell_exec( "find $current_dir -type f -mmin -480 | grep '\.\($extensions\)'" );
-		$contents = array_merge( $contents, array_filter( explode( "\n", $files ) ) );
-
-		// Sort the recent files by basename
-		usort( $contents, function( $a, $b )
-		{
-			$a = strtolower( basename( $a ) );
-			$b = strtolower( basename( $b ) );
-			if ( $a > $b )
-			{
-				return 1;
-			}
-			else if ( $b > $a )
-			{
-				return -1;
-			}
-			else
-			{
-				return 0;
-			}
-		} );
-	}
-
-	foreach ( $contents as $item )
+	foreach ( $files as $item )
 	{
 		if ( client_can_view_file( $item ) )
 		{
