@@ -3,6 +3,7 @@ namespace( 'Theme' ).PopoverList = (function( $ )
 	function PopoverList( options )
 	{
 		this.options = options;
+		this.updateListMap();
 
 		var toggler = options.el;
 		var position = {
@@ -15,6 +16,18 @@ namespace( 'Theme' ).PopoverList = (function( $ )
 	}
 
 	PopoverList.prototype = Object.create( Theme.Popover.prototype );
+
+	PopoverList.prototype.updateListMap = function()
+	{
+		this.map = [];
+		(this.options.lists || []).forEach( function( list, i )
+		{
+			if ( list.id )
+			{
+				this.map[ list.id ] = i;
+			}
+		}.bind( this ) );
+	};
 
 	PopoverList.prototype.renderLists = function()
 	{
@@ -60,12 +73,20 @@ namespace( 'Theme' ).PopoverList = (function( $ )
 	PopoverList.prototype.setLists = function( new_lists )
 	{
 		this.options.lists = new_lists;
+		this.updateListMap();
 		this.setContent( this.renderLists() );
 	}
 
 	PopoverList.prototype.setList = function( i, new_list )
 	{
+		if ( typeof i == 'string' )
+		{
+			i = typeof this.map[ i ] != 'undefined'
+				? this.map[ i ]
+				: this.options.lists.length;
+		}
 		this.options.lists[ i ] = new_list;
+		this.updateListMap();
 		this.setContent( this.renderLists() );
 	}
 
