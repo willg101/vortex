@@ -95,7 +95,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 								side    : 'left',
 							} );
 						}
-						popover.setList( 0, { title : '', options : items_for_rendering } );
+						popover.setLists( [ { title : '', options : items_for_rendering } ] );
 						$( '#file_finder' ).blur().focus().val( '' ).val( base.substr( 0, min ) );
 					}
 					input = $( '#file_finder' )[ 0 ];

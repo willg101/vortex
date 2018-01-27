@@ -629,7 +629,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 							content : data[ i ].name,
 						} );
 					}
-					recent_files_popover.setList( 0, { title : 'Recently Edited', options: list } );
+					recent_files_popover.setList( 'recently_edited', { id : 'recently_edited', title : 'Recently Edited', options: list } );
 				}
 				else
 				{
@@ -640,13 +640,14 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 			var lists = [
 				{
 					title : 'Recently Edited',
+					id : 'recently_edited',
 					options : false,
 				},
 			];
 			var recent_files = listRecentlyOpenFiles();
 			if ( recent_files.length )
 			{
-				lists.push( {
+				lists.unshift( {
 					title : 'Recently Viewed',
 					options : recent_files,
 				} );
