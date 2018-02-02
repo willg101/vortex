@@ -220,63 +220,6 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		}
 	}
 
-	function buildContextTree_old( context, stack_depth, cid, is_recursive )
-	{
-		var html = '';
-
-		context.forEach( function( property )
-		{
-			if ( ! html )
-			{
-				html = '<ul>';
-			}
-
-			var value = $('<div>').text( property.value || '' ).html();
-
-			var icon = 'fa-question-circle-o';
-			switch ( property.type )
-			{
-				case 'Superglobals' : icon = 'fa-globe';          break;
-				case 'Locals'       : icon = 'fa-location-arrow'; break;
-				case 'bool'         : icon = 'fa-toggle-on';      break;
-				case 'null'         : icon = 'fa-close';          break;
-				case 'string'       : icon = 'fa-quote-left';     break;
-				case 'object'       : icon = 'fa-cogs';           break;
-				case 'array'        : icon = 'fa-th-list';        break;
-				case 'int'          : icon = 'fa-hashtag';        break;
-				case 'float'        : icon = 'fa-dot-circle-o';   break;
-			}
-
-			if ( property.type == 'null' )
-			{
-				value = 'NULL'
-			}
-			else if ( property.type == 'bool' )
-			{
-				value = Number( value ) ? 'TRUE' : 'FALSE';
-			}
-
-			if ( property.fullname == 'Superglobals' )
-			{
-				a =1;
-			}
-
-			html += '<li ' + ( property.no_alter ? 'data-no-alter="true"' : '' ) + ' data-identifier="'
-				+ property.fullname + '" class="identifier-leaf" data-jstree="{ &quot;icon&quot; : &quot;identifier-icon fa fa-fw ' + icon + '&quot; }"'
-				+ 'data-stack-depth="' + stack_depth + '"'
-				+ 'data-current-value="' + value.replace( /"/g, '&quot;' ) + '"'
-				+ ( property.address ? ' data-address="' + property.address + '"' : '' )
-				+ ( cid ? ' data-cid="' + cid + '"' : '' ) + '>'
-				+ '<span class="identifier">' + ( is_recursive ? property.name : property.fullname ) + '</span>'
-				+ ( [ 'uninitialized', 'object', 'array', 'Superglobals', 'Locals' ].indexOf( property.type ) == -1 && property.name ? ": " : '' )
-				+ ( property.type == 'string' ? '"' + value + '"' : value )
-				+ ( property.children ? buildContextTree( property.children, stack_depth, property.cid || cid, true ) : '' )
-				+ '</li>';
-		} );
-
-		return html && html + '</ul>';
-	}
-
 	function updateStack()
 	{
 		BasicApi.Debugger.command( 'stack_get' );
