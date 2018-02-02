@@ -14,7 +14,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	{
 		try
 		{
-			recent_files = JSON.parse( localStorage.getItem( 'vortex_recent_files' ) );
+			recent_files = JSON.parse( localStorage.getItem( 'vortex_recent_files' ) ) || [];
 		}
 		catch ( e )
 		{
