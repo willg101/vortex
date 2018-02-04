@@ -2,6 +2,9 @@ namespace( 'Theme' ).PopoverList = (function( $ )
 {
 	function PopoverList( options )
 	{
+		options.classes = options.classes || [];
+		options.classes.push( 'no-padding' );
+
 		this.options = options;
 		this.updateListMap();
 

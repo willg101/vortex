@@ -1094,14 +1094,24 @@ html
 	overflow-y: auto;
 	background-color: #FFF;
 	box-shadow: 0 0 30px rgba(0,0,0,0.3);
-	padding: 10px;
+
+	&:not(.no-padding)
+	{
+		padding: 10px;
+	}
 	box-sizing: border-box;
 	z-index: 99999;
+
 	h2
 	{
-		margin: 0;
+		margin: 5px 10px;
 		font-size: 15px;
 		color: @secondary-color;
+
+		&.bottom-margin-only
+		{
+			margin: 0 0 5px;
+		}
 	}
 
 	&.auto-size
@@ -1115,10 +1125,10 @@ html
 	.popover-list-option
 	{
 		.bouncy();
-		padding: 5px;
+		padding: 5px 10px;
 		cursor: pointer;
 		font-family: consolas, monospace;
-		background: #EEE;
+		background: #F8F8F8;
 		display:block;
 		width: 100%;
 		box-sizing: border-box;
