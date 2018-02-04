@@ -1,0 +1,16 @@
+{{#unless no_table}}
+<table class="watch">
+	<tr>
+		<td class="add-expression" data-modal-role=open colspan="4"><i class="fa fa-plus"></i> Add expression...</td>
+	</tr>
+{{/unless}}
+	{{#each expressions}}
+	<tr data-watch-id="{{@index}}">
+		<td class="btn-cell"><button data-role="delete" class="btn black sm"><i class="fa fa-trash"></i></button></td>
+		<td class="display-expression">{{expression}}</td>
+		<td class="result"></td>
+	</tr>
+	{{/each}}
+{{#unless no_table}}
+</table>
+{{/unless}}

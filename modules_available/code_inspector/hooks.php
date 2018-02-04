@@ -18,6 +18,13 @@ function code_inspector_provide_windows()
 			'content'   => render( 'context_window' ),
 		],
 		[
+			'title'     => 'Watch',
+			'id'        => 'watch',
+			'secondary' => '',
+			'icon'      => 'binoculars',
+			'content'   => render( 'watch_window' ),
+		],
+		[
 			'title'     => 'Stack',
 			'id'        => 'stack',
 			'secondary' => '<span class="status-indicator"><i class="fa fa-sort-amount-desc"></i> <span id="stack_depth"></span></span>',

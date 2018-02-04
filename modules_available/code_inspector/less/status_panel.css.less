@@ -6,6 +6,70 @@
 	.transition();
 }
 
+table.watch
+{
+	border-collapse: collapse;
+	width: 100%;
+
+	tr:not(:first-child) td
+	{
+		border-top: 1px solid rgba( 0, 0, 0, 0.1 );
+	}
+
+	tr:first-child td
+	{
+		padding: 5px 10px;
+		text-align: center;
+		background: rgba(0,0,0,0.1);
+		position: relative;
+		.transition();
+
+		&:after
+		{
+			.transition();
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			border-bottom: 3px solid transparent;
+			content: ' ';
+			left: 0;
+		}
+
+		&:hover
+		{
+			background: rgba(0,0,0,0.2);
+			cursor: pointer;
+
+			&:after
+			{
+				border-color: @tertiary-color;
+			}
+		}
+
+		&:active
+		{
+			transform: scale( .9 );
+		}
+	}
+
+	td
+	{
+		&.btn-cell
+		{
+			padding: 0 5px;
+		}
+
+		padding: 5px;
+		width: 0;
+		whitespace: no-wrap;
+
+		&.result
+		{
+			width: 100%;
+		}
+	}
+}
+
 #stack .stack-table
 {
 	box-shadow: none;
