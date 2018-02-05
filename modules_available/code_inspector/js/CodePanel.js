@@ -667,7 +667,6 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 	function onDocumentKeypress( e )
 	{
-		console.log( e.which, e.ctrlKey, e );
 		if ( e.which == 'O'.charCodeAt( 0 ) && e.ctrlKey )
 		{
 			$( '#file_finder' ).click().focus();
