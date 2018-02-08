@@ -269,9 +269,12 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 			if ( line )
 			{
 				var Range = ace.require('ace/range').Range;
-				current_line_marker = editor.session.addMarker( new Range( line - 1, 0, line - 1, 1),
-					"ace-current-line", "fullLine" );
-				editor.getSession().addGutterDecoration( line-1, "gutter-current-line" );
+				if ( BasicApi.Debugger.sessionIsActive() )
+				{
+					current_line_marker = editor.session.addMarker( new Range( line - 1, 0, line - 1, 1),
+						"ace-current-line", "fullLine" );
+					editor.getSession().addGutterDecoration( line-1, "gutter-current-line" );
+				}
 				editor.scrollToLine( line , true, true, function(){} );
 				current_line = line;
 			}
