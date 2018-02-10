@@ -2,15 +2,19 @@
 
 class LayoutConflictException extends Exception {};
 
-// TODO:
-//	- Clicking on file input shows most recent files automatically
-//	- Create dialog box that allows users to select files in a wysiwyg fashion
-
+/**
+ * @brief
+ *	Implements hook_boot
+ */
 function vue_boot()
 {
 	request_handlers()->register( '', 'vue_render_with_layout_engine', [ 'access' => 'authenticated_only' ] );
 }
 
+/**
+ * @brief
+ *	Renders the Debugger page
+ */
 function vue_render_with_layout_engine()
 {
 	$layouts = fire_hook( 'provide_layouts' );
@@ -41,14 +45,27 @@ function vue_render_with_layout_engine()
 	] );
 }
 
+/**
+ * @brief
+ *	Implements hook_preprocess
+ */
 function vue_render_preprocess( &$data )
 {
 	if ( $data[ 'template' ] == 'vortex_logo' )
 	{
+		// Provide the directory that contains the graphics for the logo
 		$data[ 'vars' ][ 'img_path' ] = base_path() . '/modules_enabled/vue/img';
 	}
 }
 
+/**
+ * @brief
+ *	Generates the HTML for a Debugger layout
+ *
+ * @param array $layout
+ *
+ * @retval string
+ */
 function vue_build_layout( $layout )
 {
 	static $id = 0;
@@ -74,6 +91,10 @@ function vue_build_layout( $layout )
 	return $html . '</div>';
 }
 
+/**
+ * @brief
+ *	Implements hook_provide_layouts
+ */
 function vue_provide_layouts()
 {
 	return [
