@@ -1,7 +1,7 @@
 namespace( 'Theme' ).Popover = (function( $ )
 {
-	var template_name    = 'theme_2.popover';
-	var popover_selector = '.theme-2-popover';
+	var template_name    = 'vue.popover';
+	var popover_selector = '.vue-popover';
 
 	function Popover( content, classes, position, toggle_button, delay_show )
 	{

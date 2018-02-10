@@ -1,6 +1,6 @@
 namespace( 'Theme' ).Spinner = (function( $ )
 {
-	var template_name = 'theme_2.spinner';
+	var template_name = 'vue.spinner';
 	var rendered      = false;
 
 	function Spinner(){}
@@ -10,7 +10,7 @@ namespace( 'Theme' ).Spinner = (function( $ )
 		if ( !rendered )
 		{
 			rendered = render( template_name, {
-				img_path : Dpoh.settings.base_path + 'modules_enabled/theme_2/img',
+				img_path : Dpoh.settings.base_path + 'modules_enabled/vue/img',
 			} );
 		}
 		return rendered;

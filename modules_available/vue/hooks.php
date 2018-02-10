@@ -6,12 +6,12 @@ class LayoutConflictException extends Exception {};
 //	- Clicking on file input shows most recent files automatically
 //	- Create dialog box that allows users to select files in a wysiwyg fashion
 
-function theme_2_boot()
+function vue_boot()
 {
-	request_handlers()->register( '', 'theme_2_render_with_layout_engine', [ 'access' => 'authenticated_only' ] );
+	request_handlers()->register( '', 'vue_render_with_layout_engine', [ 'access' => 'authenticated_only' ] );
 }
 
-function theme_2_render_with_layout_engine()
+function vue_render_with_layout_engine()
 {
 	$layouts = fire_hook( 'provide_layouts' );
 	fire_hook( 'alter_layouts', $layouts );
@@ -20,7 +20,7 @@ function theme_2_render_with_layout_engine()
 	{
 		foreach ( $module_layouts as $layout )
 		{
-			$layouts_rendered .= theme_2_build_layout( $layout );
+			$layouts_rendered .= vue_build_layout( $layout );
 		}
 	}
 
@@ -31,7 +31,7 @@ function theme_2_render_with_layout_engine()
 	{
 		foreach ( $module_windows as $window )
 		{
-			$windows_rendered .= render( 'theme_2_window', $window );
+			$windows_rendered .= render( 'vue_window', $window );
 		}
 	}
 
@@ -41,15 +41,15 @@ function theme_2_render_with_layout_engine()
 	] );
 }
 
-function theme_2_render_preprocess( &$data )
+function vue_render_preprocess( &$data )
 {
 	if ( $data[ 'template' ] == 'vortex_logo' )
 	{
-		$data[ 'vars' ][ 'img_path' ] = base_path() . '/modules_enabled/theme_2/img';
+		$data[ 'vars' ][ 'img_path' ] = base_path() . '/modules_enabled/vue/img';
 	}
 }
 
-function theme_2_build_layout( $layout )
+function vue_build_layout( $layout )
 {
 	static $id = 0;
 	$title_attr = '';
@@ -66,7 +66,7 @@ function theme_2_build_layout( $layout )
 	{
 		foreach ( $layout[ 'children' ] as $child )
 		{
-			$html .= theme_2_build_layout( $child );
+			$html .= vue_build_layout( $child );
 		}
 	}
 
@@ -74,7 +74,7 @@ function theme_2_build_layout( $layout )
 	return $html . '</div>';
 }
 
-function theme_2_provide_layouts()
+function vue_provide_layouts()
 {
 	return [
 		'jsfiddle-like' => [

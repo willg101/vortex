@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="theme-2">
+<html class="vue">
 	<head>
 		<title>Vortex</title>
 		<meta charset="UTF-8">

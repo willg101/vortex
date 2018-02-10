@@ -1,6 +1,6 @@
 namespace
 
-namespace( 'Theme2' ).Splash = (function( $ )
+namespace( 'Vue' ).Splash = (function( $ )
 {
 	var did_load = false;
 	var last_timeout;
@@ -64,7 +64,7 @@ namespace( 'Theme2' ).Splash = (function( $ )
 	$( document ).on( 'transitionend', '.splash-outermost', onTransitionEnd );
 }( jQuery ));
 
-namespace( 'Theme2' ).Pane = (function( $ )
+namespace( 'Vue' ).Pane = (function( $ )
 {
 	/**
 	 * @brief
@@ -257,7 +257,7 @@ namespace( 'Theme2' ).Pane = (function( $ )
 					$( '#layout_in_use' ).removeClass( 'rearranging' );
 					var self = $( this );
 					self.css( self.is( '.horizontal' ) ? 'height' : 'width', '' );
-					Theme2.Pane.current_layout.validateAll();
+					Vue.Pane.current_layout.validateAll();
 					$( document ).trigger( {
 						type : 'dpoh-interface:layout-changed',
 						pane : '*',
@@ -320,7 +320,7 @@ namespace( 'Theme2' ).Pane = (function( $ )
 			$( '#layout_in_use' ).removeClass( 'rearranging' );
 			var self = $( this );
 			self.css( self.is( '.horizontal' ) ? 'height' : 'width', '' );
-			Theme2.Pane.current_layout.validateAll();
+			Vue.Pane.current_layout.validateAll();
 		} ).on( 'sortover', function( e, ui )
 		{
 			$( e.target ).addClass( 'sortover' );
@@ -399,7 +399,7 @@ namespace( 'Theme2' ).Pane = (function( $ )
 	 */
 	Pane.prototype.suggestOwner = function( a_window )
 	{
-		if ( a_window instanceof Theme2.Window )
+		if ( a_window instanceof Vue.Window )
 		{
 			a_window = a_window.id;
 		}
@@ -775,7 +775,7 @@ namespace( 'Theme2' ).Pane = (function( $ )
 	return Pane;
 }( jQuery ));
 
-namespace( 'Theme2' ).Window = (function( $ )
+namespace( 'Vue' ).Window = (function( $ )
 {
 	/**
 	 * @brief
@@ -792,7 +792,7 @@ namespace( 'Theme2' ).Window = (function( $ )
 		this.element.data( 'window', this );
 
 		// Find out which Pane should contain this window, and then attach to validate that Pane
-		Theme2.Pane.current_layout.suggestOwner( this ).attach( this );
+		Vue.Pane.current_layout.suggestOwner( this ).attach( this );
 
 		this.state = 'normal';
 		// Valid states: 'minimized', 'maximized', 'normal'
@@ -1085,12 +1085,12 @@ namespace( 'Theme2' ).Window = (function( $ )
 
 $( window ).load( function()
 {
-	Theme2.Pane.boot();
-	Theme2.Window.boot();
+	Vue.Pane.boot();
+	Vue.Window.boot();
 } );
 
 
-namespace( 'Theme2' ).LayoutSelector = (function( $ )
+namespace( 'Vue' ).LayoutSelector = (function( $ )
 {
 	var restart_needed = false;
 
@@ -1112,8 +1112,8 @@ namespace( 'Theme2' ).LayoutSelector = (function( $ )
 			+ '</div>' );
 
 		var layout = i == 0
-			? Theme2.Pane.current_layout
-			: new Theme2.Pane( el );
+			? Vue.Pane.current_layout
+			: new Vue.Pane( el );
 
 		var jq = $( '<div class="layout-selector-widget">' ).append( $( '<div class="layout-preview-container" data-index="' + i + '" data-layout-id="' + el.attr( 'data-split-id' ) + '">' )
 				.append( layout.buildPreviewLayout() ) )
