@@ -286,12 +286,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			}
 			else
 			{
-				var first_pane = this.children[ 0 ];
-				while( !first_pane.isLeaf() )
-				{
-					first_pane = first_pane.children[ 0 ];
-				}
-				return first_pane;
+				return this.element.find( '.leaf' ).first().data( 'pane' );
 			}
 		}
 	};
