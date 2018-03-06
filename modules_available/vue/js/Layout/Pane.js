@@ -138,7 +138,6 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		layout.find( '.leaf' ).each( function()
 		{
 			Sortable.create( this, {
-				//forceFallback: true,
 				group: "omega",
 				handle: '.label-row',
 				filter : '.btn',
@@ -172,58 +171,6 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 				},
 			} );
 		} );
-/*		layout.find(  '.leaf' ).sortable( {
-			handle : '.label-row',
-			cancel : '.btn',
-			cursorAt: { left : 5, top : 5 },
-			appendTo : 'body',
-			helper : 'clone',
-			scroll : false,
-			tolerance : 'pointer',
-		} ).each( function()
-		{
-			$( this ).sortable( "option", "connectWith", layout.find( '.leaf' ) );
-		} ).on( 'sortupdate', function( e, ui )
-		{
-			layout.find( '.leaf' ).each( function()
-			{
-				var windows = $( this ).children().map( function(){ return $( this ).attr( 'data-window-id' ) } ).toArray();
-				var pane = $( this ).data( 'pane' );
-				pane.suggested_windows = windows;
-				localStorage.setItem( 'dpoh_layout_windows@' + pane.path, JSON.stringify( windows ) );
-				$( this ).find( '[data-role=window]' ).each( function()
-				{
-					pane.attach( $( this ).data( 'window' ) );
-				} );
-			} );
-		} ).on( 'sortstart', function( e, ui )
-		{
-			$( '#layout_in_use' ).addClass( 'rearranging' ).find( '.layout-split' ).css( 'display', '' );
-			$( '.leaf' ).each( function()
-			{
-				var self = $( this );
-				if ( self.is( '.horizontal' ) )
-				{
-					self.height( self.height() );
-				}
-				else
-				{
-					self.width( self.width() );
-				}
-			} );
-		} ).on( 'sortstop', function()
-		{
-			$( '#layout_in_use' ).removeClass( 'rearranging' );
-			var self = $( this );
-			self.css( self.is( '.horizontal' ) ? 'height' : 'width', '' );
-			Vue.Pane.current_layout.validateAll();
-		} ).on( 'sortover', function( e, ui )
-		{
-			$( e.target ).addClass( 'sortover' );
-		} ).on( 'sortout', function( e, ui )
-		{
-			$( e.target ).removeClass( 'sortover' );
-		} );*/
 	};
 
 	/**
