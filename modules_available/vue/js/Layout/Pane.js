@@ -74,29 +74,29 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		this.element.data( 'size', JSON.parse( localStorage.getItem( 'dpoh_pane_size_' + this.path ) || 'false' ) );
 	}
 
-	Pane.prototype.buildPhantomLayout = function( processor )
+	Pane.prototype.buildModifiedCopy = function( modifier )
 	{
-		if ( typeof processor != 'function' )
+		if ( typeof modifier != 'function' )
 		{
-			throw new Error( 'Pane.buildPhantomLayout: Expected `processor` argument to be a '
-				+ 'function; received a ' + typeof processor );
+			throw new Error( 'Pane.buildModifiedCopy: Expected `modifier` argument to be a '
+				+ 'function; received a ' + typeof modifier );
 		}
 
-		var processed_self = processor( this, this.isRoot(), this.isLeaf() );
+		var modified_self = modifier( this );
 		if ( !this.isLeaf() )
 		{
 			this.children.forEach( function( el, i )
 			{
 				if ( i )
 				{
-					processed_self.append( $( '<div class="gutter">' ) );
+					modified_self.append( $( '<div class="gutter">' ) );
 				}
 
-				processed_self.append( el.buildPhantomLayout( processor ) );
+				modified_self.append( el.buildModifiedCopy( modifier ) );
 			} );
 		}
 
-		return processed_self;
+		return modified_self;
 	}
 
 	Pane.prototype.buildPreviewLayout = function( n_preview_windows )
@@ -105,8 +105,10 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			? 2
 			: n_preview_windows;
 
-		var processor = function( pane, is_root, is_leaf )
+		var modifier = function( pane )
 		{
+			var is_leaf = pane.isLeaf();
+			var is_root = pane.isRoot();
 			var jquery = $( '<div class="layout-pane-preview ' + pane.direction + '">' );
 
 			if ( is_leaf )
@@ -120,7 +122,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 
 			return jquery;
 		};
-		return this.buildPhantomLayout( processor );
+		return this.buildModifiedCopy( modifier );
 	};
 
 	Pane.prototype.initSortable = function()
