@@ -11,7 +11,7 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 		this.element = $( el );
 		this.id      = this.element.attr( 'data-window-id' ); // used in saving/restoring state
 
-		this.element.data( 'weighted_size', JSON.parse( localStorage.getItem( 'dpoh_window_size_' + this.id ) || 'false' ) );
+		this.element.data( 'size', JSON.parse( localStorage.getItem( 'dpoh_window_size_' + this.id ) || 'false' ) );
 		this.element.data( 'window', this );
 
 		// Find out which Pane should contain this window, and then attach to validate that Pane
@@ -118,15 +118,15 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 		}
 	};
 
-	Window.prototype.updateWeightedSize = function( weight, size )
+	Window.prototype.updateSize = function( size )
 	{
-		this.element.data( 'weighted_size', { weight : weight, size : size } );
+		this.element.data( 'size', size );
 		this.save();
 	};
 
 	Window.prototype.save = function()
 	{
-		localStorage.setItem( 'dpoh_window_size_'  + this.id, JSON.stringify( this.element.data( 'weighted_size' ) || 'false' ) );
+		localStorage.setItem( 'dpoh_window_size_'  + this.id, JSON.stringify( this.element.data( 'size' ) || 'false' ) );
 		localStorage.setItem( 'dpoh_window_state_' + this.id, this.state );
 	}
 

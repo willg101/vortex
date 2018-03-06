@@ -23,38 +23,6 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		} );
 	}
 
-	function normalizeWeightedSizes( weighted_sizes )
-	{
-		var normalized_sizes     = [];
-		var remaining_size       = 100;
-		var current_weight       = -1;
-		var size_used_this_round = 0;
-
-		weighted_sizes = weighted_sizes.slice();
-		weighted_sizes.forEach( function( el, i )
-			{
-				el.i = i;
-			} );
-		weighted_sizes.sort( function( a, b )
-			{
-				return b.weight - a.weight;
-			} );
-		weighted_sizes.forEach( function( el )
-			{
-				if ( current_weight != el.weight )
-				{
-					current_weight = el.weight;
-					remaining_size -= size_used_this_round;
-					size_used_this_round = 0;
-				}
-
-				var my_adjusted_size = remaining_size * ( el.size / 100 );
-				size_used_this_round += my_adjusted_size;
-				normalized_sizes[ el.i ] = my_adjusted_size || 50;
-			} );
-		return normalizeSizes( normalized_sizes );
-	}
-
 	/**
 	 * @brief
 	 *	Pane constructor
@@ -103,16 +71,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			}
 		}
 
-		this.element.data( 'weighted_size', JSON.parse( localStorage.getItem( 'dpoh_pane_size_' + this.path ) || 'false' ) );
-
-		// Determine the "default capacity" of each of the leaves. Default capacity is a number
-		// approximates how many windows each leaf should hold in order to equally distribute space
-		if ( this.isRoot() )
-		{
-			this.calcWeight();
-			var min_weight = this.getMinWeight();
-			this.calcDefaultCapacity( min_weight );
-		}
+		this.element.data( 'size', JSON.parse( localStorage.getItem( 'dpoh_pane_size_' + this.path ) || 'false' ) );
 	}
 
 	Pane.prototype.buildPhantomLayout = function( processor )
@@ -283,12 +242,12 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		} );
 		localStorage.setItem( 'dpoh_layout_windows@' + this.path, JSON.stringify( windows ) );
 
-		var weighted_size = this.element.data( 'weighted_size' );
+		var size = this.element.data( 'size' );
 		var key = 'dpoh_pane_size_' + this.path;
 
-		if ( weighted_size )
+		if ( size )
 		{
-			localStorage.setItem( key, JSON.stringify( weighted_size ) );
+			localStorage.setItem( key, JSON.stringify( size ) );
 		}
 		else
 		{
@@ -327,8 +286,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 	/**
 	 * @brief
 	 *	Suggest which Pane should contain the given window based on previously saved preferences,
-	 *	and falling back to using default capacity when no preferences have been saved for this
-	 *	window
+	 *	and falling back to suggesting the first leaf Pane in the DOM
 	 *
 	 * @param Window|string a_window
 	 */
@@ -379,132 +337,15 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			}
 			else
 			{
-				// Get all leaf Panes sorted with the preferred Pane (for balance purposes)
-				// first; select this first candidate
-				var candidates = this.getOwnerCandidates();
-				candidates[ 0 ].pane.suggested_windows.push( a_window );
-				return candidates[ 0 ].pane;
+				var first_pane = this.children[ 0 ];
+				while( !first_pane.isLeaf() )
+				{
+					first_pane = first_pane.children[ 0 ];
+				}
+				return first_pane;
 			}
 		}
 	};
-
-	/**
-	 * @brief
-	 *	Calculates and stores each Pane's weight.
-	 *
-	 * "Weight" as calculated by this function is a key component is determining default capacity,
-	 * and is determined by assigning each child Pane a weight of y/x, where y is the current
-	 * Pane's weight, and x is the number of child Panes. The root Pane is always assigned a
-	 * weight of 1.
-	 *
-	 * Thus, if the root Pane has 4 children, each of these Panes will have a weight of 1/4.
-	 * If each of these Panes, in turn, has 2 children, these will all have a weight of 1/8.
-	 *
-	 * @param float my_weight OPTIONAL. Should only be passed in recursive calls.
-	 */
-	Pane.prototype.calcWeight = function( my_weight )
-	{
-		this.weight = this.isRoot() ? 1 : my_weight;
-
-		if ( this.isLeaf() )
-		{
-			return;
-		}
-
-		var child_weight = this.weight / ( this.children.length || 1 );
-		this.children.forEach( function( child )
-		{
-			child.calcWeight( child_weight );
-		} );
-	};
-
-	/**
-	 * @brief
-	 *	Calculates and stores the default capacity of the Pane
-	 *
-	 * The default capacity is a rough approximation of how many windows each leaf Pane should
-	 * hold, relative to the rest of the leaf Panes, in order to appear as balanced as possible.
-	 * This is calculated by dividing all each Pane's weight by the lowest weight of all leaves,
-	 * and thus is not guaranteed to be a whole number.
-	 *
-	 * @param float min_weight The lowest weight of all leaf Panes
-	 */
-	Pane.prototype.calcDefaultCapacity = function( min_weight )
-	{
-		this.default_capacity = this.weight / min_weight;
-
-		if ( !this.isLeaf() )
-		{
-			this.children.forEach( function( child )
-			{
-				child.calcDefaultCapacity( min_weight );
-			} );
-		}
-	};
-
-	/**
-	 * @retval object
-	 */
-	Pane.prototype.getCapacity = function()
-	{
-		if ( this.isLeaf() )
-		{
-			var n_visible_windows = this.element.children( ':not(.gutter):visible' ).length;
-			return {
-				remaining_capacity : this.default_capacity - n_visible_windows,
-				n_visible_windows  : n_visible_windows,
-			};
-		}
-		else
-		{
-			return null;
-		}
-	}
-
-	/**
-	 * @retval Array
-	 *	An Array of leaf Panes, in order of suggested Window owners, most preferred first
-	 *
-	 * @param Array current_candidates OPTIONAL. Should only be passed when called recursively
-	 */
-	Pane.prototype.getOwnerCandidates = function( current_candidates )
-	{
-		var i_am_root = this.isRoot();
-		if ( i_am_root )
-		{
-			current_candidates = [];
-		}
-		else if ( ! (current_candidates instanceof Array) )
-		{
-			throw new Error( 'getOwnerCandidates() must be called on the root of a Pane' );
-		}
-
-		if ( this.isLeaf() )
-		{
-			current_candidates.push( { pane : this, capacity : this.getCapacity() } );
-		}
-		else
-		{
-			this.children.forEach( function( child )
-			{
-				child.getOwnerCandidates( current_candidates );
-			} );
-		}
-
-		if ( i_am_root )
-		{
-			return current_candidates.sort( function( a, b )
-			{
-				// Sort leaf Panes by remaining capacity, highest first; in the case of a tie,
-				// put the Pane with fewer visible Windows first
-				a = a.pane.getCapacity();
-				b = b.pane.getCapacity();
-				return ( b.remaining_capacity - a.remaining_capacity )
-					|| ( a.n_visible_windows  - b.n_visible_windows );
-			} );
-		}
-	};
-
 
 	/**
 	 * @brief
@@ -590,7 +431,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 
 				var visible_children_sizes = this.element.children( ':visible' ).map( function()
 				{
-					return $( this ).data( 'weighted_size' ) || { weight : 0, size: 100 };
+					return $( this ).data( 'size' ) || 100;
 				} );
 
 				// Show this Pane's child Panes or Windows within a resizable Split if 2 or
@@ -599,7 +440,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 				{
 					this.split = Split( visible_children.toArray(), {
 						direction : this.direction.toLowerCase(),
-						sizes     : normalizeWeightedSizes( visible_children_sizes.toArray() ),
+						sizes     : normalizeSizes( visible_children_sizes.toArray() ),
 						onDragEnd : this.storeSizes.bind( this ),
 					} );
 				}
@@ -630,31 +471,14 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			} );
 		visible_children.forEach( function( el, i )
 			{
-				el.updateWeightedSize( visible_children.length, sizes[ i ] );
+				el.updateSize( sizes[ i ] );
 			} );
 	}
 
-	Pane.prototype.updateWeightedSize = function( weight, size )
+	Pane.prototype.updateSize = function( size )
 	{
-		this.element.data( 'weighted_size', { weight : weight, size : size } );
+		this.element.data( 'size', size );
 		this.save( true );
-	};
-
-	/**
-	 * @brief
-	 *	Recursively determines the lowest leaf Pane weight
-	 */
-	Pane.prototype.getMinWeight = function()
-	{
-		if ( this.isLeaf() )
-		{
-			return this.weight;
-		}
-		else
-		{
-			child_weights = this.children.map( function( child ){ return child.getMinWeight() } );
-			return Math.min.apply( undefined, child_weights );
-		}
 	};
 
 	Pane.prototype.attach = function( a_window )
