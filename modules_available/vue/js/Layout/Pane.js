@@ -122,7 +122,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 
 			return jquery;
 		};
-		return this.buildModifiedCopy( modifier );
+		return $( '<div>' ).append( this.buildModifiedCopy( modifier ) ).html();
 	};
 
 	Pane.prototype.initSortable = function()
