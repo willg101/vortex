@@ -1,5 +1,18 @@
 namespace( 'Vue.Layout' ).Window = (function( $ )
 {
+	var attr = {
+		window_id     : 'data-window-id',
+		minimize_icon : 'data-minimize-icon',
+	};
+
+	var selectors = {
+		minimize_btn              : '.btn.minimize',
+		maximize_btn              : '.btn.maximize',
+		unmaximize_btn            : '.btn.unmaximize',
+		minimized_icons_container : '.toolbar .right',
+		current_layout            : '#layout_in_use',
+	};
+
 	/**
 	 * @brief
 	 *	Constructor for a Window
@@ -9,7 +22,7 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 	function Window( el )
 	{
 		this.element = $( el );
-		this.id      = this.element.attr( 'data-window-id' ); // used in saving/restoring state
+		this.id      = this.element.attr( attr.window_id ); // used in saving/restoring state
 
 		this.element.data( 'size', JSON.parse( localStorage.getItem( 'dpoh_window_size_' + this.id ) || 'false' ) );
 		this.element.data( 'window', this );
@@ -29,8 +42,8 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 			this.maximize();
 		}
 
-		$( '.btn.minimize', el ).on( 'click', this.minimize.bind( this, undefined, undefined ) );
-		$( '.btn.maximize, .btn.unmaximize', el ).on( 'click', this.maximize.bind( this, undefined, undefined ) );
+		$( selectors.minimize_btn, el ).on( 'click', this.minimize.bind( this, undefined, undefined ) );
+		$( selectors.maximize_btn + ', ' + selectors.unmaximize_btn, el ).on( 'click', this.maximize.bind( this, undefined, undefined ) );
 		subscribe( 'window-maximized',   this.onOtherWindowMaximized.bind( this ) );
 		subscribe( 'window-unmaximized', this.onOtherWindowUnmaximized.bind( this ) );
 	}
@@ -133,7 +146,7 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 	Window.prototype.addMinimizedIcon = function()
 	{
 		var that = this;
-		var icon = this.element.attr( 'data-minimize-icon' );
+		var icon = this.element.attr( attr.minimize_icon );
 		$( '<span>' ).addClass( 'fa fa-' + icon ).appendTo( '<button class="btn">' )
 			.parent()
 			.data( 'related_window', this )
@@ -145,7 +158,7 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 					} )
 					.addClass( 'window-restored' );
 			} )
-			.prependTo('.toolbar .right' );
+			.prependTo( selectors.minimized_icons_container );
 	}
 
 	Window.prototype.onOtherWindowMaximized = function( e )
@@ -233,7 +246,7 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 						position: 'fixed',
 					} );
 				this.maximized_placeholder.insertAfter( this.element );
-				this.element.detach().insertAfter( '#layout_in_use' )
+				this.element.detach().insertAfter( selectors.current_layout )
 					.position( {
 						my : 'left top',
 						at : 'left top',
@@ -296,7 +309,7 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 	Window.boot = function()
 	{
 		Window.all_windows = [];
-		$( '[data-window-id]' ).each( function()
+		$( '[' + attr.window_id + ']' ).each( function()
 		{
 			Window.all_windows.push( new Window( $( this ) ) );
 		} );
