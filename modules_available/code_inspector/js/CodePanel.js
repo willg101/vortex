@@ -39,6 +39,11 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 	function init()
 	{
+		if ( !$( "#editor" ).length )
+		{
+			return;
+		}
+
 		loadRecentFiles();
 
 		var data = {
@@ -559,7 +564,10 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 	function onLayoutChanged()
 	{
-		editor.resize();
+		if ( editor )
+		{
+			editor.resize();
+		}
 	}
 
 	function onBeforeSend( data )
@@ -676,7 +684,6 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}
 	}
 
-	$( init );
 	$( document ).on( 'click',    '[data-command]',       onCommandButtonClicked );
 	$( document ).on( 'keypress', '.bp-expression-input', onNewExpressionGiven )
 	$( document ).on( 'click',    '.refresh-file',        onRefereshFileClicked )
@@ -692,6 +699,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	subscribe( 'layout-changed',               onLayoutChanged )
 	subscribe( 'before-send',                  onBeforeSend );
 	subscribe( 'alter-settings-quick-actions', alterQuickActions );
+	subscribe( 'vortex-init',                  init );
 
 	return {
 		clearBreakpoints          : clearBreakpoints,

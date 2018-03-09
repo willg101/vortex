@@ -17,7 +17,6 @@
 
 	function init()
 	{
-
 		initConsole();
 	}
 
@@ -297,8 +296,6 @@
 		$( '#console' ).terminal().enable();
 	}
 
-	$( init );
-
 	$( document ).on( 'dblclick.jstree',   '#open_files_panel',  onNodeDoubleClicked );
 	$( document ).on( 'click',             '[data-open-file]',   onOpenFileClicked );
 	$( document ).on( 'click',             '#console_container', onConsoleClicked );
@@ -309,5 +306,6 @@
 
 	subscribe( 'session-status-changed', onSessionStatusChanged );
 	subscribe( 'file-changed',           onFileChanged );
+	subscribe( 'vortex-init',            init );
 
 }( jQuery ));

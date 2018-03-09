@@ -8,7 +8,11 @@ namespace( 'BasicApi' ).Controller = (function( $ )
 
 	function init()
 	{
-		BasicApi.SocketServer.openConnection();
+		if ( !Dpoh.settings.js_test_mode )
+		{
+			BasicApi.SocketServer.openConnection();
+			publish( 'vortex-init' );
+		}
 	}
 
 	function onConnectionStatusChanged( e )
