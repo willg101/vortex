@@ -4,7 +4,7 @@
 namespace( 'Theme' ).PageTitle = (function( $ )
 {
 	var title_vars = {
-		init   : 'DP-OH',
+		init   : 'Vortex',
 		status : 'initializing',
 	};
 	var title_format = false;
