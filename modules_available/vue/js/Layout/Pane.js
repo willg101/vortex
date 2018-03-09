@@ -1,6 +1,16 @@
-
 namespace( 'Vue.Layout' ).Pane = (function( $ )
 {
+	var attr = {
+		split_direction : 'data-split',
+		split_id        : 'data-split-id',
+	};
+
+	var selectors = {
+		pane           : '.layout-split',
+		current_layout : '#layout_in_use',
+		leaf_pane      : '.leaf',
+	};
+
 	/**
 	 * @brief
 	 *	Normalizes an Array of numbers so that the numbers all remain proportional to each other
@@ -35,8 +45,8 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 	function Pane( el, parent )
 	{
 		this.element   = $( el );
-		this.direction = this.element.attr( 'data-split' );    // 'vertical' or 'horizontal'
-		this.id        = this.element.attr( 'data-split-id' );
+		this.direction = this.element.attr( attr.split_direction );    // 'vertical' or 'horizontal'
+		this.id        = this.element.attr( attr.split_id );
 		this.path      = parent                                // path: a fully qualified id used
 			? parent.path + '.' + this.id                      // for saving/loading settings
 			: this.id + '{root}';
@@ -50,7 +60,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		                             // Pane, but not necessarily contained within this Pane at the
 		                             // moment
 
-		var child_panes = this.element.children( '.layout-split' );
+		var child_panes = this.element.children( selectors.pane );
 		if ( child_panes.length ) // Recursively initialize child Panes if applicable
 		{
 			var that = this;
@@ -155,7 +165,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 
 		var i = 0;
 		var layout = this.element;
-		layout.find( '.leaf' ).each( function()
+		layout.find( selectors.leaf_pane ).each( function()
 		{
 			Sortable.create( this, {
 				group: "omega",
@@ -165,11 +175,10 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 				animation: 150,
 				onStart : function()
 				{
-					$( '#layout_in_use' ).addClass( 'rearranging' ).find( '.layout-split' ).css( 'display', '' );
+					$( selectors.current_layout ).addClass( 'rearranging' ).find( selectors.pane ).css( 'display', '' );
 				},
 				onEnd : function()
 				{
-					$( '#layout_in_use' ).removeClass( 'rearranging' );
 					var self = $( this );
 					self.css( self.is( '.horizontal' ) ? 'height' : 'width', '' );
 					Vue.Layout.Pane.current_layout.validateAll();
@@ -306,7 +315,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			}
 			else
 			{
-				return this.element.find( '.leaf' ).first().data( 'pane' );
+				return this.element.find( selectors.leaf_pane ).first().data( 'pane' );
 			}
 		}
 	};
@@ -508,9 +517,9 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 	 */
 	Pane.boot = function()
 	{
-		var layout_id = localStorage.getItem( 'dpoh_selected_layout' ) || $( '.layout-split' ).first().attr( 'data-split-id' );
-		var layout_element = $( '[data-split-id="' + layout_id + '"]' );
-		layout_element.appendTo( '#layout_in_use' );
+		var layout_id = localStorage.getItem( 'dpoh_selected_layout' ) || $( selectors.pane ).first().attr( attr.split_id );
+		var layout_element = $( '[' + attr.split_id '="' + layout_id + '"]' );
+		layout_element.appendTo( selectors.current_layout );
 		this.current_layout = new Pane( layout_element );
 		this.current_layout.initSortable();
 		this.current_layout.refreshAll();
