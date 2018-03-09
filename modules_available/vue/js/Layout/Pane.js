@@ -74,6 +74,14 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		this.element.data( 'size', JSON.parse( localStorage.getItem( 'dpoh_pane_size_' + this.path ) || 'false' ) );
 	}
 
+	/**
+	 * @brief
+	 *	Transform the Pane and its descendants using the given callback
+	 *
+	 * @param function transformer Receives a Pane instance as its only argument; returns a jQuery
+	 *
+	 * @retval jQuery
+	 */
 	Pane.prototype.transform = function( transformer )
 	{
 		if ( typeof transformer != 'function' )
@@ -99,6 +107,14 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		return transformed_self;
 	}
 
+	/**
+	 * @brief
+	 *	Generate the HTML for a preview of this Pane and its children
+	 *
+	 * @param int n_preview_windows The number of preview "windows" to include in each leaf Pane
+	 *
+	 * @retval string
+	 */
 	Pane.prototype.buildPreviewLayout = function( n_preview_windows )
 	{
 		n_preview_windows = typeof n_preview_windows == 'undefined'
@@ -125,6 +141,10 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		return $( '<div>' ).append( this.transform( transformer ) ).html();
 	};
 
+	/**
+	 * @brief
+	 * Initialize a Sortable instance on each leaf Pane of this Pane's layout
+	 */
 	Pane.prototype.initSortable = function()
 	{
 		if ( !this.isRoot() )
@@ -305,11 +325,18 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		}
 	}
 
-	Pane.prototype.validateAll = function( skip_bubble_to_root )
+	/**
+	 * @brief
+	 *	Triggers a recursive refresh on one or more Panes
+	 *
+	 * @param bool skip_bubble_to_root Only recursive downward, effectively refreshing just this
+	 * Pane and its children
+	 */
+	Pane.prototype.refreshAll = function( skip_bubble_to_root )
 	{
 		if ( !skip_bubble_to_root && !this.isRoot() )
 		{
-			this.parent.validateAll();
+			this.parent.refreshAll();
 			return;
 		}
 
@@ -317,12 +344,12 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		{
 			this.children.forEach( function( child )
 			{
-				child.validateAll( true );
+				child.refreshAll( true );
 			} );
 		}
 		else
 		{
-			this.validate();
+			this.refresh();
 		}
 	};
 
@@ -335,7 +362,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 	 *                                it's not necessary to call this.show(), since it has already
 	 *                                been called somewhere deeper in the call stack.
 	 */
-	Pane.prototype.validate = function( did_show )
+	Pane.prototype.refresh = function( did_show )
 	{
 		// If any of our anscestors are hidden, that will mess up code that searches for visible
 		// children, such as `this.element.children( ':visible' );`
@@ -357,13 +384,13 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		// Because the call this.show() does not always take effct immediately, we will finish this
 		// validation later using setTimeout(), which will allow this function to return, and for
 		// the browser to update, before continuing
-		if ( !this.validate_queued )
+		if ( !this.refresh_queued )
 		{
-			this.validate_queued = true; // If the browser is running slowly, don't let multiple
+			this.refresh_queued = true; // If the browser is running slowly, don't let multiple
 			                             // validations pile up here
 			setTimeout( function()
 			{
-				this.validate_queued = false;
+				this.refresh_queued = false;
 
 				var visible_children = this.element.children( ':visible' );
 
@@ -394,17 +421,21 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			// Bubble up the validation, as the number of visible children has potentially changed
 			if ( this.parent )
 			{
-				this.parent.validate( true );
+				this.parent.refresh( true );
 			}
 			else
 			{
 				publish( 'layout-changed', { pane : '*' } );
 			}
 
-			}.bind( this ), 1 );
+			}.bind( this ), 50 );
 		}
 	}
 
+	/**
+	 * @brief
+	 *	Store this Pane's Split sizes in localStorage
+	 */
 	Pane.prototype.storeSizes = function()
 	{
 		var sizes = this.split ? this.split.getSizes() : [ 100 ];
@@ -419,12 +450,22 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			} );
 	}
 
+	/**
+	 * @brief
+	 *	Update the cache and localStorage with a new size
+	 */
 	Pane.prototype.updateSize = function( size )
 	{
 		this.element.data( 'size', size );
 		this.save( true );
 	};
 
+	/**
+	 * @brief
+	 *	Attach a Window to this leaf Pane
+	 *
+	 * @param Vue.Layout.Window a_window
+	 */
 	Pane.prototype.attach = function( a_window )
 	{
 		if ( !this.isLeaf() )
@@ -440,7 +481,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			{
 				a_window.owner.windows.splice( index_to_remove, 1 );
 			}
-			a_window.owner.validate();
+			a_window.owner.refresh( true );
 		}
 
 		a_window.owner = this;
@@ -458,7 +499,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			this.windows.push( a_window );
 		}
 
-		this.validateAll();
+		this.refreshAll( true );
 	};
 
 	/**
@@ -472,7 +513,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		layout_element.appendTo( '#layout_in_use' );
 		this.current_layout = new Pane( layout_element );
 		this.current_layout.initSortable();
-		this.current_layout.validateAll();
+		this.current_layout.refreshAll();
 
 		publish( 'pane-boot' );
 	};
