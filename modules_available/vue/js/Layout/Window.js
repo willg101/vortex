@@ -272,13 +272,13 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 		{
 			publish( 'window-unmaximized', { window : this } );
 			this.element.removeClass( 'maximized blurable' );
-			this.element.position( { 
+			this.element.position( {
 				my : 'left top',
 				at : 'left top',
 				of : this.maximized_placeholder,
 				collision : 'none',
 			} );
-			var new_css = { 
+			var new_css = {
 				position :  '',
 				top : '',
 				left : '',
