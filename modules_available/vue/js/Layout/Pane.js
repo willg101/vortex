@@ -177,26 +177,14 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 				{
 					$( selectors.current_layout ).addClass( 'rearranging' ).find( selectors.pane ).css( 'display', '' );
 				},
-				onEnd : function()
+				onEnd : function( e )
 				{
 					var self = $( this );
 					self.css( self.is( '.horizontal' ) ? 'height' : 'width', '' );
-					Vue.Layout.Pane.current_layout.validateAll();
-					$( document ).trigger( {
-						type : 'dpoh-interface:layout-changed',
-						pane : '*',
-					} );
-					layout.find( '.leaf' ).each( function()
-					{
-						var windows = $( this ).children().map( function(){ return $( this ).attr( 'data-window-id' ) } ).toArray();
-						var pane = $( this ).data( 'pane' );
-						pane.suggested_windows = windows;
-						localStorage.setItem( 'dpoh_layout_windows@' + pane.path, JSON.stringify( windows ) );
-						$( this ).find( '[data-role=window]' ).each( function()
-						{
-							pane.attach( $( this ).data( 'window' ) );
-						} );
-					} );
+					$( selectors.current_layout ).removeClass( 'rearranging' );
+					$( e.to ).data( 'pane' ).attach( $( e.item ).data( 'window' ) );
+
+					publish( 'layout-changed' );
 				},
 			} );
 		} );
@@ -380,16 +368,6 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			this.show();
 		}
 
-		var previous_sizes = undefined;
-
-		// If we currently have a Split instance, destroy it and null it out so we can start fresh
-		if ( this.split )
-		{
-			previous_sizes = this.split.getSizes();
-			this.split.destroy();
-			delete this.split;
-		}
-
 		// Because the call this.show() does not always take effct immediately, we will finish this
 		// validation later using setTimeout(), which will allow this function to return, and for
 		// the browser to update, before continuing
@@ -401,7 +379,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			{
 				this.refresh_queued = false;
 
-				var visible_children = this.element.children( ':visible' );
+				var visible_children = this.element.children( ':visible:not(.gutter)' );
 
 				// No need to show this Pane if it has no visible child Panes or Windows
 				if ( visible_children.length == 0 )
@@ -409,33 +387,60 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 					this.element.hide();
 				}
 
-				var visible_children_sizes = this.element.children( ':visible' ).map( function()
+				var visible_children_sizes = visible_children.map( function()
 				{
 					return $( this ).data( 'size' ) || 100;
-				} );
+				} ).toArray();
 
-				// Show this Pane's child Panes or Windows within a resizable Split if 2 or
-				// more are visible
 				if ( visible_children.length > 1 )
 				{
+					// If we currently have a Split instance, destroy it and null it out so we can start fresh
+					if ( this.split )
+					{
+						var dimension = this.direction.toLowerCase() == 'vertical' ? 'height' : 'width';
+						var margin    = this.direction.toLowerCase() == 'vertical' ? 'top'    : 'left';
+						this.element.children().each( function( i )
+						{
+							var self = $( this );
+							if ( i > 0 )
+							{
+								self.css( 'margin-' + margin, '10px' );
+							}
+							self[ dimension ]( self[ dimension ] );
+						} );
+						this.split.destroy();
+						delete this.split;
+					}
 					this.split = Split( visible_children.toArray(), {
 						direction : this.direction.toLowerCase(),
-						sizes     : normalizeSizes( visible_children_sizes.toArray() ),
+						sizes     : normalizeSizes( visible_children_sizes ),
 						onDragEnd : this.storeSizes.bind( this ),
 					} );
+					if ( margin )
+					{
+						this.element.children().each( function()
+						{
+							$( this ).css( 'margin-' + margin, '' );
+						} );
+					}
+				}
+				else if ( this.split )
+				{
+					this.split.destroy();
+					delete this.split;
 				}
 
 				this.storeSizes()
 
-			// Bubble up the validation, as the number of visible children has potentially changed
-			if ( this.parent )
-			{
-				this.parent.refresh( true );
-			}
-			else
-			{
-				publish( 'layout-changed', { pane : '*' } );
-			}
+				// Bubble up the validation, as the number of visible children has potentially changed
+				if ( this.parent )
+				{
+					this.parent.refresh( true );
+				}
+				else
+				{
+					publish( 'layout-changed', { pane : '*' } );
+				}
 
 			}.bind( this ), 50 );
 		}
@@ -482,9 +487,14 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			throw new Error( "Can't attach a Window to a non-leaf Pane" );
 		}
 
+		var html_element_needs_move = !this.element.find( a_window.element ).length;
+
 		if ( a_window.owner )
 		{
-			a_window.element = a_window.element.detach();
+			if ( html_element_needs_move )
+			{
+				a_window.element = a_window.element.detach();
+			}
 			var index_to_remove = a_window.owner.windows.indexOf( a_window );
 			if ( index_to_remove != -1 )
 			{
@@ -496,19 +506,25 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		a_window.owner = this;
 
 		var index = this.suggested_windows.indexOf( a_window.id );
-
-		if ( index >= 0 && this.element.children().length > index )
+		if ( html_element_needs_move )
 		{
-			this.element.children().eq( index ).before( a_window.element );
-			this.windows.splice( index, 0, a_window );
+			if ( index >= 0 && this.element.children().length > index )
+			{
+				this.element.children().eq( index ).before( a_window.element );
+				this.windows.splice( index, 0, a_window );
+			}
+			else
+			{
+				this.element.append( a_window.element );
+				this.windows.push( a_window );
+			}
 		}
 		else
 		{
-			this.element.append( a_window.element );
-			this.windows.push( a_window );
+			this.windows.splice( a_window.element.index(), 0, a_window );
 		}
 
-		this.refreshAll( true );
+		this.refreshAll();
 	};
 
 	/**
@@ -518,7 +534,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 	Pane.boot = function()
 	{
 		var layout_id = localStorage.getItem( 'dpoh_selected_layout' ) || $( selectors.pane ).first().attr( attr.split_id );
-		var layout_element = $( '[' + attr.split_id '="' + layout_id + '"]' );
+		var layout_element = $( '[' + attr.split_id + '="' + layout_id + '"]' );
 		layout_element.appendTo( selectors.current_layout );
 		this.current_layout = new Pane( layout_element );
 		this.current_layout.initSortable();
