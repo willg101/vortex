@@ -74,29 +74,29 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		this.element.data( 'size', JSON.parse( localStorage.getItem( 'dpoh_pane_size_' + this.path ) || 'false' ) );
 	}
 
-	Pane.prototype.buildModifiedCopy = function( modifier )
+	Pane.prototype.transform = function( transformer )
 	{
-		if ( typeof modifier != 'function' )
+		if ( typeof transformer != 'function' )
 		{
-			throw new Error( 'Pane.buildModifiedCopy: Expected `modifier` argument to be a '
-				+ 'function; received a ' + typeof modifier );
+			throw new Error( 'Pane.transform: Expected `transformer` argument to be a '
+				+ 'function; received a ' + typeof transformer );
 		}
 
-		var modified_self = modifier( this );
+		var transformed_self = transformer( this );
 		if ( !this.isLeaf() )
 		{
 			this.children.forEach( function( el, i )
 			{
 				if ( i )
 				{
-					modified_self.append( $( '<div class="gutter">' ) );
+					transformed_self.append( $( '<div class="gutter">' ) );
 				}
 
-				modified_self.append( el.buildModifiedCopy( modifier ) );
+				transformed_self.append( el.transform( transformer ) );
 			} );
 		}
 
-		return modified_self;
+		return transformed_self;
 	}
 
 	Pane.prototype.buildPreviewLayout = function( n_preview_windows )
@@ -105,7 +105,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			? 2
 			: n_preview_windows;
 
-		var modifier = function( pane )
+		var transformer = function( pane )
 		{
 			var is_leaf = pane.isLeaf();
 			var is_root = pane.isRoot();
@@ -122,7 +122,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 
 			return jquery;
 		};
-		return $( '<div>' ).append( this.buildModifiedCopy( modifier ) ).html();
+		return $( '<div>' ).append( this.transform( transformer ) ).html();
 	};
 
 	Pane.prototype.initSortable = function()
