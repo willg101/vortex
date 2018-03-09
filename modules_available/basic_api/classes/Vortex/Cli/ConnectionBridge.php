@@ -92,6 +92,14 @@ class ConnectionBridge
 			: [];
 	}
 
+	public function detachQueuedSession( $sid )
+	{
+		return $this->dbg_app
+			? $this->dbg_app->detachQueuedSession( $sid )
+			: NULL;
+
+	}
+
 	public function switchSession( $sid )
 	{
 		return $this->dbg_app

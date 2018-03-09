@@ -77,6 +77,16 @@ class DbgpApp implements MessageComponentInterface
 		}, array_keys( $this->queue ), $this->queue );
 	}
 
+	public function detachQueuedSession( $sid )
+	{
+		if ( !empty( $this->queue[ $sid ] ) )
+		{
+			$this->queue[ $sid ][ 'connection' ]->send( 'detach -i 0' );
+			$this->queue[ $sid ][ 'connection' ]->close();
+			unset( $this->queue[ $sid ] );
+		}
+	}
+
 	public function switchSession( $sid )
 	{
 		if ( !empty( $this->queue[ $sid ] ) )

@@ -33,6 +33,17 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 				indicator.addClass( 'inactive' );
 			}
 		}
+		else if ( e.jq_message.is( '[type=detach_queued_session]' ) )
+		{
+			BasicApi.Debugger.command( 'ctrl:peek_queue' );
+		}
+	}
+
+	function onDetachSessionClicked( e )
+	{
+		var sid = $( e.currentTarget ).attr( 'data-detach-session' );
+		BasicApi.SocketServer.send( 'ctrl:detach_queued_session -s ' + sid );
+		return false;
 	}
 
 	function onIndicatorClicked()
@@ -61,6 +72,10 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 				el      : $( '#connection_queue_indicator' ),
 				side    : 'right',
 			} );
+			$( '[data-switch-to-session]' ).each( function()
+			{
+				$( this ).append( $( '<span style="position: absolute; top: 5px; right: 5px;" class="btn btn-sm">Detach</span>' ).attr( 'data-detach-session', $( this ).attr( 'data-switch-to-session' ) ) );
+			} );
 		}
 		else
 		{
@@ -76,6 +91,7 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 	}
 
 	$( document ).on( 'click', '[data-switch-to-session]',    onSwitchToSessionClicked );
+	$( document ).on( 'click', '[data-detach-session]',       onDetachSessionClicked );
 	$( document ).on( 'click', '#connection_queue_indicator', onIndicatorClicked );
 
 	subscribe( 'server-info',            onServerInfoReceived );
