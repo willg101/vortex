@@ -24,22 +24,25 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 		this.element = $( el );
 		this.id      = this.element.attr( attr.window_id ); // used in saving/restoring state
 
-		this.element.data( 'size', JSON.parse( localStorage.getItem( 'dpoh_window_size_' + this.id ) || 'false' ) );
+		this.persistor = new BasicApi.Persistor( this.id + '_persistor' );
 		this.element.data( 'window', this );
 
 		// Find out which Pane should contain this window, and then attach to validate that Pane
 		Vue.Layout.Pane.current_layout.suggestOwner( this ).attach( this );
 
-		this.state = 'normal';
-		// Valid states: 'minimized', 'maximized', 'normal'
-		var state   = localStorage.getItem( 'dpoh_window_state_' + this.id ) || 'normal';
-		if ( state == 'minimized' )
+		if ( this.state == 'minimized' )
 		{
+			this.state = 'normal';
 			this.minimize();
 		}
-		else if ( state == 'maximized' )
+		else if ( this.state == 'maximized' )
 		{
+			this.state = 'normal';
 			this.maximize();
+		}
+		else
+		{
+			this.state = 'normal';
 		}
 
 		$( selectors.minimize_btn, el ).on( 'click', this.minimize.bind( this, undefined, undefined ) );
@@ -47,6 +50,30 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 		subscribe( 'window-maximized',   this.onOtherWindowMaximized.bind( this ) );
 		subscribe( 'window-unmaximized', this.onOtherWindowUnmaximized.bind( this ) );
 	}
+
+	Object.defineProperty( Window.prototype, 'state', {
+		get : function()
+		{
+			return this.persistor.state;
+		},
+		set : function( val )
+		{
+			this.persistor.state = val;
+			return val;
+		},
+	} );
+
+	Object.defineProperty( Window.prototype, 'size', {
+		get : function()
+		{
+			return this.persistor.size;
+		},
+		set : function( val )
+		{
+			this.persistor.size = val;
+			return val;
+		},
+	} );
 
 	/*
 	 * @brief
@@ -110,7 +137,7 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 					// Hide the window so that it no longer takes up space, and then validate our
 					// owner Pane
 					$( this ).hide();
-					that.owner.validate()
+					that.owner.refresh()
 					on_finish();
 					that.save();
 				} ).addClass( 'minimize-blur' );
@@ -124,23 +151,16 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 			setTimeout( function()
 			{
 				that.element.removeClass( 'minimize-blur' ).css( 'display', '' );
-				that.owner.validate();
+				that.owner.refresh();
 				that.save();
 				on_finish();
 			}, 1 );
 		}
 	};
 
-	Window.prototype.updateSize = function( size )
-	{
-		this.element.data( 'size', size );
-		this.save();
-	};
-
 	Window.prototype.save = function()
 	{
-		localStorage.setItem( 'dpoh_window_size_'  + this.id, JSON.stringify( this.element.data( 'size' ) || 'false' ) );
-		localStorage.setItem( 'dpoh_window_state_' + this.id, this.state );
+		//localStorage.setItem( 'dpoh_window_state_' + this.id, this.state );
 	}
 
 	Window.prototype.addMinimizedIcon = function()
@@ -294,7 +314,7 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 			this.maximized_placeholder.remove();
 			this.maximized_placeholder = undefined;
 			this.element.css( new_css ).removeClass( 'no-transition' );
-			this.owner.validate();
+			this.owner.refresh();
 		}.bind( this ), 200 );
 			this.state = 'normal';
 			this.save();

@@ -56,9 +56,6 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 
 		this.parent = parent;
 		this.children = [];
-		this.suggested_windows = []; // ids of windows that are known to be associated with this
-		                             // Pane, but not necessarily contained within this Pane at the
-		                             // moment
 
 		var child_panes = this.element.children( selectors.pane );
 		if ( child_panes.length ) // Recursively initialize child Panes if applicable
@@ -71,18 +68,23 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		}
 		else
 		{
-			try
-			{
-				this.suggested_windows = JSON.parse( localStorage.getItem( 'dpoh_layout_windows@' + this.path ) ) || [];
-			}
-			catch ( e )
-			{
-				// noop
-			}
+			this.suggested_windows = new BasicApi.Persistor( this.id + '_suggested_windows' );
 		}
 
-		this.element.data( 'size', JSON.parse( localStorage.getItem( 'dpoh_pane_size_' + this.path ) || 'false' ) );
+		this.size_persistor = new BasicApi.Persistor( this.id + '_size' );
 	}
+
+	Object.defineProperty( Pane.prototype, 'size', {
+		get : function()
+		{
+			return this.size_persistor.size;
+		},
+		set : function( val )
+		{
+			this.size_persistor.size = val;
+			return val;
+		},
+	} );
 
 	/**
 	 * @brief
@@ -198,27 +200,14 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 	 */
 	Pane.prototype.save = function( no_recurse )
 	{
-		var windows = this.suggested_windows.slice();
-		this.windows.forEach( function( el )
+		for ( var key in this.suggested_windows )
 		{
-			if ( windows.indexOf( el.id ) == -1 )
-			{
-				windows.push( el.id )
-			}
-		} );
-		localStorage.setItem( 'dpoh_layout_windows@' + this.path, JSON.stringify( windows ) );
-
-		var size = this.element.data( 'size' );
-		var key = 'dpoh_pane_size_' + this.path;
-
-		if ( size )
-		{
-			localStorage.setItem( key, JSON.stringify( size ) );
+			delete this.suggested_windows[ key ];
 		}
-		else
+		this.windows.forEach( function( el, i )
 		{
-			localStorage.removeItem( key );
-		}
+			this.suggested_windows[ el.id ] = i;
+		}.bind( this ) );
 
 		if ( !no_recurse )
 		{
@@ -267,9 +256,9 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		if ( this.isLeaf() && this.isRoot() )
 		{
 			// Don't associate the window id with this Pane more than once
-			if ( this.suggested_windows.indexOf( a_window ) == -1 )
+			if ( typeof this.suggested_windows[ a_window ] != 'undefined' )
 			{
-				this.suggested_windows.push( a_window );
+				this.suggested_windows[ a_window ] = Object.keys( this.suggested_windows ).length;
 			}
 
 			return this;
@@ -277,7 +266,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		else if ( this.isLeaf() )
 		{
 			// Check if this leaf is known to own the given window
-			return this.suggested_windows.indexOf( a_window ) != -1
+			return typeof this.suggested_windows[ a_window ] != 'undefined'
 				? this
 				: false;
 		}
@@ -387,9 +376,10 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 					this.element.hide();
 				}
 
+				var data_key = this.isLeaf() ? 'window' : 'pane';
 				var visible_children_sizes = visible_children.map( function()
 				{
-					return $( this ).data( 'size' ) || 100;
+					return ( $( this ).data( data_key ) || {} ).size || 100;
 				} ).toArray();
 
 				if ( visible_children.length > 1 )
@@ -460,19 +450,9 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			} );
 		visible_children.forEach( function( el, i )
 			{
-				el.updateSize( sizes[ i ] );
+				el.size = sizes[ i ];
 			} );
 	}
-
-	/**
-	 * @brief
-	 *	Update the cache and localStorage with a new size
-	 */
-	Pane.prototype.updateSize = function( size )
-	{
-		this.element.data( 'size', size );
-		this.save( true );
-	};
 
 	/**
 	 * @brief
@@ -499,16 +479,16 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 			if ( index_to_remove != -1 )
 			{
 				a_window.owner.windows.splice( index_to_remove, 1 );
+
 			}
-			a_window.owner.refresh( true );
 		}
 
 		a_window.owner = this;
 
-		var index = this.suggested_windows.indexOf( a_window.id );
+		var index = this.suggested_windows[ a_window.id ];
 		if ( html_element_needs_move )
 		{
-			if ( index >= 0 && this.element.children().length > index )
+			if ( typeof index != 'undefined' && this.element.children().length > index )
 			{
 				this.element.children().eq( index ).before( a_window.element );
 				this.windows.splice( index, 0, a_window );
@@ -522,6 +502,11 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		else
 		{
 			this.windows.splice( a_window.element.index(), 0, a_window );
+		}
+
+		if ( Pane.saving_allowed )
+		{
+			Pane.current_layout.save();
 		}
 
 		this.refreshAll();
@@ -541,6 +526,7 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		this.current_layout.refreshAll();
 
 		publish( 'pane-boot' );
+		Pane.saving_allowed = true;
 	};
 
 	$( Pane.boot.bind( Pane ) );
