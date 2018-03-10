@@ -223,19 +223,23 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	 * @brief
 	 *	Gets a file from the server and displays it
 	 *
-	 * @param sring    filename   Absolute path of the file
-	 * @param int      line       Optional; 1-indexed line number to highlight (indicates the current
-	 *                            instruction)
-	 * @param function cb         Optional; called after the file is loaded and displayed. This
-	 *                            function is passed three arguments:
-	 *                             - The filename
-	 *                             - The line number (or undefined)
-	 *                             - The file's contents
-	 * @param bool     skip_cache Force the file to be loaded from the server
+	 * @param sring    filename             Absolute path of the file
+	 * @param int      line                 Optional; 1-indexed line number to highlight (indicates
+	 *                                      the current instruction)
+	 * @param function cb                   Optional; called after the file is loaded and
+	 *                                      displayed. This function is passed three arguments:
+	 *                                       - The filename
+	 *                                       - The line number (or undefined)
+	 *                                       - The file's contents
+	 * @param bool     skip_cache           Force the file to be loaded from the server
+	 * @param int      scroll_top           Optional; when given, overrides `line` param; the
+	 *                                      position to set the editor's scrollTop to
+	 * @param bool     no_clear_active_line Don't clear the current line indicator (for refreshing
+	 *                                      the editor)
 	 */
-	function showFile( filename, line, cb, skip_cache )
+	function showFile( filename, line, cb, skip_cache, scroll_top, no_clear_active_line )
 	{
-		if ( ! line || ! ( line = Number( line ) ) || line % 1 != 0 || line < 1 )
+		if ( scroll_top || !line || ! ( line = Number( line ) ) || line % 1 != 0 || line < 1 )
 		{
 			line = undefined;
 		}
@@ -254,7 +258,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 			var text = data;
 			if ( current_file != filename || skip_cache )
 			{
-				editor.setValue( text );
+				editor.setValue( text, -1 );
 				$( '#filename' ).text( filename.replace( /^.*\//, '' ) );
 				open_files[ filename ] = filename.replace( /^.*\//, '' );
 				if ( text.match( /^\<\?php \/\* dpoh: ignore \*\// ) )
@@ -265,7 +269,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 				current_file = filename;
 			}
 
-			if ( current_line_marker )
+			if ( !no_clear_active_line && current_line_marker )
 			{
 				editor.session.removeMarker( current_line_marker );
 				editor.getSession().removeGutterDecoration( current_line - 1, "gutter-current-line" );
@@ -295,7 +299,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 				cb( filename, line, text );
 			}
 
-			editor.clearSelection();
+			editor.session.setScrollTop( scroll_top )
 		}, skip_cache );
 	}
 
@@ -580,16 +584,21 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 	function onRefreshFileClicked( e )
 	{
+		if ( !current_file )
+		{
+			return;
+		}
+
 		var target = $( e.target ).closest( 'button' ).css( 'visibility', 'hidden' );
 		var spinner = $( new Theme.Spinner + '' ).css( 'position', 'absolute' ).appendTo( '.file-bar' ).position( {
 			my : 'center',
 			at : 'center',
 			of : target,
 		} );
-		showFile( current_file, editor.getSelectionRange().start.row, function(){
+		showFile( current_file, false, function(){
 			spinner.remove();
 			target.css( 'visibility', '' );
-		}, true )
+		}, true, editor.session.getScrollTop(), true )
 	}
 
 	function beforeAutorun( e )
