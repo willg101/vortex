@@ -7,18 +7,18 @@ namespace( 'BasicApi' ).Persistor = (function( $ )
 
 	function generateLocalStorageItemKey( widget_key, item_key )
 	{
-		return widget_key + '_' + item_key;
+		return widget_key + '_::_' + item_key;
 	}
 
 	function Persistor( widget_key )
 	{
-		this.widget_key = widget_key;
+		this.__widget_key__ = widget_key;
 		return new Proxy( this, {
 			get : function( target, item_key )
 			{
 				if ( typeof target[ item_key ] == 'undefined' )
 				{
-					target[ item_key ] = Storage.get( generateLocalStorageItemKey( target.widget_key, item_key ) );
+					target[ item_key ] = Storage.get( generateLocalStorageItemKey( target.__widget_key__, item_key ) );
 				}
 				return target[ item_key ];
 			},
@@ -32,7 +32,7 @@ namespace( 'BasicApi' ).Persistor = (function( $ )
 				else
 				{
 					target[ item_key ] = item_value;
-					Storage.set( generateLocalStorageItemKey( target.widget_key, item_key ), item_value );
+					Storage.set( generateLocalStorageItemKey( target.__widget_key__, item_key ), item_value );
 				}
 
 				return item_value;
@@ -41,7 +41,25 @@ namespace( 'BasicApi' ).Persistor = (function( $ )
 			deleteProperty : function( target, item_key )
 			{
 				delete target[ item_key ];
-				Storage.del( generateLocalStorageItemKey( target.widget_key, item_key ) );
+				Storage.del( generateLocalStorageItemKey( target.__widget_key__, item_key ) );
+			},
+
+			ownKeys : function( target )
+			{
+				var keys = Object.keys( target );
+				for ( var i = 0; i < localStorage.length; i++ )
+				{
+					if ( localStorage.key( i ).startsWith( target.__widget_key__ + '_::_' ) )
+					{
+						keys.push( localStorage.key( i ) );
+					}
+				}
+				var remove_index = keys.indexOf( '__widget_key__' );
+				if ( remove_index >= 0 )
+				{
+					keys.splice( remove_index, 1 );
+				}
+				return keys;
 			},
 		} );
 	}
