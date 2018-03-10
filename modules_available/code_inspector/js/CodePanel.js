@@ -578,7 +578,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}
 	}
 
-	function onRefereshFileClicked( e )
+	function onRefreshFileClicked( e )
 	{
 		var target = $( e.target ).closest( 'button' ).css( 'visibility', 'hidden' );
 		var spinner = $( new Theme.Spinner + '' ).css( 'position', 'absolute' ).appendTo( '.file-bar' ).position( {
@@ -686,7 +686,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 	$( document ).on( 'click',    '[data-command]',       onCommandButtonClicked );
 	$( document ).on( 'keypress', '.bp-expression-input', onNewExpressionGiven )
-	$( document ).on( 'click',    '.refresh-file',        onRefereshFileClicked )
+	$( document ).on( 'click',    '.refresh-file',        onRefreshFileClicked )
 	$( document ).on( 'click',    '[data-action=clear-all-breakpoints]', onClearBpClicked )
 	$( document ).on( 'click',    '#file_finder',         showQuickFiles );
 	$( document ).on( 'keyup',                         onDocumentKeypress );
