@@ -115,6 +115,33 @@ function vue_provide_layouts()
 				]
 			],
 		],
+		'Sidebar' => [
+			'title' => 'Sidebar',
+			'data'  => [
+				'dir'      => 'h',
+				'id'       => 'outer0',
+				'children' => [
+					[
+						'id'  => 'middle-l',
+						'dir' => 'v',
+						'children' => [
+							[
+								'id' => 'inner-top',
+								'dir' => 'h',
+							],
+							[
+								'id' => 'inner-bottom',
+								'dir' => 'h',
+							],
+						],
+					],
+					[
+						'id'  => 'middle-r',
+						'dir' => 'v',
+					],
+				]
+			],
+		],
 		'horizon' => [
 			'title' => 'Horizon',
 			'data'  => [
