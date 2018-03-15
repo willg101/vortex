@@ -98,8 +98,8 @@ function vue_build_layout( $layout )
 function vue_provide_layouts()
 {
 	return [
-		'jsfiddle-like' => [
-			'title' => 'JSFiddle Style',
+		'stacks' => [
+			'title' => 'Stacks',
 			'data'  => [
 				'dir'      => 'h',
 				'id'       => 'outer0',
@@ -115,8 +115,8 @@ function vue_provide_layouts()
 				]
 			],
 		],
-		'original' => [
-			'title' => 'Original',
+		'horizon' => [
+			'title' => 'Horizon',
 			'data'  => [
 				'dir'      => 'v',
 				'id'       => 'outer1',
