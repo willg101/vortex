@@ -9,3 +9,7 @@
 		</div>
 	</div>
 </div>
+<div class="continuation-command-notification inactive">
+	<span class="processing-spinner"></span>
+	<span class="timer"></span>
+</div>

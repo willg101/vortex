@@ -9,6 +9,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	var module_initialized    = false;
 	var after_init_cb         = false;
 	var recent_files          = [];
+	var continuation_command_to;
 
 	function loadRecentFiles()
 	{
@@ -43,6 +44,8 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		{
 			return;
 		}
+
+		$( new Theme.Spinner + '' ).appendTo( '.processing-spinner' );
 
 		loadRecentFiles();
 
@@ -312,6 +315,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	{
 		editor.session.removeMarker( current_line_marker );
 		editor.getSession().removeGutterDecoration( current_line - 1, "gutter-current-line" );
+		clearActiveContinuationCommand();
 
 		current_line_marker = false;
 		current_line = false;
@@ -421,6 +425,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		{
 			updateStatusIndicator( BasicApi.SocketServer.isConnected() ? 'connected' : 'disconnected' );
 			clearCurrentLineIndicator();
+			clearActiveContinuationCommand();
 		}
 	}
 
@@ -505,13 +510,25 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 	function startContinuationCommand()
 	{
-		clearActiveContinuationCommand();
-		$( '.gutter-current-line' ).addClass( 'current-line-running' );
+		clearTimeout( continuation_command_to );
+		if ( !$( '.continuation-command-notification:visible' ).length )
+		{
+			$( '.continuation-command-notification' )
+				.removeClass( 'inactive' )
+				.find( '.timer' )
+				.stopwatch( 'start' );
+		}
 	}
 
 	function clearActiveContinuationCommand()
 	{
-		$( '.current-line-running' ).removeClass( 'current-line-running' );
+		clearTimeout( continuation_command_to );
+		continuation_command_to = setTimeout( function()
+		{
+			$( '.continuation-command-notification' ).addClass( 'inactive' )
+				.find( '.timer' )
+				.stopwatch( 'stop' );
+		}, 50 ); // Debounce cases in which a series of stop/start continuations are issued rapidly
 	}
 
 	function sendAllBreakpoints()

@@ -98,21 +98,9 @@
 	animation: pending-breakpoint 1s infinite;
 }
 
-@keyframes running-in-out
-{
-	0%  { background: @tertiary-color }
-	50% { background: transparent }
-	100%{ background: @tertiary-color }
-}
-
 .ace_gutter-cell.gutter-current-line
 {
 	background: @tertiary-color;
-
-	&.current-line-running
-	{
-		animation: 1s running-in-out infinite ease-in-out;
-	}
 }
 
 .ace-current-line
@@ -138,5 +126,34 @@
 	100%
 	{
 		background: rgba(0,0,0,0);
+	}
+}
+
+.continuation-command-notification
+{
+	position: absolute;
+	@margin: 10px;
+	@padding: 5px 10px;
+	bottom: @margin;
+	left: @margin;
+	background: #FFF;
+	border-radius: 3px;
+	box-shadow: 0 0 5px #000;
+	padding: @padding;
+	display: flex;
+	align-items: center;
+
+	.timer
+	{
+		color: @primary-color;
+		font-family: monospace;
+		font-weight: bold;
+		display: inline-block;
+		margin-left: 10px;
+	}
+
+	&.inactive
+	{
+		display: none;
 	}
 }
