@@ -96,11 +96,11 @@ function basic_api_recent_files_api( $path )
 	{
 		if ( client_can_view_file( $item ) )
 		{
-			$response[] = [
+			array_unshift( $response, [
 				'name'     => basename( $item ),
 				'fullpath' => $item,
 				'is_dir'   => FALSE,
-			];
+			] );
 		}
 	}
 
