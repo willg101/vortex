@@ -735,7 +735,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		updateStatusIndicator     : updateStatusIndicator,
 		updateBreakpoint          : updateBreakpoint,
 		addBreakpoint             : addBreakpoint,
-		showQuickFiles            : showQuickFiles
+		showQuickFiles            : showQuickFiles,
 	}
 
 }( jQuery ));
