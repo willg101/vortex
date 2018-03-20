@@ -59,6 +59,7 @@ namespace( 'BasicApi' ).Debugger = (function( $ )
 		value       : 'v',
 		transaction : 'i',
 		pattern     : 'p',
+		max_data    : 'm'
 	};
 
 	function translateArgs( args_object )

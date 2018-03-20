@@ -11,17 +11,27 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		var identifier  = li.attr( 'data-identifier' );
 		var stack_depth = li.attr( 'data-stack-depth' );
 		var cid         = li.attr( 'data-cid' );
-		var current_val = li.attr( 'data-current-value' ) || '';
+		var size        = li.attr( 'data-size' );
 
-		Theme.Modal.set( {
-			title : 'Update Value',
-			content : '<label>Assign a new value to <span class="identifier">' + identifier
-				+':</span></label><div class="value-input" contenteditable data-identifier="' + identifier
-				+ '" data-stack-depth="' + stack_depth + '" data-cid="' + cid + '">' + current_val + '</div>'
-		} );
-		Theme.Modal.show();
-		$( '.value-input' ).focus();
-		document.execCommand( 'selectAll', false, null );
+		BasicApi.Debugger.command( 'property_get', {
+				name        : identifier,
+				stack_depth : stack_depth,
+				context     : cid,
+				max_data    : size,
+			},
+			function( e )
+			{
+				var current_val = $('<div>').text( e.parsed[ 0 ].value || '' ).html();
+				Theme.Modal.set( {
+					title : 'Update Value',
+					content : '<label>Assign a new value to <span class="identifier">' + identifier
+						+':</span></label><div class="value-input" contenteditable data-identifier="' + identifier
+						+ '" data-stack-depth="' + stack_depth + '" data-cid="' + cid + '">' + current_val + '</div>'
+				} );
+				Theme.Modal.show();
+				$( '.value-input' ).focus();
+				document.execCommand( 'selectAll', false, null );
+			} );
 	}
 
 	function onNewValueGiven( e )
@@ -158,6 +168,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 					'class'              : 'identifier-leaf',
 					'data-stack-depth'   : stack_depth,
 					'data-current-value' : value,
+					'data-size'          : property.size,
 				},
 				icon    : 'identifier-icon fa fa-fw ' + icon,
 				text    : '<span class="identifier">'
