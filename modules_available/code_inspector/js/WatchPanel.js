@@ -7,6 +7,19 @@
 	const HEREDOC_SUFFIX      = '\nreturn ' + MAGIC_EVAL_VAR_NAME + ';\nVORTEXEVAL\n);';
 	var eval_magic_var_regex  = new RegExp( '\\' + MAGIC_EVAL_VAR_NAME + '($|[^_\\w])' )
 
+	var settings = new BasicApi.Persistor( 'watch_panel_settings' );
+	var has_warned_this_session;
+
+	function notifyUserOfWatchWarning()
+	{
+		if ( !settings.no_notify && !has_warned_this_session )
+		{
+			Theme.notify( 'error', 'A watched expression failed to execute and may cause stray'
+				+ ' warnings or notices in your output.', '', { timeOut : 10000 } );
+			has_warned_this_session = true;
+		}
+	}
+
 	function prepareCommand( command_str )
 	{
 		command_str = typeof command_str == 'string' ? command_str : '';
@@ -84,6 +97,7 @@
 			{
 				var message = $( '<i class="fa fa-warning"></i>' ).attr( 'title', message );
 				$( output ).html( message );
+				notifyUserOfWatchWarning();
 			}
 			else
 			{
@@ -150,6 +164,7 @@
 	{
 		if ( e.status == 'active' )
 		{
+			has_warned_this_session = false;
 			renderExpressions();
 			$( '#watch' ).fadeIn();
 		}
