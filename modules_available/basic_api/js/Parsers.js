@@ -261,21 +261,31 @@ namespace( 'BasicApi' ).ResponseParsers = (function( $ )
 
 	subscribe( 'provide-tests', function()
 	{
+		var default_attr_overrides = {
+			size        : 1,
+			numchildren : 0,
+		};
 		function populateAttrs( prop, prefix, attrs )
 		{
-			for ( var i in attrs )
+			attrs.forEach( function( attr )
 			{
-				prop.attr( attrs[ i ], prefix + attrs[ i ] );
-			}
+				var val = typeof default_attr_overrides[ attr ] != 'undefined'
+					? default_attr_overrides[ attr ]
+					: prefix + attr;
+				prop.attr( attr, val );
+			} );
 			return prop;
 		}
 
 		function testAttrs( output, prefix, attrs )
 		{
-			for ( var i in attrs )
+			attrs.forEach( function( attr )
 			{
-				expect( output[ attrs[ i ] ] ).toBe( prefix + attrs[ i ] );
-			}
+				var expected = typeof default_attr_overrides[ attr ] != 'undefined'
+					? default_attr_overrides[ attr ]
+					: prefix + attr;
+				expect( output[ attr ] ).toBe( expected );
+			} )
 		}
 
 		describe( "BasicApi.Debugger - Parsers", function()
