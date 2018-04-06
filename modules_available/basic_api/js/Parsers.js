@@ -326,7 +326,15 @@ namespace( 'BasicApi' ).ResponseParsers = (function( $ )
 				expect( output.value[ 0 ].type ).toBe( 'string' );
 
 				// Array
-				jq_msg = $( '<response><property address="140736699921712" type="array" children="1" numchildren="3" page="0" pagesize="128"><property name="0" address="139919608516592" type="int"><![CDATA[1]]></property><property name="1" address="139919608519464" type="string" size="3" encoding="base64"><![CDATA[YWJj]]></property><property name="2" address="139919608519720" type="array" children="0" numchildren="0" page="0" pagesize="128"></property></property></response>' );
+				jq_msg = $( `
+					<response>
+						<property address="140736699921712" type="array" children="1" numchildren="3" page="0" pagesize="128">
+							<property name="0" address="139919608516592" type="int"><![CDATA[1]]></property>
+							<property name="1" address="139919608519464" type="string" size="3" encoding="base64"><![CDATA[YWJj]]></property>
+							<property name="2" address="139919608519720" type="array" children="0" numchildren="0" page="0" pagesize="128"></property>
+						</property>
+					</response>`
+				);
 				output = response_parsers.eval( jq_msg );
 				expect( output.message ).toBeUndefined();
 				expect( typeof output.value ).toBe( 'object' );
