@@ -79,7 +79,7 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 		}
 		else
 		{
-			new Theme.Popover( '<h2 class="bottom-margin-only">Queued Sessions</h2><i>No queued sessions</i>', [], { my : 'right top', at : 'right bottom', of : $( '#connection_queue_indicator' ) }, $( '#connection_queue_indicator' ) );
+			new Theme.Popover( '<h2 class="swallow-margin">Queued Sessions</h2><i>No queued sessions</i>', [], { my : 'right top', at : 'right bottom', of : $( '#connection_queue_indicator' ) }, $( '#connection_queue_indicator' ) );
 		}
 
 	}

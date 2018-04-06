@@ -1094,6 +1094,7 @@ html
 	overflow-y: auto;
 	background-color: #FFF;
 	box-shadow: 0 0 30px rgba(0,0,0,0.3);
+	font-size: .9rem;
 
 	&:not(.no-padding)
 	{
@@ -1104,13 +1105,20 @@ html
 
 	h2
 	{
-		margin: 5px 10px;
-		font-size: 15px;
-		color: @secondary-color;
+		padding: 5px 10px;
+		margin: 0;
 
-		&.bottom-margin-only
+		font-size: 15px;
+		color: #333;
+
+		&:not(.no-bg)
 		{
-			margin: 0 0 5px;
+			background: fade( @tertiary-color, 30% );
+		}
+
+		&.swallow-margin
+		{
+			margin: -10px -10px 5px;
 		}
 	}
 
@@ -1127,12 +1135,12 @@ html
 		.bouncy();
 		padding: 5px 10px;
 		cursor: pointer;
-		font-family: consolas, monospace;
 		background: #F8F8F8;
 		display:block;
 		width: 100%;
 		box-sizing: border-box;
 		color: @primary-color;
+		color: #333;
 
 		&.globber-dir
 		{
@@ -1142,6 +1150,12 @@ html
 		&:active
 		{
 			transform: scale( .95, .95 );
+		}
+
+		&:hover
+		{
+			background: fade( @tertiary-color, 20%);
+			border-color: transparent;
 		}
 	}
 }
