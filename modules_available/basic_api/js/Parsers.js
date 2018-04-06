@@ -161,6 +161,10 @@ namespace( 'BasicApi' ).ResponseParsers = (function( $ )
 			{
 				property.numchildren = parseInt( property.numchildren );
 			}
+			if ( typeof property.size != "undefined" )
+			{
+				property.size = parseInt( property.size );
+			}
 
 			if ( /^int(eger)?/i.test( property.type ) )
 			{
