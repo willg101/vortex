@@ -162,11 +162,11 @@ namespace( 'BasicApi' ).ResponseParsers = (function( $ )
 				property.numchildren = parseInt( property.numchildren );
 			}
 
-			if ( /^int(eger)?/i.test( property.value ) )
+			if ( /^int(eger)?/i.test( property.type ) )
 			{
 				property.value = parseInt( property.value );
 			}
-			else if ( /^(float|double)$/i.test( property.value ) )
+			else if ( /^(float|double)$/i.test( property.type ) )
 			{
 				property.value = parseFloat( property.value );
 			}
@@ -329,7 +329,7 @@ namespace( 'BasicApi' ).ResponseParsers = (function( $ )
 				output = response_parsers.eval( jq_msg );
 				expect( output.message ).toBeUndefined();
 				expect( typeof output.value ).toBe( 'object' );
-				expect( output.value[ 0 ].value ).toBe( '238752' );
+				expect( output.value[ 0 ].value ).toBe( 238752 );
 				expect( output.value[ 0 ].type ).toBe( 'int' );
 
 				// Single, fully-populated property
