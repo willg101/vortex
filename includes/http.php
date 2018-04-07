@@ -178,6 +178,8 @@ function require_method( $methods )
 		$methods = [ $methods ];
 	}
 
+	$methods = array_map( 'strtoupper', $methods );
+
 	if ( in_array( $_SERVER[ 'REQUEST_METHOD' ], $methods ) )
 	{
 		return;
