@@ -1,10 +1,11 @@
-function RenderError( message )
-{
-	this.name = 'RenderError';
-	this.message = message;
-	this.stack = (new Error()).stack;
+class RenderError extends Error {
+	constructor( message )
+	{
+		this.name = 'RenderError';
+		this.message = message;
+		this.stack = (new Error()).stack;
+	}
 }
-RenderError.prototype = new Error;
 
 /**
  * @brief
