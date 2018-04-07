@@ -10,6 +10,6 @@
     },
     "autoload": {
         "psr-4": { "Vortex\\": "src/Vortex" },
-        "files" : [ "vendor/oyejorge/less.php/lessc.inc.php" ]
+        "files" : [ "vendor/oyejorge/less.php/lessc.inc.php", "vendor/paragonie/random_compat/lib/random.php" ]
     }
 }

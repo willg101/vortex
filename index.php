@@ -68,7 +68,6 @@ require_once 'includes/javascript.php';
 require_once 'includes/models.php';
 require_once 'includes/stylesheets.php';
 require_once 'includes/templates.php';
-require_once 'vendor/paragonie/random_compat/lib/random.php';
 require_once 'vendor/autoload.php';
 
 bootstrap();
