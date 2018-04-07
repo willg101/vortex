@@ -73,7 +73,7 @@ class RequestHandlers
 	 */
 	protected function normalize( $url )
 	{
-		$url = preg_replace( '#(^/|/$)#', '',  $url );
+		$url = preg_replace( '#(^/+|/+$)#', '',  $url );
 		return preg_replace( '#/+#',      '/', $url );
 	}
 
