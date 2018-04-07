@@ -161,6 +161,7 @@ class RequestHandlers
 				$handled = TRUE;
 
 				fire_hook( 'postprocess_request', $data );
+				break;
 			}
 		}
 
