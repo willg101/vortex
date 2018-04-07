@@ -1,7 +1,6 @@
 <?php
 
 use Dpoh\DataStorage;
-use Dpoh\PersistentDataStorage;
 use Dpoh\RequestHandlers;
 
 define( 'USER_CONFIG_FILE', 'user-config.json' );
@@ -9,7 +8,6 @@ define( 'SETTINGS_FILE',    'settings-global.json' );
 define( 'MODULES_PATH',     'modules_enabled' );
 
 require_once 'DataStorage.class.php';
-require_once 'PersistentDataStorage.class.php';
 require_once 'RequestHandlers.class.php';
 
 /**
