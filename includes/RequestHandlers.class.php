@@ -15,7 +15,6 @@ class RequestHandlers
 	 */
 	private $handlers = [];
 
-	public function register( $pattern, $callback, $options = [] )
 	/**
 	 * Indicates if $handlers has been sorted by specificity yet
 	 *
@@ -30,6 +29,7 @@ class RequestHandlers
 	 *                           discarded.
 	 * @param array    $options  OPTIONAL. An arbitrary array of data to pass to $callback
 	 */
+	public function register( $pattern, $callback, array $options = [] )
 	{
 		$this->sorted = FALSE;
 
