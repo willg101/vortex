@@ -15,13 +15,13 @@ class RequestHandlers
 	 */
 	private $handlers = [];
 
-	private $unsorted = TRUE;
 	public function register( $pattern, $callback, $options = [] )
 	/**
 	 * Indicates if $handlers has been sorted by specificity yet
 	 *
 	 * @var bool
 	 */
+	private $sorted = FALSE;
 
 	/**
 	 * @param string   $pattern  A URL pattern like 'a/b/c' or 'd/%'. '%' indicates a wildcard.
@@ -31,7 +31,7 @@ class RequestHandlers
 	 * @param array    $options  OPTIONAL. An arbitrary array of data to pass to $callback
 	 */
 	{
-		$this->unsorted = TRUE;
+		$this->sorted = FALSE;
 
 		$this->handlers[] = [
 			'pattern'  => $this->normalize( $pattern ),
@@ -46,7 +46,7 @@ class RequestHandlers
 	 */
 	protected function sortHandlers()
 	{
-		if ( !$this->unsorted )
+		if ( $this->sorted )
 		{
 			return;
 		}
@@ -60,7 +60,7 @@ class RequestHandlers
 			return $diff ?: substr_count( $b, '%' ) - substr_count( $a, '%' );
 		} );
 
-		$this->unsorted = FALSE;
+		$this->sorted = TRUE;
 	}
 
 	/**
