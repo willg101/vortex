@@ -17,13 +17,13 @@ require_once 'RequestHandlers.class.php';
  * @retval array
  *	@code
  *	[
- *		'hook_implementations' => 'modules/foo/hooks.php'             // or FALSE
- *		'ajax_api_script'      => 'modules/foo/ajax-api.php'          // or FALSE
- *		'page_template'        => 'modules/foo/page-template.tpl.php' // or FALSE
- *		'js'                   => [ 'modules/foo/js/a/b/c.js', 'modules/foo/js/d.js' ],
- *		'css'                  => [ 'modules/foo/css/a/b/c.css', 'modules/foo/css/d.css' ],
- *		'less'                 => [ 'modules/foo/less/a/b.css.less', 'modules/foo/less/d.css.less' ],
- *		'templates'            => [ 'modules/foo/templates/a.tpl.php' ],
+ *		'hook_implementations' => 'modules_enabled/foo/hooks.php'             // or FALSE
+ *		'ajax_api_script'      => 'modulese_nabled/foo/ajax-api.php'          // or FALSE
+ *		'page_template'        => 'modules_enabled/foo/page-template.tpl.php' // or FALSE
+ *		'js'                   => [ 'modules_enabled/foo/js/a/b/c.js', 'modules/foo/js/d.js' ],
+ *		'css'                  => [ 'modules_enabled/foo/css/a/b/c.css', 'modules/foo/css/d.css' ],
+ *		'less'                 => [ 'modules_enabled/foo/less/a/b.css.less', 'modules/foo/less/d.css.less' ],
+ *		'templates'            => [ 'modules_enabled/foo/templates/a.tpl.php' ],
  *		'settings'             => [
  *			'external_dependencies' => [
  *				'js'  => [ '//a.com/b/c.js' ],
@@ -166,6 +166,9 @@ function settings( $key = NULL, $default_val = NULL )
 		: $settings_model;
 }
 
+/**
+ * @retval RequestHandlers
+ */
 function request_handlers()
 {
 	static $model;

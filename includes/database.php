@@ -2,6 +2,14 @@
 
 class DatabaseException extends Exception {}
 
+/**
+ * @brief
+ *	Lazy initialize and/or retrieve a database connection
+ *
+ * @param string $connection OPTIONAL. The name of a database connection defined in settings
+ *
+ * @retval PDO
+ */
 function db( $connection = 'default' )
 {
 	static $connections = [];
@@ -19,6 +27,16 @@ function db( $connection = 'default' )
 	return $connections[ $connection ];
 }
 
+/**
+ * @brief
+ *	Perform a query against the database and fetch an associative array of its results
+ *
+ * @param string $query
+ * @param array  $params     OPTIONAL. An array of paramters to inject into the query
+ * @param string $connection OPTIONAL. The DB connection to run the query on
+ *
+ * @retval array
+ */
 function db_query( $query, array $params = [], $connection = NULL )
 {
 	$connection = $connection ?: db();

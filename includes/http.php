@@ -61,6 +61,8 @@ function error_response( $message, $code = 400, $http_message = 'Bad Request' )
 }
 
 /**
+ * COPIED FROM DRUPAL 7 CORE
+ *
  * Returns the requested URL path of the page being viewed.
  *
  * Examples:
@@ -131,6 +133,15 @@ function send_json( $data, $die = TRUE )
 	}
 }
 
+/**
+ * AN EXCERPT COPIED FROM DRUPAL 7 CORE, `conf_init()`
+ *
+ * @brief
+ *	Get the base path of this website; helpful for installations that are not at document root
+ *
+ * @retval string
+ *	A string ending with '/'
+ */
 function base_path()
 {
   static $base_path;
@@ -153,6 +164,13 @@ function base_path()
   return $base_path;
 }
 
+/**
+ * @brief
+ *	Verify that the HTTP request was sent using the given method, and if it was not, send a 405
+ *	response
+ *
+ * @param string|array A string containing an HTTP method name, or an array of such strings
+ */
 function require_method( $methods )
 {
 	if ( !is_array( $methods ) )
@@ -176,6 +194,10 @@ function require_method( $methods )
 	}
 }
 
+/**
+ * @param string $str The content of a cookie header
+ * @retval array
+ */
 function parse_cookie_str( $str )
 {
 	$cookies = [];

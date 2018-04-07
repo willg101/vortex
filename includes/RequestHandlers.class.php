@@ -2,13 +2,34 @@
 
 namespace Dpoh;
 
+/**
+ * @brief
+ *	Delegate incoming HTTP requests to the proper handlers
+ */
 class RequestHandlers
 {
+	/**
+	 * Registered request handlers.
+	 *
+	 * @var array
+	 */
 	private $handlers = [];
 
 	private $unsorted = TRUE;
-
 	public function register( $pattern, $callback, $options = [] )
+	/**
+	 * Indicates if $handlers has been sorted by specificity yet
+	 *
+	 * @var bool
+	 */
+
+	/**
+	 * @param string   $pattern  A URL pattern like 'a/b/c' or 'd/%'. '%' indicates a wildcard.
+	 * @param callable $callback A callable like `function( string $url, array $options )`. This
+	 *                           callable is responsible printing its output; its return value is
+	 *                           discarded.
+	 * @param array    $options  OPTIONAL. An arbitrary array of data to pass to $callback
+	 */
 	{
 		$this->unsorted = TRUE;
 
@@ -19,6 +40,10 @@ class RequestHandlers
 		];
 	}
 
+	/**
+	 * @brief
+	 *	Sort $this->handlers in order of specificity, from most specific to least
+	 */
 	protected function sortHandlers()
 	{
 		if ( !$this->unsorted )
@@ -38,12 +63,29 @@ class RequestHandlers
 		$this->unsorted = FALSE;
 	}
 
+	/**
+	 * @brief
+	 *	Collapse repeated '/' characters and strip leading and trailing '/'
+	 *
+	 * @param string $url
+	 *
+	 * @retval string
+	 */
 	protected function normalize( $url )
 	{
 		$url = preg_replace( '#(^/|/$)#', '',  $url );
 		return preg_replace( '#/+#',      '/', $url );
 	}
 
+	/**
+	 * @brief
+	 *	Determines if a given pattern matches a normalized url
+	 *
+	 * @param string $pattern See documentation from register()'s `$pattern` argument
+	 * @param string $url
+	 *
+	 * @retval bool
+	 */
 	protected function matches( $pattern, $url )
 	{
 		$url     = explode( '/', $url );
@@ -57,6 +99,7 @@ class RequestHandlers
 		{
 			foreach ( $pattern as $i => $component )
 			{
+				// Treat '%%' as a literal '%'; handle wildcards
 				if ( $url[ $i ] == preg_replace( '/%(%+)/', '$1', $component ) || $component == '%' )
 				{
 					continue;
@@ -70,6 +113,27 @@ class RequestHandlers
 		}
 	}
 
+	/**
+	 * @brief
+	 *	Apply the registered handler for this request
+	 *
+	 * To perform an action immediately before or after the request is handled, use
+	 * hook_preprocess_request or hook_postprocess_request, respectively. These hooks are passed an
+	 * array like
+	 * @code
+	 * [
+	 * 	'url'      => 'a/b/c',
+	 * 	'pattern'  => 'a/b/%',
+	 * 	'options'  => [ 'foo' => 'bar' ], // ALTERABLE
+	 * 	'callback' => 'my_handler_function', // ALTERABLE
+	 * ]
+	 * @endcode
+	 *
+	 * @param string $url OPTIONAL. When omitted, retrieves the URL from `request_path()`
+	 *
+	 * @retval bool
+	 *	Indicates whether the request was handled or not
+	 */
 	public function handle( $url = NULL )
 	{
 		if ( !isset( $url ) )
