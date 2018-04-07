@@ -15,11 +15,9 @@ class RenderError extends Error {
  *
  * @retval object
  */
+function namespace( ns )
 {
-	if ( !context || typeof context != "object" )
-	{
-		context = window;
-	}
+	var context = window;
 
 	ns.split( '.' ).forEach( function( part )
 	{
