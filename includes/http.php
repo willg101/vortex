@@ -144,24 +144,24 @@ function send_json( $data, $die = TRUE )
  */
 function base_path()
 {
-  static $base_path;
+	static $base_path;
 
-  if ( !isset( $base_path ) )
-  {
-    // $_SERVER['SCRIPT_NAME'] can, in contrast to $_SERVER['PHP_SELF'], not
-    // be modified by a visitor.
-    if ( $dir = rtrim( dirname( $_SERVER[ 'SCRIPT_NAME' ] ), '\/' ) )
+	if ( !isset( $base_path ) )
 	{
-      $base_path = $dir;
-      $base_path .= '/';
-    }
-    else
-	{
-      $base_path = '/';
-    }
-  }
+		// $_SERVER['SCRIPT_NAME'] can, in contrast to $_SERVER['PHP_SELF'], not
+		// be modified by a visitor.
+		if ( $dir = rtrim( dirname( $_SERVER[ 'SCRIPT_NAME' ] ), '\/' ) )
+		{
+			$base_path = $dir;
+			$base_path .= '/';
+		}
+		else
+		{
+			$base_path = '/';
+		}
+	}
 
-  return $base_path;
+	return $base_path;
 }
 
 /**
