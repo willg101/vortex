@@ -49,11 +49,10 @@
  */
 function render( $name, $vars = [] )
 {
-	$implementations = get_template_implementations( $name );
 	$data = [
 		'template'        => $name,
 		'vars'            => &$vars,
-		'implementations' => $implementations,
+		'implementations' => get_template_implementations( $name ),
 	];
 
 	fire_hook( 'render_preprocess', $data );
