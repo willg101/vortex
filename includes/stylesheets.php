@@ -97,8 +97,6 @@ function compile_less( $input_file, $output_prefix, array &$errors = [] )
 	$output_file = LESS_OUTPUT_DIR . "/cached-$output_prefix-$request_timestamp-"
 		. without_file_extension( $input_file ) . '.css';
 
-	require_once "lib/less_php/Less.php";
-
 	$less = new Less_Parser();
 	$less->ModifyVars( settings( 'less_variables' ) );
 	try

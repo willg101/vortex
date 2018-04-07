@@ -5,9 +5,11 @@
         "symfony/yaml":"3.4",
         "monolog/monolog": "^1.23",
         "paragonie/random_compat": "^2.0",
-        "sentry/sentry": "^1.8"
+        "sentry/sentry": "^1.8",
+        "oyejorge/less.php": "v1.7.0.14"
     },
     "autoload": {
-        "psr-4": { "Vortex\\": "src/Vortex" }
+        "psr-4": { "Vortex\\": "src/Vortex" },
+        "files" : [ "vendor/oyejorge/less.php/lessc.inc.php" ]
     }
 }
