@@ -6,9 +6,21 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @brief
+ *	Runs the socket server in a loop, allowing remote restarting of the socket server
+ */
 class SocketServerStartCommand extends Command
 {
-	const TIGHT_LOOP_KILL_THRESHOLD = 10;
+	/**
+	 * @brief
+	 *	Crash loop protection: Don't bring the socket server back up if we start it up more than
+	 *	TIGHT_LOOP_KILL_THRESHOLD times in TIGHT_LOOP_KILL_SAMPLE_WINDOW_SECONDS seconds.
+	 *
+	 * @var TIGHT_LOOP_KILL_THRESHOLD             integer
+	 * @var TIGHT_LOOP_KILL_SAMPLE_WINDOW_SECONDS integer
+	 */
+	const TIGHT_LOOP_KILL_THRESHOLD             = 10;
 	const TIGHT_LOOP_KILL_SAMPLE_WINDOW_SECONDS = 1;
 
 	protected function configure()
@@ -19,7 +31,7 @@ class SocketServerStartCommand extends Command
 			->setHelp( 'The socket server is a bridge between the debugger engine and a websocket' );
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output)
+	protected function execute( InputInterface $input, OutputInterface $output )
 	{
 		$samples = array_fill( 0, static::TIGHT_LOOP_KILL_THRESHOLD, 0 );
 		while ( TRUE )

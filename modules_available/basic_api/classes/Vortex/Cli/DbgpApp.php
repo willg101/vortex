@@ -4,17 +4,37 @@ namespace Vortex\Cli;
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
-use SplObjectStorage;
 use Psr\Log\LoggerInterface;
 use Exception;
 
 class DbgpApp implements MessageComponentInterface
 {
+	/**
+	 * @brief
+	 *	Max number of sessions that can be enqueued (additional connections are dropped)
+	 *
+	 * @var int
+	 */
 	const MAX_QUEUE_LENGTH = 32;
 
+	/**
+	 * @var \Vortex\Cli\ConnectionBridge
+	 */
 	protected $bridge;
-	protected $connected_to_client;
+
+	/**
+	 * @var \Ratchet\ConnectionInterface
+	 */
+	protected $ws_connection;
+
+	/**
+	 * @var Psr\Log\LoggerInterface
+	 */
 	protected $logger;
+
+	/**
+	 * @var array
+	 */
 	protected $queue = [];
 
 	public function __construct( ConnectionBridge $bridge, LoggerInterface $logger )
@@ -109,12 +129,12 @@ class DbgpApp implements MessageComponentInterface
 			'logger'     => $this->logger,
 		];
 		fire_hook( 'dbg_connection_opened', $data );
-		$this->connected_to_client = $conn;
+		$this->ws_connection = $conn;
 	}
 
 	public function onClose( ConnectionInterface $conn )
 	{
-		if ( $this->connected_to_client == $conn )
+		if ( $this->ws_connection == $conn )
 		{
 			$data = [
 				'connection' => $conn,
@@ -125,7 +145,7 @@ class DbgpApp implements MessageComponentInterface
 
 			$this->logger->debug( "Removing callback bridge" );
 			$this->bridge->clearDbgConnection( $conn );
-			$this->connected_to_client = FALSE;
+			$this->ws_connection = FALSE;
 
 			if ( $this->bridge->hasWsConnection() )
 			{

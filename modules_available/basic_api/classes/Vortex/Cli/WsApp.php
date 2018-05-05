@@ -9,7 +9,14 @@ use Exception;
 
 class WsApp implements MessageComponentInterface
 {
+	/**
+	 * @var \Vortex\Cli\ConnectionBridge
+	 */
 	protected $bridge;
+
+	/**
+	 * @var \Psr\Log\LoggerInterface
+	 */
 	protected $logger;
 
 	public function __construct( ConnectionBridge $bridge, LoggerInterface $logger )
@@ -22,6 +29,8 @@ class WsApp implements MessageComponentInterface
 	{
 		$name = "websocket connection $conn->resourceId";
 		$this->logger->debug( "Connection opened: $name" );
+
+		// Parse cookies in order to authenticate the user
 		$cookies = parse_cookie_str( array_get( $conn->httpRequest->getHeader( 'Cookie' ),  0 ) );
 		$this->logger->debug( "Connection" , (array) $cookies );
 
@@ -30,7 +39,7 @@ class WsApp implements MessageComponentInterface
 			$this->bridge->setWsConnection( $conn );
 			$this->bridge->sendToWs( '<wsserver status="connection_accepted"></wsserver>' );
 		}
-		else
+		else // An active web socket already exists
 		{
 			$conn->send( "50\0<wsserver status=\"no_exclusive_access\"></wsserver>\0" );
 			$this->logger->debug( "We already have a websocket connection; dropping $name" );
@@ -68,6 +77,7 @@ class WsApp implements MessageComponentInterface
 		];
 		fire_hook( 'ws_message_received', $data );
 
+		// Handle `ctrl:` commands, which manipulate the socket server
 		if ( preg_match( '/^ctrl:stop /', $data[ 'message' ] ) )
 		{
 			fire_hook( 'stop_socket_server' );

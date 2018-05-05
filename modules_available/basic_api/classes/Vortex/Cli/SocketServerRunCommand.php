@@ -15,8 +15,6 @@ use Ratchet\Server\IoServer;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
-//chdir( __DIR__ . '/../../../' );
-
 require_once 'includes/arrays.php';
 require_once 'includes/database.php';
 require_once 'includes/bootstrap.php';
@@ -28,7 +26,6 @@ require_once 'includes/templates.php';
 
 class SocketServerRunCommand extends Command
 {
-
 	protected function configure()
 	{
 		$this
@@ -47,8 +44,8 @@ class SocketServerRunCommand extends Command
 		$logger->info( 'Creating socket servers' );
 
 		$loop = EventLoopFactory::create();
-		$dbg  = new SocketServer( '0.0.0.0:9000', $loop );
-		$ws   = new SocketServer( '0.0.0.0:3001', $loop );
+		$dbg  = new SocketServer( '0.0.0.0:9000', $loop ); // TODO: Configurable
+		$ws   = new SocketServer( '0.0.0.0:3001', $loop ); // TODO: Configurable
 
 		$wsStack = new HttpServer(
 			new WsServer(
