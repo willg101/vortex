@@ -261,6 +261,11 @@
 	{
 		var height = $( '.toolbar .css-cell:not(.match-height)' ).height();
 		$( '.toolbar .css-cell.match-height' ).height( height + 1 );
+
+		// jQuery Terminal's handling of resizing, in which all messages are re-rendered, does not
+		// work well with jsTree, and tends to crash. Since we wouldn't gain much benefit from this
+		// feature even if it did work, let's just disable it.
+		$( '#console' ).resizer( 'unbind' );
 	}
 
 	function onFileChanged( e )
