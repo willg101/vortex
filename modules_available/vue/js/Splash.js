@@ -3,12 +3,12 @@
  */
 namespace( 'Vue' ).Splash = (function( $ )
 {
-	var did_load = false;
-
 	function onWindowLoad()
 	{
-		did_load = true;
 		onWindowResized( '*' );
+		$( '.splash-outermost' ).addClass( 'out' )
+			.find( '.full' )
+			.css( 'animation-fill-mode', 'none' );
 	}
 
 	function onSessionStatusChanged( e )
@@ -30,20 +30,6 @@ namespace( 'Vue' ).Splash = (function( $ )
 		} );
 	};
 
-	function onAnimationEnd()
-	{
-		if ( did_load )
-		{
-			$( '.splash-outermost' ).addClass( 'out' )
-				.find( '.full' )
-				.css( 'animation-fill-mode', 'none' );
-		}
-		else
-		{
-			$( '.v' ).toggleClass( 'a b' );
-		}
-	}
-
 	function onTransitionEnd( e )
 	{
 		$( e.target ).remove();
@@ -57,6 +43,6 @@ namespace( 'Vue' ).Splash = (function( $ )
 
 	subscribe( 'session-status-changed',    onSessionStatusChanged );
 	$( window ).on( 'load', onWindowLoad );
-	$( document ).on( 'animationend', '.v.v1', onAnimationEnd );
 	$( document ).on( 'transitionend', '.splash-outermost', onTransitionEnd );
+
 }( jQuery ));
