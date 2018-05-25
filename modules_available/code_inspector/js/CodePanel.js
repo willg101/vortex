@@ -10,6 +10,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	var after_init_cb         = false;
 	var recent_files          = [];
 	var continuation_command_to;
+	var Range = ace.require('ace/range').Range;
 
 	function loadRecentFiles()
 	{
@@ -60,7 +61,6 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		editor.setOption( "showPrintMargin", false );
 		editor.on( "guttermousedown", onGutterClicked );
 		editor.setReadOnly( true );
-
 		publish( 'editor-ready', { editor : editor } );
 	}
 
@@ -280,7 +280,6 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 			if ( line )
 			{
-				var Range = ace.require('ace/range').Range;
 				if ( BasicApi.Debugger.sessionIsActive() )
 				{
 					current_line_marker = editor.session.addMarker( new Range( line - 1, 0, line - 1, 1),
@@ -710,6 +709,102 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}
 	}
 
+	function onEditorReady( e )
+	{
+		var session = e.editor.session;
+		var last_highlighted_expr;
+		var last_highlighted_marker;
+		var show_popover_timeout;
+
+		function clearPopover()
+		{
+			if ( typeof last_highlighted_marker != "undefined" )
+			{
+				session.removeMarker( last_highlighted_marker );
+			}
+			last_highlighted_expr = '';
+			clearTimeout( show_popover_timeout );
+			$( '.current-value' ).removeClass( 'showing' );
+		}
+
+		e.editor.on( "mousemove", function( e )
+		{
+			var TokenIterator         = ace.require( "./token_iterator" ).TokenIterator;
+			var pos = e.getDocumentPosition();
+			var hovered = BasicApi.Debugger.sessionIsActive()
+				&& CodeInspector.VariableExpressionParser.getContainingExpression(
+					new TokenIterator( session, pos.row, pos.column ) );
+
+			if ( !hovered )
+			{
+				clearPopover();
+				return;
+			}
+			else if ( hovered.expr != last_highlighted_expr )
+			{
+				if ( typeof last_highlighted_marker != "undefined" )
+				{
+					clearPopover();
+				}
+
+				last_highlighted_expr   = hovered.expr;
+				last_highlighted_marker = session.addMarker( hovered.range, "var-expr-hover", "text" );
+				clearTimeout( show_popover_timeout );
+
+				show_popover_timeout = setTimeout( function()
+				{
+					BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
+
+					BasicApi.Debugger.command( 'eval', last_highlighted_expr, function( data )
+					{
+						var sel = '.current-value .tree-container';
+
+						if ( data.parsed.value && data.parsed.value.length )
+						{
+							data.parsed.value.forEach( function( item )
+							{
+								item.name     = item.name || '';
+								item.fullname = item.fullname || '';
+							} );
+							$( '.current-value' ).addClass( 'showing' )
+								.appendTo( 'body' )
+								.position( {
+									my : 'left top',
+									at : 'left bottom',
+									of : $( '.var-expr-hover' ),
+								} )
+								.find( '.tree-container' )
+								.html( '<i class="fa fa-spin fa-circle-o-notch"></i>' )
+
+							setTimeout( function()
+							{
+								$( '.current-value .tree-container' ).html( '' )
+									.jstree( 'destroy' )
+									.jstree( {
+										core : {
+											data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value )
+									},
+								} );
+							}, 30 );
+						}
+						else if ( data.parsed.message )
+						{
+							var message = $( '<div>' ).text( data.parsed.message ).html();
+							message = '<span class="debugger-message">' + message + '</span>';
+							$( sel ).html( message );
+						}
+						else
+						{
+							$( sel ).html( '<span class="no-debugger-message">Empty response '
+								+ 'received</span>' );
+						}
+					} );
+					BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
+				}, 500 );
+			}
+		} );
+	}
+
 	$( document ).on( 'click',    '[data-command]',       onCommandButtonClicked );
 	$( document ).on( 'keypress', '.bp-expression-input', onNewExpressionGiven )
 	$( document ).on( 'click',    '.refresh-file',        onRefreshFileClicked )
@@ -718,6 +813,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	$( document ).on( 'keyup',                         onDocumentKeypress );
 
 	subscribe( 'before-autorun',               beforeAutorun )
+	subscribe( 'editor-ready',                 onEditorReady )
 	subscribe( 'session-status-changed',       onSessionStatusChanged )
 	subscribe( 'connection-status-changed',    onConnectionStatusChanged )
 	subscribe( 'response-received',            onResponseReceived )

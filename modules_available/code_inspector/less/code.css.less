@@ -129,6 +129,68 @@
 	}
 }
 
+.current-value
+{
+	display: none;
+	@padding: 10px;
+	transition: transform,opacity 300ms;
+	background: @bg;
+	color: #FFF;
+	border-radius: 3px;
+	padding: @padding;
+	font-family: monospace;
+	position: fixed;
+	@bg: #555;
+	&:before
+	{
+		position: absolute;
+		top: -5px;
+		left: 5px;
+		width: 0;
+		height: 0;
+		border-left: 5px solid transparent;
+		border-right: 5px solid transparent;
+		border-bottom: 5px solid @bg;
+		content: " ";
+	}
+
+	.tree-container
+	{
+		width: 300px;
+		height: 250px;
+		overflow: auto;
+
+		&.jstree-default .jstree-hovered
+		{
+			background-color: rgba(0,0,0,0.2);
+		}
+
+		&.jstree-default .jstree-anchor
+		{
+			height: auto;
+			white-space: normal;
+			max-width: ~"calc( 100% - 2em )";
+			word-break: break-word;
+		}
+
+		.identifier
+		{
+			color: #FFF;
+		}
+	}
+
+	&.showing
+	{
+		display:block;
+	}
+}
+
+.var-expr-hover
+{
+	background: lighten( @secondary-color, 30% );
+	position: absolute;
+}
+
 .continuation-command-notification
 {
 	position: absolute;
