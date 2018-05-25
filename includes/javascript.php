@@ -39,7 +39,8 @@ function build_script_requirements()
 
 		foreach ( $module[ 'js' ] as $js_file )
 		{
-			$result[] = '<script src="' . base_path() . $js_file . '"></script>';
+			$is_module = strpos( $js_file, '.module.js' ) !== FALSE ? 'type="module"' : '';
+			$result[] = '<script ' . $is_module . ' src="' . base_path() . $js_file . '"></script>';
 		}
 	}
 
