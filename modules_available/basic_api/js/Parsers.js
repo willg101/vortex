@@ -74,6 +74,21 @@ namespace( 'BasicApi' ).ResponseParsers = (function( $ )
 
 		/**
 		 * @brief
+		 *	Parses the response from an 'source' command
+		 *
+		 * @param jQuery jq_message
+		 *
+		 * @retval object
+		 */
+		source : function( jq_message )
+		{
+			var data           = {};
+			data.file_contents = parseCdata( jq_message );
+			return data;
+		},
+
+		/**
+		 * @brief
 		 *	Parses the response from a stack_get command
 		 *
 		 * @param jQuery jq_message
