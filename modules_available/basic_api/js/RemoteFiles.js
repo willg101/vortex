@@ -19,15 +19,39 @@ namespace( 'BasicApi' ).RemoteFiles = (function( $ )
 	 */
 	function fetchFromSever( path, cb )
 	{
-		$.get( apiPath( path ), function( data )
+		if ( !path.match( /^file:\/\// ) )
 		{
-			filecache[ path ] = data;
-			cb( data )
-		} ).fail( function()
+			path = 'file://' + path;
+		}
+
+		if ( BasicApi.Debugger.sessionIsActive() )
 		{
-			filecache[ path ] = false;
-			cb( false );
-		} );
+			BasicApi.Debugger.command( 'eval', `gethostname();`, function( message )
+			{
+				BasicApi.Debugger.command( 'source', { file : path }, function( message )
+				{
+					if ( message.jq_message.find( ' > error[code=100]' ).length )
+					{
+						message.parsed.file_contents = false;
+					}
+					var contents      = message.parsed.file_contents || false;
+					filecache[ path ] = contents;
+					cb( contents );
+				} );
+			} );
+		}
+		else
+		{
+			$.get( apiPath( path ), function( data )
+			{
+				filecache[ path ] = data;
+				cb( data )
+			} ).fail( function()
+			{
+				filecache[ path ] = false;
+				cb( false );
+			} );
+		}
 	}
 
 	/**

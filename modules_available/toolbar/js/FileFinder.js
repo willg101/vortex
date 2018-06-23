@@ -17,9 +17,8 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 			}
 			else
 			{
-				BasicApi.SocketServer.send( 'X_glob', { p : current_val }, function( e )
+				processGlobOnServer( current_val, function( items )
 				{
-					var items = $( e.message_raw ).find( '[type]' );
 					var popover = $( '#file_finder' ).data( 'toggles_popover' );
 
 					if ( items.length == 0 )
@@ -28,21 +27,20 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 					}
 					else if ( items.length == 1 )
 					{
-						$( '#file_finder' ).blur().focus().val( '' ).val( items.text()
-							+ ( items.attr( 'type' ) == 'dir' ? '/' : '' ) );
+						$( '#file_finder' ).blur().focus().val( '' ).val( items[ 0 ].name
+							+ ( items[ 0 ].type == 'dir' ? '/' : '' ) );
 						popover && popover.remove()
 					}
 					else if ( items.length > 1 )
 					{
 						var base, min, items_for_rendering = [];
-						items.each( function( i, el )
+						items.forEach( function( el, i )
 						{
-							el = $( el );
-							var current_text = el.text();
+							var current_text = el.name;
 							items_for_rendering.push( {
 								attr : {
 									'data-full-path' : current_text,
-									class : 'globber-option globber-' + $( el ).attr( 'type' )
+									class : 'globber-option globber-' + el.type,
 								},
 								content : current_text.replace( /^.*\//, '' ),
 							} );
@@ -109,10 +107,9 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 		{
 			e.preventDefault();
 			var file = $( e.target ).val();
-			BasicApi.SocketServer.send( 'X_glob ', { p : file }, function( e )
+			processGlobOnServer( file, function( item )
 			{
-				var item = $( e.message_raw ).find( 'item' );
-				if ( item.length == 1 && item.is( '[type=file]' ) )
+				if ( item.length == 1 && item.type == 'file' )
 				{
 					$( '#file_finder' ).val( '' ).blur();
 					publish( 'file-nav-request', {
@@ -123,9 +120,9 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 				else
 				{
 					var found_exact_match = false;
-					$( e.message_raw ).find( 'item' ).each( function( i, el )
+					item.forEach( function( el )
 					{
-						if ( $( el ).text() == file && $( el ).is( '[type=file]' ) )
+						if ( el.name == file && el.type == 'file' )
 						{
 							$( '#file_finder' ).val( '' ).blur();
 							publish( 'file-nav-request', {
@@ -144,6 +141,49 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 					}
 				}
 			} );
+		}
+	}
+
+	function processGlobOnServer( prefix, cb )
+	{
+		if ( !BasicApi.Debugger.sessionIsActive() )
+		{
+			BasicApi.SocketServer.send( 'X_glob', { p : prefix }, function( e )
+			{
+				var items = [];
+				$( e.message_raw ).find( '[type]' ).each( function()
+					{
+						items.push( {
+							type : $( this ).attr( 'type' ),
+							name : $( this ).text(),
+						} );
+					} );
+				cb( items );
+			} );
+		}
+		else
+		{
+			BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 2 } );
+			BasicApi.Debugger.command( 'eval', `eval(<<<\'VORTEXEVAL\'\n$__ = [];
+				foreach ( glob( '${current_val}*' ) as $item )
+			{
+					$type = is_dir( $item ) ? 'dir' : 'file';
+					$__[ $item ] = [ 'type' => $type, 'name' => $item ];
+			}
+			return $__;\nVORTEXEVAL\n);`, function( e )
+			{
+				var items = (e.parsed.value[ 0 ].children || []).map( function( item )
+				{
+					var ret = [];
+					( item.children || [] ).map( function( el )
+					{
+						ret[ el.name ] = el.value;
+					} );
+					return ret;
+				} );
+				cb( items );
+			} );
+			BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 		}
 	}
 
