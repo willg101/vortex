@@ -4,11 +4,17 @@ class LoginException        extends Exception{}
 class BadPasswordException  extends LoginException{}
 class AccessDeniedException extends LoginException{}
 
+/**
+ * Implements hook_preboot
+ */
 function login_preboot()
 {
 	login_create_tables();
 }
 
+/**
+ * Implements hook_boot
+ */
 function login_boot()
 {
 	login_try_one_time_login();
@@ -42,6 +48,9 @@ function login_boot()
 	login_clear_expired_sessions_and_tokens();
 }
 
+/**
+ * Implements hook_alter_js_options
+ */
 function login_alter_js_options( &$options )
 {
 	$options[ 'authenticated' ] = dpoh_session_id_is_valid();
