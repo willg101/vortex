@@ -40,3 +40,11 @@ function debugger_provide_windows()
 		],
 	];
 }
+
+function debugger_render_preprocess( &$data )
+{
+	if ( $data[ 'template' ] == 'toolbar_right' )
+	{
+		$data[ 'implementations' ][ 'debugger' ][ 'weight' ] = 10;
+	}
+}
