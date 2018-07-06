@@ -2,7 +2,8 @@
 	"external_dependencies" : {
 		"js" : [
 			"//cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.11.0/js/jquery.terminal.min.js",
-			"//cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"
+			"//cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js",
+			"//cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"
 		],
 		"css" : [
 			"//cdnjs.cloudflare.com/ajax/libs/jquery.terminal/1.11.0/css/jquery.terminal.min.css",

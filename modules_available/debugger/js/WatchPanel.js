@@ -55,7 +55,7 @@
 
 	function renderExpressions()
 	{
-		$( '#watch' ).html( render( 'code_inspector.watch_panel', {
+		$( '#watch' ).html( render( 'debugger.watch_panel', {
 			expressions : expressions,
 		} ) );
 		expressions.forEach( function( expr, i )
@@ -68,7 +68,7 @@
 	{
 		Theme.Modal.set( {
 			title : 'Watch Expression',
-			content : render( 'code_inspector.watch_expression_modal' ),
+			content : render( 'debugger.watch_expression_modal' ),
 		} );
 		Theme.Modal.show();
 	}
@@ -139,7 +139,7 @@
 		var existing_row = $( '#watch [data-watch-id="' + id + '"]' );
 		if ( !existing_row.length )
 		{
-			$( '#watch table.watch' ).append( render( 'code_inspector.watch_panel', {
+			$( '#watch table.watch' ).append( render( 'debugger.watch_panel', {
 				no_table : true,
 				expressions : faux_expressions,
 			} ) );
@@ -188,7 +188,7 @@
 		var id = row.attr( 'data-watch-id' );
 		Theme.Modal.set( {
 			title : 'Watch Expression',
-			content : render( 'code_inspector.watch_expression_modal', { expression : expressions[ id ].expression, id : id } ),
+			content : render( 'debugger.watch_expression_modal', { expression : expressions[ id ].expression, id : id } ),
 		} );
 		Theme.Modal.show();
 	}

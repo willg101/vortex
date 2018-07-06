@@ -104,7 +104,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 				&& confirmed_breakpoints[ current_file ][ line ].id ) || '';
 			Theme.Modal.set( {
 				title : 'Conditional Breakpoint',
-				content : render( 'code_inspector.conditional_bp_modal', {
+				content : render( 'debugger.conditional_bp_modal', {
 					line : line,
 					bp_id : bp_id,
 					expression : expression,

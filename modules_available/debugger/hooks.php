@@ -1,8 +1,15 @@
 <?php
 
-function code_inspector_provide_windows()
+function debugger_provide_windows()
 {
 	return [
+		[
+			'title'     => 'Console',
+			'id'        => 'console',
+			'secondary' => FALSE,
+			'icon'      => 'terminal',
+			'content'   => render( 'console_window' ),
+		],
 		[
 			'title'     => 'Code',
 			'id'        => 'code',
