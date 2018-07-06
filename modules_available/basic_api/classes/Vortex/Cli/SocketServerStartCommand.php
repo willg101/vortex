@@ -47,7 +47,7 @@ class SocketServerStartCommand extends Command
 			}
 
 			$cmd_output = [];
-			$last_line = exec( './vcli socket-server:run', $cmd_output, $status );
+			$last_line = exec( 'php -d "xdebug.remote_port=9003" vcli socket-server:run', $cmd_output, $status );
 			if ( $last_line == 'stop' )
 			{
 				exit( $status );
