@@ -106,7 +106,7 @@ namespace( 'SettingsUI' ).Controller = (function( $ )
 
 		Theme.Modal.set( {
 			title   : 'Settings',
-			content : render( 'settings_ui.settings_modal', {
+			content : render( 'vue.settings_modal', {
 				widgets : gatherSettingsPageWidgets( pages_info.default_page ),
 				icon : current_page.icon,
 				title : current_page.title,
