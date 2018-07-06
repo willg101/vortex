@@ -89,7 +89,7 @@ namespace( 'Autorun' ).Controller = (function( $ )
 	{
 		if ( e.page == 'autorun' )
 		{
-			e.widgets.push( render( 'autorun.settings', {
+			e.widgets.push( render( 'debugger.autorun_settings', {
 				modes : getModes(),
 			} ) );
 		}
