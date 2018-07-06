@@ -56,14 +56,6 @@ function login_alter_js_options( &$options )
 	$options[ 'authenticated' ] = dpoh_session_id_is_valid();
 }
 
-function login_render_preprocess( &$data )
-{
-	if ( $data[ 'template' ] == 'toolbar_right' )
-	{
-		$data[ 'vars' ][ 'user_name' ] = user( 'username' );
-	}
-}
-
 function login_preprocess_request( &$options )
 {
 	$is_logged_in = dpoh_session_id_is_valid();
