@@ -98,12 +98,37 @@ namespace( 'BasicApi' ).Controller = (function( $ )
 		} );
 	}
 
+	function onServerInfo( e )
+	{
+		if ( e.jq_message.is( '[status=session_change]' ) )
+		{
+			var delay = 1;
+			$( '[data-role="window"]' ).each( function()
+				{
+					setTimeout( function()
+					{
+						$( this ).addClass( 'not-loaded' );
+					}.bind( this ), delay++ * 50 );
+				} );
+			BasicApi.Debugger.command( 'ctrl:peek_queue' );
+			BasicApi.Debugger.command( 'stack_get' );
+			$( '[data-role="window"]' ).each( function()
+				{
+					setTimeout( function()
+					{
+						$( this ).removeClass( 'not-loaded' );
+					}.bind( this ), delay++ * 50 + 500 );
+				} );
+		}
+	}
+
 	subscribe( 'connection-status-changed',    onConnectionStatusChanged );
 	subscribe( 'session-status-changed',       onSessionStatusChanged );
 	subscribe( 'before-inspect-context',       beforeInspectContext );
 	subscribe( 'session-init',                 onSessionInit );
 	subscribe( 'response-received',            onResponseReceived );
 	subscribe( 'alter-settings-quick-actions', alterQuickActions );
+	subscribe( 'server-info',         onServerInfo );
 	$( init );
 
 }( jQuery) );

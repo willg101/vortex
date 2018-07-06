@@ -101,9 +101,10 @@ class WsApp implements MessageComponentInterface
 			$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="detach_queued_session" session_id="' . $match[ 'id' ] . '">' );
 			return;
 		}
-		elseif ( preg_match( '/^ctrl:switch_session -s (?<id>\d+) /', $data[ 'message' ], $match ) )
+		elseif ( preg_match( '/^ctrl:switch_session -s (?<id>c\d+) /', $data[ 'message' ], $match ) )
 		{
 			$this->bridge->switchSession( $match[ 'id' ] );
+			return;
 		}
 
 		if ( !$data[ 'abort' ] && $data[ 'message' ] )

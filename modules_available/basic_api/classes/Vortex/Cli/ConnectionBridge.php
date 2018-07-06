@@ -164,6 +164,6 @@ class ConnectionBridge
 	 */
 	public function switchSession( $sid )
 	{
-		$this->dbg_app && $this->dbg_app->switchSession( $sid );
+		$this->dbg_app && $this->dbg_app->switchSession( $sid, $this->dbg_connection );
 	}
 }

@@ -18,6 +18,7 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 				var file = self.attr( 'path' ) || '(Unknown file)';
 				known_sessions.push( {
 					id : session_id,
+					host : self.attr( 'host' ),
 					file : file.replace( /^file:\/\//, '' )
 				} );
 			} );
@@ -43,39 +44,30 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 	{
 		var sid = $( e.currentTarget ).attr( 'data-detach-session' );
 		BasicApi.SocketServer.send( 'ctrl:detach_queued_session -s ' + sid );
-		return false;
 	}
 
 	function onIndicatorClicked()
 	{
 		var sessions_for_list;
+		var items = '';
 		if ( known_sessions.length )
 		{
 			sessions_for_list = [];
 			for ( var i in known_sessions )
 			{
 				sessions_for_list.push( {
-					content : known_sessions[ i ].file,
+					file : known_sessions[ i ].file.replace( /^.*\//, '' ),
+					host : known_sessions[ i ].host,
+					content : known_sessions[ i ].file.replace( /^.*\//, '' ),
+					id : known_sessions[ i ].id,
 					attr : {
 						'data-switch-to-session' : known_sessions[ i ].id,
 					},
 				} );
+				items += render( 'basic_api.item', sessions_for_list[ i ] );
 			}
-			new Theme.PopoverList( {
-				lists : [
-					{
-						title : 'Queued Sessions',
-						options : sessions_for_list,
-					},
-				],
-				classes : [ 'auto-size' ],
-				el      : $( '#connection_queue_indicator' ),
-				side    : 'right',
-			} );
-			$( '[data-switch-to-session]' ).each( function()
-			{
-				$( this ).append( $( '<span style="position: absolute; top: 5px; right: 5px;" class="btn btn-sm">Detach</span>' ).attr( 'data-detach-session', $( this ).attr( 'data-switch-to-session' ) ) );
-			} );
+
+			new Theme.Popover( '<h2>Queued Sessions</h2><table class="session-table">' + items + '</table>', [ 'no-padding' ], { my : 'right top', at : 'right bottom', of : $( '#connection_queue_indicator' ) }, $( '#connection_queue_indicator' ) )
 		}
 		else
 		{
