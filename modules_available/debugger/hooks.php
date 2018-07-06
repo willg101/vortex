@@ -187,6 +187,34 @@ function debugger_ws_message_received( &$data )
 			$data[ 'logger' ]->warning( "Ignoring improperly formatted X_glob command: $data[message]", $args );
 		}
 	}
+	elseif ( preg_match( '/^ctrl:stop /', $data[ 'message' ] ) )
+	{
+		fire_hook( 'stop_socket_server' );
+		$data[ 'logger' ]->info( "Received stop command; killing server" );
+		exit( 'stop' );
+	}
+	elseif ( preg_match( '/^ctrl:restart /', $data[ 'message' ] ) )
+	{
+		fire_hook( 'restart_socket_server' );
+		$data[ 'logger' ]->info( "Received restart command; restarting server" );
+		exit( 'restart' );
+	}
+	elseif ( preg_match( '/^ctrl:peek_queue /', $data[ 'message' ] ) )
+	{
+		$data[ 'bridge' ]->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $data[ 'bridge' ]->peekQueue() ) . "</wsserver>" );
+		$data[ 'abort' ] = TRUE;
+	}
+	elseif ( preg_match( '/^ctrl:detach_queued_session -s (?<id>\d+) /', $data[ 'message' ], $match ) )
+	{
+		$data[ 'bridge' ]->detachQueuedSession( $match[ 'id' ] );
+		$data[ 'bridge' ]->sendToWs( '<wsserver session-status-change=neutral status="alert" type="detach_queued_session" session_id="' . $match[ 'id' ] . '">' );
+		$data[ 'abort' ] = TRUE;
+	}
+	elseif ( preg_match( '/^ctrl:switch_session -s (?<id>c\d+) /', $data[ 'message' ], $match ) )
+	{
+		$data[ 'bridge' ]->switchSession( $match[ 'id' ] );
+		$data[ 'abort' ] = TRUE;
+	}
 }
 
 function debugger_parse_glob_command( $command )

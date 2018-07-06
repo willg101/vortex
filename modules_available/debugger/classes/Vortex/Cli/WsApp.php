@@ -77,36 +77,6 @@ class WsApp implements MessageComponentInterface
 		];
 		fire_hook( 'ws_message_received', $data );
 
-		// Handle `ctrl:` commands, which manipulate the socket server
-		if ( preg_match( '/^ctrl:stop /', $data[ 'message' ] ) )
-		{
-			fire_hook( 'stop_socket_server' );
-			$this->logger->info( "Received stop command; killing server" );
-			exit( 'stop' );
-		}
-		elseif ( preg_match( '/^ctrl:restart /', $data[ 'message' ] ) )
-		{
-			fire_hook( 'restart_socket_server' );
-			$this->logger->info( "Received restart command; restarting server" );
-			exit( 'restart' );
-		}
-		elseif ( preg_match( '/^ctrl:peek_queue /', $data[ 'message' ] ) )
-		{
-			$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $this->bridge->peekQueue() ) . "</wsserver>" );
-			return;
-		}
-		elseif ( preg_match( '/^ctrl:detach_queued_session -s (?<id>\d+) /', $data[ 'message' ], $match ) )
-		{
-			$this->bridge->detachQueuedSession( $match[ 'id' ] );
-			$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="detach_queued_session" session_id="' . $match[ 'id' ] . '">' );
-			return;
-		}
-		elseif ( preg_match( '/^ctrl:switch_session -s (?<id>c\d+) /', $data[ 'message' ], $match ) )
-		{
-			$this->bridge->switchSession( $match[ 'id' ] );
-			return;
-		}
-
 		if ( !$data[ 'abort' ] && $data[ 'message' ] )
 		{
 			$this->bridge->sendToDbg( $data[ 'message' ] . "\0" );
