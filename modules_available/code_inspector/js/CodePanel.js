@@ -515,7 +515,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	function startContinuationCommand()
 	{
 		clearTimeout( continuation_command_to );
-		if ( !$( '.continuation-command-notification:visible' ).length )
+		if ( !$( '.continuation-command-notification:visible' ).length && BasicApi.Debugger.sessionIsActive() )
 		{
 			$( '.continuation-command-notification' )
 				.removeClass( 'inactive' )
