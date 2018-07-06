@@ -7,8 +7,17 @@ namespace( 'Vue' ).Splash = (function( $ )
 	{
 		onWindowResized( '*' );
 		$( '.splash-outermost' ).addClass( 'out' )
-			.find( '.full' )
-			.css( 'animation-fill-mode', 'none' );
+			.find( '.full' ).addClass( 'stop' );
+
+		var i = 12
+		$( '[data-role=window]' ).each( function()
+		{
+			setTimeout( function()
+			{
+				$( this ).removeClass( 'not-loaded' );
+			}.bind( this ), i * 50 );
+			i++;
+		} );
 	}
 
 	function onSessionStatusChanged( e )

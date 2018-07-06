@@ -21,7 +21,8 @@
 	background: #FFF;
 	box-shadow: 0 0 30px #000;
 	position: relative;
-	max-width: ~"calc(100% - 50px)";
+	max-width: 600px;
+	width: 80vw;
 	margin: 0 auto;
 	transform:  scale(1, 1);
 	opacity: 1;
@@ -38,11 +39,9 @@
 .modal-title-bar
 {
 	position: relative;
-	background: #E0E0E0;
-	height: 20px;
-	padding: 10px;
-	color: #333;
-	border-radius: 3px 3px 0 0 ;
+	background: #0A93C1;
+	padding: 10px 15px;
+	color: #FFF;
 	font-size: 14px;
 }
 
@@ -50,24 +49,22 @@
 {
 	border-radius: 0 3px 0 0 ;
 	padding: 10px;
-	background: #E0E0E0;
+	background: #0A93C1;
 	position: absolute;
 	font-size: 14px;
 	top: 0;
 	right: 0;
-	color: #333;
-	height: 20px;
+	color: #FFF;
+	height: 100%;
+	box-sizing: border-box;
 	cursor: pointer;
-	.bouncy(@border-width: 0);
+	.bouncy();
 
 	&:hover,
 	&:active
 	{
-		background: #A33;
-		.fa
-		{
-			color: #FFF;
-		}
+		background: none;
+		border-color: #E45245;
 	}
 
 }

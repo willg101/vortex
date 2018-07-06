@@ -1,4 +1,4 @@
-<div class="splash-outermost css-table" style="background: #444">
+<div class="splash-outermost css-table">
 	<div class="css-row">
 		<div class="css-cell center-lt">
 			<div class="lt-inline">

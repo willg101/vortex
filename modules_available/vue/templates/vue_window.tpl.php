@@ -1,4 +1,4 @@
-<div data-role="window" data-window-title="<?php echo $title ?>" data-window-id="<?php echo $id ?>" data-minimize-icon="<?php echo $icon ?>">
+<div data-role="window" data-window-title="<?php echo $title ?>" data-window-id="<?php echo $id ?>" data-minimize-icon="<?php echo $icon ?>" class="not-loaded">
 	<div class="css-table">
 		<div class="css-row label-row">
 			<div class="css-cell">
