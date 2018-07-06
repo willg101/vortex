@@ -64,7 +64,7 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 						'data-switch-to-session' : known_sessions[ i ].id,
 					},
 				} );
-				items += render( 'basic_api.item', sessions_for_list[ i ] );
+				items += render( 'debugger.item', sessions_for_list[ i ] );
 			}
 
 			new Theme.Popover( '<h2>Queued Sessions</h2><table class="session-table">' + items + '</table>', [ 'no-padding' ], { my : 'right top', at : 'right bottom', of : $( '#connection_queue_indicator' ) }, $( '#connection_queue_indicator' ) )
