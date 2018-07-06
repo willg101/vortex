@@ -18,7 +18,7 @@
 	-webkit-transform: translateZ(0) scale(1.0, 1.0);
 }
 
-.bouncy(@max-scale : 1.5; @min-scale: 0.7; @border-width: 3px)
+.bouncy(@max-scale : 1.5; @min-scale: 0.7; @border-width: 1px)
 {
 	.transition();
 	border: none; // For <button> elements, to which some browsers add a cheesy 3D-ish border
@@ -32,7 +32,7 @@
 	&:hover
 	{
 		background: rgba(0,0,0,0.2);
-		border-bottom: @border-width solid @tertiary-color;
+		border-bottom: @border-width solid #b8ff7e;
 
 		.fa
 		{
