@@ -19,13 +19,13 @@ namespace( 'BasicApi' ).RemoteFiles = (function( $ )
 	 */
 	function fetchFromSever( path, cb )
 	{
-		if ( !path.match( /^file:\/\// ) )
-		{
-			path = 'file://' + path;
-		}
-
 		if ( BasicApi.Debugger.sessionIsActive() )
 		{
+			if ( !path.match( /^file:\/\// ) )
+			{
+				path = 'file://' + path;
+			}
+
 			BasicApi.Debugger.command( 'eval', `gethostname();`, function( message )
 			{
 				BasicApi.Debugger.command( 'source', { file : path }, function( message )
@@ -36,7 +36,8 @@ namespace( 'BasicApi' ).RemoteFiles = (function( $ )
 					}
 					var contents      = message.parsed.file_contents || false;
 					filecache[ path ] = contents;
-					cb( contents );
+					var error_reason = !contents && ( message.is_stopping ? 'stopping' : ( message.is_stopped ? 'stopped' : 'other' ) );
+					cb( contents, error_reason );
 				} );
 			} );
 		}

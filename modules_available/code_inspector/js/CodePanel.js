@@ -250,10 +250,15 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		filename = normalizeFilename( filename );
 		addRecentFile( filename );
 
-		BasicApi.RemoteFiles.get( filename, function( data )
+		BasicApi.RemoteFiles.get( filename, function( data, error_reason )
 		{
 			if ( data === false )
 			{
+				if ( error_reason == 'stopping' || error_reason == 'stopped' )
+				{
+					return;
+				}
+
 				Theme.notify( 'error', 'The file <b>' + filename.replace( /^.*\//, '' ) + '</b> failed to load' );
 				return;
 			}
@@ -471,13 +476,13 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 				break;
 
 			case 'debugger_command:stack_get':
-				if ( !current_file && e.parsed[ 0 ] )
+				if ( e.parsed[ 0 ] )
 				{
 					var filename = normalizeFilename( e.parsed[ 0 ].filename );
 					var lineno = e.parsed[ 0 ].lineno;
 					showFile( filename, lineno );
+					break;
 				}
-				break;
 		}
 	}
 
