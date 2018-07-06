@@ -165,10 +165,8 @@ function debugger_provide_console_commands( $data )
 
 function debugger_ws_message_received( &$data )
 {
-	if ( preg_match( '/^X_glob /', $data[ 'message' ] ) )
+	if ( preg_match( '/^X-glob /', $data[ 'message' ] ) )
 	{
-		$data[ 'abort' ] = TRUE; // Don't pass this on to the DE
-
 		$args = debugger_parse_glob_command( $data[ 'message' ] );
 		if ( $args[ 'id' ] && $args[ 'pattern' ] )
 		{
@@ -179,41 +177,38 @@ function debugger_ws_message_received( &$data )
 				$xml_out .= "<item type=\"$type\">$item</item>";
 			}
 			$xml_out = "<globber transaction_id=\"$args[id]\" pattern=\"$args[pattern]\">$xml_out</globber>";
-			$data[ 'logger' ]->debug( "Handling X_glob command: $data[message]", $args );
+			$data[ 'logger' ]->debug( "Handling X-glob command: $data[message]", $args );
 			$data[ 'bridge' ]->sendToWs( $xml_out );
 		}
 		else
 		{
-			$data[ 'logger' ]->warning( "Ignoring improperly formatted X_glob command: $data[message]", $args );
+			$data[ 'logger' ]->warning( "Ignoring improperly formatted X-glob command: $data[message]", $args );
 		}
 	}
-	elseif ( preg_match( '/^ctrl:stop /', $data[ 'message' ] ) )
+	elseif ( preg_match( '/^X-ctrl:stop /', $data[ 'message' ] ) )
 	{
 		fire_hook( 'stop_socket_server' );
 		$data[ 'logger' ]->info( "Received stop command; killing server" );
 		exit( 'stop' );
 	}
-	elseif ( preg_match( '/^ctrl:restart /', $data[ 'message' ] ) )
+	elseif ( preg_match( '/^X-ctrl:restart /', $data[ 'message' ] ) )
 	{
 		fire_hook( 'restart_socket_server' );
 		$data[ 'logger' ]->info( "Received restart command; restarting server" );
 		exit( 'restart' );
 	}
-	elseif ( preg_match( '/^ctrl:peek_queue /', $data[ 'message' ] ) )
+	elseif ( preg_match( '/^X-ctrl:peek_queue /', $data[ 'message' ] ) )
 	{
 		$data[ 'bridge' ]->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $data[ 'bridge' ]->peekQueue() ) . "</wsserver>" );
-		$data[ 'abort' ] = TRUE;
 	}
-	elseif ( preg_match( '/^ctrl:detach_queued_session -s (?<id>\d+) /', $data[ 'message' ], $match ) )
+	elseif ( preg_match( '/^X-ctrl:detach_queued_session -s (?<id>\d+) /', $data[ 'message' ], $match ) )
 	{
 		$data[ 'bridge' ]->detachQueuedSession( $match[ 'id' ] );
 		$data[ 'bridge' ]->sendToWs( '<wsserver session-status-change=neutral status="alert" type="detach_queued_session" session_id="' . $match[ 'id' ] . '">' );
-		$data[ 'abort' ] = TRUE;
 	}
-	elseif ( preg_match( '/^ctrl:switch_session -s (?<id>c\d+) /', $data[ 'message' ], $match ) )
+	elseif ( preg_match( '/^X-ctrl:switch_session -s (?<id>c\d+) /', $data[ 'message' ], $match ) )
 	{
 		$data[ 'bridge' ]->switchSession( $match[ 'id' ] );
-		$data[ 'abort' ] = TRUE;
 	}
 }
 

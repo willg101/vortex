@@ -73,7 +73,7 @@ class WsApp implements MessageComponentInterface
 			'connection' => $conn,
 			'bridge'     => $this->bridge,
 			'logger'     => $this->logger,
-			'abort'      => FALSE,
+			'abort'      => strpos( $msg, 'X-' ) === 0, // By default, don't forward messages beginning with 'X-'
 		];
 		fire_hook( 'ws_message_received', $data );
 

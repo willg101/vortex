@@ -36,14 +36,14 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 		}
 		else if ( e.jq_message.is( '[type=detach_queued_session]' ) )
 		{
-			BasicApi.Debugger.command( 'ctrl:peek_queue' );
+			BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
 		}
 	}
 
 	function onDetachSessionClicked( e )
 	{
 		var sid = $( e.currentTarget ).attr( 'data-detach-session' );
-		BasicApi.SocketServer.send( 'ctrl:detach_queued_session -s ' + sid );
+		BasicApi.SocketServer.send( 'X-ctrl:detach_queued_session -s ' + sid );
 	}
 
 	function onIndicatorClicked()
@@ -79,7 +79,7 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 	function onSwitchToSessionClicked( e )
 	{
 		var session_id = $( e.target ).closest( '[data-switch-to-session]' ).attr( 'data-switch-to-session' );
-		BasicApi.Debugger.command( 'ctrl:switch_session -s ' + session_id );
+		BasicApi.Debugger.command( 'X-ctrl:switch_session -s ' + session_id );
 	}
 
 	$( document ).on( 'click', '[data-switch-to-session]',    onSwitchToSessionClicked );

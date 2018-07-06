@@ -148,7 +148,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 	{
 		if ( !BasicApi.Debugger.sessionIsActive() )
 		{
-			BasicApi.SocketServer.send( 'X_glob', { p : prefix }, function( e )
+			BasicApi.SocketServer.send( 'X-glob', { p : prefix }, function( e )
 			{
 				var items = [];
 				$( e.message_raw ).find( '[type]' ).each( function()
@@ -211,7 +211,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 
 	function onSessionStatusChanged( e )
 	{
-		BasicApi.Debugger.command( 'ctrl:peek_queue' );
+		BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
 	}
 
 	function onGlobberBlur()

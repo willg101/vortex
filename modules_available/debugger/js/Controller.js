@@ -50,7 +50,7 @@ namespace( 'BasicApi' ).Controller = (function( $ )
 
 	function onSessionStatusChanged( e )
 	{
-		BasicApi.Debugger.command( 'ctrl:peek_queue' );
+		BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
 
 		if ( e.status == 'active' )
 		{
@@ -93,7 +93,7 @@ namespace( 'BasicApi' ).Controller = (function( $ )
 		e.items.unshift( {
 			content : 'Restart socket bridge',
 			attr : {
-				'data-command' : 'ctrl:restart',
+				'data-command' : 'X-ctrl:restart',
 			},
 		} );
 	}
@@ -110,7 +110,7 @@ namespace( 'BasicApi' ).Controller = (function( $ )
 						$( this ).addClass( 'not-loaded' );
 					}.bind( this ), delay++ * 50 );
 				} );
-			BasicApi.Debugger.command( 'ctrl:peek_queue' );
+			BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
 			BasicApi.Debugger.command( 'stack_get' );
 			$( '[data-role="window"]' ).each( function()
 				{
