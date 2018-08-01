@@ -64,11 +64,6 @@
 	}
 }
 
-.margin-top
-{
-	margin-top: 20px;
-}
-
 .user-accounts-listing + .flex-container
 {
 	display: flex;
@@ -85,62 +80,6 @@
 		flex-grow: 1;
 		flex-shrink: 1;
 		margin-left: 0;
-	}
-}
-
-.btn-group
-{
-	display: flex;
-	flex-direction: row;
-	border: 1px solid #EEE;
-
-	&:not(:first-child)
-	{
-		margin-top: 10px;
-	}
-
-	&.extra-margin-top
-	{
-		&:not(:first-child),
-		.force
-		{
-			margin-top: 20px;
-		}
-	}
-
-	& > *
-	{
-		flex-basis: 0;
-
-		&:not(.no-grow)
-		{
-			flex-grow: 1;
-		}
-
-		&.no-grow
-		{
-			white-space: nowrap;
-		}
-
-		&:not(:last-child)
-		{
-			border-right: 1px solid #EEE;
-		}
-
-		&.dpoh-input
-		{
-			padding: 5px 10px;
-			border: none;
-			background: #E8E8E8;
-		}
-	}
-
-	&.black
-	{
-		.btn
-		{
-			color: #000;
-		}
 	}
 }
 
