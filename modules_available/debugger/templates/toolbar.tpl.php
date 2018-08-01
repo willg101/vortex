@@ -1,4 +1,4 @@
-<div class="toolbar">
+<div class="toolbar blurable">
 	<div class="left">
 		<?php $show( 'toolbar_left' ) ?>
 	</div>
