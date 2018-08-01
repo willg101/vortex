@@ -154,7 +154,7 @@ namespace( 'SettingsUI' ).Controller = (function( $ )
 	{
 		if ( e.page == 'about' )
 		{
-			e.widgets.push( 'Vortex Debugger &copy; 2017 Will Groenendyk.' );
+			e.widgets.push( 'Vortex Debugger &copy; 2018 Will Groenendyk.' );
 		}
 	}
 
