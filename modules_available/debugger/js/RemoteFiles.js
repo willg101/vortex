@@ -17,7 +17,7 @@ namespace( 'BasicApi' ).RemoteFiles = (function( $ )
 	 *                       - A string containing the file's contents/an array containing objects
 	 *                         for the files within the directory
 	 */
-	function fetchFromSever( path, cb )
+	async function fetchFromSever( path, cb )
 	{
 		if ( BasicApi.Debugger.sessionIsActive() )
 		{
@@ -26,31 +26,28 @@ namespace( 'BasicApi' ).RemoteFiles = (function( $ )
 				path = 'file://' + path;
 			}
 
-			BasicApi.Debugger.command( 'eval', `gethostname();`, function( message )
+			var message = await BasicApi.Debugger.command( 'source', { file : path } );
+			if ( message.jq_message.find( ' > error[code=100]' ).length )
 			{
-				BasicApi.Debugger.command( 'source', { file : path }, function( message )
-				{
-					if ( message.jq_message.find( ' > error[code=100]' ).length )
-					{
-						message.parsed.file_contents = false;
-					}
-					var contents      = message.parsed.file_contents || false;
-					filecache[ path ] = contents;
-					var error_reason = !contents && ( message.is_stopping ? 'stopping' : ( message.is_stopped ? 'stopped' : 'other' ) );
-					cb( contents, error_reason );
-				} );
-			} );
+				message.parsed.file_contents = false;
+			}
+			var contents      = message.parsed.file_contents || false;
+			filecache[ path ] = contents;
+			var error_reason = !contents && ( message.is_stopping ? 'stopping' : ( message.is_stopped ? 'stopped' : 'other' ) );
+			return new Promise( ( resolve, reject ) => contents ? resolve( contents ) : reject( error_reason ) );
 		}
 		else
 		{
-			$.get( apiPath( path ), function( data )
-			{
-				filecache[ path ] = data;
-				cb( data )
-			} ).fail( function()
-			{
-				filecache[ path ] = false;
-				cb( false );
+			return new Promise( ( resolve, reject ) => {
+				$.get( apiPath( path ), function( data )
+				{
+					filecache[ path ] = data;
+					resolve( data )
+				} ).fail( function()
+				{
+					filecache[ path ] = false;
+					resolve( false );
+				} );
 			} );
 		}
 	}
@@ -75,21 +72,20 @@ namespace( 'BasicApi' ).RemoteFiles = (function( $ )
 	 *	Gets the contents of a file or directory
 	 *
 	 * @param string   path       @c fetchFromSever()
-	 * @param function cb         @c fetchFromSever()
 	 * @param bool     skip_cache OPTIONAL. Default is FALSE. When true, ignores the cache and
 	 *                            sends a request to the server for the file
 	 */
-	function get( path, cb, skip_cache )
+	function get( path, skip_cache )
 	{
 		path = path.replace( /^file:\/\//, '' );
 
 		if ( !skip_cache && typeof filecache[ path ] != "undefined" )
 		{
-			cb( filecache[ path ] );
+			return new Promise( resolve => resolve( filecache[ path ] ) );
 		}
 		else
 		{
-			fetchFromSever( path, cb );
+			return fetchFromSever( path );
 		}
 	}
 

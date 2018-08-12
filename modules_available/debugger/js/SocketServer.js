@@ -20,6 +20,9 @@ namespace( 'BasicApi' ).SocketServer = (function( $ )
 	// engine does, for example). This object maps transaction ids to respective callbacks
 	var transaction_callbacks = {};
 
+	// tid => promise
+	var promises = {};
+
 	// A list of functions that help determine what type of response was received from the server.
 	// See determineMessageType() for more information.
 	var type_determiners   = [];
@@ -151,7 +154,7 @@ namespace( 'BasicApi' ).SocketServer = (function( $ )
 		}
 
 		current_connection.send( command );
-		return tid;
+		return new Promise( resolve => { promises[ tid ] = resolve } );
 	}
 
 	/**
@@ -256,6 +259,12 @@ namespace( 'BasicApi' ).SocketServer = (function( $ )
 		if ( typeof transaction_callbacks[ parseInt( tid ) ] == 'function' )
 		{
 			transaction_callbacks[ Number( tid ) ]( processed );
+		}
+
+		if ( promises[ Number( tid ) ] )
+		{
+			promises[ Number( tid ) ]( processed );
+			delete promises[ Number( tid ) ];
 		}
 
 		return processed;

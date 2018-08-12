@@ -1,6 +1,6 @@
 namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 {
-	function onNodeDoubleClicked( e )
+	async function onNodeDoubleClicked( e )
 	{
 		var li = $( e.target ).closest( 'li' );
 		if ( li.is( '[data-no-alter]' ) )
@@ -13,28 +13,25 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		var cid         = li.attr( 'data-cid' );
 		var size        = li.attr( 'data-size' );
 
-		BasicApi.Debugger.command( 'property_get', {
-				name        : identifier,
-				stack_depth : stack_depth,
-				context     : cid,
-				max_data    : size,
-			},
-			function( e )
-			{
-				var current_val = $('<div>').text( e.parsed[ 0 ].value || '' ).html();
-				Theme.Modal.set( {
-					title : 'Update Value',
-					content : '<label>Assign a new value to <span class="identifier">' + identifier
-						+':</span></label><div class="value-input" contenteditable data-identifier="' + identifier
-						+ '" data-stack-depth="' + stack_depth + '" data-cid="' + cid + '">' + current_val + '</div>'
-				} );
-				Theme.Modal.show();
-				$( '.value-input' ).focus();
-				document.execCommand( 'selectAll', false, null );
-			} );
+		var e = await BasicApi.Debugger.command( 'property_get', {
+			name        : identifier,
+			stack_depth : stack_depth,
+			context     : cid,
+			max_data    : size,
+		} );
+		var current_val = $('<div>').text( e.parsed[ 0 ].value || '' ).html();
+		Theme.Modal.set( {
+			title : 'Update Value',
+			content : '<label>Assign a new value to <span class="identifier">' + identifier
+				+':</span></label><div class="value-input" contenteditable data-identifier="' + identifier
+				+ '" data-stack-depth="' + stack_depth + '" data-cid="' + cid + '">' + current_val + '</div>'
+		} );
+		Theme.Modal.show();
+		$( '.value-input' ).focus();
+		document.execCommand( 'selectAll', false, null );
 	}
 
-	function onNewValueGiven( e )
+	async function onNewValueGiven( e )
 	{
 		if ( e.which == 13 && !e.ctrlKey && !e.shiftKey )
 		{
@@ -46,13 +43,12 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 
 			Theme.Modal.hide();
 
-			BasicApi.Debugger.command( 'property_set', {
-					name        : identifier,
-					stack_depth : stack_depth,
-					context     : cid
-				},
-				updateContext.bind( undefined, stack_depth ),
-				new_value );
+			await BasicApi.Debugger.command( 'property_set', {
+				name        : identifier,
+				stack_depth : stack_depth,
+				context     : cid
+			}, new_value );
+			updateContext( stack_depth );
 		}
 	}
 
@@ -113,22 +109,17 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		updateStackDepth( max_depth );
 	}
 
-	function updateProperty( identifier, stack_depth, cid, address, data )
+	async function updateProperty( identifier, stack_depth, cid, address, data )
 	{
-		BasicApi.Debugger.command( 'property_get', {
-				name        : identifier,
-				context     : cid,
-				stack_depth : stack_depth,
-		},
-		function( data )
-		{
-
-			var html =
-			$( '#context' ).jstree( "destroy" );
-			var t = $( '[data-address=' + address + ']' );
-			t.after( buildContextTree( data.parsed, stack_depth ).replace( /(^\<ul\>|\<\/ul\>$)/g, '' ) );
-			$( '#context' ).jstree();
+		var data = await BasicApi.Debugger.command( 'property_get', {
+			name        : identifier,
+			context     : cid,
+			stack_depth : stack_depth,
 		} );
+		$( '#context' ).jstree( "destroy" );
+		var t = $( '[data-address=' + address + ']' );
+		t.after( buildContextTree( data.parsed, stack_depth ).replace( /(^\<ul\>|\<\/ul\>$)/g, '' ) );
+		$( '#context' ).jstree();
 	}
 
 	function buildContextTree( context, stack_depth, cid, is_recursive )
@@ -193,18 +184,14 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 			else if ( Number( property.numchildren ) && property.fullname )
 			{
 				node.children     = true;
-				node.get_children = function( parent, cb )
+				node.get_children = async function( parent, cb )
 				{
-					BasicApi.Debugger.command( 'property_get', {
-							name        : property.fullname,
-							stack_depth : stack_depth || 0,
-							context     : cid || undefined,
-						},
-						function( children )
-						{
-							// For eval, no property.fullname is given. Does that use a different parse method?
-							cb( buildContextTree( children.parsed[ 0 ].children, stack_depth, cid, true ) );
-						} );
+					var children = await BasicApi.Debugger.command( 'property_get', {
+						name        : property.fullname,
+						stack_depth : stack_depth || 0,
+						context     : cid || undefined,
+					} );
+					cb( buildContextTree( children.parsed[ 0 ].children, stack_depth, cid, true ) );
 				};
 			}
 
@@ -236,7 +223,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		BasicApi.Debugger.command( 'stack_get' );
 	}
 
-	function updateContext( stack_depth )
+	async function updateContext( stack_depth )
 	{
 		var command = 'context_names';
 		if ( !( stack_depth % 1 === 0 && stack_depth > -1 ) )
@@ -244,37 +231,31 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 			stack_depth = undefined;
 		}
 
-		BasicApi.Debugger.command( 'context_names', {
+		var context_names = await BasicApi.Debugger.command( 'context_names', {
+			stack_depth : stack_depth,
+		} );
+		var all_contexts = [];
+		context_names.parsed.forEach( async function( info )
+		{
+			var context_data = await BasicApi.Debugger.command( 'context_get', {
+				context     : info.id,
 				stack_depth : stack_depth,
-			},
-			function( context_names )
-			{
-				var all_contexts = [];
-				context_names.parsed.forEach( function( info )
-				{
-					BasicApi.Debugger.command( 'context_get', {
-							context     : info.id,
-							stack_depth : stack_depth,
-						},
-						function( context_data )
-						{
-							all_contexts.push( {
-								name     : info.name,
-								fullname : info.name,
-								type     : info.name,
-								address  : info.name,
-								children : context_data.parsed,
-								no_alter : true,
-								cid      : info.id,
-							} );
-
-							if ( all_contexts.length == context_names.parsed.length )
-							{
-								validateContext( all_contexts, stack_depth || 0 );
-							}
-						} );
-				} );
 			} );
+			all_contexts.push( {
+				name     : info.name,
+				fullname : info.name,
+				type     : info.name,
+				address  : info.name,
+				children : context_data.parsed,
+				no_alter : true,
+				cid      : info.id,
+			} );
+
+			if ( all_contexts.length == context_names.parsed.length )
+			{
+				validateContext( all_contexts, stack_depth || 0 );
+			}
+		} );
 	}
 
 	function toggleIndicators( show )
@@ -318,13 +299,11 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		}
 	}
 
-	function updateMemoryUsage()
+	async function updateMemoryUsage()
 	{
-		BasicApi.Debugger.command( 'eval', function( data )
-		{
-			var data = data.parsed.value[ 0 ] || {};
-			$( '#mem_usage' ).text( bytesToHumanReadable( data.value || 0 ) );
-		}, 'memory_get_usage()' );
+		var data = await BasicApi.Debugger.command( 'eval', 'memory_get_usage()' );
+		var mem_data = data.parsed.value[ 0 ] || {};
+		$( '#mem_usage' ).text( bytesToHumanReadable( mem_data.value || 0 ) );
 	}
 
 	function onFileChanged( e )

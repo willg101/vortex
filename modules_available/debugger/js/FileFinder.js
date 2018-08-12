@@ -144,7 +144,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 		}
 	}
 
-	function processGlobOnServer( prefix, cb )
+	async function processGlobOnServer( prefix, cb )
 	{
 		if ( !BasicApi.Debugger.sessionIsActive() )
 		{
@@ -164,25 +164,23 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 		else
 		{
 			BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 2 } );
-			BasicApi.Debugger.command( 'eval', `eval(<<<\'VORTEXEVAL\'\n$__ = [];
+			var e = await BasicApi.Debugger.command( 'eval', `eval(<<<\'VORTEXEVAL\'\n$__ = [];
 				foreach ( glob( '${current_val}*' ) as $item )
-			{
-					$type = is_dir( $item ) ? 'dir' : 'file';
-					$__[ $item ] = [ 'type' => $type, 'name' => $item ];
-			}
-			return $__;\nVORTEXEVAL\n);`, function( e )
-			{
-				var items = (e.parsed.value[ 0 ].children || []).map( function( item )
 				{
-					var ret = [];
-					( item.children || [] ).map( function( el )
-					{
-						ret[ el.name ] = el.value;
-					} );
-					return ret;
+						$type = is_dir( $item ) ? 'dir' : 'file';
+						$__[ $item ] = [ 'type' => $type, 'name' => $item ];
+				}
+				return $__;\nVORTEXEVAL\n);` );
+			var items = ( e.parsed.value[ 0 ].children || []).map( function( item )
+			{
+				var ret = [];
+				( item.children || [] ).map( function( el )
+				{
+					ret[ el.name ] = el.value;
 				} );
-				cb( items );
+				return ret;
 			} );
+			cb( items );
 			BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 		}
 	}

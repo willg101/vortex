@@ -73,11 +73,11 @@
 		Theme.Modal.show();
 	}
 
-	function evalWatchedExpression( expression, output )
+	async function evalWatchedExpression( expression, output )
 	{
 		output = $( output );
 		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
-		BasicApi.Debugger.command( 'eval', function( data )
+		var data = await BasicApi.Debugger.command( 'eval', function( data )
 		{
 			if ( output.is( '.jstree' ) )
 			{
@@ -105,7 +105,7 @@
 					.attr( 'title', 'An empty response was received' );
 				$( output ).html( message );
 			}
-		}, prepareCommand( expression ) );
+		}, );
 		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 	}
 

@@ -240,7 +240,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	 * @param bool     no_clear_active_line Don't clear the current line indicator (for refreshing
 	 *                                      the editor)
 	 */
-	function showFile( filename, line, cb, skip_cache, scroll_top, no_clear_active_line )
+	async function showFile( filename, line, cb, skip_cache, scroll_top, no_clear_active_line )
 	{
 		if ( scroll_top || !line || ! ( line = Number( line ) ) || line % 1 != 0 || line < 1 )
 		{
@@ -250,64 +250,62 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		filename = normalizeFilename( filename );
 		addRecentFile( filename );
 
-		BasicApi.RemoteFiles.get( filename, function( data, error_reason )
+		var data = await BasicApi.RemoteFiles.get( filename, skip_cache );
+		if ( data === false )
 		{
-			if ( data === false )
+			/*if ( error_reason == 'stopping' || error_reason == 'stopped' )
 			{
-				if ( error_reason == 'stopping' || error_reason == 'stopped' )
-				{
-					return;
-				}
-
-				Theme.notify( 'error', 'The file <b>' + filename.replace( /^.*\//, '' ) + '</b> failed to load' );
 				return;
 			}
+			*/
+			Theme.notify( 'error', 'The file <b>' + filename.replace( /^.*\//, '' ) + '</b> failed to load' );
+			return;
+		}
 
-			var text = data;
-			if ( current_file != filename || skip_cache )
+		var text = data;
+		if ( current_file != filename || skip_cache )
+		{
+			editor.setValue( text, -1 );
+			$( '#filename' ).text( filename.replace( /^.*\//, '' ) );
+			open_files[ filename ] = filename.replace( /^.*\//, '' );
+			if ( text.match( /^\<\?php \/\* dpoh: ignore \*\// ) )
 			{
-				editor.setValue( text, -1 );
-				$( '#filename' ).text( filename.replace( /^.*\//, '' ) );
-				open_files[ filename ] = filename.replace( /^.*\//, '' );
-				if ( text.match( /^\<\?php \/\* dpoh: ignore \*\// ) )
-				{
-					$( '#filename' ).prepend( '<span class="fa fa-low-vision"></span> ' );
-				}
-				editor.resize( true );
-				current_file = filename;
+				$( '#filename' ).prepend( '<span class="fa fa-low-vision"></span> ' );
 			}
+			editor.resize( true );
+			current_file = filename;
+		}
 
-			if ( !no_clear_active_line && current_line_marker )
+		if ( !no_clear_active_line && current_line_marker )
+		{
+			editor.session.removeMarker( current_line_marker );
+			editor.getSession().removeGutterDecoration( current_line - 1, "gutter-current-line" );
+		}
+
+		if ( line )
+		{
+			if ( BasicApi.Debugger.sessionIsActive() )
 			{
-				editor.session.removeMarker( current_line_marker );
-				editor.getSession().removeGutterDecoration( current_line - 1, "gutter-current-line" );
+				current_line_marker = editor.session.addMarker( new Range( line - 1, 0, line - 1, 1),
+					"ace-current-line", "fullLine" );
+				editor.getSession().addGutterDecoration( line-1, "gutter-current-line" );
 			}
+			editor.scrollToLine( line , true, true, function(){} );
+			current_line = line;
+		}
+		else
+		{
+			editor.scrollToLine( 1 , true, true, function(){} );
+		}
 
-			if ( line )
-			{
-				if ( BasicApi.Debugger.sessionIsActive() )
-				{
-					current_line_marker = editor.session.addMarker( new Range( line - 1, 0, line - 1, 1),
-						"ace-current-line", "fullLine" );
-					editor.getSession().addGutterDecoration( line-1, "gutter-current-line" );
-				}
-				editor.scrollToLine( line , true, true, function(){} );
-				current_line = line;
-			}
-			else
-			{
-				editor.scrollToLine( 1 , true, true, function(){} );
-			}
+		showBreakpointsForFile();
 
-			showBreakpointsForFile();
+		if ( typeof cb == "function" )
+		{
+			cb( filename, line, text );
+		}
 
-			if ( typeof cb == "function" )
-			{
-				cb( filename, line, text );
-			}
-
-			editor.session.setScrollTop( scroll_top )
-		}, skip_cache );
+		editor.session.setScrollTop( scroll_top )
 	}
 
 	function clearBreakpoints()
@@ -339,7 +337,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		}
 	}
 
-	function toggleBreakpoint( row, expression, file )
+	async function toggleBreakpoint( row, expression, file )
 	{
 		if ( !file )
 		{
@@ -376,35 +374,30 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 		if ( !confirmed_breakpoints[ file ][ row ] )
 		{
-			BasicApi.Debugger.command( 'breakpoint_set', {
-				type : expression ? 'conditional' : 'line',
-				line : row,
-				file : file,
-			},
-			function( data )
-			{
-				updateBreakpoint( 'confirmed', row, expression );
-				confirmed_breakpoints[ file ][ row ].status = 'confirmed';
-				confirmed_breakpoints[ file ][ row ].id     = data.parsed.id;
-			}, expression );
-
 			updateBreakpoint( 'pending', row );
 			confirmed_breakpoints[ file ][ row ] = {
 				status     : 'pending',
 				expression : expression
 			};
+
+			var data = await BasicApi.Debugger.command( 'breakpoint_set', {
+				type : expression ? 'conditional' : 'line',
+				line : row,
+				file : file,
+			}, expression );
+			updateBreakpoint( 'confirmed', row, expression );
+			confirmed_breakpoints[ file ][ row ].status = 'confirmed';
+			confirmed_breakpoints[ file ][ row ].id     = data.parsed.id;
 		}
 		else if ( confirmed_breakpoints[ file ][ row ].status != 'pending' )
 		{
 			updateBreakpoint( 'pending', row );
-			var tid = BasicApi.Debugger.command( 'breakpoint_remove', {
+			var data = await BasicApi.Debugger.command( 'breakpoint_remove', {
 				breakpoint : confirmed_breakpoints[ file ][ row ].id,
-			},
-			function( data )
-			{
-				delete confirmed_breakpoints[ file ][ row ];
-				updateBreakpoint( 'removed', row );
 			} );
+
+			delete confirmed_breakpoints[ file ][ row ];
+			updateBreakpoint( 'removed', row );
 		}
 	}
 
@@ -756,54 +749,51 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 				last_highlighted_marker = session.addMarker( hovered.range, "var-expr-hover", "text" );
 				clearTimeout( show_popover_timeout );
 
-				show_popover_timeout = setTimeout( function()
+				show_popover_timeout = setTimeout( async function()
 				{
 					BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
+					var data = await BasicApi.Debugger.command( 'eval', last_highlighted_expr );
+					var sel = '.current-value .tree-container';
 
-					BasicApi.Debugger.command( 'eval', last_highlighted_expr, function( data )
+					if ( data.parsed.value && data.parsed.value.length )
 					{
-						var sel = '.current-value .tree-container';
-
-						if ( data.parsed.value && data.parsed.value.length )
+						data.parsed.value.forEach( function( item )
 						{
-							data.parsed.value.forEach( function( item )
-							{
-								item.name     = item.name || '';
-								item.fullname = item.fullname || '';
+							item.name     = item.name || '';
+							item.fullname = item.fullname || '';
+						} );
+						$( '.current-value' ).addClass( 'showing' )
+							.appendTo( 'body' )
+							.position( {
+								my : 'left top',
+								at : 'left bottom',
+								of : $( '.var-expr-hover' ),
+							} )
+							.find( '.tree-container' )
+							.html( '<i class="fa fa-spin fa-circle-o-notch"></i>' )
+
+						setTimeout( function()
+						{
+							$( '.current-value .tree-container' ).html( '' )
+								.jstree( 'destroy' )
+								.jstree( {
+									core : {
+										data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value )
+								},
 							} );
-							$( '.current-value' ).addClass( 'showing' )
-								.appendTo( 'body' )
-								.position( {
-									my : 'left top',
-									at : 'left bottom',
-									of : $( '.var-expr-hover' ),
-								} )
-								.find( '.tree-container' )
-								.html( '<i class="fa fa-spin fa-circle-o-notch"></i>' )
-
-							setTimeout( function()
-							{
-								$( '.current-value .tree-container' ).html( '' )
-									.jstree( 'destroy' )
-									.jstree( {
-										core : {
-											data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value )
-									},
-								} );
-							}, 30 );
-						}
-						else if ( data.parsed.message )
-						{
-							var message = $( '<div>' ).text( data.parsed.message ).html();
-							message = '<span class="debugger-message">' + message + '</span>';
-							$( sel ).html( message );
-						}
-						else
-						{
-							$( sel ).html( '<span class="no-debugger-message">Empty response '
-								+ 'received</span>' );
-						}
-					} );
+						}, 30 );
+					}
+					else if ( data.parsed.message )
+					{
+						var message = $( '<div>' ).text( data.parsed.message ).html();
+						message = '<span class="debugger-message">' + message + '</span>';
+						$( sel ).html( message );
+					}
+					else
+					{
+						$( sel ).html( '<span class="no-debugger-message">Empty response '
+							+ 'received</span>' );
+					}
 					BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 				}, 500 );
 			}

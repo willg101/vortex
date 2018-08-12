@@ -32,7 +32,7 @@
 				var fn = function(){ return inner_fn() };
 				term.pause();
 
-				var process_command = function()
+				var process_command = async function()
 				{
 					term.echo( fn, { raw : true } );
 
@@ -41,34 +41,32 @@
 					// properties, I came up empty-handed. Lazy-loading doesn't seem to be a viable option
 					// here, so let's deep-load the response instead
 					BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
-					BasicApi.Debugger.command( 'eval', function( data )
+					var data = await BasicApi.Debugger.command( 'eval', prepareCommand( command ));
+					if ( data.parsed.value && data.parsed.value.length )
 					{
-						if ( data.parsed.value && data.parsed.value.length )
+						data.parsed.value.forEach( function( item )
 						{
-							data.parsed.value.forEach( function( item )
-							{
-								item.name     = item.name || '';
-								item.fullname = item.fullname || '';
-							} );
-							$( '#' + id ).html( '' ).jstree( { core : { data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value ) } } );
-							inner_fn = function()
-							{
-								setTimeout( function(){ $( '#' + id ).html( '' ).jstree( { core : { data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value ) } } ); }, 30 );
-								return result;
-							};
-						}
-						else if ( data.parsed.message )
+							item.name     = item.name || '';
+							item.fullname = item.fullname || '';
+						} );
+						$( '#' + id ).html( '' ).jstree( { core : { data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value ) } } );
+						inner_fn = function()
 						{
-							var message = $( '<div>' ).text( data.parsed.message ).html();
-							message = '<span class="debugger-message">' + message + '</span>';
-							$( '#' + id ).html( message );
-						}
-						else
-						{
-							$( '#' + id ).html( '<span class="no-debugger-message">Empty response '
-								+ 'received</span>' );
-						}
-					}, prepareCommand( command ) );
+							setTimeout( function(){ $( '#' + id ).html( '' ).jstree( { core : { data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value ) } } ); }, 30 );
+							return result;
+						};
+					}
+					else if ( data.parsed.message )
+					{
+						var message = $( '<div>' ).text( data.parsed.message ).html();
+						message = '<span class="debugger-message">' + message + '</span>';
+						$( '#' + id ).html( message );
+					}
+					else
+					{
+						$( '#' + id ).html( '<span class="no-debugger-message">Empty response '
+							+ 'received</span>' );
+					}
 					BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 					term.resume();
 				};

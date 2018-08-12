@@ -17,21 +17,19 @@ namespace( 'Autorun' ).Controller = (function( $ )
 	 */
 	function onSessionInit( e )
 	{
-		whenReadyTo( 'inspect-context' ).then( function()
+		whenReadyTo( 'inspect-context' ).then( async function()
 		{
 			// If the request includes a "VORTEX_NO_AUTORUN" GET param, we will not autorun
-			BasicApi.Debugger.command( 'property_get', { name : '$_GET["VORTEX_NO_AUTORUN"]' }, function( data )
+			var data = await BasicApi.Debugger.command( 'property_get', { name : '$_GET["VORTEX_NO_AUTORUN"]' } );
+			if ( !data.parsed || !data.parsed[ 0 ] ) // No "VORTEX_NO_AUTORUN" GET param
 			{
-				if ( !data.parsed || !data.parsed[ 0 ] ) // No "VORTEX_NO_AUTORUN" GET param
-				{
-					var mode = getCurrentMode();
+				var mode = getCurrentMode();
 
-					if ( mode != 'disabled' && ( document.visibilityState == 'hidden' || mode == 'always' ) )
-					{
-						whenReadyTo( 'autorun' ).then( BasicApi.Debugger.command.bind( null, 'run' ) );
-					}
+				if ( mode != 'disabled' && ( document.visibilityState == 'hidden' || mode == 'always' ) )
+				{
+					whenReadyTo( 'autorun' ).then( BasicApi.Debugger.command.bind( null, 'run' ) );
 				}
-			} );
+			}
 		} );
 	}
 
