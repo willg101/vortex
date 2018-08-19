@@ -48,7 +48,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 				stack_depth : stack_depth,
 				context     : cid
 			}, new_value );
-			updateContext( stack_depth );
+			// updateContext( stack_depth );
 		}
 	}
 
@@ -67,7 +67,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		return ( size / Math.pow( 1024, i) ).toFixed (2 ) * 1 + ' ' + [ 'B', 'kB', 'MB', 'GB', 'TB' ][ i ];
 	}
 
-	function validateContext( context, depth )
+	function validateContext( context )
 	{
 		var expanded = [];
 		$( '#context li[aria-expanded=true]' ).each( function( i, el )
@@ -75,7 +75,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 			expanded.push( $( el ).attr( 'data-address' ) );
 		} );
 		$( '#context' ).jstree( "destroy" );
-		$( '#context' ).jstree( { core : { data : buildContextTree( context, depth ) } } ).removeClass( 'blur-hidden' );
+		$( '#context' ).jstree( { core : { data : buildContextTree( context ) } } ).removeClass( 'blur-hidden' );
 		var tree = $.jstree.reference( '#context' );
 		expanded.forEach( function( address )
 		{
@@ -83,31 +83,41 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		} );
 	}
 
-	function validateStack( stack_array )
+	subscribe( 'program-state-changed', ( e ) =>
 	{
+		var stack = e.program_state.stack
 		var html = '<div class="css-table stack-table no-max-height">';
 		var max_depth = 0;
 		var active = 'active';
-		stack_array.forEach( function( data )
+		stack.frames.forEach( function( frame )
 		{
-			var filename_full  = data.filename;
-			var lineno         = data.lineno;
-			var level          = data.level;
-			var filename_short = filename_full.replace( /^.*\//, '' );
 			html +=
-				  '<div class="css-row stack-row ' + active + '" data-file="' + filename_full + '" data-line="' + lineno + '" data-stack-depth="' + level + '">'
-					+ '<div class="css-cell depth">' + level + '</div>'
-					+ '<div class="css-cell file">' + filename_short + '</div>'
-					+ '<div class="css-cell line">' + lineno + '</div>'
+				  '<div class="css-row stack-row ' + active + '" data-file="' + frame.filename_full + '" data-line="' + frame.lineno + '" data-stack-depth="' + frame.level + '">'
+					+ '<div class="css-cell depth">' + frame.level + '</div>'
+					+ '<div class="css-cell file">' + frame.filename_short + '</div>'
+					+ '<div class="css-cell line">' + frame.lineno + '</div>'
 				+ '</div>'
 
-			max_depth = data.level;
 			active = '';
 		} );
 		html += '</div>'
 		$( '#stack' ).html( html );
-		updateStackDepth( max_depth );
-	}
+		updateStackDepth( stack.depth );
+
+		var context = e.program_state.contexts;
+		var expanded = [];
+		$( '#context li[aria-expanded=true]' ).each( function( i, el )
+		{
+			expanded.push( $( el ).attr( 'data-address' ) );
+		} );
+		$( '#context' ).jstree( "destroy" );
+		$( '#context' ).jstree( { core : { data : buildContextTree( context ) } } ).removeClass( 'blur-hidden' );
+		var tree = $.jstree.reference( '#context' );
+		expanded.forEach( function( address )
+		{
+			tree.open_node( '[data-address=' + address + ']', function(){}, false );
+		} );
+	} );
 
 	async function updateProperty( identifier, stack_depth, cid, address, data )
 	{
@@ -118,17 +128,19 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		} );
 		$( '#context' ).jstree( "destroy" );
 		var t = $( '[data-address=' + address + ']' );
-		t.after( buildContextTree( data.parsed, stack_depth ).replace( /(^\<ul\>|\<\/ul\>$)/g, '' ) );
+		t.after( buildContextTree( data.parsed ).replace( /(^\<ul\>|\<\/ul\>$)/g, '' ) );
 		$( '#context' ).jstree();
 	}
 
-	function buildContextTree( context, stack_depth, cid, is_recursive )
+	function buildContextTree( context, is_recursive )
 	{
 		var nodes = [];
 
-		context.forEach( function( property )
+		(context instanceof Array ? context : context.children || [] ).forEach( function( property )
 		{
-			var value = $('<div>').text( property.value || '' ).html();
+			var stack_depth = property.stackDepth;
+			var cid         = property.cid;
+			var value       = $('<div>').text( property.value || '' ).html();
 
 			var icon = 'fa-question-circle-o';
 			switch ( property.type )
@@ -167,7 +179,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 					+ '</span>',
 			};
 
-			if ( property.no_alter ){ node.li_attr[ 'data-no-alter' ] = 'true'; }
+			if ( property.isReadOnly ){ node.li_attr[ 'data-no-alter' ] = 'true'; }
 			if ( property.address  ){ node.li_attr[ 'data-address' ]  = property.address; }
 			if ( cid               ){ node.li_attr[ 'data-no-alter' ] = cid; }
 
@@ -179,19 +191,17 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 
 			if ( property.children )
 			{
-				node.children = buildContextTree( property.children, stack_depth, cid, true );
+				node.children = buildContextTree( property.children, true );
 			}
-			else if ( Number( property.numchildren ) && property.fullname )
+			else if ( property.hasChildren )
 			{
 				node.children     = true;
-				node.get_children = async function( parent, cb )
+				node.get_children = async function( cb )
 				{
-					var children = await BasicApi.Debugger.command( 'property_get', {
-						name        : property.fullname,
-						stack_depth : stack_depth || 0,
-						context     : cid || undefined,
-					} );
-					cb( buildContextTree( children.parsed[ 0 ].children, stack_depth, cid, true ) );
+					var children = await property.fetchChildren();
+					var tree = buildContextTree( children, true );
+					cb( tree );
+					return tree;
 				};
 			}
 
@@ -212,7 +222,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 				}
 				else if ( typeof obj.original.get_children == 'function' )
 				{
-					obj.original.get_children( obj, cb );
+					obj.original.get_children( cb );
 				}
 			};
 		}
@@ -223,40 +233,10 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		BasicApi.Debugger.command( 'stack_get' );
 	}
 
-	async function updateContext( stack_depth )
-	{
-		var command = 'context_names';
-		if ( !( stack_depth % 1 === 0 && stack_depth > -1 ) )
-		{
-			stack_depth = undefined;
-		}
-
-		var context_names = await BasicApi.Debugger.command( 'context_names', {
-			stack_depth : stack_depth,
-		} );
-		var all_contexts = [];
-		context_names.parsed.forEach( async function( info )
-		{
-			var context_data = await BasicApi.Debugger.command( 'context_get', {
-				context     : info.id,
-				stack_depth : stack_depth,
-			} );
-			all_contexts.push( {
-				name     : info.name,
-				fullname : info.name,
-				type     : info.name,
-				address  : info.name,
-				children : context_data.parsed,
-				no_alter : true,
-				cid      : info.id,
-			} );
-
-			if ( all_contexts.length == context_names.parsed.length )
-			{
-				validateContext( all_contexts, stack_depth || 0 );
-			}
-		} );
-	}
+//	async function updateContext( nodes )
+//	{
+//		validateContext( all_contexts, stack_depth || 0 );
+//	}
 
 	function toggleIndicators( show )
 	{
@@ -282,7 +262,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 			lineno   : line,
 			source   : 'stack',
 		} );
-		updateContext( stack_depth );
+		// updateContext( stack_depth ); TODO
 	}
 
 	function onResponseReceived( e )
@@ -295,7 +275,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 
 		if ( e.response_type == 'debugger_command:stack_get' )
 		{
-			validateStack( e.parsed );
+			//validateStack( e.parsed );
 		}
 	}
 
@@ -318,7 +298,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 	{
 		updateMemoryUsage();
 		BasicApi.Debugger.command( 'stack_get' );
-		updateContext();
+		// updateContext();
 	}
 
 	function onSessionStatusChanged( e )
