@@ -83,25 +83,16 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		} );
 	}
 
+	class StackView extends View
+	{
+		process( vars ){ return { frames : vars }; }
+	}
+	StackView.template = 'debugger.stack_frame';
+
 	subscribe( 'program-state-changed', ( e ) =>
 	{
 		var stack = e.program_state.stack
-		var html = '<div class="css-table stack-table no-max-height">';
-		var max_depth = 0;
-		var active = 'active';
-		stack.frames.forEach( function( frame )
-		{
-			html +=
-				  '<div class="css-row stack-row ' + active + '" data-file="' + frame.filename_full + '" data-line="' + frame.lineno + '" data-stack-depth="' + frame.level + '">'
-					+ '<div class="css-cell depth">' + frame.level + '</div>'
-					+ '<div class="css-cell file">' + frame.filename_short + '</div>'
-					+ '<div class="css-cell line">' + frame.lineno + '</div>'
-				+ '</div>'
-
-			active = '';
-		} );
-		html += '</div>'
-		$( '#stack' ).html( html );
+		$( '#stack' ).html( new StackView( stack.frames ) + '' );
 		updateStackDepth( stack.depth );
 
 		var context = e.program_state.contexts;

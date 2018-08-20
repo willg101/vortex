@@ -1,0 +1,10 @@
+<div class="css-table stack-table no-max-height">
+{{#each frames}}
+	<div class="css-row stack-row {{#if @index}}{{else}}active{{/if}}" data-file="{{ filename_full }}"
+		data-line="{{ lineno }}" data-stack-depth="{{ level }}">
+		<div class="css-cell depth">{{ level }}</div>
+		<div class="css-cell file">{{ filename_short }}</div>
+		<div class="css-cell line">{{ lineno }}</div>
+	</div>
+{{/each}}
+</div>
