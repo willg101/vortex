@@ -256,20 +256,6 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		// updateContext( stack_depth ); TODO
 	}
 
-	function onResponseReceived( e )
-	{
-		var data = e.parsed || {};
-		if ( data.is_continuation && !e.is_stopping )
-		{
-			updateAll();
-		}
-
-		if ( e.response_type == 'debugger_command:stack_get' )
-		{
-			//validateStack( e.parsed );
-		}
-	}
-
 	async function updateMemoryUsage()
 	{
 		var data = await BasicApi.Debugger.command( 'eval', 'memory_get_usage()' );
@@ -285,19 +271,11 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		}
 	}
 
-	function updateAll()
-	{
-		updateMemoryUsage();
-		BasicApi.Debugger.command( 'stack_get' );
-		// updateContext();
-	}
-
 	function onSessionStatusChanged( e )
 	{
 		if ( e.status == 'active' )
 		{
 			toggleIndicators( true );
-			updateAll();
 		}
 		else
 		{
@@ -315,7 +293,6 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 	$( document ).on( 'click',           '.stack-row',   onStackRowClicked );
 
 	subscribe( 'file-changed',           onFileChanged );
-	subscribe( 'response-received',      onResponseReceived );
 	subscribe( 'session-status-changed', onSessionStatusChanged );
 
 	return {
