@@ -1,3 +1,5 @@
+import File from './File.module.js'
+
 namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 {
 	var known_sessions = [];
