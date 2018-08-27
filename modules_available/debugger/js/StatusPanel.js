@@ -39,7 +39,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 			context     : cid,
 			max_data    : size,
 		} );
-		var current_val = $('<div>').text( e.parsed[ 0 ].value || '' ).html();
+		var current_val = $('<div>').text( (e.parsed[ 0 ] || {}).value || '' ).html();
 		Theme.Modal.set( {
 			title : 'Update Value',
 			content : render( 'debugger.change_variable_value', { identifier, stack_depth, cid, size } ),
