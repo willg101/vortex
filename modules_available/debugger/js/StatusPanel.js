@@ -1,5 +1,25 @@
 namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 {
+	subscribe( 'program-state-changed', ( e ) =>
+	{
+		var stack = e.program_state.stack
+		$( '#stack' ).html( render( 'debugger.stack_frame', { frames: stack.frames } ) );
+		updateStackDepth( stack.depth );
+
+		var context = e.program_state.contexts;
+		var expanded = [];
+		$( '#context li[aria-expanded=true]' ).each( function( i, el )
+		{
+			expanded.push( $( el ).attr( 'data-address' ) );
+		} );
+		$( '#context' ).vtree( context ).removeClass( 'blur-hidden' );
+		var tree = $.jstree.reference( '#context' );
+		expanded.forEach( function( address )
+		{
+			tree.open_node( '[data-address=' + address + ']', function(){}, false );
+		} );
+	} );
+
 	async function onNodeDoubleClicked( e )
 	{
 		var li = $( e.target ).closest( 'li' );
@@ -46,7 +66,6 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 				stack_depth : stack_depth,
 				context     : cid
 			}, new_value );
-			// updateContext( stack_depth );
 		}
 	}
 
@@ -69,11 +88,6 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 	{
 		BasicApi.Debugger.command( 'stack_get' );
 	}
-
-//	async function updateContext( nodes )
-//	{
-//		validateContext( all_contexts, stack_depth || 0 );
-//	}
 
 	function toggleIndicators( show )
 	{
