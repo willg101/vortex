@@ -1,6 +1,7 @@
 class RenderError extends Error {
-	constructor( message )
+	constructor( message, ...args )
 	{
+		super( message, ...args );
 		this.name = 'RenderError';
 		this.message = message;
 		this.stack = (new Error()).stack;
