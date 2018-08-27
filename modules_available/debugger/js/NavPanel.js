@@ -49,10 +49,10 @@
 							item.name     = item.name || '';
 							item.fullname = item.fullname || '';
 						} );
-						$( '#' + id ).html( '' ).jstree( { core : { data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value ) } } );
+						$( '#' + id ).html( '' ).vtree( data.parsed.value );
 						inner_fn = function()
 						{
-							setTimeout( function(){ $( '#' + id ).html( '' ).jstree( { core : { data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value ) } } ); }, 30 );
+							setTimeout( function(){ $( '#' + id ).html( '' ).vtree( data.parsed.value ); }, 30 );
 							return result;
 						};
 					}

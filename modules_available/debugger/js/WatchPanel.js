@@ -91,7 +91,7 @@
 					item.name     = item.name || '';
 					item.fullname = item.fullname || '';
 				} );
-				$( output ).html( '' ).jstree( { core : { data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value ) } } );
+				$( output ).html( '' ).vtree( data.parsed.value );
 			}
 			else if ( data.parsed.message )
 			{

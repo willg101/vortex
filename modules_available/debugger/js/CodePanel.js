@@ -774,13 +774,9 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 						setTimeout( function()
 						{
-							$( '.current-value .tree-container' ).html( '' )
-								.jstree( 'destroy' )
-								.jstree( {
-									core : {
-										data : CodeInspector.StatusPanel.buildContextTree( data.parsed.value )
-								},
-							} );
+							$( '.current-value .tree-container' )
+								.html( '' )
+								.vtree( data.parsed.value );
 						}, 30 );
 					}
 					else if ( data.parsed.message )
