@@ -2,6 +2,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 {
 	var dir_aliases = {};
 	var tab_pressed = false;
+	var CodePanel = CodeInspector.CodePanel;
 
 	function onGlobberKeydown( e )
 	{
@@ -189,7 +190,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 	{
 		if ( ! $( '#file_finder' ).val().trim() )
 		{
-			var def = (CodeInspector.CodePanel.getCurrentFile() || '').replace( /^file:\/\//, '' ).replace( /\/+[^\/]*$/, '' );
+			var def = (CodePanel.getCurrentFile() || '').replace( /^file:\/\//, '' ).replace( /\/+[^\/]*$/, '' );
 			def = def ? def + '/' : '';
 			$( '#file_finder' ).val( def )
 		}

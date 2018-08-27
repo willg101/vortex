@@ -2,6 +2,8 @@ FragData = (function( $ )
 {
 	var id_regex = /^#frag_data:/;
 
+	var CodePanel = CodeInspector.CodePanel;
+
 	// We require the CodePanel object
 	if ( typeof CodePanel != 'object' )
 	{
