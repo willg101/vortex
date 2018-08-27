@@ -1,3 +1,5 @@
+import File from './File.module.js'
+
 namespace( 'CodeInspector' ).FileFinder = (function( $ )
 {
 	var dir_aliases = {};
@@ -43,7 +45,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 									'data-full-path' : current_text,
 									class : 'globber-option globber-' + el.type,
 								},
-								content : current_text.replace( /^.*\//, '' ),
+								content : File.basename( current_text ),
 							} );
 
 							if ( !base )

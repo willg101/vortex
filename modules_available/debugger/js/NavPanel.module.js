@@ -1,3 +1,5 @@
+import File from './File.module.js'
+
 (function( $ )
 {
 	var dummy_session_timeout = null;
@@ -211,11 +213,6 @@
 		$( '.nav-panel.showing' ).removeClass( 'showing' );
 	}
 
-	function getShortFileName( filename )
-	{
-		return filename.replace( /^.*\//, '' );
-	}
-
 	function onNodeDoubleClicked( e, data )
 	{
 		var li = $( e.target ).closest( 'li' );
@@ -269,7 +266,7 @@
 	function onFileChanged( e )
 	{
 		$( '.files-heading' ).slideDown();
-		var filename_only = e.file.replace( /^.*\//, '' );
+		var filename_only = File.basename( e.file );
 		if ( !$( '[data-open-file="' + e.file + '"]', '.currently-open-files' ).length )
 		{
 			var new_button = $( '<span>' ).attr( 'data-open-file', e.file )

@@ -56,9 +56,9 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 			for ( var i in known_sessions )
 			{
 				sessions_for_list.push( {
-					file : known_sessions[ i ].file.replace( /^.*\//, '' ),
+					file : File.basename( known_sessions[ i ].file ),
 					host : known_sessions[ i ].host,
-					content : known_sessions[ i ].file.replace( /^.*\//, '' ),
+					content : File.basename( known_sessions[ i ].file ),
 					id : known_sessions[ i ].id,
 					attr : {
 						'data-switch-to-session' : known_sessions[ i ].id,

@@ -1,3 +1,5 @@
+import File from './File.module.js'
+
 namespace( 'CodeInspector' ).CodePanel = (function( $ )
 {
 	var editor                = null;
@@ -258,7 +260,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 				return;
 			}
 			*/
-			Theme.notify( 'error', 'The file <b>' + filename.replace( /^.*\//, '' ) + '</b> failed to load' );
+			Theme.notify( 'error', 'The file <b>' + File.basename( filename ) + '</b> failed to load' );
 			return;
 		}
 
@@ -266,8 +268,8 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		if ( current_file != filename || skip_cache )
 		{
 			editor.setValue( text, -1 );
-			$( '#filename' ).text( filename.replace( /^.*\//, '' ) );
-			open_files[ filename ] = filename.replace( /^.*\//, '' );
+			$( '#filename' ).text( File.basename( filename ) );
+			open_files[ filename ] = File.basename( filename );
 			if ( text.match( /^\<\?php \/\* dpoh: ignore \*\// ) )
 			{
 				$( '#filename' ).prepend( '<span class="fa fa-low-vision"></span> ' );
@@ -356,7 +358,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 
 		if ( !BasicApi.Debugger.sessionIsActive() )
 		{
-			create = !confirmed_breakpoints[ file ][ row ];
+			var create = !confirmed_breakpoints[ file ][ row ];
 			if ( create )
 			{
 				confirmed_breakpoints[ file ][ row ] = {
@@ -570,7 +572,7 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 		for ( var i in recent_files )
 		{
 			list.push( {
-				content : recent_files[ i ].replace( /^.*\//, '' ),
+				content : File.basename( recent_files[ i ] ),
 				attr : {
 					'data-open-file' : recent_files[ i ],
 				},
@@ -826,3 +828,5 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	}
 
 }( jQuery ));
+
+export default CodeInspector.CodePanel;
