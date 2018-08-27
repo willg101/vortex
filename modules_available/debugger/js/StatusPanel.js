@@ -22,9 +22,7 @@ namespace( 'CodeInspector' ).StatusPanel = (function( $ )
 		var current_val = $('<div>').text( e.parsed[ 0 ].value || '' ).html();
 		Theme.Modal.set( {
 			title : 'Update Value',
-			content : '<label>Assign a new value to <span class="identifier">' + identifier
-				+':</span></label><div class="value-input" contenteditable data-identifier="' + identifier
-				+ '" data-stack-depth="' + stack_depth + '" data-cid="' + cid + '">' + current_val + '</div>'
+			content : render( 'debugger.change_variable_value', { identifier, stack_depth, cid, size } ),
 		} );
 		Theme.Modal.show();
 		$( '.value-input' ).focus();

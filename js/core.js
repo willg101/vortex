@@ -79,54 +79,6 @@ render = (function()
 }())
 
 /**
- * Thrown when a subclass of View attempts to render itself without defining a
- * `template` property on the subclass
- */
-class UndefinedTemplateError extends Error
-{
-	/**
-	 * @param View instance
-	 */
-	constructor( instance )
-	{
-		super( 'Class "' + instance.constructor.name + '" does not define a template' );
-	}
-}
-
-/**
- * Abstract subclass wrapper around a handlebars template and the render() function above.
- */
-class View
-{
-	// template = 'module_name.template_name'; Subclasses MUST define this
-
-	/**
-	 * @param object Vars
-	 */
-	constructor( vars )
-	{
-		this.vars = this.process( vars );
-	}
-
-	/**
-	 * Process the object of variables passed to the constructor
-	 * @param object vars
-	 * @retval vars
-	 */
-	process( vars ){ return vars }
-
-	toString()
-	{
-		var template = this.constructor.template;
-		if ( !template )
-		{
-			throw new UndefinedTemplateError( this );
-		}
-		return render( template, this.vars );
-	}
-}
-
-/**
  * @brief
  *	Publish an event
  *
