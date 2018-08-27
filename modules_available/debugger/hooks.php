@@ -23,7 +23,7 @@ function debugger_provide_windows()
 			'content'   => render( 'code_window' ),
 		],
 		[
-			'title'     => 'Context',
+			'title'     => 'Scope',
 			'id'        => 'context',
 			'secondary' => '<span class="status-indicator"><i class="fa fa-microchip"></i> <span id="mem_usage"></span></span>',
 			'icon'      => 'sitemap',

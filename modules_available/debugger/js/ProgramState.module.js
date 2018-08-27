@@ -1,6 +1,73 @@
 var $ = jQuery;
-var d = 10000
 import File from './File.module.js';
+import ProgrammingLanguageTranslator from './ProgrammingLanguage.module.js';
+
+/**
+ * @brief
+ *	A single frame within the stack
+ */
+class StackFrame
+{
+	/**
+	 * @param Array frameData 
+	 */
+	constructor( frameData )
+	{
+		frameData.schemelessFilename = File.stripScheme( frameData.filename );
+		frameData.pathlessFilename   = File.basename( frameData.filename );
+
+		this.frameData = $.extend( true, {}, frameData );
+	}
+
+	get rawFilename()        { return this.frameData.filename;           }
+	get schemelessFilename() { return this.frameData.schemelessFilename; }
+	get pathlessFilename()   { return this.frameData.pathlessFilename;   }
+	get lineno()             { return this.frameData.lineno;             }
+	get level()              { return this.frameData.level;              }
+
+	/**
+	 * @retval Promise
+	 */
+	fetchContext()
+	{
+		if ( this.contextPromise )
+		{
+			return this.contextPromise;
+		}
+		else if ( this.context )
+		{
+			this.contextPromise = new Promise( resolve =>
+			{
+				resolve( this.context );
+			} );
+		}
+		else
+		{
+			this.contextPromise = new Promise( async ( resolve ) =>
+			{
+				var response = await BasicApi.Debugger.command( 'context_names', {
+					stack_depth : this.level,
+				} );
+				var contexts = [];
+				var contextDescriptor = null;
+				for ( var i = 0; i < response.parsed.length; i++ )
+				{
+					contextDescriptor = response.parsed[ i ];
+					var contextItems = await BasicApi.Debugger.command( 'context_get', {
+						context     : contextDescriptor.id,
+						stack_depth : this.level,
+					} );
+					contexts.push( new ContextRoot( contextDescriptor.name,
+						contextDescriptor.id, contextItems.parsed, this.level ) );
+				}
+				this.context = contexts;
+				resolve( this.context );
+			} );
+		}
+
+		return this.contextPromise;
+	}
+}
 
 /**
  * @brief
@@ -9,19 +76,22 @@ import File from './File.module.js';
 class Stack
 {
 	/**
-	 * @param Array frame_array
+	 * @param Array frameArray
 	 */
-	constructor( frame_array )
+	constructor( frameArray )
 	{
-		this.frames = ( frame_array || []).map( raw_frame =>
+		frameArray = frameArray || [];
+
+		this.frames = frameArray.map( rawFrame =>
 		{
-			return {
-				filename_full  : raw_frame.filename,
-				lineno         : raw_frame.lineno,
-				level          : raw_frame.level,
-				filename_short : File.basename( raw_frame.filename ),
-			};
+			return new StackFrame( {
+				filename : rawFrame.filename,
+				lineno   : rawFrame.lineno,
+				level    : rawFrame.level,
+			} );
 		} );
+
+		frameArray.length && this.frames[ 0 ].fetchContext();
 	}
 
 	get depth() {
@@ -49,16 +119,16 @@ class ContextNode {
 		} );
 	}
 
-	_searchRecursivelyForValue( value_name )
+	_searchRecursivelyForValue( key )
 	{
-		if ( typeof this[ value_name ] != 'undefined' )
+		if ( typeof this[ key ] != 'undefined' )
 		{
-			return this[ value_name ];
+			return this[ key ];
 		}
 		else
 		{
 			return this.parent
-				? this.parent._searchRecursivelyForValue( value_name )
+				? this.parent._searchRecursivelyForValue( key )
 				: undefined;
 		}
 	}
@@ -131,39 +201,29 @@ class ContextRoot extends ContextNode
 class ProgramState {
 	constructor()
 	{
-		this._getStack()
-			.then( this._getContexts.bind( this ) )
-			.then( () => { publish( 'program-state-changed', { program_state : this } ); } );
+		Promise.all( [
+			this.getStack(),
+			this.getMemoryUsage(),
+		] ).then( () =>
+		{
+			publish( 'program-state-changed', { programState : this } );
+		} );
 	}
 
-	async _getStack()
+	async getStack()
 	{
 		var response = await BasicApi.Debugger.command( 'stack_get' );
 		this.stack   = new Stack( response.parsed );
+		await this.stack.frames[ 0 ].fetchContext();
 	}
 
-	async _getContexts()
+	async getMemoryUsage()
 	{
-		var response = await BasicApi.Debugger.command( 'context_names', {
-			stack_depth : this.stack.depth,
-		} );
-		var contexts = [];
-		var context_descriptor = null;
-		for ( var i = 0; i < response.parsed.length; i++ )
-		{
-			context_descriptor = response.parsed[ i ];
-			var context_items = await BasicApi.Debugger.command( 'context_get', {
-				context     : context_descriptor.id,
-				stack_depth : 0,
-			} );
-			contexts.push( new ContextRoot( context_descriptor.name,
-				context_descriptor.id, context_items.parsed, 0 ) );
-		}
-		this.contexts = contexts;
-	}
-
-	_getFile()
-	{
+		var response = await ProgrammingLanguageTranslator.tx( 'getBytesOfMemoryUsed' );
+		this.memoryUsage = {
+			bytes    : response,
+			readable : File.bytesToHumanReadable( response ), 
+		};
 	}
 }
 
@@ -184,38 +244,42 @@ subscribe( 'provide-tests', function()
 			var s1 = new Stack( [] );
 			expect( s1.depth ).toBe( 0 );
 
-			var s2 = new Stack( [ { level : 0, type : 'file', filename : '/a/b/c', lineno: 123 } ] );
+			var s2 = new Stack( [ { level : 0, type : 'file', filename : 'file:///a/b/c', lineno: 123 } ] );
 			expect( s2.depth ).toBe( 1 );
 			expect( typeof s2.frames ).toBe( 'object' );
 			expect( s2.frames instanceof Array ).toBe( true );
 			var frame = s2.frames[ 0 ];
 			expect( frame.level ).toBe( 0 );
-			expect( frame.filename_full ).toBe( '/a/b/c' );
-			expect( frame.filename_short ).toBe( File.basename( '/a/b/c' ) );
+			expect( frame.rawFilename ).toBe( 'file:///a/b/c' );
+			expect( frame.schemelessFilename ).toBe( '/a/b/c' );
+			expect( frame.pathlessFilename ).toBe( File.basename( '/a/b/c' ) );
 			expect( frame.lineno ).toBe( 123 );
 
 			var s3 = new Stack( [
-				{ level : 0, type : 'file', filename : '/aaa/bbb/ccc/ddd/eee', lineno: 123 },
-				{ level : 1, type : 'file', filename : '/aaa/baaa',            lineno: 12  },
-				{ level : 2, type : 'file', filename : '/aaaa',                lineno: 1   },
+				{ level : 0, type : 'file', filename : 'file:///aaa/bbb/ccc/ddd/eee', lineno: 123 },
+				{ level : 1, type : 'file', filename : 'file:///aaa/baaa',            lineno: 12  },
+				{ level : 2, type : 'file', filename : 'file:///aaaa',                lineno: 1   },
 			] );
 			expect( s3.depth ).toBe( 3 );
 			expect( typeof s3.frames ).toBe( 'object' );
 			expect( s3.frames instanceof Array ).toBe( true );
 			frame = s3.frames[ 0 ];
 			expect( frame.level ).toBe( 0 );
-			expect( frame.filename_full ).toBe( '/aaa/bbb/ccc/ddd/eee' );
-			expect( frame.filename_short ).toBe( File.basename( '/aaa/bbb/ccc/ddd/eee' ) );
+			expect( frame.rawFilename ).toBe( 'file:///aaa/bbb/ccc/ddd/eee' );
+			expect( frame.schemelessFilename ).toBe( '/aaa/bbb/ccc/ddd/eee' );
+			expect( frame.pathlessFilename ).toBe( File.basename( '/aaa/bbb/ccc/ddd/eee' ) );
 			expect( frame.lineno ).toBe( 123 );
 			frame = s3.frames[ 1 ];
 			expect( frame.level ).toBe( 1 );
-			expect( frame.filename_full ).toBe( '/aaa/baaa' );
-			expect( frame.filename_short ).toBe( File.basename( '/aaa/baaa' ) );
+			expect( frame.rawFilename ).toBe( 'file:///aaa/baaa' );
+			expect( frame.schemelessFilename ).toBe( '/aaa/baaa' );
+			expect( frame.pathlessFilename ).toBe( File.basename( '/aaa/baaa' ) );
 			expect( frame.lineno ).toBe( 12 );
 			frame = s3.frames[ 2 ];
 			expect( frame.level ).toBe( 2 );
-			expect( frame.filename_full ).toBe( '/aaaa' );
-			expect( frame.filename_short ).toBe( File.basename( '/aaaa' ) );
+			expect( frame.rawFilename ).toBe( 'file:///aaaa' );
+			expect( frame.schemelessFilename ).toBe( '/aaaa' );
+			expect( frame.pathlessFilename ).toBe( File.basename( '/aaaa' ) );
 			expect( frame.lineno ).toBe( 1 );
 		} );
 

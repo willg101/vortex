@@ -816,6 +816,11 @@ namespace( 'CodeInspector' ).CodePanel = (function( $ )
 	subscribe( 'alter-settings-quick-actions', alterQuickActions );
 	subscribe( 'vortex-init',                  init );
 
+	subscribe( 'program-state-ui-refresh-needed', ( e ) =>
+	{
+		showFile( e.file, e.line != -1 ? e.line : undefined );
+	} );
+
 	return {
 		clearBreakpoints          : clearBreakpoints,
 		clearCurrentLineIndicator : clearCurrentLineIndicator,
