@@ -17,22 +17,23 @@ function getCurrentMode()
  */
 function onSessionInit( e )
 {
-	whenReadyTo( 'inspect-context' ).then( function()
+	var mode = getCurrentMode();
+	if ( mode == 'disabled' )
 	{
-		(async function()
-		{
-			// If the request includes a "VORTEX_NO_AUTORUN" GET param, we will not autorun
-			var data = await BasicApi.Debugger.command( 'property_get', { name : '$_GET["VORTEX_NO_AUTORUN"]' } );
-			if ( !data.parsed || !data.parsed[ 0 ] ) // No "VORTEX_NO_AUTORUN" GET param
-			{
-				var mode = getCurrentMode();
+		return;
+	}
 
-				if ( mode != 'disabled' && ( document.visibilityState == 'hidden' || mode == 'always' ) )
-				{
-					whenReadyTo( 'autorun' ).then( BasicApi.Debugger.command.bind( null, 'run' ) );
-				}
+	whenReadyTo( 'inspect-context' ).then( async function()
+	{
+		// If the request includes a "VORTEX_NO_AUTORUN" GET param, we will not autorun
+		var data = await BasicApi.Debugger.command( 'property_get', { name : '$_GET["VORTEX_NO_AUTORUN"]' } );
+		if ( !data.parsed || !data.parsed[ 0 ] ) // No "VORTEX_NO_AUTORUN" GET param
+		{
+			if ( document.visibilityState == 'hidden' || mode == 'always' )
+			{
+				whenReadyTo( 'autorun' ).then( BasicApi.Debugger.command.bind( null, 'run' ) );
 			}
-		}());
+		}
 	} );
 }
 
