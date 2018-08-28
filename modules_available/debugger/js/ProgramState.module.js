@@ -50,7 +50,7 @@ class StackFrame
 				} );
 				var contexts = [];
 				var contextDescriptor = null;
-				for ( var i = 0; i < response.parsed.length; i++ )
+				for ( var i = 0; i < ( response.parsed || [] ).length; i++ )
 				{
 					contextDescriptor = response.parsed[ i ];
 					var contextItems = await BasicApi.Debugger.command( 'context_get', {
