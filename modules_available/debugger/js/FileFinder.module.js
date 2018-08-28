@@ -1,4 +1,6 @@
-import File from './File.module.js'
+import File        from './File.module.js'
+import CodeWindow  from './CodePanel.module.js'
+import RecentFiles from './RecentFiles.module.js'
 
 namespace( 'CodeInspector' ).FileFinder = (function( $ )
 {
@@ -6,13 +8,67 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 	var tab_pressed = false;
 	var CodePanel = CodeInspector.CodePanel;
 
+	$( document ).on( 'click', '#file_finder', function()
+	{
+		var recent_files_popover = $( '#file_finder' ).data( 'toggles_popover' );
+		if ( !recent_files_popover )
+		{
+			BasicApi.RemoteFiles.listRecent( function( success, data )
+			{
+				if ( success )
+				{
+					var list = [];
+					for ( var i in data )
+					{
+						list.push( {
+							attr : {
+								'data-open-file' : data[ i ].fullpath,
+							},
+							content : data[ i ].name,
+						} );
+					}
+					recent_files_popover.setList( 'recently_edited', { id : 'recently_edited', title : 'Recently Edited', options: list } );
+				}
+				else
+				{
+					recent_files_popover.setContent( '<i class="fa fa-warning"></i> An error occured.' );
+				}
+			} );
+			var lists = [
+				{
+					title : 'Recently Edited',
+					id : 'recently_edited',
+					options : false,
+				},
+			];
+			var recent_files = listRecentlyOpenFiles();
+			if ( recent_files.length )
+			{
+				lists.unshift( {
+					title : 'Recently Viewed',
+					options : recent_files,
+				} );
+			}
+			recent_files_popover = new Theme.PopoverList( {
+				lists   : lists,
+				classes : [],
+				el      : $( '#file_finder' ),
+				side    : 'left',
+			} );
+		}
+		else
+		{
+			recent_files_popover.remove();
+		}
+	} );
+
 	function onGlobberKeydown( e )
 	{
 		if ( e.which == 9 ) // tab
 		{
 			tab_pressed = true;
 			e.preventDefault();
-			current_val = $( e.target ).val();
+			var current_val = $( e.target ).val();
 			if ( dir_aliases[ current_val ] )
 			{
 				$( e.target ).val( dir_aliases[ current_val ] );
@@ -168,7 +224,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 		{
 			BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 2 } );
 			var e = await BasicApi.Debugger.command( 'eval', `eval(<<<\'VORTEXEVAL\'\n$__ = [];
-				foreach ( glob( '${current_val}*' ) as $item )
+				foreach ( glob( '${prefix}*' ) as $item )
 				{
 						$type = is_dir( $item ) ? 'dir' : 'file';
 						$__[ $item ] = [ 'type' => $type, 'name' => $item ];
@@ -192,7 +248,7 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 	{
 		if ( ! $( '#file_finder' ).val().trim() )
 		{
-			var def = (CodePanel.getCurrentFile() || '').replace( /^file:\/\//, '' ).replace( /\/+[^\/]*$/, '' );
+			var def = (CodeWindow.getCurrentFileShowing() || '').replace( /^file:\/\//, '' ).replace( /\/+[^\/]*$/, '' );
 			def = def ? def + '/' : '';
 			$( '#file_finder' ).val( def )
 		}
@@ -207,7 +263,23 @@ namespace( 'CodeInspector' ).FileFinder = (function( $ )
 			input.scrollLeft = input.scrollWidth;
 		}, 30 );
 		return false;
+	}
 
+	function listRecentlyOpenFiles()
+	{
+		var list = [];
+
+		RecentFiles.list().forEach( ( filename ) =>
+		{
+			list.push( {
+				content : File.basename( filename ),
+				attr : {
+					'data-open-file' : filename,
+				},
+			} );
+		} );
+
+		return list;
 	}
 
 	function onSessionStatusChanged( e )
