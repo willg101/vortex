@@ -1,4 +1,5 @@
 var $ = jQuery;
+var expandedNodes = {};
 
 /**
  * @brief
@@ -17,16 +18,23 @@ subscribe( 'program-state-ui-refresh-needed', async ( e ) =>
 	}
 
 	var context = e.programState.stack.frames[ e.stackPos ].context;
-	var expanded = [];
+	Object.keys( expandedNodes ).forEach( addr =>
+	{
+		var node = $( `[data-address=${addr}]`, '#context' );
+		if ( node.length && !node.is( '[aria-expanded=true]' ) )
+		{
+			delete expandedNodes[ addr ];
+		}
+	} );
 	$( '#context li[aria-expanded=true]' ).each( function( i, el )
 	{
-		expanded.push( $( el ).attr( 'data-address' ) );
+		expandedNodes[ $( el ).attr( 'data-address' ) ] = true;
 	} );
 	$( '#context' ).vtree( context ).removeClass( 'blur-hidden' );
 	var tree = $.jstree.reference( '#context' );
-	expanded.forEach( function( address )
+	Object.keys( expandedNodes ).forEach( addr =>
 	{
-		tree.open_node( '[data-address=' + address + ']', function(){}, false );
+		tree.open_node( `[data-address=${addr}]`, function(){}, false );
 	} );
 	$( '#mem_usage' ).text( e.programState.memoryUsage.readable );
 } );

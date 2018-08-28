@@ -191,6 +191,7 @@ class ContextRoot extends ContextNode
 	get value()    { return this.name; }
 	get fullname() { return this.name; }
 	get type()     { return this.name; }
+	get address()  { return this.name; }
 
 	get isReadOnly() { return true; }
 }
