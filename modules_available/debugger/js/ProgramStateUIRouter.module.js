@@ -22,10 +22,14 @@ subscribe( 'program-state-changed', ( e ) =>
 
 subscribe( 'session-status-changed', function( e )
 {
-	var selectorShow = e.status == 'active' ? 'show' : 'hide';
-	var selectorHide = e.status != 'active' ? 'show' : 'hide';
-	$( `[data-active-session-visibility=${selectorHide}` ).addClass( 'hidden' );
-	$( `[data-active-session-visibility=${selectorShow}` ).removeClass( 'hidden' );
+	if ( e.status == 'active' )
+	{
+		$( 'body' ).addClass( 'active-session' );
+	}
+	else
+	{
+		$( 'body' ).removeClass( 'active-session' );
+	}
 } );
 
 /**

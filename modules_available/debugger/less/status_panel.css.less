@@ -165,3 +165,22 @@ table.watch
 	height: 100%;
 	background: #FFF;
 }
+
+body
+{
+	&.active-session
+	{
+		[data-active-session-visibility="hide"]
+		{
+			display: none;
+		}
+	}
+
+	&:not(.active-session)
+	{
+		[data-active-session-visibility="show"]
+		{
+			display: none;
+		}
+	}
+}
