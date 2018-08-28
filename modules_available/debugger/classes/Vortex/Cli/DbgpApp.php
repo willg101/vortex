@@ -103,9 +103,9 @@ class DbgpApp implements MessageComponentInterface
 	{
 		if ( !empty( $this->queue[ $sid ] ) )
 		{
-			$this->queue[ "c$sid" ][ 'connection' ]->send( "detach -i 0\0" );
-			$this->queue[ "c$sid" ][ 'connection' ]->close();
-			unset( $this->queue[ "c$sid" ] );
+			$this->queue[ $sid ][ 'connection' ]->send( "detach -i 0\0" );
+			$this->queue[ $sid ][ 'connection' ]->close();
+			unset( $this->queue[ $sid ] );
 		}
 	}
 
