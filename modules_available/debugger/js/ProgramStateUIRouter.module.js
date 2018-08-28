@@ -93,3 +93,29 @@ function setFile( filename )
 	currentFile     = filename;
 	triggerUIRefresh();
 }
+
+subscribe( 'before-switch-session', function( e )
+{
+	var resolve = e.register();
+	var delay = 0;
+	$( '[data-role="window"]' ).each( function()
+	{
+		setTimeout( function()
+		{
+			$( this ).addClass( 'not-loaded' );
+		}.bind( this ), ++delay * 50 );
+	} );
+	setTimeout( resolve, delay * 50 );
+} );
+
+subscribe( 'session-switched', function()
+{
+	var delay = 0;
+	$( '[data-role="window"]' ).each( function()
+	{
+		setTimeout( function()
+		{
+			$( this ).removeClass( 'not-loaded' );
+		}.bind( this ), ++delay * 50 );
+	} );
+} );

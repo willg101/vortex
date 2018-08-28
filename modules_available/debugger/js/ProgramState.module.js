@@ -202,7 +202,7 @@ class ContextRoot extends ContextNode
 class ProgramState {
 	constructor()
 	{
-		Promise.all( [
+		this.ctorFinished = Promise.all( [
 			this.getStack(),
 			this.getMemoryUsage(),
 		] ).then( () =>
@@ -230,6 +230,20 @@ class ProgramState {
 		};
 	}
 }
+
+subscribe( 'server-info', function( e )
+{
+	// Handle a debug session change
+	if ( e.jq_message.is( '[status=session_change]' ) )
+	{
+		whenReadyTo( 'switch-session' ).then( async () =>
+		{
+			var state = new ProgramState;
+			await state.ctorFinished;
+			publish( 'session-switched' );
+		} );
+	}
+} );
 
 subscribe( 'response-received', e => {
 	if ( e.parsed.is_continuation && !e.parsed.is_stopping )

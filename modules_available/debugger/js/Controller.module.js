@@ -110,27 +110,3 @@ subscribe( 'alter-settings-quick-actions', function( e )
 	} );
 } );
 
-subscribe( 'server-info', function( e )
-{
-	// Handle a debug session change
-	if ( e.jq_message.is( '[status=session_change]' ) )
-	{
-		var delay = 1;
-		$( '[data-role="window"]' ).each( function()
-			{
-				setTimeout( function()
-				{
-					$( this ).addClass( 'not-loaded' );
-				}.bind( this ), delay++ * 50 );
-			} );
-		BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
-		BasicApi.Debugger.command( 'stack_get' );
-		$( '[data-role="window"]' ).each( function()
-			{
-				setTimeout( function()
-				{
-					$( this ).removeClass( 'not-loaded' );
-				}.bind( this ), delay++ * 50 + 500 );
-			} );
-	}
-} );
