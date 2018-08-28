@@ -8,19 +8,16 @@ var after_stepped_into = false;
  * @brief
  *	Document.ready handler
  */
-function init()
+$( () =>
 {
 	if ( !Dpoh.settings.js_test_mode )
 	{
 		BasicApi.SocketServer.openConnection();
 		publish( 'vortex-init' );
 	}
-}
+} );
 
-/**
- * @param Event e
- */
-function onConnectionStatusChanged( e )
+subscribe( 'connection-status-changed', function( e )
 {
 	if ( e.status == 'error' || e.status == 'closed' )
 	{
@@ -51,28 +48,22 @@ function onConnectionStatusChanged( e )
 		Theme.PageTitle.update( 'status', 'waiting' );
 		was_connected = true;
 	}
-}
+} );
 
-/**
- * @param Event e
- */
-function onSessionStatusChanged( e )
+subscribe( 'session-status-changed', function( e )
 {
 	BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
 
 	if ( e.status == 'active' )
 	{
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_data',  value : 2048 } );
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_children',  value : 128 } );
+		BasicApi.Debugger.command( 'feature_set', { name : 'max_data', value : 2048 } );
+		BasicApi.Debugger.command( 'feature_set', { name : 'max_children', value : 128 } );
 		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 		BasicApi.Debugger.command( 'status' );
 	}
-}
+} );
 
-/**
- * @param Event e
- */
-function onResponseReceived( e )
+subscribe( 'response-received', function( e )
 {
 	if ( e.is_stopping )
 	{
@@ -80,12 +71,12 @@ function onResponseReceived( e )
 		// session, so if the DE indicates it's stopping, let's encourage it to end the session
 		BasicApi.Debugger.command( 'run' );
 	}
-}
+} );
 
 /**
  * When a debug session begins, we issue a continuation command to start executing the code.
  */
-async function onSessionInit()
+subscribe( 'session-init', async function()
 {
 	stepped_into = false;
 	await BasicApi.Debugger.command( 'step_into' );
@@ -95,21 +86,21 @@ async function onSessionInit()
 		after_stepped_into();
 		after_stepped_into = false;
 	}
-}
+} );
 
 /**
  * When a session begins, we don't want to attempt to display the context before stepping into the
  * code, so let's delay until we've stepped into the code.
  */
-function beforeInspectContext( e )
+subscribe( 'before-inspect-context', function beforeInspectContext( e )
 {
 	if ( !stepped_into )
 	{
 		after_stepped_into = e.register();
 	}
-}
+} );
 
-function alterQuickActions( e )
+subscribe( 'alter-settings-quick-actions', function( e )
 {
 	e.items.unshift( {
 		content : 'Restart socket bridge',
@@ -117,12 +108,9 @@ function alterQuickActions( e )
 			'data-command' : 'X-ctrl:restart',
 		},
 	} );
-}
+} );
 
-/**
- * @param Event e
- */
-function onServerInfo( e )
+subscribe( 'server-info', function( e )
 {
 	// Handle a debug session change
 	if ( e.jq_message.is( '[status=session_change]' ) )
@@ -145,13 +133,4 @@ function onServerInfo( e )
 				}.bind( this ), delay++ * 50 + 500 );
 			} );
 	}
-}
-
-subscribe( 'connection-status-changed',    onConnectionStatusChanged );
-subscribe( 'session-status-changed',       onSessionStatusChanged );
-subscribe( 'before-inspect-context',       beforeInspectContext );
-subscribe( 'session-init',                 onSessionInit );
-subscribe( 'response-received',            onResponseReceived );
-subscribe( 'alter-settings-quick-actions', alterQuickActions );
-subscribe( 'server-info',                  onServerInfo );
-$( init );
+} );
