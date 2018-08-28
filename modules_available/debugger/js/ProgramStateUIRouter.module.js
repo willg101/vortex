@@ -85,6 +85,7 @@ function setFile( filename )
 		throw new Error( `Illegal filename: '${filename}'` );
 	}
 	currentStackPos = -1;
-	currentLine      = -1;
+	currentLine     = -1;
+	currentFile     = filename;
 	triggerUIRefresh();
 }
