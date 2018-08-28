@@ -215,7 +215,10 @@ class ProgramState {
 	{
 		var response = await BasicApi.Debugger.command( 'stack_get' );
 		this.stack   = new Stack( response.parsed );
-		await this.stack.frames[ 0 ].fetchContext();
+		if ( this.stack.frames.length )
+		{
+			await this.stack.frames[ 0 ].fetchContext();
+		}
 	}
 
 	async getMemoryUsage()
