@@ -52,8 +52,8 @@ function triggerUIRefresh()
 function applyPositionFromStackFrame( n )
 {
 	currentStackPos = n;
-	currentFile      = mostRecentState.stack.frames[ n ].schemelessFilename;
-	currentLine      = mostRecentState.stack.frames[ n ].lineno;
+	currentFile     = mostRecentState.stack.frames[ n ].schemelessFilename;
+	currentLine     = mostRecentState.stack.frames[ n ].lineno;
 }
 
 /**

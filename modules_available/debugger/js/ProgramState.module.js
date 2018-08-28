@@ -9,7 +9,7 @@ import ProgrammingLanguageTranslator from './ProgrammingLanguage.module.js';
 class StackFrame
 {
 	/**
-	 * @param Array frameData 
+	 * @param Array frameData
 	 */
 	constructor( frameData )
 	{
@@ -226,7 +226,7 @@ class ProgramState {
 		var response = await ProgrammingLanguageTranslator.tx( 'getBytesOfMemoryUsed' );
 		this.memoryUsage = {
 			bytes    : response,
-			readable : File.bytesToHumanReadable( response ), 
+			readable : File.bytesToHumanReadable( response ),
 		};
 	}
 }
@@ -237,7 +237,6 @@ subscribe( 'response-received', e => {
 		new ProgramState;
 	}
 } );
-
 
 subscribe( 'provide-tests', function()
 {
