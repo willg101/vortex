@@ -140,118 +140,6 @@ import File from './File.module.js'
 	});
 	}
 
-	function onNavButtonClicked( e )
-	{
-		var selector = $( e.currentTarget ).attr( 'data-open-nav-panel' );
-		if ( selector == '#console' )
-		{
-			$( '#console .input' ).focus();
-		}
-		$( selector ).addClass( 'showing' );
-		
-	}
-	
-	function sortBreakpointList( breakpoints )
-	{
-		var sorted = {
-			Files      : {},
-			Functions  : {},
-		};
-		
-		var process_line_bp = function( bp )
-		{
-			if ( !sorted.Files[ bp.filename ] )
-			{
-				sorted.Files[ bp.filename ] = [];
-			}
-			sorted.Files[ bp.filename ].push( bp )
-		};
-		breakpoints.line.forEach( process_line_bp );
-		breakpoints.conditional.forEach( process_line_bp );
-		
-		var sort_file_bp = function( bp1, bp2 )
-		{
-			return ( bp1.lineno || Math.NEGATIVE_INFINITY ) - ( bp2.lineno || Math.NEGATIVE_INFINITY );
-		};
-		for ( var i in sorted.Files )
-		{
-			sorted.Files[ i ] = sorted.Files[ i ].sort( sort_file_bp );
-		}
-		
-		var process_fn_bp = function( bp )
-		{
-			if ( !sorted.Functions[ bp[ 'function' ] ] )
-			{
-				sorted.Functions[ bp[ 'function' ] ] = [];
-			}
-			sorted.Functions[ bp[ 'function' ] ].push( bp );
-		};
-		breakpoints.call.forEach( process_fn_bp );
-		breakpoints[ 'return' ].forEach( process_fn_bp );
-		
-		var sort_fn_bp = function( bp1, bp2 )
-		{
-			return ( bp1.type == 'call' ? 1 : 0 ) - ( bp2.type == 'call' ? 1 : 0 );
-		};
-		for ( var i in sorted.Functions )
-		{
-			sorted.Functions[ i ] = sorted.Functions[ i ].sort( sort_fn_bp );
-		}
-		
-		return sorted;
-	}
-
-	function onOpenFileClicked( e )
-	{
-		var file = $( e.currentTarget ).attr( 'data-file' );
-		publish( 'file-nav-request', {
-			filename : file,
-			source   : 'file-nav',
-		} );
-		$( '#open_files_panel .open-file' ).removeClass( 'active' );
-		$( e.currentTarget ).addClass( 'active' );
-		$( '.nav-panel.showing' ).removeClass( 'showing' );
-	}
-
-	function onNodeDoubleClicked( e, data )
-	{
-		var li = $( e.target ).closest( 'li' );
-		var is_file = li.attr( 'data-is-file' );
-		if ( !is_file || is_file === "false" )
-		{
-			return;
-		}
-
-		$( '.nav-panel.showing' ).removeClass( 'showing' );
-		var filename = li.attr( 'data-full-path' );
-		publish( 'file-nav-request', {
-			filename : filename,
-			source   : 'tree',
-		} );
-	}
-
-	function onDocumentKeydown( e )
-	{
-		var target = $( e.target );
-		if ( e.which == 'O'.charCodeAt(0) && e.ctrlKey )
-		{
-			e.preventDefault();
-			$( '.showing' ).removeClass( 'showing' );
-			$( '#open_files_panel' ).addClass( 'showing' );
-		}
-		else if ( e.which == 'E'.charCodeAt( 0 ) && e.ctrlKey )
-		{
-			e.preventDefault();
-			$( '.showing' ).removeClass( 'showing' );
-			$( '#console' ).addClass( 'showing' );
-			$( '#console .input' ).focus();
-		}
-		else if ( e.which == 27 )
-		{
-			$( '.showing' ).removeClass( 'showing' );
-		}
-	}
-
 	function resizeCell()
 	{
 		var height = $( '.toolbar .css-cell:not(.match-height)' ).height();
@@ -261,29 +149,6 @@ import File from './File.module.js'
 		// work well with jsTree, and tends to crash. Since we wouldn't gain much benefit from this
 		// feature even if it did work, let's just disable it.
 		$( '#console' ).resizer( 'unbind' );
-	}
-
-	function onFileChanged( e )
-	{
-		$( '.files-heading' ).slideDown();
-		var filename_only = File.basename( e.file );
-		if ( !$( '[data-open-file="' + e.file + '"]', '.currently-open-files' ).length )
-		{
-			var new_button = $( '<span>' ).attr( 'data-open-file', e.file )
-				.text( filename_only );
-			$( '.currently-open-files' ).append( new_button );
-		}
-
-		$( '.currently-open' ).removeClass( 'currently-open' );
-		$( '[data-open-file="' + e.file + '"]', '.currently-open-files' ).addClass( 'currently-open' );
-	}
-
-	function onOpenFileClicked( e )
-	{
-		publish( 'file-nav-request', {
-			filename : $( e.target ).attr( 'data-open-file' ),
-			source   : 'currently-open-files',
-		} );
 	}
 
 	function onSessionStatusChanged()
@@ -296,16 +161,10 @@ import File from './File.module.js'
 		$( '#console' ).terminal().enable();
 	}
 
-	$( document ).on( 'dblclick.jstree',   '#open_files_panel',  onNodeDoubleClicked );
-	$( document ).on( 'click',             '[data-open-file]',   onOpenFileClicked );
-	$( document ).on( 'click',             '#console_container', onConsoleClicked );
-	$( document ).on( 'keydown',                                 onDocumentKeydown );
-	$( document ).on( 'click', '[data-open-nav-panel]',          onNavButtonClicked );
-	$( document ).on( 'click', '[data-open-file]',               onOpenFileClicked );
-	$( window   ).on( 'resize load',                             resizeCell );
+	$( document ).on( 'click',       '#console_container', onConsoleClicked );
+	$( window   ).on( 'resize load',                       resizeCell );
 
 	subscribe( 'session-status-changed', onSessionStatusChanged );
-	subscribe( 'file-changed',           onFileChanged );
 	subscribe( 'vortex-init',            init );
 
 }( jQuery ));
