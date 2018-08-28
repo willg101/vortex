@@ -1,4 +1,4 @@
-import CodePanel from './CodePanel.module.js'
+import CodePanel from './CodeWindow.module.js'
 
 var id_regex = /^#frag_data:/;
 

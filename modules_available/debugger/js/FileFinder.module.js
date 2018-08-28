@@ -1,5 +1,5 @@
 import File        from './File.module.js'
-import CodeWindow  from './CodePanel.module.js'
+import CodeWindow  from './CodeWindow.module.js'
 import RecentFiles from './RecentFiles.module.js'
 
 namespace( 'CodeInspector' ).FileFinder = (function( $ )
