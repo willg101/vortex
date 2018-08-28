@@ -21,7 +21,7 @@ class ProgrammingLanguageTranslator
 		{
 			if ( typeof this[ key ] != 'function' )
 			{
-				throw new ProgrammingLanguageError( `${this.constructor}: Missing required translator "${key}"` );
+				throw new this.constructor.Error( `${this.constructor.name}: Missing required translator "${key}"` );
 			}
 		} );
 	}
