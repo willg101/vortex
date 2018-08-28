@@ -1,6 +1,11 @@
 var $ = jQuery;
 
-var requiredTranslations = [ 'getBytesOfMemoryUsed' ];
+var requiredTranslations = [
+	'evalCommand',
+	'getBytesOfMemoryUsed',
+	'getConsoleInfo',
+	'getConsoleFormatter',
+];
 
 class ProgrammingLanguageTranslator
 {

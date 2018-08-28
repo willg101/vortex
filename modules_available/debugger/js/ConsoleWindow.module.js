@@ -1,170 +1,129 @@
 import File from './File.module.js'
+import ProgrammingLanguage from './ProgrammingLanguage.module.js'
 
-(function( $ )
+var $ = jQuery;
+
+// $.type( async function(){} ) returns 'object', not 'function', and this messes up calls like
+// $( '#console' ).terminal( async function( command, term ){ ... } ). Let's fix that.
+var AsyncFunction = (async function(){}).constructor;
+var old_method = $.type;
+$.type = function( item )
 {
-	var dummy_session_timeout = null;
-
-	const MAGIC_EVAL_VAR_NAME = '$__';
-	const HEREDOC_PREFIX      = 'eval(<<<\'VORTEXEVAL\'\n';
-	const HEREDOC_SUFFIX      = '\nreturn ' + MAGIC_EVAL_VAR_NAME + ';\nVORTEXEVAL\n);';
-	var eval_magic_var_regex  = new RegExp( '\\' + MAGIC_EVAL_VAR_NAME + '($|[^_\\w])' )
-
-	function prepareCommand( command_str )
+	if ( typeof item == 'function' && item instanceof AsyncFunction )
 	{
-		command_str = typeof command_str == 'string' ? command_str : '';
-		return command_str.match( eval_magic_var_regex )
-			? HEREDOC_PREFIX + command_str + HEREDOC_SUFFIX
-			: command_str;
+		return 'function';
+	}
+	return old_method.call( $, item );
+};
+
+/**
+ * Control the console output for a single command
+ */
+class ConsoleCommandDisplay
+{
+	/**
+	 * @param jQueryTerminal term
+	 */
+	constructor( term )
+	{
+		this.id = 'ccd_' + this.constructor.id_ctr++;
+		var inner_fn = () => `<div id="${this.id}"></div>`;
+		term.echo( () => inner_fn(), { raw : true } );
+
+		this.element = $( `#${this.id}` );
+		this.spinner = $( '<i class="fa fa-spin fa-circle-o-notch"></i>' );
+		this.element.append( this.spinner );
 	}
 
-	function init()
+	/**
+	 * @param string text
+	 * @param string level ('error' is the only non-default value accepted right now)
+	 * @retval jQuery
+	 */
+	makeText( text, level )
 	{
-		initConsole();
+		return $( '<div>' ).text( text ).css( 'color', level == 'error' ? '#f46242' : '' );
 	}
 
-	function initConsole()
+	/**
+	 * @brief
+	 *	Append a line of output
+	 *
+	 * @param string text
+	 * @param string level @see makeText()
+	 */
+	append( text, level )
 	{
-		var command_n = 0;
-		$( '#console').terminal(function(command, term)
-			{
-				var my_command_n = command_n++;
-				var id = 'term_resp_' + my_command_n;
-				var result = '<div id="' + id + '"><i class="fa fa-spin fa-circle-o-notch"></i></div>';
-				var inner_fn = function(){ return result };
-				var fn = function(){ return inner_fn() };
-				term.pause();
+		this.element.append( this.makeText( text, level ) );
+	}
 
-				var process_command = async function()
-				{
-					term.echo( fn, { raw : true } );
+	/**
+	 * @brief
+	 *	Prepend a line of output
+	 *
+	 * @param string text
+	 * @param string level @see makeText()
+	 */
+	prepend( text, level )
+	{
+		this.element.prepend( this.makeText( text, level ) );
+	}
 
-					// After scouring the Xdebug protocol docs for a way to get a variable name from an
-					// address, which would be required to lazy-load the response's object/array's nested
-					// properties, I came up empty-handed. Lazy-loading doesn't seem to be a viable option
-					// here, so let's deep-load the response instead
-					BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
-					var data = await BasicApi.Debugger.command( 'eval', prepareCommand( command ));
-					if ( data.parsed.value && data.parsed.value.length )
-					{
-						data.parsed.value.forEach( function( item )
-						{
-							item.name     = item.name || '';
-							item.fullname = item.fullname || '';
-						} );
-						$( '#' + id ).html( '' ).vtree( data.parsed.value );
-						inner_fn = function()
-						{
-							setTimeout( function(){ $( '#' + id ).html( '' ).vtree( data.parsed.value ); }, 30 );
-							return result;
-						};
-					}
-					else if ( data.parsed.message )
-					{
-						var message = $( '<div>' ).text( data.parsed.message ).html();
-						message = '<span class="debugger-message">' + message + '</span>';
-						$( '#' + id ).html( message );
-					}
-					else
-					{
-						$( '#' + id ).html( '<span class="no-debugger-message">Empty response '
-							+ 'received</span>' );
-					}
-					BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
-					term.resume();
-				};
+	/**
+	 * @param jQuery|string replacement
+	 */
+	replaceSpinner( replacement )
+	{
+		this.spinner.after( replacement ).remove();
+	}
 
-				if ( !BasicApi.Debugger.sessionIsActive() )
-				{
-					if ( !BasicApi.SocketServer.isConnected() )
-					{
-						term.echo( "Error: no connection to socket server" );
-						return;
-					}
+	removeSpinner()
+	{
+		this.spinner.remove();
+	}
+}
 
-					term.echo( 'No debug session is active; creating dummy session...' );
-					var options = {
-						url    : 'dummy.php',
-						params : {
-							XDEBUG_SESSION_START : 1,
-						}
-					};
-					publish( 'alter-dummy-session-request', { options : options } );
-					var url = options.url + '?' + $.param( options.params );
-					$.get( url );
+ConsoleCommandDisplay.id_ctr = 0; 
 
-					var timeout;
-					function tryProcessing()
-					{
-						if ( !BasicApi.Debugger.sessionIsActive() )
-						{
-							term.echo( "Could not initiate a new session (timed out)" );
-							term.resume();
-						}
-						else
-						{
-							process_command();
-						}
-					}
-					timeout = setTimeout( tryProcessing, 250 );
-				}
-				else
-				{
-					process_command();
-				}
-		},
+// Initialize the console
+subscribe( 'vortex-init', function()
+{
+	$( '#console' ).terminal( async function( command, term )
+	{ 
+		term.pause();
+
+		var display = new ConsoleCommandDisplay( term );
+		var result = await ProgrammingLanguage.tx( 'evalCommand', command, display );
+
+		if ( result.message )
 		{
-			greetings: function( cb ){ cb( 'Tip: if you have trouble running a multi-statement '
-				+ 'snippet, try including the magic variable [[b;#21599f;]' + MAGIC_EVAL_VAR_NAME
-				+ ']. This will cause your code to be processed slightly differently and will '
-				+ '[[b;;]output the final value of ][[b;#21599f;]' + MAGIC_EVAL_VAR_NAME + '].' ); },
-			prompt : 'php> ',
-			name : 'console',
-			enabled : false,
-		} );
-		var lowercase = [
-		'__halt_compiler', 'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'class', 'clone', 'const', 'continue', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final', 'for', 'foreach', 'function', 'global', 'goto', 'if', 'implements', 'include', 'include_once', 'instanceof', 'insteadof', 'interface', 'isset', 'list', 'namespace', 'new', 'or', 'print', 'private', 'protected', 'public', 'require', 'require_once', 'return', 'static', 'switch', 'throw', 'trait', 'try', 'unset', 'use', 'var', 'while', 'xor'
-	];
-	var keywords = lowercase.concat(lowercase.map(function(keyword) {
-    	return keyword.toUpperCase();
-	}));
-	$.terminal.defaults.formatters.push(function(string) {
-    	return string.split(/((?:\s|&nbsp;)+)/).map(function(string) {
-        	if (keywords.indexOf(string) != -1) {
-            	return '[[;#268bd2;]' + string + ']';
-        	} else if ( string[ 0 ] == '$' && string.length > 1) {
-            	return '[[;#59c203;]' + string + ']';
-        	} else {
-            	return string;
-        	}
-    	}).join('');
-	});
-	}
+			display.removeSpinner();
+			display.append( result.message, result.status );
+		}
+		else
+		{
 
-	function resizeCell()
-	{
-		var height = $( '.toolbar .css-cell:not(.match-height)' ).height();
-		$( '.toolbar .css-cell.match-height' ).height( height + 1 );
+			display.replaceSpinner( $( '<div>' ).vtree( result.return_value ) );
+		}
 
-		// jQuery Terminal's handling of resizing, in which all messages are re-rendered, does not
-		// work well with jsTree, and tends to crash. Since we wouldn't gain much benefit from this
-		// feature even if it did work, let's just disable it.
-		$( '#console' ).resizer( 'unbind' );
-	}
+		term.resume();
+	},
 
-	function onSessionStatusChanged()
-	{
-		clearInterval( dummy_session_timeout );
-	}
+	$.extend( ProgrammingLanguage.tx( 'getConsoleInfo' ), {
+		name : 'console',
+		enabled : false,
+	} ) );
 
-	function onConsoleClicked()
-	{
-		$( '#console' ).terminal().enable();
-	}
+	$.terminal.defaults.formatters.push( ProgrammingLanguage.tx( 'getConsoleFormatter' ) );
 
-	$( document ).on( 'click',       '#console_container', onConsoleClicked );
-	$( window   ).on( 'resize load',                       resizeCell );
+	// jQuery Terminal's handling of resizing, in which all messages are re-rendered, does not
+	// work well with jsTree, and tends to crash. Since we wouldn't gain much benefit from this
+	// feature even if it did work, let's just disable it.
+	$( '#console' ).resizer( 'unbind' );
+} );
 
-	subscribe( 'session-status-changed', onSessionStatusChanged );
-	subscribe( 'vortex-init',            init );
-
-}( jQuery ));
+// Focus the console when the console window is clicked
+$( document ).on( 'click', '#console_container', function()
+{
+	$( '#console' ).terminal().enable();
+} );
