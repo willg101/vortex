@@ -4,6 +4,24 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 {
 	var known_sessions = [];
 
+	subscribe( 'connection-status-changed', function onConnectionStatusChanged( e )
+	{
+		if ( e.status == 'connected' )
+		{
+			BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
+		}
+		else
+		{
+			var indicator = $( '#connection_queue_indicator' );
+			indicator.find( '.n' ).html( '<i class="fa fa-times">' ).addClass( 'inactive' );
+		}
+	} );
+
+	subscribe( 'session-status-changed', function()
+	{
+		BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
+	} );
+
 	function onServerInfoReceived( e )
 	{
 		if ( e.jq_message.is( '[type=peek_queue]' ) )

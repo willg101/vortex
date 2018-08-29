@@ -52,8 +52,6 @@ subscribe( 'connection-status-changed', function( e )
 
 subscribe( 'session-status-changed', function( e )
 {
-	BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
-
 	if ( e.status == 'active' )
 	{
 		BasicApi.Debugger.command( 'feature_set', { name : 'max_data', value : 2048 } );
