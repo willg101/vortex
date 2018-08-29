@@ -1,5 +1,5 @@
-import ProgrammingLanguage from './ProgrammingLanguage.module.js'
-import Debugger            from './Debugger.module.js'
+import LanguageAbstractor from './LanguageAbstractor.module.js'
+import Debugger           from './Debugger.module.js'
 
 const MAGIC_EVAL_VAR_NAME      = '$__';
 const HEREDOC_PREFIX           = 'eval(<<<\'VORTEXEVAL\'\n';
@@ -7,7 +7,7 @@ const HEREDOC_SUFFIX           = '\nreturn ' + MAGIC_EVAL_VAR_NAME + ';\nVORTEXE
 const EVAL_MAGIC_VAR_REGEX     = new RegExp( '\\' + MAGIC_EVAL_VAR_NAME + '($|[^_\\w])' )
 const DUMMY_SESSION_TIMEOUT_MS = 500;
 
-class PhpLanguage extends ProgrammingLanguage
+class PhpLanguage extends LanguageAbstractor
 {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// Public/required functions
@@ -165,7 +165,7 @@ class PhpLanguage extends ProgrammingLanguage
 
 	constructor( ...args )
 	{
-		super( ...args );
+		super( 'php', ...args );
 		this.dummySessionTimeout = null;
 	}
 
@@ -214,4 +214,4 @@ class PhpLanguage extends ProgrammingLanguage
 	}
 }
 
-ProgrammingLanguage.setDefault( new PhpLanguage( 'php' ) );
+LanguageAbstractor.setDefault( new PhpLanguage );

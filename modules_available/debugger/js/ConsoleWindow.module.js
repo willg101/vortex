@@ -1,5 +1,5 @@
-import File from './File.module.js'
-import ProgrammingLanguage from './ProgrammingLanguage.module.js'
+import File               from './File.module.js'
+import LanguageAbstractor from './LanguageAbstractor.module.js'
 
 var $ = jQuery;
 
@@ -93,7 +93,7 @@ subscribe( 'vortex-init', function()
 		term.pause();
 
 		var display = new ConsoleCommandDisplay( term );
-		var result = await ProgrammingLanguage.tx( 'evalCommand', command, display );
+		var result = await LanguageAbstractor.evalCommand( command, display );
 
 		if ( result.message )
 		{
@@ -109,12 +109,12 @@ subscribe( 'vortex-init', function()
 		term.resume();
 	},
 
-	$.extend( ProgrammingLanguage.tx( 'getConsoleInfo' ), {
+	$.extend( LanguageAbstractor.getConsoleInfo(), {
 		name : 'console',
 		enabled : false,
 	} ) );
 
-	$.terminal.defaults.formatters.push( ProgrammingLanguage.tx( 'getConsoleFormatter' ) );
+	$.terminal.defaults.formatters.push( LanguageAbstractor.getConsoleFormatter() );
 
 	// jQuery Terminal's handling of resizing, in which all messages are re-rendered, does not
 	// work well with jsTree, and tends to crash. Since we wouldn't gain much benefit from this

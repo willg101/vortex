@@ -1,7 +1,8 @@
+import Debugger           from './Debugger.module.js'
+import File               from './File.module.js';
+import LanguageAbstractor from './LanguageAbstractor.module.js';
+
 var $ = jQuery;
-import Debugger                      from './Debugger.module.js'
-import File                          from './File.module.js';
-import ProgrammingLanguageTranslator from './ProgrammingLanguage.module.js';
 
 /**
  * @brief
@@ -224,7 +225,7 @@ class ProgramState {
 
 	async getMemoryUsage()
 	{
-		var response = await ProgrammingLanguageTranslator.tx( 'getBytesOfMemoryUsed' );
+		var response = await LanguageAbstractor.getBytesOfMemoryUsed();
 		this.memoryUsage = {
 			bytes    : response,
 			readable : File.bytesToHumanReadable( response ),

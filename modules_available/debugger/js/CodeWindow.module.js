@@ -1,8 +1,8 @@
-import File                from './File.module.js'
-import RecentFiles         from './RecentFiles.module.js'
-import sessionBreakpoints  from './SessionBreakpoints.module.js'
-import ProgrammingLanguage from './ProgrammingLanguage.module.js'
-import Debugger            from './Debugger.module.js'
+import File               from './File.module.js'
+import RecentFiles        from './RecentFiles.module.js'
+import sessionBreakpoints from './SessionBreakpoints.module.js'
+import LanguageAbstractor from './LanguageAbstractor.module.js'
+import Debugger           from './Debugger.module.js'
 
 export default { getCurrentFileShowing }
 
@@ -28,7 +28,7 @@ subscribe( 'vortex-init', function()
 	var data = {
 		options : {
 			theme : 'solarized_light',
-			language : ProgrammingLanguage.getDefault().name
+			language : LanguageAbstractor.getDefault().name
 		},
 	};
 	publish( 'alter-editor-options', data ); // Allow other modules to change theme and language

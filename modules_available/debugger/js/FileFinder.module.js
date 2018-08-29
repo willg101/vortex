@@ -2,7 +2,7 @@ import Debugger             from './Debugger.module.js'
 import File                 from './File.module.js'
 import RecentFiles          from './RecentFiles.module.js'
 import ProgramStateUIRouter from './ProgramStateUIRouter.module.js'
-import ProgrammingLanguage  from './ProgrammingLanguage.module.js'
+import LanguageAbstractor   from './LanguageAbstractor.module.js'
 
 var $ = jQuery;
 var dir_aliases = {};
@@ -253,7 +253,7 @@ async function processGlobOnServer( prefix, cb )
 	{
 		// Handling this via the DE allows us to use the program's host file system, which may
 		// differ from the Vortex host
-		cb( await ProgrammingLanguage.tx( 'globDirectory', prefix ) );
+		cb( await LanguageAbstractor.globDirectory( prefix ) );
 	}
 }
 
