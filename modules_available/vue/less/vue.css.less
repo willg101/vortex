@@ -73,27 +73,6 @@ html
 	height: 100%;
 }
 
-.session-indicator
-{
-	.transition();
-	padding: 2px 6px;
-	background: rgba(0,0,0,0.2);
-	color: #FFF;
-	font-weight: bold;
-	border-radius: @default-border-radius;
-	cursor: pointer;
-
-	&.inactive
-	{
-		color: rgba(255,255,255,.5);
-	}
-
-	&:hover
-	{
-		background: rgba(0,0,0,0.4); 
-	}
-}
-
 .themed-input
 {
 	padding: 10px 15px;
@@ -1239,53 +1218,6 @@ html
 			display: inline-block;
 			font-weight: normal;
 			margin-left: 10px;
-		}
-	}
-}
-
-.session-table
-{
-	width: 100%;
-	border-collapse: collapse;
-
-	tr
-	{
-		.transition();
-		cursor: pointer;
-
-		&:hover
-		{
-			background: fade( #0A93C1, 30%);
-		}
-
-		td
-		{
-			width: 0;
-			overflow: hidden;
-			white-space: nowrap;
-			text-overflow: ellipsis;
-
-			&:first-child
-			{
-				padding: 10px 15px;
-				width: 100%;
-
-				.file
-				{
-					font-weight: bold;
-				}
-
-				.host
-				{
-					color: #888;
-				}
-
-				&:active
-				{
-					.transition();
-					transform: scale( .95 );
-				}
-			}
 		}
 	}
 }

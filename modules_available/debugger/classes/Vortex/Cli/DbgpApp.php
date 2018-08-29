@@ -59,6 +59,7 @@ class DbgpApp implements MessageComponentInterface
 				{
 					$this->queue[ "c$conn->resourceId" ] = [
 						'connection' => $conn,
+						'uuid'       => $this->makeUuid(),
 						'messages'   => [],
 					];
 
@@ -95,7 +96,7 @@ class DbgpApp implements MessageComponentInterface
 
 			$root = !$el ?: ( array_get( simplexml_load_string( $el ), 'fileuri' ) ?: simplexml_load_string( $el )->stack[ 0 ][ 'filename' ] );
 			$hostname = gethostbyaddr( $value[ 'connection' ]->remoteAddress ) ?: $value[ 'connection' ]->remoteAddress;
-			return '<queuedsession host="' . $hostname . '" session-id="' . $key . '" path="' . $root . '"></queuedsession>';
+			return '<queuedsession uuid="' . $value[ 'uuid' ] . '" host="' . $hostname . '" session-id="' . $key . '" path="' . $root . '"></queuedsession>';
 		}, array_keys( $this->queue ), $this->queue );
 	}
 
@@ -139,6 +140,11 @@ class DbgpApp implements MessageComponentInterface
 		];
 		fire_hook( 'dbg_connection_opened', $data );
 		$this->ws_connection = $conn;
+	}
+
+	protected function makeUuid()
+	{
+		return bin2hex( openssl_random_pseudo_bytes( 10 ) );
 	}
 
 	public function onClose( ConnectionInterface $conn )

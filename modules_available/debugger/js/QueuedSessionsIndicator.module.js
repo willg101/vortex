@@ -38,6 +38,7 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 				var file = self.attr( 'path' ) || '(Unknown file)';
 				known_sessions.push( {
 					id : session_id,
+					uuid : self.attr( 'uuid' ),
 					host : self.attr( 'host' ),
 					file : file.replace( /^file:\/\//, '' )
 				} );
@@ -80,6 +81,7 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 					host : known_sessions[ i ].host,
 					content : File.basename( known_sessions[ i ].file ),
 					id : known_sessions[ i ].id,
+					img : GeoPattern.generate( known_sessions[ i ].uuid ).toDataUrl(),
 					attr : {
 						'data-switch-to-session' : known_sessions[ i ].id,
 					},
