@@ -1,3 +1,5 @@
+import Parsers from './Parsers.module.js'
+
 /**
  * @brief
  *	Communicate with the debugger engine (DE) over a websocket (WS)
@@ -10,17 +12,10 @@ namespace( 'BasicApi' ).Debugger = (function( $ )
 	// Whether or not a session with the DE is currently active
 	var session_is_active = false;
 
-	var response_parsers = {};
-
-	function initParsers()
-	{
-		publish( 'provide-response-parsers', { parsers : response_parsers } );
-		publish( 'alter-response-parsers',   { parsers : response_parsers } );
-	}
+	var response_parsers = Parsers.list();
 
 	function init()
 	{
-		initParsers();
 		BasicApi.SocketServer.registerMessageProcessor( processMessage );
 		BasicApi.SocketServer.registerTypeDeterminer( determineMessageType );
 	}
