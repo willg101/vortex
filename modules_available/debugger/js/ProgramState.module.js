@@ -1,6 +1,7 @@
 import Debugger           from './Debugger.module.js'
 import File               from './File.module.js';
 import LanguageAbstractor from './LanguageAbstractor.module.js';
+export default { refreshState }
 
 var $ = jQuery;
 
@@ -233,6 +234,11 @@ class ProgramState {
 	}
 }
 
+function refreshState()
+{
+	new ProgramState;
+}
+
 subscribe( 'server-info', function( e )
 {
 	// Handle a debug session change
@@ -250,7 +256,7 @@ subscribe( 'server-info', function( e )
 subscribe( 'response-received', e => {
 	if ( e.parsed.is_continuation && !e.parsed.is_stopping )
 	{
-		new ProgramState;
+		refreshState();
 	}
 } );
 

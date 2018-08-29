@@ -1,6 +1,7 @@
-import File     from './File.module.js'
-import Debugger from './Debugger.module.js'
-export default { setStackPosition, setFile, getStackPosition, getFile };
+import File         from './File.module.js'
+import Debugger     from './Debugger.module.js'
+import ProgramState from './ProgramState.module.js'
+export default { setStackPosition, setFile, getStackPosition, getFile, refreshState };
 
 class IllegalAction extends Error {}
 var $ = jQuery
@@ -111,6 +112,15 @@ function setFile( filename )
 function getFile()
 {
 	return currentFile;
+}
+
+function refreshState()
+{
+	if ( !Debugger.sessionIsActive() )
+	{
+		throw new Error( 'Cannot refresh program state without an active debug session' )
+	}
+	ProgramState.refreshState();
 }
 
 subscribe( 'before-switch-session', function( e )

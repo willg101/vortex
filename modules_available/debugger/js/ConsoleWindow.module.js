@@ -1,5 +1,8 @@
-import File               from './File.module.js'
-import LanguageAbstractor from './LanguageAbstractor.module.js'
+import File                 from './File.module.js'
+import LanguageAbstractor   from './LanguageAbstractor.module.js'
+import ProgramStateUIRouter from './ProgramStateUIRouter.module.js'
+
+const DELALYED_REFRESH_INTERVAL_MS = 1000;
 
 var $ = jQuery;
 
@@ -15,6 +18,8 @@ $.type = function( item )
 	}
 	return old_method.call( $, item );
 };
+
+var state_refresh_timeout = null;
 
 /**
  * Control the console output for a single command
@@ -83,6 +88,26 @@ class ConsoleCommandDisplay
 	}
 }
 
+/**
+ * @brief
+ *	Trigger a state refresh after at least DELALYED_REFRESH_INTERVAL_MS milliseconds
+ *
+ * This helps us avoid making the console trigger a bunch of overlapping state refreshes
+ */
+function performDelayedStateRefresh()
+{
+	clearTimeout( state_refresh_timeout );
+	state_refresh_timeout = setTimeout( () => ProgramStateUIRouter.refreshState(),
+		DELALYED_REFRESH_INTERVAL_MS );
+}
+
+// If a state refresh occurs during a timeout period intiated by performDelayedStateRefresh(),
+// cancel the now-unnecessary timeout
+subscribe( 'program-state-ui-refresh-needed', ( e ) =>
+{
+	clearTimeout( state_refresh_timeout );
+} )
+
 ConsoleCommandDisplay.id_ctr = 0; 
 
 // Initialize the console
@@ -105,6 +130,8 @@ subscribe( 'vortex-init', function()
 
 			display.replaceSpinner( $( '<div>' ).vtree( result.return_value ) );
 		}
+
+		performDelayedStateRefresh();
 
 		term.resume();
 	},

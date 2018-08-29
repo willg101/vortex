@@ -1,4 +1,5 @@
-import Debugger from './Debugger.module.js'
+import Debugger             from './Debugger.module.js'
+import ProgramStateUIRouter from './ProgramStateUIRouter.module.js'
 
 var $ = jQuery;
 var expandedNodes = {};
@@ -96,5 +97,7 @@ $( document ).on( 'keypress', '.value-input', async function( e )
 			stack_depth : stackDepth,
 			context     : cid
 		}, newValue );
+
+		ProgramStateUIRouter.refreshState();
 	}
 } );
