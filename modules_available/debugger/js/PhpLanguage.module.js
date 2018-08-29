@@ -126,6 +126,30 @@ class PhpLanguage extends ProgrammingLanguage
 		}
 	}
 
+	async globDirectory( dir )
+	{
+		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 2 } );
+		var rawEntries = await this.evalCommand( `
+			$__ = [];
+			foreach ( glob( '${dir}*' ) as $item )
+			{
+					$type = is_dir( $item ) ? 'dir' : 'file';
+					$__[ $item ] = [ 'type' => $type, 'name' => $item ];
+			}
+			return $__;`
+		);
+		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
+		return (rawEntries.return_value[ 0 ].children || []).map( entry =>
+		{
+			var ret = {};
+			( entry.children || [] ).map( el =>
+			{
+				ret[ el.name ] = el.value;
+			} );
+			return ret;
+		} );
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// Utility functions
 	///////////////////////////////////////////////////////////////////////////////////////////////

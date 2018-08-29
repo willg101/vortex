@@ -5,6 +5,7 @@ var requiredTranslations = [
 	'getBytesOfMemoryUsed',
 	'getConsoleInfo',
 	'getConsoleFormatter',
+	'globDirectory',
 ];
 
 class ProgrammingLanguageTranslator
