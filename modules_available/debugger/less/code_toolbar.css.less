@@ -124,11 +124,36 @@
 	tr
 	{
 		.transition();
-		cursor: pointer;
 
-		&:hover
+		&:not(.active)
 		{
-			background: fade( #0A93C1, 30%);
+			cursor: pointer;
+			&:hover
+			{
+				background: fade( #0A93C1, 30%);
+			}
+
+			&:active
+			{
+				.transition();
+				transform: scale( .95 );
+			}
+		}
+
+		&.active
+		{
+			.session-random-art::before
+			{
+				font: normal normal normal 18px/1 FontAwesome;
+				display: block;
+				content: "\f05d";
+				position: absolute;
+				top: ~"calc( 50% - 9px )";
+				width: 100%;
+				text-align: center;
+				color: #281;
+				text-shadow: 0 0 10px #FFF, 0 0 10px #FFF;
+			}
 		}
 
 		td
@@ -146,12 +171,12 @@
 				height: 40px;
 				display: inline-block;
 				background-size: cover;
+				position: relative;
 			}
 
 			&.img-cell
 			{
-				padding: 10px 15px;
-				padding-right: 0;
+				padding: 10px 0 10px 15px;
 				width: 0;
 			}
 
@@ -174,12 +199,6 @@
 				.host
 				{
 					display: block;
-				}
-
-				&:active
-				{
-					.transition();
-					transform: scale( .95 );
 				}
 			}
 		}
