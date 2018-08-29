@@ -1,3 +1,5 @@
+import Persistor from '../../../debugger/js/Persistor.module.js'
+
 namespace( 'Vue.Layout' ).Pane = (function( $ )
 {
 	var attr = {
@@ -68,10 +70,10 @@ namespace( 'Vue.Layout' ).Pane = (function( $ )
 		}
 		else
 		{
-			this.suggested_windows = new BasicApi.Persistor( this.id + '_suggested_windows' );
+			this.suggested_windows = new Persistor( this.id + '_suggested_windows' );
 		}
 
-		this.size_persistor = new BasicApi.Persistor( this.id + '_size' );
+		this.size_persistor = new Persistor( this.id + '_size' );
 	}
 
 	Object.defineProperty( Pane.prototype, 'size', {

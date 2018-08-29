@@ -1,4 +1,5 @@
-import Debugger from './Debugger.module.js'
+import Persistor from './Persistor.module.js'
+import Debugger  from './Debugger.module.js'
 
 (function( $ )
 {
@@ -9,7 +10,7 @@ import Debugger from './Debugger.module.js'
 	const HEREDOC_SUFFIX      = '\nreturn ' + MAGIC_EVAL_VAR_NAME + ';\nVORTEXEVAL\n);';
 	var eval_magic_var_regex  = new RegExp( '\\' + MAGIC_EVAL_VAR_NAME + '($|[^_\\w])' )
 
-	var settings = new BasicApi.Persistor( 'watch_panel_settings' );
+	var settings = new Persistor( 'watch_panel_settings' );
 	var has_warned_this_session;
 
 	function notifyUserOfWatchWarning()
@@ -34,7 +35,7 @@ import Debugger from './Debugger.module.js'
 	{
 		try
 		{
-			expressions = JSON.parse( localStorage.getItem( LOCAL_STORAGE_NAME ) ) || [];
+			expressions = JSON.parse( localStorage.getItem( LOCAL_STORAGE_NAME ) ) || []; // TODO: use `settings`
 		}
 		catch ( e )
 		{

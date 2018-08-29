@@ -1,3 +1,5 @@
+import Persistor from '../../../debugger/js/Persistor.module.js'
+
 namespace( 'Vue.Layout' ).Window = (function( $ )
 {
 	var attr = {
@@ -24,7 +26,7 @@ namespace( 'Vue.Layout' ).Window = (function( $ )
 		this.element = $( el );
 		this.id      = this.element.attr( attr.window_id ); // used in saving/restoring state
 
-		this.persistor = new BasicApi.Persistor( this.id + '_persistor' );
+		this.persistor = new Persistor( this.id + '_persistor' );
 		this.element.data( 'window', this );
 
 		// Find out which Pane should contain this window, and then attach to validate that Pane
