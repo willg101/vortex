@@ -1,5 +1,5 @@
 import File from './File.module.js'
-export default { setStackPosition, setFile };
+export default { setStackPosition, setFile, getStackPosition, getFile };
 
 class IllegalAction extends Error {}
 var $ = jQuery
@@ -80,6 +80,14 @@ function setStackPosition( pos )
 }
 
 /**
+ * @retval int
+ */
+function getStackPosition()
+{
+	return currentStackPos;
+}
+
+/**
  * Deviate from the stack (if applicable) and show a specific file
  */
 function setFile( filename )
@@ -92,6 +100,14 @@ function setFile( filename )
 	currentLine     = -1;
 	currentFile     = filename;
 	triggerUIRefresh();
+}
+
+/**
+ * @retval string
+ */
+function getFile()
+{
+	return currentFile;
 }
 
 subscribe( 'before-switch-session', function( e )
