@@ -5,7 +5,7 @@ var $ = jQuery;
  *	jQuery plugin to build a jsTree representingthe value of one or more variables
  *
  * Samples Usages:
- *	var data = await BasicApi.Debugger.command( 'property_get' ... );
+ *	var data = await Debugger.command( 'property_get' ... );
  *
  *	# Basic
  *	$( '.my-selector' ).vtree( data.parsed.value )

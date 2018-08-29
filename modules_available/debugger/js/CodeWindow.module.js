@@ -2,6 +2,7 @@ import File                from './File.module.js'
 import RecentFiles         from './RecentFiles.module.js'
 import sessionBreakpoints  from './SessionBreakpoints.module.js'
 import ProgrammingLanguage from './ProgrammingLanguage.module.js'
+import Debugger            from './Debugger.module.js'
 
 export default { getCurrentFileShowing }
 
@@ -202,7 +203,7 @@ subscribe( 'editor-ready', function( e )
 	{
 		var TokenIterator = ace.require( "./token_iterator" ).TokenIterator;
 		var pos           = e.getDocumentPosition();
-		var hovered       = BasicApi.Debugger.sessionIsActive()
+		var hovered       = Debugger.sessionIsActive()
 			&& CodeInspector.VariableExpressionParser.getContainingExpression(
 				new TokenIterator( session, pos.row, pos.column ) );
 
@@ -224,9 +225,9 @@ subscribe( 'editor-ready', function( e )
 
 			show_popover_timeout = setTimeout( async function()
 			{
-				BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
-				var data = await BasicApi.Debugger.command( 'eval', last_highlighted_expr );
-				BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
+				Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
+				var data = await Debugger.command( 'eval', last_highlighted_expr );
+				Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 				var sel = '.current-value .tree-container';
 
 				if ( data.parsed.value && data.parsed.value.length )
@@ -394,7 +395,7 @@ async function showFile( filename, line, cb, skip_cache, scroll_top, no_clear_ac
 
 	if ( line )
 	{
-		if ( BasicApi.Debugger.sessionIsActive() )
+		if ( Debugger.sessionIsActive() )
 		{
 			active_line_marker = editor.session.addMarker( new Range( line - 1, 0, line - 1, 1),
 				"ace-current-line", "fullLine" );
@@ -442,7 +443,7 @@ function showBreakpointsForFile()
 function showCommandTimer()
 {
 	clearTimeout( command_stopwatch_timeout );
-	if ( !$( '.command-timer:visible' ).length && BasicApi.Debugger.sessionIsActive() )
+	if ( !$( '.command-timer:visible' ).length && Debugger.sessionIsActive() )
 	{
 		$( '.command-timer' )
 			.removeClass( 'inactive' )

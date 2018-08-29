@@ -1,3 +1,5 @@
+import Debugger from './Debugger.module.js'
+
 var $ = jQuery;
 
 // The currently-selected autorun mode (in the settings page)
@@ -26,12 +28,12 @@ function onSessionInit( e )
 	whenReadyTo( 'inspect-context' ).then( async function()
 	{
 		// If the request includes a "VORTEX_NO_AUTORUN" GET param, we will not autorun
-		var data = await BasicApi.Debugger.command( 'property_get', { name : '$_GET["VORTEX_NO_AUTORUN"]' } );
+		var data = await Debugger.command( 'property_get', { name : '$_GET["VORTEX_NO_AUTORUN"]' } );
 		if ( !data.parsed || !data.parsed[ 0 ] ) // No "VORTEX_NO_AUTORUN" GET param
 		{
 			if ( document.visibilityState == 'hidden' || mode == 'always' )
 			{
-				whenReadyTo( 'autorun' ).then( BasicApi.Debugger.command.bind( null, 'run' ) );
+				whenReadyTo( 'autorun' ).then( Debugger.command.bind( null, 'run' ) );
 			}
 		}
 	} );

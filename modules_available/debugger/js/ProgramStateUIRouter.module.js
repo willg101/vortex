@@ -1,4 +1,5 @@
-import File from './File.module.js'
+import File     from './File.module.js'
+import Debugger from './Debugger.module.js'
 export default { setStackPosition, setFile, getStackPosition, getFile };
 
 class IllegalAction extends Error {}
@@ -62,7 +63,7 @@ function applyPositionFromStackFrame( n )
  */
 function setStackPosition( pos )
 {
-	if ( ! BasicApi.Debugger.sessionIsActive() )
+	if ( ! Debugger.sessionIsActive() )
 	{
 		throw new IllegalAction( 'Cannot update the stack position while no session is active.' );
 	}

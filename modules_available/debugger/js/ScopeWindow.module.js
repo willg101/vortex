@@ -1,3 +1,5 @@
+import Debugger from './Debugger.module.js'
+
 var $ = jQuery;
 var expandedNodes = {};
 
@@ -57,7 +59,7 @@ $( document ).on( 'dblclick.jstree', '#context', async function( e )
 	var cid        = li.attr( 'data-cid' );
 	var size       = li.attr( 'data-size' );
 
-	var e = await BasicApi.Debugger.command( 'property_get', {
+	var e = await Debugger.command( 'property_get', {
 		name        : identifier,
 		stack_depth : stackDepth,
 		context     : cid,
@@ -89,7 +91,7 @@ $( document ).on( 'keypress', '.value-input', async function( e )
 
 		Theme.Modal.hide();
 
-		await BasicApi.Debugger.command( 'property_set', {
+		await Debugger.command( 'property_set', {
 			name        : identifier,
 			stack_depth : stackDepth,
 			context     : cid

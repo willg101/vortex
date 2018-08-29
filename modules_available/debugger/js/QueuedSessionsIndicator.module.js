@@ -1,4 +1,5 @@
-import File from './File.module.js'
+import Debugger from './Debugger.module.js'
+import File     from './File.module.js'
 
 namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 {
@@ -8,7 +9,7 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 	{
 		if ( e.status == 'connected' )
 		{
-			BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
+			Debugger.command( 'X-ctrl:peek_queue' );
 		}
 		else
 		{
@@ -19,7 +20,7 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 
 	subscribe( 'session-status-changed', function()
 	{
-		BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
+		Debugger.command( 'X-ctrl:peek_queue' );
 	} );
 
 	function onServerInfoReceived( e )
@@ -58,13 +59,13 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 		}
 		else if ( e.jq_message.is( '[type=detach_queued_session]' ) )
 		{
-			BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
+			Debugger.command( 'X-ctrl:peek_queue' );
 		}
 	}
 
 	subscribe( 'session-switched', function()
 	{
-		BasicApi.Debugger.command( 'X-ctrl:peek_queue' );
+		Debugger.command( 'X-ctrl:peek_queue' );
 	} );
 
 	function onDetachSessionClicked( e )
@@ -112,7 +113,7 @@ namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 			return;
 		}
 		var session_id = $( e.target ).closest( '[data-switch-to-session]' ).attr( 'data-switch-to-session' );
-		BasicApi.Debugger.command( 'X-ctrl:switch_session -s ' + session_id );
+		Debugger.command( 'X-ctrl:switch_session -s ' + session_id );
 	}
 
 	$( document ).on( 'click', '[data-switch-to-session]',    onSwitchToSessionClicked );

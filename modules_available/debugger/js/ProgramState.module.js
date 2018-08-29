@@ -1,5 +1,6 @@
 var $ = jQuery;
-import File from './File.module.js';
+import Debugger                      from './Debugger.module.js'
+import File                          from './File.module.js';
 import ProgrammingLanguageTranslator from './ProgrammingLanguage.module.js';
 
 /**
@@ -45,7 +46,7 @@ class StackFrame
 		{
 			this.contextPromise = new Promise( async ( resolve ) =>
 			{
-				var response = await BasicApi.Debugger.command( 'context_names', {
+				var response = await Debugger.command( 'context_names', {
 					stack_depth : this.level,
 				} );
 				var contexts = [];
@@ -53,7 +54,7 @@ class StackFrame
 				for ( var i = 0; i < ( response.parsed || [] ).length; i++ )
 				{
 					contextDescriptor = response.parsed[ i ];
-					var contextItems = await BasicApi.Debugger.command( 'context_get', {
+					var contextItems = await Debugger.command( 'context_get', {
 						context     : contextDescriptor.id,
 						stack_depth : this.level,
 					} );
@@ -158,7 +159,7 @@ class ContextNode {
 			{
 				this.fetchingChildrenPromise = new Promise( async ( resolve ) =>
 				{
-					var children = await BasicApi.Debugger.command( 'property_get', {
+					var children = await Debugger.command( 'property_get', {
 						name        : this.fullname,
 						stack_depth : this.stackDepth || 0,
 						context     : this.cid || undefined,
@@ -213,7 +214,7 @@ class ProgramState {
 
 	async getStack()
 	{
-		var response = await BasicApi.Debugger.command( 'stack_get' );
+		var response = await Debugger.command( 'stack_get' );
 		this.stack   = new Stack( response.parsed );
 		if ( this.stack.frames.length )
 		{

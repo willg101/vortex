@@ -1,3 +1,5 @@
+import Debugger from './Debugger.module.js'
+
 (function( $ )
 {
 	var expressions;
@@ -76,8 +78,8 @@
 	async function evalWatchedExpression( expression, output )
 	{
 		output = $( output );
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
-		var data = await BasicApi.Debugger.command( 'eval', function( data )
+		Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
+		var data = await Debugger.command( 'eval', function( data )
 		{
 			if ( output.is( '.jstree' ) )
 			{
@@ -106,7 +108,7 @@
 				$( output ).html( message );
 			}
 		}, );
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
+		Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 	}
 
 	function onExpressionInputKeypress( e )

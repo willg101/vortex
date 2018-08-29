@@ -1,3 +1,4 @@
+import Debugger             from './Debugger.module.js'
 import File                 from './File.module.js'
 import RecentFiles          from './RecentFiles.module.js'
 import ProgramStateUIRouter from './ProgramStateUIRouter.module.js'
@@ -233,7 +234,7 @@ $( document ).on( 'click', '.globber-option', function( e )
 
 async function processGlobOnServer( prefix, cb )
 {
-	if ( !BasicApi.Debugger.sessionIsActive() )
+	if ( !Debugger.sessionIsActive() )
 	{
 		BasicApi.SocketServer.send( 'X-glob', { p : prefix }, function( e )
 		{

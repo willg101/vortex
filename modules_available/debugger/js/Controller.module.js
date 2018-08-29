@@ -1,3 +1,4 @@
+import Debugger from './Debugger.module.js'
 var $                  = jQuery;
 var reconnect_delay_ms = 5000;
 var was_connected      = true;
@@ -44,7 +45,7 @@ subscribe( 'connection-status-changed', function( e )
 	{
 		// Probe for an existing session; allows us to pick up where we left off if the user
 		// left the page and has now returned or lost their connection and has now regained it
-		BasicApi.Debugger.command( 'status' );
+		Debugger.command( 'status' );
 		Theme.PageTitle.update( 'status', 'waiting' );
 		was_connected = true;
 	}
@@ -54,10 +55,10 @@ subscribe( 'session-status-changed', function( e )
 {
 	if ( e.status == 'active' )
 	{
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_data', value : 2048 } );
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_children', value : 128 } );
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
-		BasicApi.Debugger.command( 'status' );
+		Debugger.command( 'feature_set', { name : 'max_data', value : 2048 } );
+		Debugger.command( 'feature_set', { name : 'max_children', value : 128 } );
+		Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
+		Debugger.command( 'status' );
 	}
 } );
 
@@ -67,7 +68,7 @@ subscribe( 'response-received', function( e )
 	{
 		// Sometimes the debugger engine will wait for a continuation command in order to end a
 		// session, so if the DE indicates it's stopping, let's encourage it to end the session
-		BasicApi.Debugger.command( 'run' );
+		Debugger.command( 'run' );
 	}
 } );
 
@@ -77,7 +78,7 @@ subscribe( 'response-received', function( e )
 subscribe( 'session-init', async function()
 {
 	stepped_into = false;
-	await BasicApi.Debugger.command( 'step_into' );
+	await Debugger.command( 'step_into' );
 	stepped_into = true;
 	if ( after_stepped_into )
 	{

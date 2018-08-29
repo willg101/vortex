@@ -1,4 +1,5 @@
-import File from './File.module.js'
+import File     from './File.module.js'
+import Debugger from './Debugger.module.js'
 
 class Breakpoint
 {
@@ -24,7 +25,7 @@ class Breakpoint
 
 	async sendToDebugger()
 	{
-		if ( !BasicApi.Debugger.sessionIsActive() || this.state == 'confirmed' )
+		if ( !Debugger.sessionIsActive() || this.state == 'confirmed' )
 		{
 			return;
 		}
@@ -32,7 +33,7 @@ class Breakpoint
 		this.info.state = 'pending';
 		this.triggerStateChange();
 
-		var data = await BasicApi.Debugger.command( 'breakpoint_set', {
+		var data = await Debugger.command( 'breakpoint_set', {
 			type : this.type,
 			line : this.line,
 			file : this.file,
@@ -45,12 +46,12 @@ class Breakpoint
 
 	async removeFromDebugger()
 	{
-		if ( BasicApi.Debugger.sessionIsActive() && this.state != 'removed' )
+		if ( Debugger.sessionIsActive() && this.state != 'removed' )
 		{
 			this.info.state = 'pending';
 			this.triggerStateChange();
 
-			await BasicApi.Debugger.command( 'breakpoint_remove', { breakpoint : this.id } );
+			await Debugger.command( 'breakpoint_remove', { breakpoint : this.id } );
 		}
 
 		this.info.state = 'removed'
@@ -96,7 +97,7 @@ class SessionBreakpoints
 
 	async importFromDebuggerEngine()
 	{
-		var breakpoints = await BasicApi.Debugger.command( 'breakpoint_list' );
+		var breakpoints = await Debugger.command( 'breakpoint_list' );
 		var importEach = bp =>
 		{
 			var filename = File.stripScheme( bp.filename );
@@ -120,7 +121,7 @@ class SessionBreakpoints
 		breakpoints.parsed.line.forEach( importEach );
 		breakpoints.parsed.conditional.forEach( importEach );
 
-		var action = BasicApi.Debugger.sessionIsActive() ? 'sendToDebugger' : 'goOffline';
+		var action = Debugger.sessionIsActive() ? 'sendToDebugger' : 'goOffline';
 		this.apply( bp => this.allBreakpoints[ bp.file ][ bp.line ][ action ]() );
 	}
 

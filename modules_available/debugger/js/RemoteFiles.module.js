@@ -1,3 +1,4 @@
+import Debugger from './Debugger.module.js'
 /**
  * Get the contents of files; list recently edited files
  */
@@ -19,14 +20,14 @@ namespace( 'BasicApi' ).RemoteFiles = (function( $ )
 	 */
 	async function fetchFromSever( path, cb )
 	{
-		if ( BasicApi.Debugger.sessionIsActive() )
+		if ( Debugger.sessionIsActive() )
 		{
 			if ( !path.match( /^file:\/\// ) )
 			{
 				path = 'file://' + path;
 			}
 
-			var message = await BasicApi.Debugger.command( 'source', { file : path } );
+			var message = await Debugger.command( 'source', { file : path } );
 			if ( message.jq_message.find( ' > error[code=100]' ).length )
 			{
 				message.parsed.file_contents = false;

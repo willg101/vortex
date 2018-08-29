@@ -296,7 +296,7 @@ subscribe( 'provide-tests', function()
 		} )
 	}
 
-	describe( "BasicApi.Debugger - Parsers", function()
+	describe( "Parsers.module.js", function()
 	{
 		it( "parseContextGet", function()
 		{

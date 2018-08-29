@@ -1,4 +1,5 @@
 import ProgrammingLanguage from './ProgrammingLanguage.module.js'
+import Debugger            from './Debugger.module.js'
 
 const MAGIC_EVAL_VAR_NAME      = '$__';
 const HEREDOC_PREFIX           = 'eval(<<<\'VORTEXEVAL\'\n';
@@ -14,7 +15,7 @@ class PhpLanguage extends ProgrammingLanguage
 
 	async getBytesOfMemoryUsed()
 	{
-		var data = await BasicApi.Debugger.command( 'eval', 'memory_get_usage()' );
+		var data = await Debugger.command( 'eval', 'memory_get_usage()' );
 		var mem_data = data.parsed.value[ 0 ] || {};
 		return mem_data.value;
 	}
@@ -30,7 +31,7 @@ class PhpLanguage extends ProgrammingLanguage
 			};
 		}
 
-		if ( !BasicApi.Debugger.sessionIsActive() )
+		if ( !Debugger.sessionIsActive() )
 		{
 			try
 			{
@@ -50,9 +51,9 @@ class PhpLanguage extends ProgrammingLanguage
 		// address, which would be required to lazy-load the response's object/array's nested
 		// properties, I came up empty-handed. Lazy-loading doesn't seem to be a viable option
 		// here, so let's deep-load the response instead
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
-		var data = await BasicApi.Debugger.command( 'eval', this.prepareCodeForEval( command ));
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
+		Debugger.command( 'feature_set', { name : 'max_depth', value : 10 } );
+		var data = await Debugger.command( 'eval', this.prepareCodeForEval( command ));
+		Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 
 		var message = '';
 		var status  = 'ok';
@@ -128,7 +129,7 @@ class PhpLanguage extends ProgrammingLanguage
 
 	async globDirectory( dir )
 	{
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 2 } );
+		Debugger.command( 'feature_set', { name : 'max_depth', value : 2 } );
 		var rawEntries = await this.evalCommand( `
 			$__ = [];
 			foreach ( glob( '${dir}*' ) as $item )
@@ -138,7 +139,7 @@ class PhpLanguage extends ProgrammingLanguage
 			}
 			return $__;`
 		);
-		BasicApi.Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
+		Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 		return (rawEntries.return_value[ 0 ].children || []).map( entry =>
 		{
 			var ret = {};
@@ -178,7 +179,7 @@ class PhpLanguage extends ProgrammingLanguage
 			reject  = reject_promise;
 		} );
 
-		if ( !BasicApi.Debugger.sessionIsActive() )
+		if ( !Debugger.sessionIsActive() )
 		{
 			if ( !BasicApi.SocketServer.isConnected() )
 			{
@@ -198,7 +199,7 @@ class PhpLanguage extends ProgrammingLanguage
 
 			function tryProcessing()
 			{
-				if ( !BasicApi.Debugger.sessionIsActive() )
+				if ( !Debugger.sessionIsActive() )
 				{
 					reject( 'Could not initiate a new session (timed out)' );
 				}
@@ -211,8 +212,6 @@ class PhpLanguage extends ProgrammingLanguage
 		}
 		return promise;
 	}
-
-
 }
 
 ProgrammingLanguage.setDefault( new PhpLanguage( 'php' ) );
