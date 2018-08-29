@@ -1,4 +1,4 @@
-import CodePanel from './CodeWindow.module.js'
+import sessionBreakpoints from './SessionBreakpoints.module.js'
 
 var id_regex = /^#frag_data:/;
 
@@ -12,7 +12,7 @@ function init()
 
 	try
 	{
-		data = JSON.parse( location.hash.replace( id_regex, '' ) );
+		data = JSON.parse( decodeURI( location.hash.replace( id_regex, '' ) ) );
 	}
 	catch ( e )
 	{
@@ -24,13 +24,9 @@ function init()
 	for ( var i in data )
 	{
 		var filename = data[ i ].filename;
-		publish( 'file-nav-request', {
-			filename : filename,
-			source   : 'frag-data',
-		} );
 		for ( var j in data[ i ].bp_list )
 		{
-			CodePanel.addBreakpoint( filename, data[ i ].bp_list[ j ].line, data[ i ].bp_list[ j ].expression );
+			sessionBreakpoints.create( filename, data[ i ].bp_list[ j ].line, data[ i ].bp_list[ j ].expression );
 		}
 	}
 }
