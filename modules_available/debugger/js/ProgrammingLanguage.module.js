@@ -42,7 +42,6 @@ ProgrammingLanguageTranslator.setDefault = function( language )
 };
 ProgrammingLanguageTranslator.getDefault = function(){ return this.defaultLanguage };
 
-
 ProgrammingLanguageTranslator.tx = function( key, ...args )
 {
 	if ( !this.defaultLanguage )

@@ -89,6 +89,8 @@ function getStackPosition()
 
 /**
  * Deviate from the stack (if applicable) and show a specific file
+ *
+ * @param string filename
  */
 function setFile( filename )
 {
