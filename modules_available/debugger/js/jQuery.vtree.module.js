@@ -62,9 +62,10 @@ $.fn.vtree = function( ctx, options )
 
 		(context instanceof Array ? context : context.children || [] ).forEach( function( property )
 		{
-			var stack_depth = property.stackDepth;
-			var cid         = property.cid;
+			var stack_depth = property.stackDepth || 0;
+			var cid         = property.cid || 0;
 			var value       = $( '<div>' ).text( property.value || '' ).html();
+			var address     = property.address || `s${stack_depth}c${cid}` + btoa( property.fullname );
 
 			if ( property.type == 'null' )
 			{
@@ -84,6 +85,7 @@ $.fn.vtree = function( ctx, options )
 					'data-stack-depth'   : stack_depth,
 					'data-current-value' : value,
 					'data-size'          : property.size,
+					'data-address'       : address,
 				},
 				icon    : 'identifier-icon fa fa-fw ' + icon,
 				text    : '<span class="identifier">'
@@ -92,7 +94,6 @@ $.fn.vtree = function( ctx, options )
 			};
 
 			if ( property.isReadOnly ){ node.li_attr[ 'data-no-alter' ] = 'true'; }
-			if ( property.address  ){ node.li_attr[ 'data-address' ]  = property.address; }
 			if ( cid               ){ node.li_attr[ 'data-cid' ] = cid; }
 
 			if ( [ 'uninitialized', 'object', 'array', 'Superglobals', 'Locals' ]
