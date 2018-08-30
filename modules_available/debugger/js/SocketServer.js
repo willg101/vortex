@@ -64,14 +64,16 @@ namespace( 'BasicApi' ).SocketServer = (function( $ )
 	 * @brief
 	 *	Attempts to open a WS connection
 	 *
+	 * @param object params HTTP GET params to include with the request
+	 *
 	 * @retval bool
 	 *	true if the connection was attempted; false if not (a connection already exists)
 	 */
-	function openConnection()
+	function openConnection( params )
 	{
 		// Allow connections to be aborted by other modules
 		var options = { 'abort' : false };
-		publish( 'attempt-connection', { options : options } );
+		publish( 'attempt-connection', { options, params } );
 		if ( options.abort )
 		{
 			return;
@@ -84,6 +86,10 @@ namespace( 'BasicApi' ).SocketServer = (function( $ )
 		}
 
 		var ws_url = ( location.protocol == 'http:' ? 'ws://' : 'wss://' ) + location.host + ws_path;
+		if ( params )
+		{
+			ws_url += '?' + $.param( params );
+		}
 		current_connection = new WebSocket( ws_url );
 
 		current_connection.onclose   = onConnectionStatusChanged.bind( undefined, 'disconnected' );
