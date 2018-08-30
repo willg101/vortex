@@ -2,7 +2,125 @@ import Debugger             from './Debugger.module.js'
 import ProgramStateUIRouter from './ProgramStateUIRouter.module.js'
 
 var $ = jQuery;
-var expandedNodes = {};
+
+/**
+ * Track which nodes of a jstree are open. Unlike jstree's built-in state save/restore functions,
+ * this is intended to track and apply states *between different instances* of a tree, as we
+ * destory and recreate the jstree instance each time the stack frame changes.
+ *
+ * Of particular importance, we want to handle cases in which a user is browsing through the
+ * current set of stack frames. Consider the following sequence of actions, starting with the user
+ * looking at the tree in frame 0:
+ *	1. Open the set of Locals
+ *	2. Open Locals > $foo
+ *	3. Switch to frame 1
+ *	4. Open Locals > $bar
+ *	5. Switch to frame 0
+ * In step 3, the 'Locals' node was still intentionally open, despite being a different context and
+ * tree. And in step 5, `Locals` and $foo were open again, picking up where the user left off
+ * in step 2.
+ */
+class TreeState
+{
+	constructor()
+	{
+		this.tree = {};
+	}
+
+	/**
+	 * @brief
+	 *	Track the opening of a tree node
+	 *
+	 * @param object node The `node` argument passed to an `open_node.jstree` event handler
+	 */
+	open( node )
+	{
+		var prev_node = this.tree;
+		this.tracePath( node ).forEach( addr =>
+		{
+			if ( !prev_node[ addr ] )
+			{
+				prev_node[ addr ] = {};
+			}
+			prev_node = prev_node[ addr ];
+		} );
+	}
+
+	/**
+	 * @brief
+	 *	Track the closing of a tree node
+	 *
+	 * @param object node The `node` argument passed to a `close_node.jstree` event handler
+	 */
+	close( node )
+	{
+		var prev_node      = this.tree;
+		var path           = this.tracePath( node );
+		var addr_to_delete = path.pop();
+
+		path.some( addr =>
+		{
+			if ( !prev_node[ addr ] )
+			{
+				prev_node = null;
+				return true;
+			}
+			prev_node = prev_node[ addr ];
+		} );
+
+		if ( prev_node )
+		{
+			delete prev_node[ addr_to_delete ];
+		}
+	}
+
+	/**
+	 * @param object node The value passed to either close() or open()
+	 *
+	 * @retval Array
+	 *	An array node addresses, with the last element being `node`'s address, and the first
+	 *	element being the address of the node's furthest ancestor
+	 */
+	tracePath( node )
+	{
+		var container = node.instance.get_container();
+		var path = [ node.node.li_attr[ 'data-address' ] ];
+		(node.node.parents || []).forEach( node_id =>
+		{
+			if ( node_id == '#' )
+			{
+				return; // Root node
+			}
+			path.unshift( container.jstree( 'get_node', node_id ).li_attr[ 'data-address' ] );
+		} );
+		return path;
+	}
+
+	/**
+	 * @brief
+	 *	Restore the state stored in this instance to the given jstree container
+	 *
+	 * @param jQuery container
+	 * @param object jstree    OPTIONAL. Only passed to this while recursing
+	 * @param object ctx       OPTIONAL. Only passed to this while recursing
+	 */
+	restore( container, jstree, ctx )
+	{
+		jstree = jstree || $.jstree.reference( container );
+		ctx  = ctx  || this.tree;
+
+		// Starting at the root of the tree, and descending one level at a time, open all nodes on
+		// this level of the tree, and then do the same on the next level only once the next level
+		// exists and is ready (much of the tree is lazy-loaded)
+		for ( let addr in ctx )
+		{
+			jstree.open_node( `[data-address='${addr}']`,
+				() => this.restore( container, jstree, ctx[ addr ] ), false );
+		}
+	}
+}
+
+var treeState = new TreeState;
 
 /**
  * @brief
@@ -21,24 +139,14 @@ subscribe( 'program-state-ui-refresh-needed', async ( e ) =>
 	}
 
 	var context = e.programState.stack.frames[ e.stackPos ].context;
-	Object.keys( expandedNodes ).forEach( addr =>
+	$( '#context' ).vtree( context ).on( 'ready.jstree', function()
 	{
-		var node = $( `[data-address=${addr}]`, '#context' );
-		if ( node.length && !node.is( '[aria-expanded=true]' ) )
-		{
-			delete expandedNodes[ addr ];
-		}
+		var self = $( this ).removeClass( 'blur-hidden' );
+		treeState.restore( self );
+		$( '#context' ).on( 'open_node.jstree',  ( e, node ) => treeState.open( node ) );
+		$( '#context' ).on( 'close_node.jstree', ( e, node ) => treeState.close( node ) );
 	} );
-	$( '#context li[aria-expanded=true]' ).each( function( i, el )
-	{
-		expandedNodes[ $( el ).attr( 'data-address' ) ] = true;
-	} );
-	$( '#context' ).vtree( context ).removeClass( 'blur-hidden' );
-	var tree = $.jstree.reference( '#context' );
-	Object.keys( expandedNodes ).forEach( addr =>
-	{
-		tree.open_node( `[data-address=${addr}]`, function(){}, false );
-	} );
+
 	$( '#mem_usage' ).text( e.programState.memoryUsage.readable );
 } );
 
