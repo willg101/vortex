@@ -71,7 +71,13 @@ class SessionBreakpoints
 	constructor()
 	{
 		this.allBreakpoints = [];
-		subscribe( 'session-status-changed', this.importFromDebuggerEngine.bind( this ) );
+		subscribe( 'session-status-changed', ( e ) =>
+		{
+			if ( e.status == 'active' )
+			{
+				this.importFromDebuggerEngine()
+			}
+		} );
 	}
 
 	listForFile( filename )

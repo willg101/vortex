@@ -20,6 +20,14 @@ function init()
 	BasicApi.SocketServer.registerTypeDeterminer( determineMessageType );
 }
 
+subscribe( 'connection-status-changed', function( e )
+{
+	if ( e.status == 'error' || e.status == 'closed' )
+	{
+		setActiveSessionStatus( false );
+	}
+} );
+
 /**
  * @brief
  *	Updates the flag for whether or not a session with the DE is currently active. If the call
