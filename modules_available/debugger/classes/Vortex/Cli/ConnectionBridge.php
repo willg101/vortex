@@ -52,6 +52,22 @@ class ConnectionBridge
 		return !!$this->dbg_connection;
 	}
 
+	/**
+	 * @retval ConnectionInterface
+	 */
+	public function getWsConnection()
+	{
+		return $this->ws_connection;
+	}
+
+	/**
+	 * @retval ConnectionInterface
+	 */
+	public function getDbgConnection()
+	{
+		return $this->dbg_connection;
+	}
+
 	public function setWsConnection( ConnectionInterface $conn )
 	{
 		$this->ws_connection = $conn;
@@ -119,6 +135,11 @@ class ConnectionBridge
 	{
 		if ( $this->hasDbgConnection() )
 		{
+			if ( preg_match( '/^detach /', $msg ) )
+			{
+				$this->dbg_app->beforeDetach( $this->dbg_connection );
+			}
+
 			$this->dbg_connection->send( $msg );
 
 			// Close & clear the debugger engine connection if this is a `stop` or `clear` command

@@ -300,12 +300,6 @@ function debugger_ws_message_received( &$data )
 	{
 		$data[ 'bridge' ]->switchSession( $match[ 'id' ] );
 	}
-	elseif ( strpos( $data[ 'message' ], 'detach ' ) === 0 )
-	{
-		$data[ 'logger' ]->debug( 'Detected `detach` command; disabling xdebug...' );
-		$data[ 'bridge' ]->sendToDbg(
-			"eval -i 0 -- aW5pX3NldCggInhkZWJ1Zy5yZW1vdGVfcG9ydCIsIDAgKTs\0" ); // ini_set( "xdebug.remote_port", 0 );
-	}
 	elseif ( strpos( $data[ 'message' ], 'property_set ' ) === 0 )
 	{
 		$data[ 'logger' ]->debug( 'Detected `property_set` command; checking syntax...' );
@@ -322,6 +316,12 @@ function debugger_ws_message_received( &$data )
 			$data[ 'message' ] = "$command -- $expression\0";
 		}
 	}
+}
+
+function debugger_before_debugger_detach( $data )
+{
+	$data[ 'connection' ]->send(
+		"eval -i 0 -- aW5pX3NldCggInhkZWJ1Zy5yZW1vdGVfcG9ydCIsIDAgKTs\0" ); // ini_set( "xdebug.remote_port", 0 );
 }
 
 /**

@@ -106,10 +106,22 @@ class DbgpApp implements MessageComponentInterface
 		}, $keys, $this->queue );
 	}
 
+	public function beforeDetach( ConnectionInterface $conn )
+	{
+		$data = [ 'connection' => $conn ];
+		fire_hook( 'before_debugger_detach', $data );
+	}
+
 	public function detachQueuedSession( $sid )
 	{
 		if ( !empty( $this->queue[ $sid ] ) )
 		{
+			if ( $this->queue[ $sid ][ 'connection' ] == $this->bridge->getDbgConnection() )
+			{
+				$this->bridge->sendToDbg( "detach -i 0 \0" );
+				return;
+			}
+			$this->beforeDetach( $this->queue[ $sid ][ 'connection' ] );
 			$this->queue[ $sid ][ 'connection' ]->send( "detach -i 0\0" );
 			$this->queue[ $sid ][ 'connection' ]->close();
 			unset( $this->queue[ $sid ] );
