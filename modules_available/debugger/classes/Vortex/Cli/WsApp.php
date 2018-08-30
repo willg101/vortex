@@ -15,6 +15,15 @@ class WsApp implements MessageComponentInterface
 	protected $bridge;
 
 	/**
+	 * During a commandeer operation, stores the unique token that the request must include in
+	 * order to claim exclusive access (a NULL value indicates that no commandeer operation is in
+	 * progess)
+	 *
+	 * @var string|NULL
+	 */
+	protected $commandeer_token;
+
+	/**
 	 * @var \Psr\Log\LoggerInterface
 	 */
 	protected $logger;
@@ -25,17 +34,62 @@ class WsApp implements MessageComponentInterface
 		$this->logger = $logger;
 	}
 
+	/**
+	 * @brief
+	 *	Handle "maintenance," or internal, requests
+	 *
+	 * @param Ratchet\ConnectionInterface $conn
+	 * @param array                       $params GET params sent with the WS request
+	 *
+	 * @retval bool
+	 *	Indicates if the request was handled (and thus the connection should be closed)
+	 */
+	protected function handleMaintenanceRequest( ConnectionInterface $conn, array $params )
+	{
+		if ( validate_maintenance_token( array_get( $params, 'security_token' ) ) )
+		{
+			$action = array_get( $params, 'action' );
+			switch ( $action )
+			{
+				case 'commandeer':
+					if ( $this->bridge->hasWsConnection() )
+					{
+						$this->bridge->sendToWs( '<wsserver status="session_commandeered"></wsserver>' );
+						$this->bridge->clearWsConnection();
+					}
+					$this->commandeer_token = get_random_token( 10 );
+					$conn->send( json_encode( [ 'commandeer_token' => $this->commandeer_token ] ) );
+					$conn->close();
+					break;
+
+				default:
+					$conn->send( json_encode( [ 'error' => "Unknown maintenance action '$action'" ] ) );
+					$conn->close();
+					break;
+			}
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	public function onOpen( ConnectionInterface $conn )
 	{
 		$name = "websocket connection $conn->resourceId";
 		$this->logger->debug( "Connection opened: $name" );
 
-		// Parse cookies in order to authenticate the user
-		$cookies = parse_cookie_str( array_get( $conn->httpRequest->getHeader( 'Cookie' ),  0 ) );
-		$this->logger->debug( "Connection" , (array) $cookies );
+		$params = [];
+		parse_str( $conn->httpRequest->getUri()->getQuery(), $params );
 
-		if ( !$this->bridge->hasWsConnection() )
+		if ( $this->handleMaintenanceRequest( $conn, $params ) )
 		{
+			return;
+		}
+
+		if ( !$this->bridge->hasWsConnection() && ( !$this->commandeer_token
+			|| $this->commandeer_token == array_get( $params, 'commandeer_token' ) ) )
+		{
+			$this->commandeer_token = FALSE;
 			$this->bridge->setWsConnection( $conn );
 			$this->bridge->sendToWs( '<wsserver status="connection_accepted"></wsserver>' );
 		}
@@ -43,6 +97,7 @@ class WsApp implements MessageComponentInterface
 		{
 			$conn->send( "50\0<wsserver status=\"no_exclusive_access\"></wsserver>\0" );
 			$this->logger->debug( "We already have a websocket connection; dropping $name" );
+			sleep( 1 ); // Give the message to the ws client a chance to send before closing
 			$conn->close();
 		}
 

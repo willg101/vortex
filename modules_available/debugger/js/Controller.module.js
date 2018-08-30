@@ -4,6 +4,7 @@ var reconnect_delay_ms = 5000;
 var was_connected      = true;
 var stepped_into       = false;
 var after_stepped_into = false;
+var allow_reconnect    = true;
 
 /**
  * @brief
@@ -20,6 +21,11 @@ $( () =>
 
 subscribe( 'connection-status-changed', function( e )
 {
+	if ( !allow_reconnect )
+	{
+		return;
+	}
+
 	if ( e.status == 'error' || e.status == 'closed' )
 	{
 		Theme.PageTitle.update( 'status', 'disconnected' );
@@ -37,7 +43,8 @@ subscribe( 'connection-status-changed', function( e )
 		if ( was_connected )
 		{
 			Theme.notify( 'error', 'Vortex is already in use in another browser or tab, or on '
-				+ 'another computer.' );
+				+ 'another computer.<br><a class="commandeer-btn">Use Vortex in this tab</a>', '',
+				{ extendedTimeOut : 0, timeOut : 0 } );
 		}
 		was_connected = false;
 	}
@@ -49,6 +56,40 @@ subscribe( 'connection-status-changed', function( e )
 		Theme.PageTitle.update( 'status', 'waiting' );
 		was_connected = true;
 	}
+} );
+
+subscribe( 'server-info', function( e )
+{
+	if ( e.jq_message.is( '[status=session_commandeered]' ) )
+	{
+		// This session has been commandeered; disable the UI and show a message explaining what
+		// has happened.
+		Theme.notify( 'error', 'This session was transferred to another tab or brower.', '', {
+			timeOut : 0,
+			extendedTimeOut : 0,
+			positionClass: "toast-bottom-center"
+		} );
+		$( '.blurable' ).fadeOut();
+		$( 'body' ).css( 'background', '#333' );
+
+		// Kill the web socket connection and prevent attempts by this module to reconnect and/or
+		// display warnings about the disconnection
+		was_connected = false;
+		Theme.PageTitle.update( 'status', 'transferred' );
+		allow_reconnect = false;
+		BasicApi.SocketServer.getConnection().close();
+	}
+} )
+
+$( document ).on( 'click', '.commandeer-btn', function()
+{
+	$.post( makeUrl( 'ws_maintenance' ), { action : 'commandeer' }, data =>
+	{
+		if ( typeof data.commandeer_token == 'string' )
+		{
+			BasicApi.SocketServer.openConnection( data );
+		}
+	} );
 } );
 
 subscribe( 'session-status-changed', function( e )

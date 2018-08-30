@@ -60,8 +60,99 @@ function debugger_render_preprocess( &$data )
  */
 function debugger_boot()
 {
-	request_handlers()->register( '/file/',         'debugger_file_api' );
-	request_handlers()->register( '/recent_files/', 'debugger_recent_files_api' );
+	request_handlers()->register( '/file/',           'debugger_file_api' );
+	request_handlers()->register( '/recent_files/',   'debugger_recent_files_api' );
+	request_handlers()->register( '/ws_maintenance/', 'debugger_ws_maintenance_api' );
+}
+
+/**
+ * @brief
+ *	Create a maintenance token (a short-lived, one-time login token intended for use exclusively
+ *	by the server)
+ *
+ * @retval string
+ */
+function make_maintenance_token()
+{
+	db_query( 'CREATE TABLE IF NOT EXISTS maintenance_tokens (
+		id      INTEGER      PRIMARY KEY AUTOINCREMENT,
+		token   VARCHAR(60)  NOT NULL,
+		expires DATETIME     DEFAULT CURRENT_TIMESTAMP
+	);' );
+
+	$token = get_random_token( 10 ) ;
+	db_query( '
+		INSERT INTO maintenance_tokens ( token, expires)
+		VALUES                         (:token, DATETIME( CURRENT_TIMESTAMP, "+2 minute"))', [
+		':token' => password_hash( $token, PASSWORD_DEFAULT ),
+	] );
+	return $token;
+}
+
+/**
+ * @brief
+ *	Verify a maintenance token created by make_maintenance_token()
+ *
+ * NOTE: if the token is validated, ALL tokens are deleted immediately.
+ *
+ * @param string $token
+ * @retval bool
+ */
+function validate_maintenance_token( $token )
+{
+	try
+	{
+		$rows = db_query( 'SELECT token FROM maintenance_tokens WHERE expires > CURRENT_TIMESTAMP' );
+		foreach ( $rows as $row )
+		{
+			if ( password_verify( $token, $row[ 'token' ] ) )
+			{
+				return TRUE;
+			}
+		}
+	}
+	catch ( DatabaseException $e )
+	{
+		// Ignore & return FALSE below
+	}
+	return FALSE;
+}
+
+/**
+ * @brief
+ *	Handle requests to the ws maintenance API.
+ *
+ * This API is used to work with the socket server, even for clients that do not currently have a
+ * websocket connection.
+ */
+function debugger_ws_maintenance_api()
+{
+	$action = array_get( $_POST, 'action' );
+
+	if ( $action == 'commandeer' )
+	{
+		$token = make_maintenance_token();
+		$params = http_build_query( [
+			'security_token' => $token,
+			'action'         => 'commandeer',
+		] );
+		Ratchet\Client\connect( 'ws://localhost:3001/?' . $params )->then( function( $conn ) // TODO: Configure Port/host
+		{
+			$conn->on( 'message', function( $msg ) use ( $conn )
+			{
+				$conn->close();
+				if ( $parsed = json_decode( $msg, TRUE ) )
+				{
+					db_query( 'DELETE FROM maintenance_tokens;' );
+					send_json( $parsed );
+				}
+				else
+				{
+					send_json( [ 'error' => $msg ] );
+				}
+			} );
+		} );
+	}
 }
 
 /**
