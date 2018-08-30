@@ -31,13 +31,14 @@ function Persistor( widget_key )
 				Storage.set( generateLocalStorageItemKey( target.__widget_key__, item_key ), item_value );
 			}
 
-			return item_value;
+			return true;
 		},
 
 		deleteProperty : function( target, item_key )
 		{
 			delete target[ item_key ];
 			Storage.del( generateLocalStorageItemKey( target.__widget_key__, item_key ) );
+			return true;
 		},
 
 		ownKeys : function( target )

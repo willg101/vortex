@@ -73,7 +73,7 @@ function set( key, value )
  */
 function del( key )
 {
-	ls_key = reduceKeyCollisionProbability( key );
+	var ls_key = reduceKeyCollisionProbability( key );
 	var data = {
 		key : key,
 		prevent : false,
