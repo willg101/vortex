@@ -1,9 +1,10 @@
-import File               from './File.module.js'
-import RecentFiles        from './RecentFiles.module.js'
-import sessionBreakpoints from './SessionBreakpoints.module.js'
-import LanguageAbstractor from './LanguageAbstractor.module.js'
-import Debugger           from './Debugger.module.js'
+import File                     from './File.module.js'
+import RecentFiles              from './RecentFiles.module.js'
+import sessionBreakpoints       from './SessionBreakpoints.module.js'
+import LanguageAbstractor       from './LanguageAbstractor.module.js'
+import Debugger                 from './Debugger.module.js'
 import RemoteFiles              from './RemoteFiles.module.js'
+import VariableExpressionParser from './VariableExpressionParser.module.js'
 
 export default { getCurrentFileShowing }
 
@@ -205,7 +206,7 @@ subscribe( 'editor-ready', function( e )
 		var TokenIterator = ace.require( "./token_iterator" ).TokenIterator;
 		var pos           = e.getDocumentPosition();
 		var hovered       = Debugger.sessionIsActive()
-			&& CodeInspector.VariableExpressionParser.getContainingExpression(
+			&& VariableExpressionParser.getContainingExpression(
 				new TokenIterator( session, pos.row, pos.column ) );
 
 		if ( !hovered ) // No variable expression was hovered
