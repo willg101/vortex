@@ -42,7 +42,7 @@ class PhpLanguage extends LanguageAbstractor
 			{
 				return {
 					status  : 'error',
-					message : e.getMessage(),
+					message : e,
 				}
 			}
 		}
