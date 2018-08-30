@@ -215,6 +215,54 @@ function debugger_ws_message_received( &$data )
 		$data[ 'bridge' ]->sendToDbg(
 			"eval -i 0 -- aW5pX3NldCggInhkZWJ1Zy5yZW1vdGVfcG9ydCIsIDAgKTs\0" ); // ini_set( "xdebug.remote_port", 0 );
 	}
+	elseif ( strpos( $data[ 'message' ], 'property_set ' ) === 0 )
+	{
+		$data[ 'logger' ]->debug( 'Detected `property_set` command; checking syntax...' );
+
+		$command_split_point = strrpos( $data[ 'message' ], '--' ) + 2;
+		$expression = base64_decode( trim( substr( $data[ 'message' ], $command_split_point ) ) );
+
+		if ( !debugger_validate_php_syntax( $expression ) )
+		{
+			$data[ 'logger' ]->debug( "Invalid syntax: <<<$expression>>>; treating as string..." );
+
+			$expression        = base64_encode( quote_string( $expression ) );
+			$command           = trim( substr( $data[ 'message' ], 0, $command_split_point - 2 ) );
+			$data[ 'message' ] = "$command -- $expression\0";
+		}
+	}
+}
+
+/**
+ * @brief
+ *	Determines if the given snippet of code is valid PHP
+ *
+ * @param string $snippet
+ *
+ * @retval bool
+ */
+function debugger_validate_php_syntax( $snippet )
+{
+	$snippet = escapeshellarg( "<?php $snippet ?>" );
+	exec( "echo $snippet | php -l > /dev/null 2>&1", $_, $status );
+	return $status === 0;
+}
+
+/**
+ * @brief
+ *	Convert the given string into a string whose *content* is a valid single-quoted PHP string.
+ *
+ * Examples:
+ *	"Hi, I have a widow's peak" -> "'Hi, I have a widow\'s peak'"
+ *	"Hi, My name is Bob"        -> "'Hi, my name is Bob'"
+ *
+ * @param string $str
+ *
+ * @retval string
+ */
+function quote_string( $str )
+{
+	return preg_replace( '/(?<!\\\\|^)\'(?!$)/', '', escapeshellarg( $str ) );
 }
 
 function debugger_parse_glob_command( $command )
