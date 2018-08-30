@@ -1,5 +1,6 @@
 class PersistentStorageError extends Error {};
-export default { get, set, del, PersistentStorageError }
+var PersistentStorage = { get, set, del, PersistentStorageError };
+export default PersistentStorage
 
 var data_store = {};
 
@@ -97,29 +98,29 @@ subscribe( 'provide-tests', function()
 		it( "Basic Usage", function()
 		{
 			localStorage.removeItem( reduceKeyCollisionProbability( 'xxx' ) );
-			expect( BasicApi.PersistentStorage.get( 'xxx' ) ).toBeUndefined();
+			expect( PersistentStorage.get( 'xxx' ) ).toBeUndefined();
 
-			BasicApi.PersistentStorage.set( 'xxx', { 'hello' : 'world' } );
-			expect( typeof BasicApi.PersistentStorage.get( 'xxx' ) ).toBe( 'object' );
-			expect( BasicApi.PersistentStorage.get( 'xxx' ).hello ).toBe( 'world' );
+			PersistentStorage.set( 'xxx', { 'hello' : 'world' } );
+			expect( typeof PersistentStorage.get( 'xxx' ) ).toBe( 'object' );
+			expect( PersistentStorage.get( 'xxx' ).hello ).toBe( 'world' );
 			expect( localStorage.getItem( reduceKeyCollisionProbability( 'xxx' ) ) ).toBe( JSON.stringify( { 'hello' : 'world' } ) );
 
-			BasicApi.PersistentStorage.del( 'xxx' );
-			expect( BasicApi.PersistentStorage.get( 'xxx' ) ).toBeUndefined();
+			PersistentStorage.del( 'xxx' );
+			expect( PersistentStorage.get( 'xxx' ) ).toBeUndefined();
 			expect( localStorage.getItem( reduceKeyCollisionProbability( 'xxx' ) ) ).toBeNull();
 
 			localStorage.setItem( reduceKeyCollisionProbability( 'xxx-prepopulated' ), JSON.stringify( { foo : 'bar' } ) );
-			expect( typeof BasicApi.PersistentStorage.get( 'xxx-prepopulated' ) ).toBe( 'object' );
-			expect( BasicApi.PersistentStorage.get( 'xxx-prepopulated' ).foo ).toBe( 'bar' );
-			BasicApi.PersistentStorage.del( 'xxx-prepopulated' );
-			expect( BasicApi.PersistentStorage.get( 'xxx-prepopulated' ) ).toBeUndefined();
+			expect( typeof PersistentStorage.get( 'xxx-prepopulated' ) ).toBe( 'object' );
+			expect( PersistentStorage.get( 'xxx-prepopulated' ).foo ).toBe( 'bar' );
+			PersistentStorage.del( 'xxx-prepopulated' );
+			expect( PersistentStorage.get( 'xxx-prepopulated' ) ).toBeUndefined();
 
 			localStorage.setItem( reduceKeyCollisionProbability( 'xxx-nested' ), JSON.stringify( { foo : { bar : { baz : 'fuzz' } } } ) );
-			expect( typeof BasicApi.PersistentStorage.get( 'xxx-nested' ) ).toBe( 'object' );
-			expect( typeof BasicApi.PersistentStorage.get( 'xxx-nested' ).foo ).toBe( 'object' );
-			expect( typeof BasicApi.PersistentStorage.get( 'xxx-nested' ).foo.bar ).toBe( 'object' );
-			expect( typeof BasicApi.PersistentStorage.get( 'xxx-nested' ).foo.bar.baz ).toBe( 'string' );
-			expect( BasicApi.PersistentStorage.get( 'xxx-nested' ).foo.bar.baz ).toBe( 'fuzz' );
+			expect( typeof PersistentStorage.get( 'xxx-nested' ) ).toBe( 'object' );
+			expect( typeof PersistentStorage.get( 'xxx-nested' ).foo ).toBe( 'object' );
+			expect( typeof PersistentStorage.get( 'xxx-nested' ).foo.bar ).toBe( 'object' );
+			expect( typeof PersistentStorage.get( 'xxx-nested' ).foo.bar.baz ).toBe( 'string' );
+			expect( PersistentStorage.get( 'xxx-nested' ).foo.bar.baz ).toBe( 'fuzz' );
 		} );
 	} );
 } );
