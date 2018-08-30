@@ -6,6 +6,7 @@ var requiredMethods = [
 	'getConsoleInfo',
 	'getConsoleFormatter',
 	'globDirectory',
+	'getLanguageNameForEditor',
 ];
 
 class LanguageAbstractor

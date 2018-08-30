@@ -28,7 +28,7 @@ subscribe( 'vortex-init', function()
 	var data = {
 		options : {
 			theme : 'solarized_light',
-			language : LanguageAbstractor.getDefault().name
+			language : LanguageAbstractor.getLanguageNameForEditor(),
 		},
 	};
 	publish( 'alter-editor-options', data ); // Allow other modules to change theme and language
