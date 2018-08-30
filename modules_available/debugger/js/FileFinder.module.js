@@ -3,6 +3,8 @@ import File                 from './File.module.js'
 import RecentFiles          from './RecentFiles.module.js'
 import ProgramStateUIRouter from './ProgramStateUIRouter.module.js'
 import LanguageAbstractor   from './LanguageAbstractor.module.js'
+import RemoteFiles          from './RemoteFiles.module.js'
+import WsClient             from './WsClient.module.js'
 
 var $ = jQuery;
 var dir_aliases = {};
@@ -236,7 +238,7 @@ async function processGlobOnServer( prefix, cb )
 {
 	if ( !Debugger.sessionIsActive() )
 	{
-		BasicApi.SocketServer.send( 'X-glob', { p : prefix }, function( e )
+		WsClient.send( 'X-glob', { p : prefix }, function( e )
 		{
 			var items = [];
 			$( e.message_raw ).find( '[type]' ).each( function()

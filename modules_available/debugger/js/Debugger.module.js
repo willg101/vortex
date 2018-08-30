@@ -1,4 +1,5 @@
-import Parsers from './Parsers.module.js'
+import Parsers  from './Parsers.module.js'
+import WsClient from './WsClient.module.js'
 export default { sessionIsActive, command }
 
 /**
@@ -16,8 +17,8 @@ var response_parsers = Parsers.list();
 
 function init()
 {
-	BasicApi.SocketServer.registerMessageProcessor( processMessage );
-	BasicApi.SocketServer.registerTypeDeterminer( determineMessageType );
+	WsClient.registerMessageProcessor( processMessage );
+	WsClient.registerTypeDeterminer( determineMessageType );
 }
 
 subscribe( 'connection-status-changed', function( e )
@@ -137,7 +138,7 @@ function command( name /*, ... */ )
 	command_args = translateArgs( alter_data.command_args );
 	data         = alter_data.data;
 
-	return BasicApi.SocketServer.send( command, command_args, data, callback );
+	return WsClient.send( command, command_args, data, callback );
 }
 
 /**
@@ -150,7 +151,7 @@ function sessionIsActive()
 
 /**
  * @brief
- *	A type determiner for BasicApi.SocketServer
+ *	A type determiner for WsClient
  */
 function determineMessageType( message )
 {
@@ -170,7 +171,7 @@ function determineMessageType( message )
 
 /**
  * @brief
- *	A message processor for BasicApi.SocketServer
+ *	A message processor for WsClient
  */
 function processMessage( type, message, processed )
 {

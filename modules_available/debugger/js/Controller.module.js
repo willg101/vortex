@@ -1,4 +1,6 @@
 import Debugger from './Debugger.module.js'
+import WsClient from './WsClient.module.js'
+
 var $                  = jQuery;
 var reconnect_delay_ms = 5000;
 var was_connected      = true;
@@ -14,7 +16,7 @@ $( () =>
 {
 	if ( !Dpoh.settings.js_test_mode )
 	{
-		BasicApi.SocketServer.openConnection();
+		WsClient.openConnection();
 		publish( 'vortex-init' );
 	}
 } );
@@ -29,7 +31,7 @@ subscribe( 'connection-status-changed', function( e )
 	if ( e.status == 'error' || e.status == 'closed' )
 	{
 		Theme.PageTitle.update( 'status', 'disconnected' );
-		setTimeout( BasicApi.SocketServer.openConnection, reconnect_delay_ms );
+		setTimeout( WsClient.openConnection, reconnect_delay_ms );
 		if ( was_connected )
 		{
 			Theme.notify( 'error', 'No websocket connection is available' );
@@ -77,7 +79,7 @@ subscribe( 'server-info', function( e )
 		was_connected = false;
 		Theme.PageTitle.update( 'status', 'transferred' );
 		allow_reconnect = false;
-		BasicApi.SocketServer.getConnection().close();
+		WsClient.getConnection().close();
 	}
 } )
 
@@ -87,7 +89,7 @@ $( document ).on( 'click', '.commandeer-btn', function()
 	{
 		if ( typeof data.commandeer_token == 'string' )
 		{
-			BasicApi.SocketServer.openConnection( data );
+			WsClient.openConnection( data );
 		}
 	} );
 } );

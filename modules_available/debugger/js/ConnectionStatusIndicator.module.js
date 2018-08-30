@@ -1,3 +1,5 @@
+import WsClient from './WsClient.module.js'
+
 subscribe( 'connection-status-changed', function onConnectionStatusChanged( e )
 {
 	updateStatusIndicator( e.status == 'connected' ? 'connected' : 'disconnected' );
@@ -11,7 +13,7 @@ subscribe( 'session-status-changed', function onSessionStatusChanged( e )
 	}
 	else
 	{
-		updateStatusIndicator( BasicApi.SocketServer.isConnected() ? 'connected' : 'disconnected' );
+		updateStatusIndicator( WsClient.isConnected() ? 'connected' : 'disconnected' );
 	}
 } );
 

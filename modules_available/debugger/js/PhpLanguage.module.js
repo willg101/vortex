@@ -186,7 +186,7 @@ class PhpLanguage extends LanguageAbstractor
 
 		if ( !Debugger.sessionIsActive() )
 		{
-			if ( !BasicApi.SocketServer.isConnected() )
+			if ( !WsClient.isConnected() )
 			{
 				reject( 'Error: no connection to socket server' );
 				return promise;

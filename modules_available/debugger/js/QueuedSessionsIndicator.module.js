@@ -1,5 +1,6 @@
 import Debugger from './Debugger.module.js'
 import File     from './File.module.js'
+import WsClient from './WsClient.module.js'
 
 namespace( 'Theme' ).SessionQueueIndicator = (function( $ )
 {
