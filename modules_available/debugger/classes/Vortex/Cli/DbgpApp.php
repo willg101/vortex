@@ -169,9 +169,9 @@ class DbgpApp implements MessageComponentInterface
 
 			if ( $this->bridge->hasWsConnection() )
 			{
-					$this->logger->debug( "Informing websocket client of disconnection" );
-					$this->bridge->sendToWs( '<wsserver status="session_end"></wsserver>' );
-					array_shift( $this->queue );
+				$this->logger->debug( "Informing websocket client of disconnection" );
+				$this->bridge->sendToWs( '<wsserver status="session_end"></wsserver>' );
+				array_shift( $this->queue );
 				if ( $this->queue )
 				{
 					$next = reset( $this->queue );
