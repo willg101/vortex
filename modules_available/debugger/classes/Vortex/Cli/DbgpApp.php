@@ -52,29 +52,31 @@ class DbgpApp implements MessageComponentInterface
 
 		if ( $this->bridge->hasWsConnection() )
 		{
-			$this->queue[ "c$conn->resourceId" ] = [
-				'connection' => $conn,
-				'uuid'       => $this->makeUuid(),
-				'messages'   => [],
-			];
+			if ( count( $this->queue ) < static::MAX_QUEUE_LENGTH )
+			{
+				$this->queue[ "c$conn->resourceId" ] = [
+					'connection' => $conn,
+					'uuid'       => $this->makeUuid(),
+					'messages'   => [],
+				];
+			}
+			else
+			{
+				$this->logger->debug( "The queue is full; dropping $name" );
+				$conn->close();
+				return;
+			}
 
 			if ( $this->bridge->hasDbgConnection() )
 			{
 				$this->logger->debug( "A debug session is currently active; enqueuing $name" );
-				if ( count( $this->queue ) < static::MAX_QUEUE_LENGTH )
-				{
-					$data = [
-						'connection' => $conn,
-						'messages'   => &$this->queue[ "c$conn->resourceId" ][ 'messages' ],
-						'logger'     => $this->logger,
-					];
-					fire_hook( 'dbg_connection_queued', $data );
-				}
-				else
-				{
-					$this->logger->debug( "The queue is full; dropping $name" );
-					$conn->close();
-				}
+
+				$data = [
+					'connection' => $conn,
+					'messages'   => &$this->queue[ "c$conn->resourceId" ][ 'messages' ],
+					'logger'     => $this->logger,
+				];
+				fire_hook( 'dbg_connection_queued', $data );
 			}
 			else
 			{
