@@ -56,7 +56,7 @@ class DbgpApp implements MessageComponentInterface
 			{
 				$this->queue[ "c$conn->resourceId" ] = [
 					'connection' => $conn,
-					'uuid'       => $this->makeUuid(),
+					'uuid'       => get_random_token( 10 ),
 					'messages'   => [],
 				];
 			}
@@ -145,11 +145,6 @@ class DbgpApp implements MessageComponentInterface
 		];
 		fire_hook( 'dbg_connection_opened', $data );
 		$this->ws_connection = $conn;
-	}
-
-	protected function makeUuid()
-	{
-		return bin2hex( openssl_random_pseudo_bytes( 10 ) );
 	}
 
 	public function onClose( ConnectionInterface $conn )

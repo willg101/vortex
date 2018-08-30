@@ -113,7 +113,7 @@ function login_handle_invite_user_api( $url )
 
 function login_invite_user( $email )
 {
-	$token = bin2hex( openssl_random_pseudo_bytes( 20 ) );
+	$token = get_random_token( 20 );
 	db_query( 'INSERT INTO invitation_tokens (token, expires) VALUES (:token, :expires)', [
 		':token' => login_hash_password( $token ),
 		':expires' => date('Y-m-d H:i:s', strtotime( '+1 day' ) ),
@@ -305,7 +305,7 @@ function login_handle_reset_password_api( $url )
 	}
 	else
 	{
-		$token = bin2hex( openssl_random_pseudo_bytes( 20 ) );
+		$token = get_random_token( 20 );
 		db_query( 'INSERT INTO login_tokens (token, user_id, expires) VALUES (:token, :user_id, :expires)', [
 			':token' => login_hash_password( $token ),
 			':user_id' => $user,
@@ -503,7 +503,7 @@ function login_user( $username, $password = NULL )
 		return FALSE;
 	}
 
-	$session_token = bin2hex( openssl_random_pseudo_bytes( 25 ) );
+	$session_token = get_random_token( 25 );
 	db_query( '
 		INSERT INTO sessions (user_id, session_token, user_ip, expires)
 		VALUES (:user_id, :session_token, :user_ip, date( CURRENT_TIMESTAMP, "+3 day"))',
