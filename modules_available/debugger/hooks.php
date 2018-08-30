@@ -123,7 +123,6 @@ function debugger_file_api( $path )
 	}
 }
 
-
 /**
  * @brief
  *	Request handler for the files API; sends the client a list of the most recently edited files
@@ -209,6 +208,12 @@ function debugger_ws_message_received( &$data )
 	elseif ( preg_match( '/^X-ctrl:switch_session -s (?<id>c\d+) /', $data[ 'message' ], $match ) )
 	{
 		$data[ 'bridge' ]->switchSession( $match[ 'id' ] );
+	}
+	elseif ( strpos( $data[ 'message' ], 'detach ' ) === 0 )
+	{
+		$data[ 'logger' ]->debug( 'Detected `detach` command; disabling xdebug...' );
+		$data[ 'bridge' ]->sendToDbg(
+			"eval -i 0 -- aW5pX3NldCggInhkZWJ1Zy5yZW1vdGVfcG9ydCIsIDAgKTs\0" ); // ini_set( "xdebug.remote_port", 0 );
 	}
 }
 
