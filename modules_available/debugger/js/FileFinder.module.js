@@ -45,7 +45,7 @@ $( document ).on( 'click', '#file_finder', function()
 		} );
 
 		// Asynchronously fill in the recently edited files
-		BasicApi.RemoteFiles.listRecent( function( success, data )
+		RemoteFiles.listRecentlyModified( function( success, data )
 		{
 			if ( success )
 			{

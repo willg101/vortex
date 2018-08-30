@@ -3,6 +3,7 @@ import RecentFiles        from './RecentFiles.module.js'
 import sessionBreakpoints from './SessionBreakpoints.module.js'
 import LanguageAbstractor from './LanguageAbstractor.module.js'
 import Debugger           from './Debugger.module.js'
+import RemoteFiles              from './RemoteFiles.module.js'
 
 export default { getCurrentFileShowing }
 
@@ -367,7 +368,7 @@ async function showFile( filename, line, cb, skip_cache, scroll_top, no_clear_ac
 	filename = File.stripScheme( filename );
 	RecentFiles.push( filename );
 
-	var data = await BasicApi.RemoteFiles.get( filename, skip_cache );
+	var data = await RemoteFiles.get( filename, skip_cache );
 	if ( data === false )
 	{
 		Theme.notify( 'error', 'The file <b>' + File.basename( filename ) + '</b> failed to load' );
