@@ -37,15 +37,20 @@ subscribe( 'session-status-changed', function( e )
 /**
  * @brief
  *	Instruct all UI subscribers to refresh their view
+ *
+ * @param bool force Force the refresh, even if the current stack frame is unavailable
  */
-function triggerUIRefresh()
+function triggerUIRefresh( force )
 {
-	publish( 'program-state-ui-refresh-needed', {
-		programState  : mostRecentState,
-		stackPos      : currentStackPos,
-		file          : currentFile,
-		line          : currentLine,
-	} );
+	if ( force || mostRecentState.stack.frames[ currentStackPos ] )
+	{
+		publish( 'program-state-ui-refresh-needed', {
+			programState  : mostRecentState,
+			stackPos      : currentStackPos,
+			file          : currentFile,
+			line          : currentLine,
+		} );
+	}
 }
 
 /**
@@ -54,8 +59,11 @@ function triggerUIRefresh()
 function applyPositionFromStackFrame( n )
 {
 	currentStackPos = n;
-	currentFile     = mostRecentState.stack.frames[ n ].schemelessFilename;
-	currentLine     = mostRecentState.stack.frames[ n ].lineno;
+	if ( mostRecentState.stack.frames[ n ] )
+	{
+		currentFile = mostRecentState.stack.frames[ n ].schemelessFilename;
+		currentLine = mostRecentState.stack.frames[ n ].lineno;
+	}
 }
 
 /**
