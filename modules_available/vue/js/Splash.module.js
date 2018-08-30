@@ -1,3 +1,5 @@
+import WsClient from '../../debugger/js/WsClient.module.js'
+
 /**
  *
  */
@@ -28,7 +30,7 @@ namespace( 'Vue' ).Splash = (function( $ )
 		}
 		else
 		{
-			Theme.PageTitle.update( 'status', ( BasicApi.SocketServer.isConnected() ? 'waiting' : 'disconnected' ) );
+			Theme.PageTitle.update( 'status', ( WsClient.isConnected() ? 'waiting' : 'disconnected' ) );
 		}
 	}
 
