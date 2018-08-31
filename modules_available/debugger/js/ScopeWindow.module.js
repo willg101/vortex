@@ -175,11 +175,8 @@ $( document ).on( 'dblclick.jstree', '#context', async function( e )
 		max_data    : size,
 	} );
 	var currentVal = $('<div>').text( (e.parsed[ 0 ] || {}).value || '' ).html();
-	Theme.Modal.set( {
-		title : 'Update Value',
-		content : render( 'debugger.change_variable_value', { identifier, stackDepth, cid, size } ),
-	} );
-	Theme.Modal.show();
+	vTheme.showModal( 'Update Value',
+		render( 'debugger.change_variable_value', { identifier, stackDepth, cid, size } ) );
 	$( '.value-input' ).focus();
 	document.execCommand( 'selectAll', false, null );
 } );
@@ -198,7 +195,7 @@ $( document ).on( 'keypress', '.value-input', async function( e )
 		var cid        = $( e.target ).attr( 'data-cid' );
 		var identifier = $( e.target ).attr( 'data-identifier' );
 
-		Theme.Modal.hide();
+		vTheme.hideModal();
 
 		await Debugger.command( 'property_set', {
 			name        : identifier,

@@ -33,22 +33,18 @@ $( document ).on( 'click', '[data-action=open-settings]', function()
 		}
 	}
 
-	Theme.Modal.set( {
-		title   : 'Settings',
-		content : render( 'vue.settings_modal', {
-			widgets : gatherSettingsPageWidgets( pages_info.default_page ),
-			icon : current_page.icon,
-			title : current_page.title,
-		} ),
-	} );
-	Theme.Modal.show();
+	vTheme.showModal( 'Settings', render( 'vue.settings_modal', {
+		widgets : gatherSettingsPageWidgets( pages_info.default_page ),
+		icon : current_page.icon,
+		title : current_page.title,
+	} ) );
 } );
 
 $( document ).on( 'click', '.save-settings', function()
 {
 	cacheSettings();
 	publish( 'save-settings' );
-	Theme.Modal.hide();
+	vTheme.hideModal();
 	publish( 'settings-saved' );
 } );
 

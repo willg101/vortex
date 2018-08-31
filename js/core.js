@@ -32,6 +32,33 @@ function namespace( ns )
 	return context;
 }
 
+vTheme = new Proxy( {}, {
+	get : ( target, key ) =>
+	{
+		if ( target.hasOwnProperty( key ) )
+		{
+			return target[ key ];
+		}
+	},
+
+	set : ( target, key, value ) =>
+	{
+		if ( typeof value != 'function' )
+		{
+			throw new Error( 'Cannot add non-function properties to `vTheme`' );
+		}
+		publish( 'update-vtree-item', { key, oldValue : target[ key ], newValue : value } );
+		target[ key ] = value;
+		return true;
+	},
+
+	deleteProperty : ( target, key ) =>
+	{
+		publish( 'delete-vtree-item', { key, value : target[ key ] } );
+		return delete target[ key ];
+	},
+} );
+
 window.PageTitle = {
 	state     : {},
 	format    : () => 'Vortex',

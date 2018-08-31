@@ -69,11 +69,7 @@ import Debugger  from './Debugger.module.js'
 
 	function onAddExpressionClicked( e )
 	{
-		Theme.Modal.set( {
-			title : 'Watch Expression',
-			content : render( 'debugger.watch_expression_modal' ),
-		} );
-		Theme.Modal.show();
+		vTheme.showModal( 'Watch Expression', render( 'debugger.watch_expression_modal' ) );
 	}
 
 	async function evalWatchedExpression( expression, output )
@@ -129,7 +125,7 @@ import Debugger  from './Debugger.module.js'
 			}
 			saveExpressions();
 			renderExpression( expression, id );
-			Theme.Modal.hide();
+			vTheme.hideModal();
 		}
 	}
 
@@ -189,11 +185,10 @@ import Debugger  from './Debugger.module.js'
 	{
 		var row = $( e.target ).closest( '[data-watch-id]' );
 		var id = row.attr( 'data-watch-id' );
-		Theme.Modal.set( {
-			title : 'Watch Expression',
-			content : render( 'debugger.watch_expression_modal', { expression : expressions[ id ].expression, id : id } ),
-		} );
-		Theme.Modal.show();
+		vTheme.showModal( 'Watch Expression', render( 'debugger.watch_expression_modal', {
+			expression : expressions[ id ].expression,
+			id : id
+		} ) );
 	}
 
 	subscribe( 'session-status-changed', onSessionStatusChanged );

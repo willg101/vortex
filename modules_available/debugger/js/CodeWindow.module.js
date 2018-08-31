@@ -58,15 +58,11 @@ subscribe( 'vortex-init', function()
 			e.domEvent.preventDefault();
 			var current_bp = sessionBreakpoints.get( current_file, line );
 			var expression = current_bp && current_bp.expression || '';
-			Theme.Modal.set( {
-				title : 'Conditional Breakpoint',
-				content : render( 'debugger.conditional_bp_modal', {
-					line       : line,
-					file       : getCurrentFileShowing(),
-					expression : expression,
-				} ),
-			} );
-			Theme.Modal.show();
+			vTheme.showModal( 'Conditional Breakpoint', render( 'debugger.conditional_bp_modal', {
+				line       : line,
+				file       : getCurrentFileShowing(),
+				expression : expression,
+			} ) );
 			setTimeout( function(){ $( '.bp-expression-input' ).focus(); }, 30 );
 		}
 		else
@@ -89,7 +85,7 @@ $( document ).on( 'keypress', '.bp-expression-input', function( e )
 		var line       = $( e.target ).attr( 'data-lineno' );
 		var file       = $( e.target ).attr( 'data-file' );
 
-		Theme.Modal.hide();
+		vTheme.hideModal();
 		sessionBreakpoints.del( file, line )
 		sessionBreakpoints.create( file, line, expression );
 	}
