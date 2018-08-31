@@ -37,7 +37,7 @@ $( document ).on( 'click', '#file_finder', function()
 				options : recent_files,
 			} );
 		}
-		recent_files_popover = new Theme.PopoverList( {
+		recent_files_popover = new vTheme.PopoverList( {
 			lists   : lists,
 			classes : [],
 			el      : $( '#file_finder' ),
@@ -140,7 +140,7 @@ $( document ).on( 'keydown', '#file_finder', function( e )
 
 					if ( !popover )
 					{
-						popover = new Theme.PopoverList( {
+						popover = new vTheme.PopoverList( {
 							lists : [
 								{
 									title : '',

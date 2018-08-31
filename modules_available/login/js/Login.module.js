@@ -78,7 +78,7 @@ $( document ).on( 'click', '.reset-pw-submit', function( e )
 	$.post( makeUrl( 'api/users/' + username_or_email + '/reset-password' ), function( data )
 	{
 		$( '[name=username_reset_pw]' ).val( '' );
-		new Theme.Popover( 'A link to reset your password has been sent to your email address.', [], {
+		new vTheme.Popover( 'A link to reset your password has been sent to your email address.', [], {
 			my : 'center',
 			at : 'center',
 			of : form },
@@ -92,7 +92,7 @@ $( document ).on( 'click', '.all-user-accounts .remove-account', function( e )
 	var row     = $( e.target ).closest( '[data-user-id]' );
 	var user_id = row.attr( 'data-user-id' );
 	var content = render( 'login.confirmation', { user_id : user_id, comfirm_type : 'remove' } )
-	new Theme.Popover( content, [ 'remove-account-popover' ], {
+	new vTheme.Popover( content, [ 'remove-account-popover' ], {
 		at : 'left bottom',
 		my : 'left top',
 		of : btn,
@@ -105,7 +105,7 @@ $( document ).on( 'click', '[data-confirm=remove]', function onRemoveConfirmed( 
 	var form = $( '.modal' );
 	$.post( makeUrl( 'api/users/' + user_id + '/remove' ), function( data )
 	{
-		new Theme.Popover( 'This account has been removed.', [], {
+		new vTheme.Popover( 'This account has been removed.', [], {
 			my : 'center',
 			at : 'center',
 			of : form
@@ -175,7 +175,7 @@ function inviteUser( e )
 			var content = ( xhr.status >= 400
 				? '<i class="fa fa-warning margin-right"></i>'
 				: '' ) + xhr.responseText;
-			new Theme.Popover( content, [], {
+			new vTheme.Popover( content, [], {
 				'of' : input,
 			}, input );
 		},

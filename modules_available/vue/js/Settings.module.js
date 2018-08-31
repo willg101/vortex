@@ -4,7 +4,7 @@ $( document ).on( 'click', '#settings_toolbar', function()
 {
 	var indicator = $( '#settings_toolbar' );
 	var items = getQuickActions();
-	new Theme.PopoverList( {
+	new vTheme.PopoverList( {
 		lists : [
 			{
 				title : '',
@@ -93,7 +93,7 @@ $( document ).on( 'click', '.settings-page', function()
 			attr : { 'data-show-settings-page' : list[i].val },
 		} );
 	}
-	new Theme.PopoverList( {
+	new vTheme.PopoverList( {
 		lists : [
 			{
 				title : '',

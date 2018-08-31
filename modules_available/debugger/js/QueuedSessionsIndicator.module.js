@@ -111,7 +111,7 @@ function showPopover( rendered_items )
 	{
 		content = '<h2 class="swallow-margin">Active Sessions</h2><i>No active sessions</i>';
 	}
-	new Theme.Popover( content, classes, {
+	new vTheme.Popover( content, classes, {
 		my : 'right top',
 		at : 'right bottom',
 		of : $( '#connection_queue_indicator' ),
