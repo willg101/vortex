@@ -16,15 +16,11 @@ $( () =>
 {
 	if ( !Dpoh.settings.js_test_mode )
 	{
+		PageTitle.setFormat( 'Vortex ({{status}})' );
+		PageTitle.updateState( { status : 'disconnected' } );
 		WsClient.openConnection();
 		publish( 'vortex-init' );
 	}
-} );
-
-subscribe( 'vortex-init', () =>
-{
-	PageTitle.setFormat( 'Vortex ({{status}})' );
-	PageTitle.updateState( { status : 'disconnected' } );
 } );
 
 subscribe( 'connection-status-changed', function( e )
@@ -36,6 +32,7 @@ subscribe( 'connection-status-changed', function( e )
 
 	if ( e.status == 'error' || e.status == 'closed' )
 	{
+		PageTitle.updateState( { status : 'disconnected' } );
 		setTimeout( WsClient.openConnection, reconnect_delay_ms );
 		if ( was_connected )
 		{
@@ -45,6 +42,7 @@ subscribe( 'connection-status-changed', function( e )
 	}
 	else if ( e.status == 'no-exclusive-access' )
 	{
+		PageTitle.updateState( { status : 'disconnected' } );
 		if ( was_connected )
 		{
 			Theme.notify( 'error', 'Vortex is already in use in another browser or tab, or on '
@@ -55,6 +53,7 @@ subscribe( 'connection-status-changed', function( e )
 	}
 	else if ( e.status == 'connected' )
 	{
+		PageTitle.updateState( { status : 'waiting' } );
 		// Probe for an existing session; allows us to pick up where we left off if the user
 		// left the page and has now returned or lost their connection and has now regained it
 		Debugger.command( 'status' );
