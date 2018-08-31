@@ -25,7 +25,7 @@ subscribe( 'vortex-init', function()
 		return;
 	}
 
-	$( new Theme.Spinner + '' ).appendTo( '.command-timer .spinner' );
+	$( vTheme.getSpinner() ).appendTo( '.command-timer .spinner' );
 
 	var data = {
 		options : {
@@ -138,7 +138,7 @@ $( document ).on( 'click', '.refresh-file', function( e )
 	}
 
 	var target = $( e.target ).closest( 'button' ).css( 'visibility', 'hidden' );
-	var spinner = $( new Theme.Spinner + '' )
+	var spinner = $( vTheme.getSpinner() )
 		.css( 'position', 'absolute' )
 		.appendTo( '.file-bar' )
 		.position( {

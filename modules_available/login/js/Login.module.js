@@ -141,7 +141,7 @@ subscribe( 'gather-settings-page-widgets', function( e )
 		} );
 
 		e.widgets.push( render( 'login.settings', {
-			spinner : new Theme.Spinner,
+			spinner : vTheme.getSpinner(),
 		} ) );
 	}
 } );

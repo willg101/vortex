@@ -47,7 +47,7 @@ PopoverList.prototype.renderLists = function()
 
 		if ( title )
 		{
-			container.append( '<h2>' + title + ( options ? '' : ' ' + new Theme.Spinner ) + '</h2>' );
+			container.append( '<h2>' + title + ( options ? '' : ' ' + vTheme.getSpinner() ) + '</h2>' );
 		}
 
 		if ( options )
