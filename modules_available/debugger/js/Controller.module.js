@@ -36,7 +36,7 @@ subscribe( 'connection-status-changed', function( e )
 		setTimeout( WsClient.openConnection, reconnect_delay_ms );
 		if ( was_connected )
 		{
-			Theme.notify( 'error', 'No websocket connection is available' );
+			vTheme.notify( 'error', 'No websocket connection is available' );
 		}
 		was_connected = false;
 	}
@@ -45,7 +45,7 @@ subscribe( 'connection-status-changed', function( e )
 		PageTitle.updateState( { status : 'disconnected' } );
 		if ( was_connected )
 		{
-			Theme.notify( 'error', 'Vortex is already in use in another browser or tab, or on '
+			vTheme.notify( 'error', 'Vortex is already in use in another browser or tab, or on '
 				+ 'another computer.<br><a class="commandeer-btn">Use Vortex in this tab</a>', '',
 				{ extendedTimeOut : 0, timeOut : 0 } );
 		}
@@ -67,7 +67,7 @@ subscribe( 'server-info', function( e )
 	{
 		// This session has been commandeered; disable the UI and show a message explaining what
 		// has happened.
-		Theme.notify( 'error', 'This session was transferred to another tab or brower.', '', {
+		vTheme.notify( 'error', 'This session was transferred to another tab or brower.', '', {
 			timeOut : 0,
 			extendedTimeOut : 0,
 			positionClass: "toast-bottom-center"

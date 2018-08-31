@@ -17,7 +17,7 @@ import Debugger  from './Debugger.module.js'
 	{
 		if ( !settings.no_notify && !has_warned_this_session )
 		{
-			Theme.notify( 'error', 'A watched expression failed to execute and may cause stray'
+			vTheme.notify( 'error', 'A watched expression failed to execute and may cause stray'
 				+ ' warnings or notices in your output.', '', { timeOut : 10000 } );
 			has_warned_this_session = true;
 		}

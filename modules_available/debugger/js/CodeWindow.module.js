@@ -368,7 +368,7 @@ async function showFile( filename, line, cb, skip_cache, scroll_top, no_clear_ac
 	var data = await RemoteFiles.get( filename, skip_cache );
 	if ( data === false )
 	{
-		Theme.notify( 'error', 'The file <b>' + File.basename( filename ) + '</b> failed to load' );
+		vTheme.notify( 'error', 'The file <b>' + File.basename( filename ) + '</b> failed to load' );
 		return;
 	}
 
