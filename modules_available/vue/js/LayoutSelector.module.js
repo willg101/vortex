@@ -1,3 +1,5 @@
+import Pane from './Layout/Pane.module.js'
+
 var $ = jQuery
 
 // Indicates whether the page needs to be reloaded after settings are saved (the page needs to
@@ -33,8 +35,8 @@ function renderLayoutSelector( i, layout_only )
 	}
 
 	pane_preview = i == 0
-		? Vue.Layout.Pane.current_layout
-		: new Vue.Layout.Pane( el )
+		? Pane.current_layout
+		: new Pane( el )
 
 	return render( 'vue.layout_selector', {
 		include_controls : !layout_only,
