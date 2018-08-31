@@ -32,6 +32,30 @@ function namespace( ns )
 	return context;
 }
 
+window.PageTitle = {
+	state     : {},
+	format    : () => 'Vortex',
+
+	setFormat : function( str )
+	{
+		this.format = Handlebars.compile( str );
+		this.refreshTitle();
+	},
+
+	updateState : function( vars )
+	{
+		$.extend( true, this.state, vars );
+		this.refreshTitle();
+	},
+
+	refreshTitle : function()
+	{
+		document.title = this.format( this.state );
+	},
+};
+
+$( () => window.PageTitle.setFormat( document.title.trim() ) );
+
 /**
  * @brief
  *	Create a URL for by prefixing the given path with this site's base path

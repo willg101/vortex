@@ -21,6 +21,12 @@ $( () =>
 	}
 } );
 
+subscribe( 'vortex-init', () =>
+{
+	PageTitle.setFormat( 'Vortex ({{status}})' );
+	PageTitle.updateState( { status : 'disconnected' } );
+} );
+
 subscribe( 'connection-status-changed', function( e )
 {
 	if ( !allow_reconnect )
@@ -30,7 +36,6 @@ subscribe( 'connection-status-changed', function( e )
 
 	if ( e.status == 'error' || e.status == 'closed' )
 	{
-		Theme.PageTitle.update( 'status', 'disconnected' );
 		setTimeout( WsClient.openConnection, reconnect_delay_ms );
 		if ( was_connected )
 		{
@@ -40,8 +45,6 @@ subscribe( 'connection-status-changed', function( e )
 	}
 	else if ( e.status == 'no-exclusive-access' )
 	{
-		Theme.PageTitle.update( 'status', 'disconnected' );
-
 		if ( was_connected )
 		{
 			Theme.notify( 'error', 'Vortex is already in use in another browser or tab, or on '
@@ -55,7 +58,6 @@ subscribe( 'connection-status-changed', function( e )
 		// Probe for an existing session; allows us to pick up where we left off if the user
 		// left the page and has now returned or lost their connection and has now regained it
 		Debugger.command( 'status' );
-		Theme.PageTitle.update( 'status', 'waiting' );
 		was_connected = true;
 	}
 } );
@@ -77,7 +79,7 @@ subscribe( 'server-info', function( e )
 		// Kill the web socket connection and prevent attempts by this module to reconnect and/or
 		// display warnings about the disconnection
 		was_connected = false;
-		Theme.PageTitle.update( 'status', 'transferred' );
+		PageTitle.updateState( { status : 'transferred' } );
 		allow_reconnect = false;
 		WsClient.getConnection().close();
 	}
@@ -98,10 +100,15 @@ subscribe( 'session-status-changed', function( e )
 {
 	if ( e.status == 'active' )
 	{
+		PageTitle.updateState( { status : 'active' } );
 		Debugger.command( 'feature_set', { name : 'max_data', value : 2048 } );
 		Debugger.command( 'feature_set', { name : 'max_children', value : 128 } );
 		Debugger.command( 'feature_set', { name : 'max_depth', value : 1 } );
 		Debugger.command( 'status' );
+	}
+	else if ( allow_reconnect )
+	{
+		PageTitle.updateState( { status : ( WsClient.isConnected() ? 'waiting' : 'disconnected' ) } );
 	}
 } );
 
