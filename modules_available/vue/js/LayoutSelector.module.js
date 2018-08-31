@@ -34,7 +34,7 @@ function renderLayoutSelector( i, layout_only )
 			+ 'layout found' );
 	}
 
-	pane_preview = i == 0
+	var pane_preview = i == 0
 		? Pane.current_layout
 		: new Pane( el )
 
