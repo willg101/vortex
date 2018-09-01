@@ -209,7 +209,7 @@ Window.prototype.onOtherWindowUnmaximized = function( e )
  * @param function on_finish         OPTIONAL. A function to call once the window has been
  *                                   maxinized/un-maximized
  */
-Window.prototype.maximize = function( enable_or_disable )
+Window.prototype.maximize = function( enable_or_disable, on_finish )
 {
 	// Validate arguments
 	if ( typeof on_finish == 'undefined' )
