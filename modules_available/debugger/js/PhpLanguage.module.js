@@ -1,5 +1,6 @@
 import LanguageAbstractor from './LanguageAbstractor.module.js'
 import Debugger           from './Debugger.module.js'
+import WsClient           from './WsClient.module.js'
 
 const MAGIC_EVAL_VAR_NAME      = '$__';
 const HEREDOC_PREFIX           = 'eval(<<<\'VORTEXEVAL\'\n';
