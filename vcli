@@ -6,6 +6,10 @@ define( 'DPOH_ROOT', __DIR__ );
 
 require __DIR__.'/vendor/autoload.php';
 
+$whoops = new Whoops\Run;
+$whoops->pushHandler( new Whoops\Handler\PlainTextHandler );
+$whoops->register();
+
 require_once 'includes/arrays.php';
 require_once 'includes/autoloader.php';
 require_once 'includes/bootstrap.php';
@@ -18,6 +22,8 @@ require_once 'includes/templates.php';
 
 require_once 'vendor/paragonie/random_compat/lib/random.php';
 require_once 'vendor/paragonie/random_compat/lib/random.php';
+
+throw new Exception( 'hi' );
 
 spl_autoload_register( 'vortex_autoloader' );
 
