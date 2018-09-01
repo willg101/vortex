@@ -67,7 +67,7 @@ $( document ).on( 'click', '#file_finder', function()
 			}
 			else
 			{
-				recent_files_popover.setContent( '<i class="fa fa-warning"></i> An error occured.' );
+				recent_files_popover.setContent( '<i class="fa fa-exclamation-triangle"></i> An error occured.' );
 			}
 		} );
 	}

@@ -40,13 +40,13 @@ $.fn.vtree = function( ctx, options )
 			case 'Superglobals' : return 'fa-globe';
 			case 'Locals'       : return 'fa-location-arrow';
 			case 'bool'         : return 'fa-toggle-on';
-			case 'null'         : return 'fa-close';
+			case 'null'         : return 'fa-ban';
 			case 'string'       : return 'fa-quote-left';
 			case 'object'       : return 'fa-cogs';
 			case 'array'        : return 'fa-th-list';
 			case 'int'          : return 'fa-hashtag';
-			case 'float'        : return 'fa-dot-circle-o';
-			default             : return 'fa-question-circle-o';
+			case 'float'        : return 'fa-dot-circle';
+			default             : return 'fa-question-circle';
 		}
 	}
 

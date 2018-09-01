@@ -36,7 +36,7 @@ class ConsoleCommandDisplay
 		term.echo( () => inner_fn(), { raw : true } );
 
 		this.element = $( `#${this.id}` );
-		this.spinner = $( '<i class="fa fa-spin fa-circle-o-notch"></i>' );
+		this.spinner = $( '<i class="fa fa-spin fa-circle-notch"></i>' );
 		this.element.append( this.spinner );
 	}
 

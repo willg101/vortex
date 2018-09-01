@@ -29,19 +29,19 @@ function updateStatusIndicator( level )
 	{
 		case 'disconnected':
 			$( '#status_indicator' )
-				.removeClass( 'connected session-in-progress fa-spin fa-circle-o-notch fa-circle' )
-				.addClass( 'fa-warning disconnected' );
+				.removeClass( 'connected session-in-progress fa-spin fas-circle-notch fa-circle' )
+				.addClass( 'fa-exclamation-triangle disconnected' );
 				break;
 
 		case 'connected':
 			$( '#status_indicator' )
-				.removeClass( 'disconnected session-in-progress fa-warning fa-circle' )
-				.addClass( 'fa-circle-o-notch fa-spin connected' );
+				.removeClass( 'disconnected session-in-progress fa-exclamation-triangle fa-circle' )
+				.addClass( 'fa-circle-notch fa-spin connected' );
 				break;
 
 		case 'active-session':
 			$( '#status_indicator' )
-				.removeClass( 'disconnected connected fa-circle-o-notch fa-spin fa-warning' )
+				.removeClass( 'disconnected connected fa-circle-notch fa-spin fa-exclamation-triangle' )
 				.addClass( 'fa-circle session-in-progress' );
 				break;
 

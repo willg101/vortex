@@ -244,7 +244,7 @@ subscribe( 'editor-ready', function( e )
 							of : $( '.var-expr-hover' ),
 						} )
 						.find( '.tree-container' )
-						.html( '<i class="fa fa-spin fa-circle-o-notch"></i>' )
+						.html( '<i class="fa fa-spin fa-circle-notch"></i>' )
 
 					setTimeout( function()
 					{

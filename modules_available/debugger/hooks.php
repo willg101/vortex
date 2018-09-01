@@ -25,7 +25,7 @@ function debugger_provide_windows()
 		[
 			'title'     => 'Scope',
 			'id'        => 'context',
-			'secondary' => '<span data-active-session-visibility="show" class="status-indicator"><i class="fa fa-microchip"></i> <span id="mem_usage"></span></span>',
+			'secondary' => '<span data-active-session-visibility="show" class="status-indicator"><i class="fa fa-memory"></i> <span id="mem_usage"></span></span>',
 			'icon'      => 'sitemap',
 			'content'   => render( 'context_window' ),
 		],
@@ -39,8 +39,8 @@ function debugger_provide_windows()
 		[
 			'title'     => 'Stack',
 			'id'        => 'stack',
-			'secondary' => '<span data-active-session-visibility="show" class="status-indicator"><i class="fa fa-sort-amount-desc"></i> <span id="stack_depth"></span></span>',
-			'icon'      => 'sort-amount-desc',
+			'secondary' => '<span data-active-session-visibility="show" class="status-indicator"><i class="fa fa-sort-amount-down"></i> <span id="stack_depth"></span></span>',
+			'icon'      => 'sort-amount-down',
 			'content'   => render( 'stack_window' ),
 		],
 	];

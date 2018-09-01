@@ -127,13 +127,13 @@ async function evalWatchedExpression( expression, output )
 	}
 	else if ( result.message )
 	{
-		var message = $( '<i class="fa fa-warning"></i>' ).attr( 'title', result.message );
+		var message = $( '<i class="fa fa-exclamation-triangle"></i>' ).attr( 'title', result.message );
 		$( output ).html( message );
 		notifyUserOfWatchWarning();
 	}
 	else
 	{
-		var message = $( '<i class="fa fa-warning"></i>' )
+		var message = $( '<i class="fa fa-exclamation-triangle"></i>' )
 			.attr( 'title', 'An empty response was received' );
 		$( output ).html( message );
 	}
