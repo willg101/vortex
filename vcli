@@ -23,8 +23,6 @@ require_once 'includes/templates.php';
 require_once 'vendor/paragonie/random_compat/lib/random.php';
 require_once 'vendor/paragonie/random_compat/lib/random.php';
 
-throw new Exception( 'hi' );
-
 spl_autoload_register( 'vortex_autoloader' );
 
 $application = new Application();
