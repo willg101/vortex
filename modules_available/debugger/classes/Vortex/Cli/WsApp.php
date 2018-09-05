@@ -97,7 +97,7 @@ class WsApp implements MessageComponentInterface
 		{
 			$conn->send( "50\0<wsserver status=\"no_exclusive_access\"></wsserver>\0" );
 			$this->logger->debug( "We already have a websocket connection; dropping $name" );
-			sleep( 1 ); // Give the message to the ws client a chance to send before closing
+			$this->loop->tick(); // Give the message to the ws client a chance to send before closing
 			$conn->close();
 		}
 
