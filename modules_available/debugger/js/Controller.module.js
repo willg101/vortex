@@ -67,7 +67,7 @@ subscribe( 'server-info', function( e )
 	{
 		// This session has been commandeered; disable the UI and show a message explaining what
 		// has happened.
-		vTheme.notify( 'error', 'This session was transferred to another tab or brower.', '', {
+		vTheme.notify( 'error', 'This session was transferred to another tab or browser.', '', {
 			timeOut : 0,
 			extendedTimeOut : 0,
 			positionClass: "toast-bottom-center"
