@@ -96,9 +96,8 @@ class WsApp implements MessageComponentInterface
 		else // An active web socket already exists
 		{
 			$conn->send( "50\0<wsserver status=\"no_exclusive_access\"></wsserver>\0" );
-			$this->logger->debug( "We already have a websocket connection; dropping $name" );
-			$this->loop->tick(); // Give the message to the ws client a chance to send before closing
-			$conn->close();
+			$this->logger->debug( "We already have a websocket connection; ignoring $name" );
+			return;
 		}
 
 		$data = [
@@ -111,6 +110,11 @@ class WsApp implements MessageComponentInterface
 
 	public function onClose( ConnectionInterface $conn )
 	{
+		if ( $conn != $this->bridge->getWsConnection() )
+		{
+			return;
+		}
+
 		$data = [
 			'connection' => $conn,
 			'bridge'     => $this->bridge,
@@ -123,6 +127,12 @@ class WsApp implements MessageComponentInterface
 
 	public function onMessage( ConnectionInterface $conn, $msg )
 	{
+		if ( $conn != $this->bridge->getWsConnection() )
+		{
+			$conn->close();
+			return;
+		}
+
 		$data = [
 			'message'    => $msg,
 			'connection' => $conn,
