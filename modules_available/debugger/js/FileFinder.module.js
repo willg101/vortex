@@ -56,7 +56,10 @@ $( document ).on( 'click', '#file_finder', function()
 						attr : {
 							'data-open-file' : data[ i ].fullpath,
 						},
-						content : data[ i ].name,
+						content : render( 'debugger.recent_file', {
+							filename : data[ i ].name,
+							path     : File.dirname( data[ i ].fullpath ),
+						} ),
 					} );
 				}
 				recent_files_popover.setList( 'recently_edited', {
@@ -266,7 +269,10 @@ function listRecentlyOpenFiles()
 	RecentFiles.list().forEach( ( filename ) =>
 	{
 		list.push( {
-			content : File.basename( filename ),
+			content : render( 'debugger.recent_file', {
+				filename : File.basename( filename ),
+				path     : File.dirname( filename ),
+			} ),
 			attr : {
 				'data-open-file' : filename,
 			},

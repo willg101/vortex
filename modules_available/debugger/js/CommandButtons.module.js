@@ -13,5 +13,5 @@ $( document ).on( 'click', '[data-command]', function( e )
 // Open files when elements with a `data-open-file` attribute are clicked
 $( document ).on( 'click', '[data-open-file]', function( e )
 {
-	ProgramStateUIRouter.setFile( $( e.target ).attr( 'data-open-file' ) );
+	ProgramStateUIRouter.setFile( $( e.currentTarget ).attr( 'data-open-file' ) );
 } );
