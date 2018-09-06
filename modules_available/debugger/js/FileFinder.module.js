@@ -225,7 +225,7 @@ $( document ).on( 'click', '.globber-option', function( e )
 	var path = target.attr( 'data-full-path' );
 	if ( target.is( '.globber-dir' ) )
 	{
-		$( '#file_finder' ).val( path + '/' ).focus().moveCursorToEnd();
+		$( '#file_finder' ).val( path + '/' ).focus().moveCursorToEnd().trigger( { type : 'keydown',  which : 9 } )
 	}
 	else if ( target.is( '.globber-file' ) )
 	{
