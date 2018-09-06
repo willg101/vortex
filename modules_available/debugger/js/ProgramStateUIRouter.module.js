@@ -108,10 +108,15 @@ function setFile( filename )
 	{
 		throw new Error( `Illegal filename: '${filename}'` );
 	}
+	else if ( filename == currentFile )
+	{
+		return;
+	}
+
 	currentStackPos = -1;
 	currentLine     = -1;
 	currentFile     = filename;
-	triggerUIRefresh();
+	triggerUIRefresh( true );
 }
 
 /**
