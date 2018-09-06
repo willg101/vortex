@@ -4,9 +4,7 @@
 		<button class="btn black refresh-file"><i class="fa fa-refresh"></i></span>
 	</div>
 	<div class="relative-container">
-		<div class="editor-layout">
-			<pre id="editor" >Start an Xdebug session in order to begin.</pre>
-		</div>
+		<pre id="editor" >Start an Xdebug session in order to begin.</pre>
 	</div>
 </div>
 <div class="current-value"><div class="tree-container"></div></div>
