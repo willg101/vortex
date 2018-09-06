@@ -193,6 +193,11 @@ class DbgpApp implements MessageComponentInterface
 				}
 			}
 		}
+		else if ( isset( $this->queue[ "c$conn->resourceId" ] ) )
+		{
+			unset( $this->queue[ "c$conn->resourceId" ] );
+			$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $this->peekQueue() ) . "</wsserver>" );
+		}
 	}
 
 	public function onMessage( ConnectionInterface $conn, $msg )
