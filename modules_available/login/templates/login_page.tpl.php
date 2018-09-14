@@ -4,16 +4,10 @@
 		<meta charset="UTF-8">
 		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 		<link rel="icon" href="favicon.ico" type="image/x-icon">
-		
 		<?php echo build_css_requirements() ?>
-		
-		<?php $errs = []; echo build_less_requirements( $errs ) ?>
+		<?php echo build_less_requirements() ?>
 	</head>
 	<body id="login_page">
-		<?php if ( $errs ): ?>
-		<pre>Less Errors:
-<?php var_export( $errs ) ?></pre>
-		<?php endif ?>
 		<div class="css-table">
 			<div class="css-row">
 				<div class="css-cell">

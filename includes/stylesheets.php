@@ -39,11 +39,9 @@ function build_css_requirements()
  *	Generates the link tags for including each required LESS file (and additionally compiles all
  *	LESS files)
  *
- * @param array[out] $errors An indexed array of errors that occurred while compiling the LESS files
- *
  * @retval string
  */
-function build_less_requirements( &$errors = [] )
+function build_less_requirements()
 {
 	$result = [];
 
@@ -55,7 +53,7 @@ function build_less_requirements( &$errors = [] )
 			{
 				// Get the input file's basename and strip off the extension
 				$less_file_plain = without_file_extension( $less_file );
-				$output          = compile_less( $less_file, $module_name, $errors );
+				$output          = compile_less( $less_file, $module_name );
 				$result[]        = '<link rel="stylesheet" href="' . $output . '"/>';
 			}
 		}
@@ -68,11 +66,10 @@ function build_less_requirements( &$errors = [] )
  * @brief
  *	Compiles a LESS file into a CSS file and saves the result to disk
  *
- * @param string     $input_file
- * @param string     $output_prefix
- * @param array[out] $errors
+ * @param string $input_file
+ * @param string $output_prefix
  */
-function compile_less( $input_file, $output_prefix, array &$errors = [] )
+function compile_less( $input_file, $output_prefix )
 {
 	static $clear = TRUE;
 	static $request_timestamp;
@@ -99,15 +96,7 @@ function compile_less( $input_file, $output_prefix, array &$errors = [] )
 
 	$less = new Less_Parser();
 	$less->ModifyVars( settings( 'less_variables' ) );
-	try
-	{
-		$less->parseFile( $input_file );
-		file_put_contents_safe( $output_file, $less->getCss() );
-	}
-	catch( Exception $e )
-	{
-		$errors[] = $e->getMessage();
-		return '';
-	}
+	$less->parseFile( $input_file );
+	file_put_contents_safe( $output_file, $less->getCss() );
 	return $output_file;
 }

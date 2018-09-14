@@ -8,7 +8,7 @@
 
 		<?php echo build_css_requirements() ?>
 
-		<?php $errs = []; echo build_less_requirements( $errs ) ?>
+		<?php echo build_less_requirements() ?>
 
 	</head>
 	<body>
