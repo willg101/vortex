@@ -45,8 +45,8 @@ subscribe( 'connection-status-changed', function( e )
 		PageTitle.updateState( { status : 'disconnected' } );
 		if ( was_connected )
 		{
-			vTheme.notify( 'error', 'Vortex is already in use in another browser or tab, or on '
-				+ 'another computer.<br><a class="commandeer-btn">Use Vortex in this tab</a>', '',
+			vTheme.notify( 'error', 'Vortex is already in use in another browser or tab.'
+				+ '<button class="btn-block commandeer-btn">Use Vortex in this tab</button>', '',
 				{ extendedTimeOut : 0, timeOut : 0 } );
 		}
 		was_connected = false;
