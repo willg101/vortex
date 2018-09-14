@@ -21,7 +21,7 @@ class PhpLanguage extends LanguageAbstractor
 		return mem_data.value;
 	}
 
-	async evalCommand( command, display )
+	async evalCommand( command, display, flags )
 	{
 		var output = function(){};
 		if ( display )
@@ -34,6 +34,12 @@ class PhpLanguage extends LanguageAbstractor
 
 		if ( !Debugger.sessionIsActive() )
 		{
+			if ( flags & LanguageAbstractor.NO_CREATE_SESSION )
+			{
+				throw new this.constructor.Error( 'Cannot eval the command: no debug session is '
+					+ 'active and the `NO_CREATE_SESSION` flag is set' );
+			}
+
 			try
 			{
 				output( 'No debug session is active; creating dummy session...' );

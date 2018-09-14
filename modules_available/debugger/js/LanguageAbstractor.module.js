@@ -59,4 +59,6 @@ requiredMethods.forEach( methodName =>
 
 LanguageAbstractor.Error = class extends Error {}
 
+LanguageAbstractor.NO_CREATE_SESSION = 1;
+
 export default LanguageAbstractor

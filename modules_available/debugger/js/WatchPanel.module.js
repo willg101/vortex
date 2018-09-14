@@ -109,7 +109,22 @@ function renderExpressions()
 async function evalWatchedExpression( expression, output )
 {
 	output = $( output );
-	var result = await LanguageAbstractor.evalCommand( expression );
+	try
+	{
+		var result = await LanguageAbstractor.evalCommand( expression, null,
+			LanguageAbstractor.NO_CREATE_SESSION );
+	}
+	catch ( e )
+	{
+		if ( e instanceof LanguageAbstractor.Error )
+		{
+			var message = $( '<i class="fa fa-exclamation-triangle"></i>' )
+				.attr( 'title', 'No debug session is currently active' );
+			$( output ).html( message );
+			return;
+		}
+		else throw e;
+	}
 
 	if ( output.is( '.jstree' ) )
 	{
