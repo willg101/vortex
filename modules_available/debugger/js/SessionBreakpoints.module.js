@@ -77,6 +77,10 @@ class SessionBreakpoints
 			{
 				this.importFromDebuggerEngine()
 			}
+			else
+			{
+				this.apply( bp => bp.goOffline() );
+			}
 		} );
 	}
 
@@ -127,8 +131,7 @@ class SessionBreakpoints
 		breakpoints.parsed.line.forEach( importEach );
 		breakpoints.parsed.conditional.forEach( importEach );
 
-		var action = Debugger.sessionIsActive() ? 'sendToDebugger' : 'goOffline';
-		this.apply( bp => this.allBreakpoints[ bp.file ][ bp.line ][ action ]() );
+		this.apply( bp => bp.sendToDebugger() );
 	}
 
 	toggle( file, line, expression )
