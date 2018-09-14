@@ -4,7 +4,6 @@
 {
 	position: relative;
 	height: 100%;
-	top: 0;
 	width: 100%;
 	overflow: auto;
 
@@ -27,15 +26,15 @@
 
 		&.terminal
 		{
-			background: #FFF;
-			color: #444;
+			background: @default-window-bg;
+			color: @default-window-text-color;
 		}
 
 		.terminal,
 		.cmd
 		{
-			background: white;
-			color: #21599f;
+			background: @default-window-bg;
+			color: @default-window-text-color;
 		}
 
 		.cmd

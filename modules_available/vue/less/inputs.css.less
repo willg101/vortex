@@ -1,0 +1,65 @@
+@import "@{defaults}";
+
+input[type=text]:not(.no-theme)
+{
+	.transition();
+	position: relative;
+	width: 100%;
+	background: @input-bg;
+	box-sizing: border-box;
+	border: 2px solid @inactive-gray;
+	border-width: @standard-border-width;
+	color: @default-window-text-color;
+	font-family: @default-monospace-font;
+	overflow: auto;
+	white-space: pre-wrap;
+	padding: 0 @default-spacing-sm;
+	margin: @default-spacing-sm;
+
+	&:focus,
+	&:active
+	{
+		outline: none;
+		border-color: @active-color-alt-light;
+	}
+}
+
+input[type=button],
+button,
+.text-btn
+{
+	.transition();
+	padding: @default-spacing-sm;
+
+	background: @input-bg;
+	box-sizing: border-box;
+	border: 2px solid @inactive-gray;
+	border-width: @standard-border-width;
+	color: @default-window-text-color;
+	font-family: @default-monospace-font;
+	cursor: pointer;
+
+	&:not(.btn)
+	{
+		margin-top: @default-spacing-sm; // TODO: Hack to keep debugger control buttons unaffected
+	}
+
+	&:focus,
+	&:hover
+	{
+		outline: none;
+		border-color: @active-color-alt-light;
+		transform: scale(1.01);
+	}
+
+	&:active
+	{
+		transform: scale(.99);
+	}
+
+	&.btn-block
+	{
+		display: block;
+		width: 100%;
+	}
+}

@@ -6,6 +6,44 @@
 @secondary-color: #3ca6de;
 @tertiary-color: #59c203;
 
+@red: #FB0416;
+@orange: #FF8504;
+@yellow: #FFD704;
+
+@active-color: @tertiary-color;
+@active-color-alt-light: lighten( @active-color, 20% );
+@selectable-color: @primary-color;
+@selectable-color-alt-light: lighten( @selectable-color, 20% );
+@selectable-hover-color: lighten( @selectable-color, 50% );
+@default-window-bg: #FFF;
+@default-window-text-color: #333;
+@toolbar-bg: @default-window-text-color;
+@toolbar-fg: @default-window-bg;
+
+@input-bg: #E0E0E0;
+@inactive-gray: #AAA;
+
+@separator: #CCC;
+
+@standard-border-width: 0 0 2px 0;
+
+@default-display-font: 'Open Sans';
+@default-monospace-font: consolas, monospace;
+
+@default-spacing-sm: 10px;
+@default-spacing: 20px;
+@deemphasized-text-color: rgba(0,0,0,0.625);
+@text-contrast-color: #FFF;
+
+@line-breakpoint-color: @red;
+@conditional-breakpoint-color: @orange;
+
+@subtle-highlight: rgba(0,0,0,0.1);
+@semitransparent-white: rgba(255,255,255,0.5);
+
+@text-shadow: 0 0 10px #FFF;
+@shadow: 0 0 10px -2px #000;
+@transition-duration: 200ms;
 /*************************************************************************************************
  * Mixins
  *************************************************************************************************/
@@ -18,7 +56,7 @@
 	-webkit-transform: translateZ(0) scale(1.0, 1.0);
 }
 
-.bouncy(@max-scale : 1.5; @min-scale: 0.7; @border-width: 1px)
+.bouncy(@max-scale : 1.5; @min-scale: 0.7; @border-width: 0px)
 {
 	.transition();
 	border: none; // For <button> elements, to which some browsers add a cheesy 3D-ish border
