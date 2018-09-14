@@ -119,10 +119,6 @@ class SessionBreakpoints
 			}
 			else
 			{
-				if ( !this.allBreakpoints[ filename ] )
-				{
-					this.allBreakpoints[ filename ] = {};
-				}
 				this.allBreakpoints[ filename ][ bp.lineno ] = new Breakpoint( filename, bp.lineno,
 					bp.expression || bp.expression_element, bp.id );
 			}
