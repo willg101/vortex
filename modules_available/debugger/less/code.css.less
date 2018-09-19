@@ -2,19 +2,29 @@
 
 .recent-file
 {
-	.filename,
-	.filepath
+	body:not(.active-session) &.nonlocal-file:hover
 	{
-		display: block;
+		background-color: @default-window-bg;
+		cursor: not-allowed;
 	}
+
 	.filename
 	{
+		display: block;
 		font-weight: bold;
 	}
+
+	.host,
 	.filepath
 	{
-		color: @deemphasized-text-color;
+		font-family: @default-monospace-font;
 		font-size: 90%;
+		display: inline-block;
+	}
+
+	.host
+	{
+		color: @extra-deemphasized-text-color;
 	}
 }
 

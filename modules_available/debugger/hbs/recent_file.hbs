@@ -1,4 +1,4 @@
 <span class="recent-file">
 	<span class="filename">{{ filename }}</span>
-	<span class="filepath">{{ path }}</span>
+	{{#if host}}<span class="host">{{ host }}:</span>{{/if}}<span class="filepath">{{ path }}</span>
 </span>
