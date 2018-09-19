@@ -21,6 +21,20 @@ class PhpLanguage extends LanguageAbstractor
 		return mem_data.value;
 	}
 
+	async getHostname()
+	{
+		if ( Debugger.sessionIsActive() )
+		{
+			var data     = await Debugger.command( 'eval', 'gethostname()' );
+			var hostname = data.parsed.value[ 0 ] || { value : 'unknown host' };
+			return hostname.value;
+		}
+		else
+		{
+			return 'localhost';
+		}
+	}
+
 	async evalCommand( command, display, flags )
 	{
 		var output = function(){};
