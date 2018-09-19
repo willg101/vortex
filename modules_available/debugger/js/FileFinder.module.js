@@ -266,15 +266,16 @@ function listRecentlyOpenFiles()
 {
 	var list = [];
 
-	RecentFiles.list().forEach( ( filename ) =>
+	RecentFiles.list().forEach( ( file ) =>
 	{
 		list.push( {
 			content : render( 'debugger.recent_file', {
-				filename : File.basename( filename ),
-				path     : File.dirname( filename ),
+				filename : File.basename( file.filename ),
+				path     : File.dirname( file.filename ),
+				host     : file.host != 'localhost' ? file.host : '',
 			} ),
 			attr : {
-				'data-open-file' : filename,
+				'data-open-file' : file.filename,
 			},
 		} );
 	} );

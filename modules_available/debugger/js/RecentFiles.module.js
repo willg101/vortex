@@ -20,10 +20,18 @@ subscribe( 'vortex-init', function()
 	}
 } );
 
-function push( filename )
+function push( file )
 {
-	filename = File.stripScheme( filename );
-	var currentIndex = recentFiles.indexOf( filename );
+	var filename = File.stripScheme( file.path );
+	var currentIndex = -1;
+	recentFiles.some( ( el, i ) =>
+	{
+		if ( el.filename == filename )
+		{
+			currentIndex = i;
+			return true;
+		}
+	} );
 	if ( currentIndex >= 0 )
 	{
 		recentFiles.splice( currentIndex, 1 );
@@ -32,7 +40,7 @@ function push( filename )
 	{
 		recentFiles.pop();
 	}
-	recentFiles.unshift( filename );
+	recentFiles.unshift( { filename, host : file.hostname } );
 	localStorage.setItem( PERSISTENT_STORAGE_KEY, JSON.stringify( recentFiles ) );
 }
 

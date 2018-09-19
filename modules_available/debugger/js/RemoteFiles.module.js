@@ -1,4 +1,5 @@
-import Debugger from './Debugger.module.js'
+import Debugger           from './Debugger.module.js'
+import LanguageAbstractor from './LanguageAbstractor.module.js'
 export default { get, listRecentlyModified, apiPath, clearCache }
 
 var $ = jQuery;
@@ -19,6 +20,8 @@ var filecache = {};
  */
 async function fetchFromSever( path, cb )
 {
+	var hostname_promise = LanguageAbstractor.getHostname();
+
 	if ( Debugger.sessionIsActive() )
 	{
 		if ( !path.match( /^file:\/\// ) )
@@ -26,27 +29,29 @@ async function fetchFromSever( path, cb )
 			path = 'file://' + path;
 		}
 
-		var message = await Debugger.command( 'source', { file : path } );
+		var message  = await Debugger.command( 'source', { file : path } );
+		var hostname = await hostname_promise;
 		if ( message.jq_message.find( ' > error[code=100]' ).length )
 		{
 			message.parsed.file_contents = false;
 		}
 		var contents      = message.parsed.file_contents || false;
 		filecache[ path ] = contents;
-		var error_reason = !contents && ( message.is_stopping ? 'stopping' : ( message.is_stopped ? 'stopped' : 'other' ) );
-		return new Promise( ( resolve, reject ) => contents ? resolve( contents ) : reject( error_reason ) );
+		var error_reason  = !contents && ( message.is_stopping ? 'stopping' : ( message.is_stopped ? 'stopped' : 'other' ) );
+		return new Promise( ( resolve, reject ) => contents ? resolve( { contents, hostname, path } ) : reject( error_reason ) );
 	}
 	else
 	{
 		return new Promise( ( resolve, reject ) => {
-			$.get( apiPath( path ), function( data )
+			$.get( apiPath( path ), async function( contents )
 			{
-				filecache[ path ] = data;
-				resolve( data )
-			} ).fail( function()
+				filecache[ path ] = contents;
+				var hostname = await hostname_promise;
+				resolve( { contents, hostname, path } )
+			} ).fail( function( error_reason )
 			{
 				filecache[ path ] = false;
-				resolve( false );
+				reject( error_reason );
 			} );
 		} );
 	}

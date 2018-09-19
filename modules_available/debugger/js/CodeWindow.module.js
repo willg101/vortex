@@ -363,16 +363,19 @@ async function showFile( filename, line, cb, skip_cache, scroll_top, no_clear_ac
 	}
 
 	filename = File.stripScheme( filename );
-	RecentFiles.push( filename );
 
-	var data = await RemoteFiles.get( filename, skip_cache );
-	if ( data === false )
+	try
+	{
+		var data = await RemoteFiles.get( filename, skip_cache );
+		RecentFiles.push( data );
+	}
+	catch ( e )
 	{
 		vTheme.notify( 'error', 'The file <b>' + File.basename( filename ) + '</b> failed to load' );
 		return;
 	}
 
-	var text = data;
+	var text = data.contents;
 	if ( current_file != filename || skip_cache )
 	{
 		editor.setValue( text, -1 );
