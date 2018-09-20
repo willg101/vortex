@@ -29,3 +29,9 @@
 		}
 	}
 }
+
+body:not(.autorun-in-progress) [data-show-when=autorunning],
+body.autorun-in-progress [data-hide-when=autorunning]
+{
+	display: none;
+}

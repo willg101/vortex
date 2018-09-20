@@ -181,7 +181,18 @@
 	box-shadow: @shadow;
 	padding: @default-spacing-sm/2 @default-spacing-sm;
 	display: flex;
-	align-items: center;
+	align-items: stretch;
+	flex-direction: column;
+
+	& > *
+	{
+		padding: 5px;
+	}
+
+	.spinner
+	{
+		margin-right: @default-spacing-sm;
+	}
 
 	.timer
 	{
@@ -189,11 +200,18 @@
 		font-family: @default-monospace-font;
 		font-weight: bold;
 		display: inline-block;
-		margin-left: @default-spacing-sm;
 	}
 
 	&.inactive
 	{
 		display: none;
+	}
+
+	.autorun-msg
+	{
+		color: @deemphasized-text-color;
+		font-size: 80%;
+		text-align: center;
+		font: @default-monospace-font;
 	}
 }

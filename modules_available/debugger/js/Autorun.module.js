@@ -33,7 +33,12 @@ function onSessionInit( e )
 		{
 			if ( document.visibilityState == 'hidden' || mode == 'always' )
 			{
-				whenReadyTo( 'autorun' ).then( Debugger.command.bind( null, 'run' ) );
+				whenReadyTo( 'autorun' ).then( () =>
+				{
+					var class_name = 'autorun-in-progress';
+					$( 'body' ).addClass( class_name );
+					Debugger.command( 'run', () => $( 'body' ).removeClass( class_name ) )
+				} );
 			}
 		}
 	} );

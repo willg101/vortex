@@ -9,6 +9,11 @@
 </div>
 <div class="current-value"><div class="tree-container"></div></div>
 <div class="command-timer inactive">
-	<span class="spinner"></span>
-	<span class="timer"></span>
+	<div class="autorun-msg" data-show-when="autorunning">
+		Autorun
+	</div>
+	<div>
+		<span class="spinner"></span>
+		<span class="timer"></span>
+	</div>
 </div>
