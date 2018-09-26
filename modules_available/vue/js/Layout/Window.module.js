@@ -149,7 +149,9 @@ Window.prototype.minimize = function( enable_or_disable, on_finish )
 	else if ( this.state == 'minimized' ) // Otherwise, if we should un-minimize (and are minimized)
 	{
 		this.state = 'normal';
-		this.element.css( 'display', '' );
+		var new_css = { display : '' };
+		new_css[ this.owner.direction == 'vertical' ? 'height' : 'width' ] = 0;
+		this.element.css( new_css );
 		setTimeout( function()
 		{
 			that.element.removeClass( 'minimize-blur' ).css( 'display', '' );
