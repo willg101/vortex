@@ -359,7 +359,7 @@ Pane.prototype.refresh = function( did_show )
 		this.show();
 	}
 
-	// Because the call this.show() does not always take effct immediately, we will finish this
+	// Because the call this.show() does not always take effect immediately, we will finish this
 	// validation later using setTimeout(), which will allow this function to return, and for
 	// the browser to update, before continuing
 	if ( !this.refresh_queued )
