@@ -1,0 +1,36 @@
+@import "@{defaults}";
+
+#toast-container
+{
+	.toast-error,
+	.toast-info,
+	.toast-warning,
+	.toast-success
+	{
+		border-radius: @default-border-radius;
+		background-image: none !important;
+		opacity: 1;
+		padding: @default-spacing;
+		box-shadow: @shadow;
+	}
+
+	.toast-error
+	{
+		background: @red;
+	}
+
+	.toast-success
+	{
+		background: @green;
+	}
+
+	.toast-info
+	{
+		background: @blue;
+	}
+
+	.toast-warning
+	{
+		background: @yellow;
+	}
+}

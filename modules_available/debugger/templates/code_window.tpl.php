@@ -1,7 +1,7 @@
 <div class="flex-wrapper">
 	<div class="file-bar">
-		<input type="text" class="themed-input" placeholder="Enter a filename..." id="file_finder"/>
-		<button class="btn black refresh-file"><i class="fa fa-sync"></i></span>
+		<input type="text" class="margin-all-sides monospace" placeholder="Enter a filename..." id="file_finder"/>
+		<button class="btn black no-margin-top sm refresh-file"><i class="fa fa-sync"></i></span>
 	</div>
 	<div class="relative-container">
 		<pre id="editor" >Start an Xdebug session in order to begin.</pre>

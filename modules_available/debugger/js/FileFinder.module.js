@@ -217,11 +217,6 @@ $( document ).on( 'focusin', '#file_finder', function( e )
 	return false;
 } );
 
-$( document ).on( 'focusout', '#file_finder', function()
-{
-	$( '#file_buttons' ).removeClass( 'blur-hidden' );
-} );
-
 $( document ).on( 'click', '.globber-option', function( e )
 {
 	var target = $( e.target ).closest( '.globber-option' );

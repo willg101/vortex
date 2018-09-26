@@ -16,42 +16,6 @@ table.watch
 		border-top: 1px solid #E0E0E0;
 	}
 
-	tr:first-child td
-	{
-		padding: 5px 10px;
-		text-align: center;
-		background: rgba(0,0,0,0.1);
-		position: relative;
-		.transition();
-
-		&:after
-		{
-			.transition();
-			position: absolute;
-			bottom: 0;
-			width: 100%;
-			border-bottom: 3px solid transparent;
-			content: ' ';
-			left: 0;
-		}
-
-		&:hover
-		{
-			background: rgba(0,0,0,0.2);
-			cursor: pointer;
-
-			&:after
-			{
-				border-color: @tertiary-color;
-			}
-		}
-
-		&:active
-		{
-			transform: scale( .9 );
-		}
-	}
-
 	td
 	{
 		padding: 5px;

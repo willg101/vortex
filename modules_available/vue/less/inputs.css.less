@@ -1,65 +1,228 @@
 @import "@{defaults}";
 
-input[type=text]:not(.no-theme)
+input[type=text],
+input[type=password],
+textarea,
+.theme-as-input
 {
-	.transition();
-	position: relative;
-	width: 100%;
-	background: @input-bg;
-	box-sizing: border-box;
-	border: 2px solid @inactive-gray;
-	border-width: @standard-border-width;
-	color: @default-window-text-color;
-	font-family: @default-monospace-font;
-	overflow: auto;
-	white-space: pre-wrap;
-	padding: 0 @default-spacing-sm;
-	margin: @default-spacing-sm;
-
-	&:focus,
-	&:active
+	&:not(.no-theme)
 	{
-		outline: none;
-		border-color: @active-color-alt-light;
+		.transition();
+
+		position: relative;
+		box-sizing: border-box;
+		width: 100%;
+		padding: 0 @default-spacing-sm;
+		border: 0 solid @inactive-gray;
+		border-width: @standard-border-width;
+
+		&:not(.no-margin-top)
+		{
+			margin-top: @default-spacing-sm;
+		}
+
+		color: @default-window-text-color;
+
+		overflow: auto;
+		white-space: pre-wrap;
+
+		&:not(.no-bg)
+		{
+			background: @input-bg;
+		}
+
+		&.monospace
+		{
+			font-family: @default-monospace-font;
+		}
+
+		&.margin-all-sides
+		{
+			margin: @default-spacing-sm;
+		}
+
+		&[contenteditable]
+		{
+			padding: @default-spacing-sm;
+		}
+
+		&:focus,
+		&:active
+		{
+			outline: none;
+			border-color: @active-color-alt-light;
+		}
+
+		&::selection,
+		{
+			background: @primary-color;
+			color: #FFF;
+		}
+	}
+}
+
+.btn
+{
+
+}
+
+.btn-group
+{
+	display: flex;
+	flex-direction: row;
+
+	&:not(:first-child)
+	{
+		margin-top: 10px;
+	}
+
+	&.extra-margin-top
+	{
+		&:not(:first-child),
+		.force
+		{
+			margin-top: 20px;
+		}
+	}
+
+	& > *
+	{
+		flex-basis: 0;
+
+		&:not(.no-grow)
+		{
+			flex-grow: 1;
+		}
+
+		&.no-grow
+		{
+			white-space: nowrap;
+		}
+
+		&:not(:last-child)
+		{
+			margin-right: @default-spacing-sm/2;
+		}
 	}
 }
 
 input[type=button],
 button,
+.btn,
 .text-btn
 {
 	.transition();
-	padding: @default-spacing-sm;
-
-	background: @input-bg;
-	box-sizing: border-box;
-	border: 2px solid @inactive-gray;
-	border-width: @standard-border-width;
-	color: @default-window-text-color;
-	font-family: @default-monospace-font;
+	background: none;
 	cursor: pointer;
+	color: #FFF;
+	display: inline-block;
+	padding: @default-spacing-sm * 1.5;
+	box-sizing: border-box;
+	border: none;
 
-	&:not(.btn)
+	&.sm
 	{
-		margin-top: @default-spacing-sm; // TODO: Hack to keep debugger control buttons unaffected
+		padding: @default-spacing-sm;
+	}
+
+	&.black,
+	&.black:hover,
+	&.black:active
+	{
+		.fa
+		{
+			color: @default-text-btn-fg;
+		}
+	}
+
+	&:not(.no-margin-top)
+	{
+		margin-top: @default-spacing-sm;
 	}
 
 	&:focus,
 	&:hover
 	{
 		outline: none;
-		border-color: @active-color-alt-light;
-		transform: scale(1.01);
+		background: @extra-deemphasized-text-color;
 	}
 
-	&:active
+	&:not(.no-bounce)
 	{
-		transform: scale(.99);
+		@scale-factor: 0.25;
+		.fa
+		{
+			.transition();
+		}
+
+		&:focus .fa,
+		&:hover .fa
+		{
+			transform: scale(1 + @scale-factor);
+		}
+
+		&:active .fa
+		{
+			transform: scale(1 - @scale-factor);
+		}
+	}
+
+	&.text-btn
+	{
+		background: @default-text-btn-bg;
+		color: @default-text-btn-fg;
+
+		&:not(.no-bounce)
+		{
+			@scale-factor: 0.05;
+
+			&:focus,
+			&:hover
+			{
+				transform: scale(1 + @scale-factor);
+			}
+
+			&:active
+			{
+				transform: scale(1 - @scale-factor);
+			}
+		}
+
+		&:hover
+		{
+			background: @default-text-btn-fg;
+			color: @default-text-btn-bg;
+		}
 	}
 
 	&.btn-block
 	{
 		display: block;
 		width: 100%;
+	}
+}
+
+.input-group
+{
+	&:not(.no-margin)
+	{
+		margin: @default-spacing-sm;
+	}
+	flex-grow: 1;
+	flex-shrink: 1;
+	display: flex;
+
+	.no-resize
+	{
+		flex-grow: 0;
+		flex-shrink: 0;
+	}
+
+	& > *
+	{
+		flex-grow: 1;
+		flex-shrink: 1;
+		padding: @default-spacing-sm/2 @default-spacing-sm;
+		box-sizing: border-box;
 	}
 }

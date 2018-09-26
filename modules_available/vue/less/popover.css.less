@@ -1,0 +1,70 @@
+@import "@{defaults}";
+
+.vue-popover
+{
+	position: relative;
+	width: 400px;
+	max-height: 500px;
+	overflow-x: hidden;
+	text-overflow: ellipsis;
+	overflow-y: auto;
+	background-color: @default-window-bg;
+	box-shadow: @shadow;
+	box-sizing: border-box;
+	z-index: 99999;
+	font-size: .9rem;
+
+	&:not(.no-padding)
+	{
+		padding: @default-spacing-sm @default-spacing-sm * 1.5;
+	}
+
+	h2
+	{
+		padding: @default-spacing-sm @default-spacing-sm * 1.5;
+		margin: 0;
+		font-weight: normal;
+
+		font-size: 15px;
+		color: @title-bar-fg;
+
+		&:not(.no-bg)
+		{
+			background: @title-bar-bg;
+		}
+
+		&.swallow-margin
+		{
+			margin: -@default-spacing-sm @default-spacing-sm * -1.5 @default-spacing-sm;
+		}
+	}
+
+	&.auto-size
+	{
+		float: left;
+		width: auto;
+	}
+
+	[data-open-file],
+	.globber-option,
+	.popover-list-option
+	{
+		padding: @default-spacing-sm @default-spacing-sm * 1.5;
+		cursor: pointer;
+		display:block;
+		width: 100%;
+		box-sizing: border-box;
+		color: @default-window-text-color;
+
+		&.globber-dir
+		{
+			color: @blue;
+		}
+
+		&:hover
+		{
+			background: @selectable-hover-color;
+			border-color: transparent;
+		}
+	}
+}

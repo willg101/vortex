@@ -2,7 +2,7 @@
 
 .modal-overlay
 {
-	background: rgba(0,0,0,0.5);
+	background: @deemphasized-text-color;
 	z-index: 9;
 	position: fixed;
 	top: 0;
@@ -16,10 +16,10 @@
 
 .modal
 {
-	border-radius: 3px;
+	border-radius: @default-border-radius;
 	.transition();
-	background: #FFF;
-	box-shadow: 0 0 30px #000;
+	background: @default-window-bg;
+	box-shadow: @shadow;
 	position: relative;
 	max-width: 600px;
 	width: 80vw;
@@ -39,124 +39,47 @@
 .modal-title-bar
 {
 	position: relative;
-	background: #0A93C1;
-	padding: 10px 15px;
-	color: #FFF;
+	background: @title-bar-bg;
+	padding: @default-spacing-sm @default-spacing-sm * 1.5;
+	color: @title-bar-fg;
 	font-size: 14px;
 }
 
 .modal-exit
 {
-	border-radius: 0 3px 0 0 ;
-	padding: 10px;
-	background: #0A93C1;
+	border-radius: 0 @default-border-radius 0 0 ;
+	padding: @default-spacing-sm;
+	background: @title-bar-bg;
 	position: absolute;
 	font-size: 14px;
 	top: 0;
 	right: 0;
-	color: #FFF;
+	color: @title-bar-fg;
 	height: 100%;
 	box-sizing: border-box;
 	cursor: pointer;
-	.bouncy();
-
-	&:hover,
-	&:active
-	{
-		background: none;
-		border-color: #E45245;
-	}
-
 }
 
 .modal-content
 {
-	padding: 15px;
+	padding: @default-spacing;
 	width: 100%;
 	box-sizing: border-box;
-	border-radius: 0 0 3px 3px;
-
-	.value-input,
-	.bp-expression-input,
-	.we-expression-input,
-	.glob-input
-	{
-		position: relative;
-		max-height: ~"calc(100vh - 160px)";
-		width: 100%;
-		background: #E0E0E0;
-		box-sizing: border-box;
-		border: 2px solid #AAA;
-		border-width: 0 0 2px 0;
-		color: #000;
-		font-family: consolas, monospace;
-		padding: 10px;
-		overflow: auto;
-		white-space: pre-wrap;
-
-		&:focus
-		{
-			outline: none;
-			border-color: @tertiary-color;
-		}
-	}
-}
-
-.modal-overlay
-{
-	background: rgba(0,0,0,0.5);
-	z-index: 9;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
+	border-radius: 0 0 @default-border-radius @default-border-radius;
 }
 
 .blurable
 {
 	.transition();
-	@scale: 1;
-	transform:  scale(@scale, @scale);
-	position: relative;
+
+	&.blurred
+	{
+		@blur: 10px;
+		position: relative;
+		-webkit-filter: blur(@blur);
+		-moz-filter: blur(@blur);
+		-o-filter: blur(@blur);
+		-ms-filter: blur(@blur);
+		filter: blur(@blur);
+	}
 }
-
-.blurable.blurred
-{
-	@scale:1;
-	@blur: 10px;
-	position: relative;
-	transform:  scale(@scale, @scale);
-	-webkit-filter: blur(@blur);
-	-moz-filter: blur(@blur);
-	-o-filter: blur(@blur);
-	-ms-filter: blur(@blur);
-	filter: blur(@blur);
-}
-
-.shake
-{
-	animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-	transform: translate3d(0, 0, 0);
-	backface-visibility: hidden;
-	perspective: 1000px;
-}
-
-@keyframes shake {
-  10%, 90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-
-  20%, 80% {
-    transform: translate3d(2px, 0, 0);
-  }
-
-  30%, 50%, 70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-
-  40%, 60% {
-    transform: translate3d(4px, 0, 0);
-  }
-}
-

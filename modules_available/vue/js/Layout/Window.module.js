@@ -169,7 +169,7 @@ Window.prototype.addMinimizedIcon = function()
 {
 	var that = this;
 	var icon = this.element.attr( attr.minimize_icon );
-	$( '<span>' ).addClass( 'fa fa-' + icon ).appendTo( '<button class="btn">' )
+	$( '<span>' ).addClass( 'fa fa-' + icon ).appendTo( '<button class="no-margin-top btn">' )
 		.parent()
 		.data( 'related_window', this )
 		.on( 'click', function()

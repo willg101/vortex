@@ -1,0 +1,30 @@
+@import "@{defaults}";
+
+.toolbar
+{
+	background: @toolbar-bg;
+	overflow: hidden;
+
+	.left
+	{
+		text-align: left;
+		flex-grow: 0;
+	}
+
+	.center
+	{
+		text-align: center;
+		flex-grow: 1;
+	}
+
+	.right
+	{
+		text-align: right;
+		flex-grow: 0;
+
+		& > .btn
+		{
+			vertical-align: top;
+		}
+	}
+}

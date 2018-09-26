@@ -16,87 +16,25 @@
 	max-height: 400px;
 	overflow: auto;
 
-	table
+	.email
 	{
-		width: 100%;
-		text-align: left;
-
-		th
-		{
-			background: #444;
-			color: #FFF;
-		}
-
-		&,th,td
-		{
-			border-bottom: 1px solid #444;
-		}
-
-		td
-		{
-			background: #EEE;
-		}
-
-		tr:hover td
-		{
-			background: #DDD;
-		}
-
-		th,td
-		{
-			padding: 5px 10px;
-		}
-
-		border-collapse: collapse;
-
-		.sm-cell
-		{
-			padding: 0;
-			padding-right: 10px;
-			width: 0;
-		}
-
-		td:not(.sm-cell),
-		th:not(.sm-cell)
-		{
-			width: 50%;
-		}
+		color: @deemphasized-text-color;
 	}
 }
 
-.user-accounts-listing + .flex-container
+.invite-user
 {
-	display: flex;
-	margin: 20px 0 0;
-
-	& > :not(.input-group)
-	{
-		flex-grow: 0;
-		flex-shrink: 0;
-	}
-
-	.input-group
-	{
-		flex-grow: 1;
-		flex-shrink: 1;
-		margin-left: 0;
-	}
-}
-
-html
-{
-	position: relative;
-	height: 100%;
+	margin-left: @default-spacing-sm;
 }
 
 body#login_page
 {
 	position: relative;
 
-	// TODO: this should not be hard-coded in like this!
-	background: url('/dpoh/modules_enabled/vue/img/bg.jpg');
+	background: @splash-bg;
 	background-size: cover;
-	background-position: center;	margin: 0;
+	background-position: center;
+	margin: 0;
 	padding: 0;
 	font-family: "Open Sans", sans-serif;
 
@@ -120,10 +58,10 @@ body#login_page
 		width: 300px;
 		max-width: 300px;
 		margin: auto;
-		background: #FFF;
-		border-radius: 3px;
-		box-shadow: 0 0 25px -3px #000;
-		padding: 20px;
+		background: @default-window-bg;
+		border-radius: @default-border-radius;
+		box-shadow: @shadow;
+		padding: @default-spacing;
 		box-sizing: border-box;
 
 		&.shake
@@ -136,38 +74,9 @@ body#login_page
 
 		&.small
 		{
-			.transition( 200ms );
+			.transition();
 			opacity: 0;
 			transform: scale( .9 );
-		}
-
-		.login-form,
-		.create-account-form,
-		.reset-pw-form
-		{
-			z-index: 999;
-			margin-top: 20px;
-			input
-			{
-				.transition( 300ms );
-				padding: 10px;
-				display: block;
-				border-width: 0 0 2px;
-				border-bottom: 2px solid #BBB;
-				width: 100%;
-				box-sizing: border-box;
-				margin: 0;
-				&:not(:last-child)
-				{
-					margin-bottom: 5px;
-				}
-
-				&:focus
-				{
-					outline: none;
-					border-color: @tertiary-color;
-				}
-			}
 		}
 	}
 }
@@ -229,4 +138,3 @@ input:-webkit-autofill {
     transform: translate3d(4px, 0, 0);
   }
 }
-

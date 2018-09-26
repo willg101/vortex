@@ -5,10 +5,13 @@
 @primary-color: #21599f;
 @secondary-color: #3ca6de;
 @tertiary-color: #59c203;
+@default-border-radius: 0px;
 
 @red: #FB0416;
 @orange: #FF8504;
 @yellow: #FFD704;
+@green: @tertiary-color;
+@blue: @primary-color;
 
 @active-color: @tertiary-color;
 @active-color-alt-light: lighten( @active-color, 20% );
@@ -16,11 +19,19 @@
 @selectable-color-alt-light: lighten( @selectable-color, 20% );
 @selectable-hover-color: lighten( @selectable-color, 50% );
 @default-window-bg: #FFF;
-@default-window-text-color: #333;
+@default-window-text-color: #444;
+@splash-bg: #333;
 @toolbar-bg: @default-window-text-color;
 @toolbar-fg: @default-window-bg;
 
-@input-bg: #E0E0E0;
+@title-bar-bg: #0A93C1;
+@title-bar-fg: #FFF;
+
+@input-bg: #F0F0F0;
+
+@default-text-btn-bg: @input-bg;
+@default-text-btn-fg: @default-window-text-color;
+
 @inactive-gray: #AAA;
 
 @separator: #CCC;
