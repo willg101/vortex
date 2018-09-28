@@ -141,7 +141,7 @@ subscribe( 'program-state-ui-refresh-needed', async ( e ) =>
 	var context = e.programState.stack.frames[ e.stackPos ].context;
 	$( '#context' ).vtree( context ).on( 'ready.jstree', function()
 	{
-		treeState.restore( self );
+		treeState.restore( this );
 		$( '#context' ).on( 'open_node.jstree',  ( e, node ) => treeState.open( node ) );
 		$( '#context' ).on( 'close_node.jstree', ( e, node ) => treeState.close( node ) );
 	} );
