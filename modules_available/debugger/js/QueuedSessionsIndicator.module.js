@@ -23,7 +23,7 @@ subscribe( 'session-status-changed', function()
 	Debugger.command( 'X-ctrl:peek_queue' );
 } );
 
-function onServerInfoReceived( e )
+subscribe( 'server-info', function( e )
 {
 	if ( e.jq_message.is( '[type=peek_queue]' ) )
 	{
@@ -62,20 +62,20 @@ function onServerInfoReceived( e )
 	{
 		Debugger.command( 'X-ctrl:peek_queue' );
 	}
-}
+} );
 
 subscribe( 'session-switched', function()
 {
 	Debugger.command( 'X-ctrl:peek_queue' );
 } );
 
-function onDetachSessionClicked( e )
+$( document ).on( 'click', '[data-detach-session]', function( e )
 {
 	var cid = $( e.currentTarget ).attr( 'data-detach-session' );
 	WsClient.send( 'X-ctrl:detach_queued_session -s ' + cid );
-}
+} );
 
-function onIndicatorClicked()
+$( document ).on( 'click', '#connection_queue_indicator:not(.no-connection)', function()
 {
 	var items = '';
 	if ( known_sessions.length )
@@ -97,7 +97,17 @@ function onIndicatorClicked()
 		}
 	}
 	showPopover( items )
-}
+} );
+
+$( document ).on( 'click', '[data-switch-to-session]', function( e )
+{
+	if ( $( e.target ).closest( 'tr.active' ).length )
+	{
+		return;
+	}
+	var session_id = $( e.target ).closest( '[data-switch-to-session]' ).attr( 'data-switch-to-session' );
+	Debugger.command( 'X-ctrl:switch_session -s ' + session_id );
+} );
 
 function showPopover( rendered_items )
 {
@@ -118,19 +128,3 @@ function showPopover( rendered_items )
 		of : $( '#connection_queue_indicator' ),
 	}, $( '#connection_queue_indicator' ) );
 }
-
-function onSwitchToSessionClicked( e )
-{
-	if ( $( e.target ).closest( 'tr.active' ).length )
-	{
-		return;
-	}
-	var session_id = $( e.target ).closest( '[data-switch-to-session]' ).attr( 'data-switch-to-session' );
-	Debugger.command( 'X-ctrl:switch_session -s ' + session_id );
-}
-
-$( document ).on( 'click', '[data-switch-to-session]',    onSwitchToSessionClicked );
-$( document ).on( 'click', '[data-detach-session]',       onDetachSessionClicked );
-$( document ).on( 'click', '#connection_queue_indicator:not(.no-connection)', onIndicatorClicked );
-
-subscribe( 'server-info', onServerInfoReceived );
