@@ -1,5 +1,8 @@
 <?php
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
 /**
  * @brief
  *	The core of the PHP side of DPOH; boots up all modules, loads config and settings information,
@@ -29,6 +32,56 @@ function bootstrap()
 	{
 		throw new HttpException( "Page not found: " . request_path(), [ 'HTTP/1.1 404 Not found' ] );
 	}
+}
+
+/**
+ * @brief
+ *	Lazy-initializes the logger for this request/execution, allowing complete override of the
+ *	default logging mechanism via hook_init_logger(), and then returns a monolog
+ *	(or monolog-compatible) logger instance
+ *
+ * @retval Monolog\Logger
+ */
+function logger()
+{
+	static $logger;
+
+	if ( !$logger )
+	{
+		$filename = '';
+		if ( php_sapi_name() == 'cli' )
+		{
+			$filename = 'cli';
+		}
+		elseif ( IS_AJAX_REQUEST )
+		{
+			$filename = 'http_ajax';
+		}
+		else
+		{
+			$filename = 'http';
+		}
+
+		$data = [
+			'logger'   => NULL,
+			'label'    => $filename,
+			'filename' => __DIR__ . "/../logs/$filename.log",
+			'level'    => Logger::DEBUG,
+		];
+		fire_hook( 'init_logger', $data );
+
+		if ( !$data[ 'logger' ] )
+		{
+			$logger = new Logger( "Vortex Logger ($data[label])" );
+			$logger->pushHandler( new StreamHandler( $data[ 'filename' ], $data[ 'level' ] ) );
+		}
+		else
+		{
+			$logger = $data[ 'logger' ];
+		}
+	}
+
+	return $logger;
 }
 
 /**

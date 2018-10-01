@@ -4,7 +4,6 @@ namespace Vortex\Cli;
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
-use Psr\Log\LoggerInterface;
 use Exception;
 
 class WsApp implements MessageComponentInterface
@@ -23,15 +22,9 @@ class WsApp implements MessageComponentInterface
 	 */
 	protected $commandeer_token;
 
-	/**
-	 * @var \Psr\Log\LoggerInterface
-	 */
-	protected $logger;
-
-	public function __construct( ConnectionBridge $bridge, LoggerInterface $logger )
+	public function __construct( ConnectionBridge $bridge )
 	{
 		$this->bridge = $bridge;
-		$this->logger = $logger;
 	}
 
 	/**
@@ -76,7 +69,7 @@ class WsApp implements MessageComponentInterface
 	public function onOpen( ConnectionInterface $conn )
 	{
 		$name = "websocket connection $conn->resourceId";
-		$this->logger->debug( "Connection opened: $name" );
+		logger()->debug( "Connection opened: $name" );
 
 		$params = [];
 		parse_str( $conn->httpRequest->getUri()->getQuery(), $params );
@@ -96,14 +89,13 @@ class WsApp implements MessageComponentInterface
 		else // An active web socket already exists
 		{
 			$conn->send( "50\0<wsserver status=\"no_exclusive_access\"></wsserver>\0" );
-			$this->logger->debug( "We already have a websocket connection; ignoring $name" );
+			logger()->debug( "We already have a websocket connection; ignoring $name" );
 			return;
 		}
 
 		$data = [
 			'connection' => $conn,
 			'bridge'     => $this->bridge,
-			'logger'     => $this->logger,
 		];
 		fire_hook( 'ws_connection_opened', $data );
 	}
@@ -118,7 +110,6 @@ class WsApp implements MessageComponentInterface
 		$data = [
 			'connection' => $conn,
 			'bridge'     => $this->bridge,
-			'logger'     => $this->logger,
 		];
 		fire_hook( 'ws_connection_closed', $data );
 
@@ -137,7 +128,6 @@ class WsApp implements MessageComponentInterface
 			'message'    => $msg,
 			'connection' => $conn,
 			'bridge'     => $this->bridge,
-			'logger'     => $this->logger,
 			'abort'      => strpos( $msg, 'X-' ) === 0, // By default, don't forward messages beginning with 'X-'
 		];
 		fire_hook( 'ws_message_received', $data );
@@ -150,7 +140,7 @@ class WsApp implements MessageComponentInterface
 
 	public function onError( ConnectionInterface $conn, Exception $e )
 	{
-		$this->logger->error( "Error with ws connection $conn->resourceId: $e" );
+		logger()->error( "Error with ws connection $conn->resourceId: $e" );
 		$conn->close();
 	}
 }

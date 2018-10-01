@@ -3,7 +3,6 @@
 namespace Vortex\Cli;
 
 use Ratchet\ConnectionInterface;
-use Psr\Log\LoggerInterface;
 
 class ConnectionBridge
 {
@@ -25,16 +24,6 @@ class ConnectionBridge
 	 * @var Vortex\Cli\DbgpApp
 	 */
 	protected $dbg_app;
-
-	/**
-	 * @var Psr\Log\LoggerInterface
-	 */
-	protected $logger;
-
-	public function __construct( LoggerInterface $logger )
-	{
-		$this->logger = $logger;
-	}
 
 	/**
 	 * @retval bool

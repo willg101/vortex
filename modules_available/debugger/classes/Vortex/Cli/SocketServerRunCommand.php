@@ -12,7 +12,6 @@ use React\Socket\Server as SocketServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use Ratchet\Server\IoServer;
-use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
 require_once 'includes/arrays.php';
@@ -37,11 +36,9 @@ class SocketServerRunCommand extends Command
 
 	protected function execute( InputInterface $input, OutputInterface $output )
 	{
-		$logger = new Logger( 'Vortex Socket Server' );
-		$logger->pushHandler( new StreamHandler( 'logs/socket_server.log', Logger::DEBUG ) );
-		$bridge = new ConnectionBridge( $logger );
+		$bridge = new ConnectionBridge;
 
-		$logger->info( 'Creating socket servers' );
+		logger()->info( 'Creating socket servers' );
 
 		$loop = EventLoopFactory::create();
 		$dbg  = new SocketServer( '0.0.0.0:9000', $loop ); // TODO: Configurable
@@ -49,13 +46,13 @@ class SocketServerRunCommand extends Command
 
 		$wsStack = new HttpServer(
 			new WsServer(
-				new WsApp( $bridge, $logger )
+				new WsApp( $bridge )
 		) );
 
-		$DbgApp = new IoServer( new DbgpApp( $bridge, $logger ), $dbg, $loop );
+		$DbgApp = new IoServer( new DbgpApp( $bridge ), $dbg, $loop );
 		$wsApp  = new IoServer( $wsStack, $ws, $loop );
 
-		$logger->info( 'Entering run loop' );
+		logger()->info( 'Entering run loop' );
 
 		$loop->run();
 	}

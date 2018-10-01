@@ -4,7 +4,6 @@ namespace Vortex\Cli;
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
-use Psr\Log\LoggerInterface;
 use Exception;
 
 class DbgpApp implements MessageComponentInterface
@@ -28,19 +27,13 @@ class DbgpApp implements MessageComponentInterface
 	protected $ws_connection;
 
 	/**
-	 * @var Psr\Log\LoggerInterface
-	 */
-	protected $logger;
-
-	/**
 	 * @var array
 	 */
 	protected $queue = [];
 
-	public function __construct( ConnectionBridge $bridge, LoggerInterface $logger )
+	public function __construct( ConnectionBridge $bridge )
 	{
 		$this->bridge = $bridge;
-		$this->logger = $logger;
 
 		$bridge->registerDbgApp( $this );
 	}
@@ -48,7 +41,7 @@ class DbgpApp implements MessageComponentInterface
 	public function onOpen( ConnectionInterface $conn )
 	{
 		$name = "debug connection $conn->resourceId";
-		$this->logger->debug( "Connection opened: $name" );
+		logger()->debug( "Connection opened: $name" );
 
 		if ( $this->bridge->hasWsConnection() )
 		{
@@ -62,19 +55,18 @@ class DbgpApp implements MessageComponentInterface
 			}
 			else
 			{
-				$this->logger->debug( "The queue is full; dropping $name" );
+				logger()->debug( "The queue is full; dropping $name" );
 				$conn->close();
 				return;
 			}
 
 			if ( $this->bridge->hasDbgConnection() )
 			{
-				$this->logger->debug( "A debug session is currently active; enqueuing $name" );
+				logger()->debug( "A debug session is currently active; enqueuing $name" );
 
 				$data = [
 					'connection' => $conn,
 					'messages'   => &$this->queue[ "c$conn->resourceId" ][ 'messages' ],
-					'logger'     => $this->logger,
 				];
 				fire_hook( 'dbg_connection_queued', $data );
 			}
@@ -85,7 +77,7 @@ class DbgpApp implements MessageComponentInterface
 		}
 		else
 		{
-			$this->logger->debug( "We don't have a websocket client; dropping $name" );
+			logger()->debug( "We don't have a websocket client; dropping $name" );
 			$conn->close();
 		}
 	}
@@ -98,7 +90,7 @@ class DbgpApp implements MessageComponentInterface
 		{
 			$el = array_get( $value, 'messages.0', FALSE );
 
-			$this->logger->debug( var_export( array_diff_key( $value, ['connection' => '' ] ), TRUE ) );
+			logger()->debug( var_export( array_diff_key( $value, ['connection' => '' ] ), TRUE ) );
 
 			$is_first = $first == $key;
 			$hostname = gethostbyaddr( $value[ 'connection' ]->remoteAddress ) ?: $value[ 'connection' ]->remoteAddress;
@@ -132,13 +124,13 @@ class DbgpApp implements MessageComponentInterface
 	{
 		if ( !empty( $this->queue[ $sid ] ) )
 		{
-			$this->logger->debug( "Bumping connection #$sid to front of queue" );
+			logger()->debug( "Bumping connection #$sid to front of queue" );
 			$new = $this->queue[ $sid ];
 			unset( $this->queue[ $sid ] );
 			$this->queue = array_merge( [ $sid => $new ], $this->queue );
-			$this->logger->debug( "Bridging connection ($sid)" );
+			logger()->debug( "Bridging connection ($sid)" );
 			$this->bridgeConnection( $new[ 'connection' ] );
-			$this->logger->debug( "Queued connection {$sid} has " . count( $new[ 'messages' ] ) . ' messages waiting.' );
+			logger()->debug( "Queued connection {$sid} has " . count( $new[ 'messages' ] ) . ' messages waiting.' );
 			$this->bridge->sendToWs( '<wsserver status="session_change"></wsserver>' );
 			while ( $msg = array_shift( $new[ 'messages' ] ) )
 			{
@@ -153,7 +145,6 @@ class DbgpApp implements MessageComponentInterface
 		$data = [
 			'connection' => $conn,
 			'bridge'     => $this->bridge,
-			'logger'     => $this->logger,
 		];
 		fire_hook( 'dbg_connection_opened', $data );
 		$this->ws_connection = $conn;
@@ -166,26 +157,25 @@ class DbgpApp implements MessageComponentInterface
 			$data = [
 				'connection' => $conn,
 				'bridge'     => $this->bridge,
-				'logger'     => $this->logger,
 			];
 			fire_hook( 'dbg_connection_closed', $data );
 
-			$this->logger->debug( "Removing callback bridge" );
+			logger()->debug( "Removing callback bridge" );
 			$this->bridge->clearDbgConnection( $conn );
 			$this->ws_connection = FALSE;
 
 			if ( $this->bridge->hasWsConnection() )
 			{
-				$this->logger->debug( "Informing websocket client of disconnection" );
+				logger()->debug( "Informing websocket client of disconnection" );
 				$this->bridge->sendToWs( '<wsserver status="session_end"></wsserver>' );
 				array_shift( $this->queue );
 				if ( $this->queue )
 				{
 					$next = reset( $this->queue );
 					$sid = $next[ 'connection' ]->resourceId;
-					$this->logger->debug( "Pulling next connection off of queue ({$next[ 'connection' ]->resourceId})" );
+					logger()->debug( "Pulling next connection off of queue ({$next[ 'connection' ]->resourceId})" );
 					$this->bridgeConnection( $next[ 'connection' ] );
-					$this->logger->debug( "Queued connection {$next[ 'connection' ]->resourceId} has " . count( $next[ 'messages' ] ) . ' messages waiting.' );
+					logger()->debug( "Queued connection {$next[ 'connection' ]->resourceId} has " . count( $next[ 'messages' ] ) . ' messages waiting.' );
 					while ( $msg = array_shift( $next[ 'messages' ] ) )
 					{
 						$this->bridge->sendToWs( $msg );
@@ -221,7 +211,7 @@ class DbgpApp implements MessageComponentInterface
 						$file_contents = file_get_contents( $root[ 'fileuri' ] );
 						if ( preg_match( '#^<\?php\s*/\*\s*(dpoh|vortex):\s*ignore\s*\*/#', $file_contents ) )
 						{
-							$this->logger->debug( "$root[fileuri] is marked to be ignored; detaching" );
+							logger()->debug( "$root[fileuri] is marked to be ignored; detaching" );
 							unset( $this->queue[ "c$conn->resourceId" ] );
 							$conn->close();
 							$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $this->peekQueue() ) . "</wsserver>" );
@@ -232,8 +222,8 @@ class DbgpApp implements MessageComponentInterface
 			}
 			catch ( Exception $e )
 			{
-				$this->logger->error( array_get( explode( "\0", $msg ), 1 ) );
-				$this->logger->error( 'Exception in ' . __CLASS__ . '::' . __FUNCTION__ . '(): ' . $e );
+				logger()->error( array_get( explode( "\0", $msg ), 1 ) );
+				logger()->error( 'Exception in ' . __CLASS__ . '::' . __FUNCTION__ . '(): ' . $e );
 			}
 		}
 		else
@@ -253,7 +243,7 @@ class DbgpApp implements MessageComponentInterface
 				{
 					$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $this->peekQueue() ) . "</wsserver>" );
 				}
-				$this->logger->debug( "Stashing message from queued connection #$conn->resourceId" );
+				logger()->debug( "Stashing message from queued connection #$conn->resourceId" );
 			}
 			return;
 		}
@@ -263,7 +253,6 @@ class DbgpApp implements MessageComponentInterface
 			'message'    => $msg,
 			'abort'      => FALSE,
 			'bridge'     => $this->bridge,
-			'logger'     => $this->logger,
 		];
 		fire_hook( 'dbg_message_received', $data );
 		if ( !$data[ 'abort' ] && $data[ 'message' ] )
@@ -275,7 +264,7 @@ class DbgpApp implements MessageComponentInterface
 
 	public function onError( ConnectionInterface $conn, Exception $e )
 	{
-		$this->logger->error( "Error with debug connection $conn->resourceId: $e" );
+		logger()->error( "Error with debug connection $conn->resourceId: $e" );
 		$conn->close();
 	}
 }

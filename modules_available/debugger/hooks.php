@@ -267,24 +267,24 @@ function debugger_ws_message_received( &$data )
 				$xml_out .= "<item type=\"$type\">$item</item>";
 			}
 			$xml_out = "<globber transaction_id=\"$args[id]\" pattern=\"$args[pattern]\">$xml_out</globber>";
-			$data[ 'logger' ]->debug( "Handling X-glob command: $data[message]", $args );
+			logger()->debug( "Handling X-glob command: $data[message]", $args );
 			$data[ 'bridge' ]->sendToWs( $xml_out );
 		}
 		else
 		{
-			$data[ 'logger' ]->warning( "Ignoring improperly formatted X-glob command: $data[message]", $args );
+			logger()->warning( "Ignoring improperly formatted X-glob command: $data[message]", $args );
 		}
 	}
 	elseif ( preg_match( '/^X-ctrl:stop /', $data[ 'message' ] ) )
 	{
 		fire_hook( 'stop_socket_server' );
-		$data[ 'logger' ]->info( "Received stop command; killing server" );
+		logger()->info( "Received stop command; killing server" );
 		exit( 'stop' );
 	}
 	elseif ( preg_match( '/^X-ctrl:restart /', $data[ 'message' ] ) )
 	{
 		fire_hook( 'restart_socket_server' );
-		$data[ 'logger' ]->info( "Received restart command; restarting server" );
+		logger()->info( "Received restart command; restarting server" );
 		exit( 'restart' );
 	}
 	elseif ( preg_match( '/^X-ctrl:peek_queue /', $data[ 'message' ] ) )
@@ -302,14 +302,14 @@ function debugger_ws_message_received( &$data )
 	}
 	elseif ( strpos( $data[ 'message' ], 'property_set ' ) === 0 )
 	{
-		$data[ 'logger' ]->debug( 'Detected `property_set` command; checking syntax...' );
+		logger()->debug( 'Detected `property_set` command; checking syntax...' );
 
 		$command_split_point = strrpos( $data[ 'message' ], '--' ) + 2;
 		$expression = base64_decode( trim( substr( $data[ 'message' ], $command_split_point ) ) );
 
 		if ( !debugger_validate_php_syntax( $expression ) )
 		{
-			$data[ 'logger' ]->debug( "Invalid syntax: <<<$expression>>>; treating as string..." );
+			logger()->debug( "Invalid syntax: <<<$expression>>>; treating as string..." );
 
 			$expression        = base64_encode( quote_string( $expression ) );
 			$command           = trim( substr( $data[ 'message' ], 0, $command_split_point - 2 ) );

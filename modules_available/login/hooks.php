@@ -229,7 +229,7 @@ function login_ws_connection_opened( $data )
 
 	if ( !dpoh_session_id_is_valid( $session_id, $session_token, $user_ip ) )
 	{
-		$data[ 'logger' ]->info( "Connection {$data['connection']->resourceId}: user is not logged "
+		logger()->info( "Connection {$data['connection']->resourceId}: user is not logged "
 			. 'in; disconnecting...' );
 		$data[ 'connection' ]->close();
 	}
