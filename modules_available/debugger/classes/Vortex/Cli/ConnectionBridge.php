@@ -136,8 +136,8 @@ class ConnectionBridge
 			// Close & clear the debugger engine connection if this is a `stop` or `clear` command
 			if ( preg_match( '/^(stop|detach) /', $msg ) )
 			{
+				logger()->debug( 'Caught a stop or detach command; closing connection' );
 				$this->dbg_connection->close();
-				$this->clearDbgConnection();
 			}
 		}
 	}
@@ -155,16 +155,16 @@ class ConnectionBridge
 
 	/**
 	 * @brief
-	 *	Proxy calls to $this->dbg_app->peekQueue(), returning an empty array if $this->dbg_app is
-	 *	not defined
+	 *	Proxy calls to $this->dbg_app->getQueueAsXml(), returning an empty string if $this->dbg_app
+	 *	is not defined
 	 *
-	 * @retval array
+	 * @retval string
 	 */
-	public function peekQueue()
+	public function getQueueAsXml()
 	{
 		return $this->dbg_app
-			? $this->dbg_app->peekQueue()
-			: [];
+			? $this->dbg_app->getQueueAsXml()
+			: '';
 	}
 
 	/**

@@ -291,7 +291,7 @@ function debugger_ws_message_received( &$data )
 	}
 	elseif ( preg_match( '/^X-ctrl:peek_queue /', $data[ 'message' ] ) )
 	{
-		$data[ 'bridge' ]->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $data[ 'bridge' ]->peekQueue() ) . "</wsserver>" );
+		$data[ 'bridge' ]->sendToWs( $data[ 'bridge' ]->getQueueAsXml() );
 	}
 	elseif ( preg_match( '/^X-ctrl:detach_queued_session -s (?<id>' . $cid_prefix . '\d+) /', $data[ 'message' ], $match ) )
 	{
