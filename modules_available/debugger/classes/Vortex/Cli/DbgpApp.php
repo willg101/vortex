@@ -8,6 +8,24 @@ use Exception;
 
 class DbgpApp implements MessageComponentInterface
 {
+	/**
+	 * @brief
+	 *	Prepare a message to be sent to the DE by ensuring that the message ends with a null char
+	 *
+	 * @note See https://xdebug.org/docs-dbgp.php#message-packets
+	 *
+	 * @param string $msg
+	 * @retval string
+	 */
+	public static function prepareMessage( $msg )
+	{
+		if ( !strpos( $msg, "\0" ) !== mb_strlen( $msg ) - 1 )
+		{
+			$msg .= "\0";
+		}
+		return $msg;
+	}
+
 	const CONNECTION_ID_PREFIX = 'c';
 
 	/**
@@ -132,11 +150,11 @@ class DbgpApp implements MessageComponentInterface
 		{
 			if ( $this->queue[ $cid ][ 'connection' ] == $this->bridge->getDbgConnection() )
 			{
-				$this->bridge->sendToDbg( "detach -i 0 \0" );
+				$this->bridge->sendToDbg( "detach -i 0" );
 				return;
 			}
 			$this->beforeDetach( $this->queue[ $cid ][ 'connection' ] );
-			$this->queue[ $cid ][ 'connection' ]->send( "detach -i 0\0" );
+			$this->queue[ $cid ][ 'connection' ]->send( static::prepareMessage( "detach -i 0" ) );
 			$this->queue[ $cid ][ 'connection' ]->close();
 			unset( $this->queue[ $cid ] );
 		}
@@ -252,7 +270,7 @@ class DbgpApp implements MessageComponentInterface
 		}
 		else
 		{
-			$conn->send( "detach -i 0\0" );
+			$conn->send( static::prepareMessage( "detach -i 0" ) );
 			$conn->close();
 		}
 

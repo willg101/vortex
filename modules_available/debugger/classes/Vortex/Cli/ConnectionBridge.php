@@ -108,7 +108,7 @@ class ConnectionBridge
 		{
 			if ( !$raw )
 			{
-				$msg = mb_strlen( $msg ) . "\0$msg\0";
+				$msg = WsApp::prepareMessage( $msg );
 			}
 			$this->ws_connection->send( $msg );
 		}
@@ -122,6 +122,8 @@ class ConnectionBridge
 	 */
 	public function sendToDbg( $msg )
 	{
+		$msg = DbgpApp::prepareMessage( $msg );
+
 		if ( $this->hasDbgConnection() )
 		{
 			if ( preg_match( '/^detach /', $msg ) )
@@ -140,6 +142,12 @@ class ConnectionBridge
 		}
 	}
 
+	/**
+	 * @brief
+	 *	Store a reference to the current DbgpApp instance to facilitate session switching
+	 *
+	 * @param DbgpApp $app
+	 */
 	public function registerDbgApp( DbgpApp $app )
 	{
 		$this->dbg_app = $app;

@@ -9,6 +9,26 @@ use Exception;
 class WsApp implements MessageComponentInterface
 {
 	/**
+	 * @brief
+	 *	Prepare a message to be sent to the websocket client by ensuring that the message is in the
+	 *	correct format
+	 *
+	 * @note See https://xdebug.org/docs-dbgp.php#message-packets
+	 *
+	 * @param string $msg
+	 * @retval string
+	 */
+	public static function prepareMessage( $msg )
+	{
+		if ( !preg_match( '/\d+\0[^\0]+\0/', $msg ) )
+		{
+			$msg = str_replace( "\0", '', $msg );
+			$msg = mb_strlen( $msg ) . "\0$msg\0";
+		}
+		return $msg;
+	}
+
+	/**
 	 * @var \Vortex\Cli\ConnectionBridge
 	 */
 	protected $bridge;
@@ -88,7 +108,7 @@ class WsApp implements MessageComponentInterface
 		}
 		else // An active web socket already exists
 		{
-			$conn->send( "50\0<wsserver status=\"no_exclusive_access\"></wsserver>\0" );
+			$conn->send( static::prepareMessage( '<wsserver status="no_exclusive_access"></wsserver>' ) );
 			logger()->debug( "We already have a websocket connection; ignoring $name" );
 			return;
 		}
@@ -134,7 +154,7 @@ class WsApp implements MessageComponentInterface
 
 		if ( !$data[ 'abort' ] && $data[ 'message' ] )
 		{
-			$this->bridge->sendToDbg( $data[ 'message' ] . "\0" );
+			$this->bridge->sendToDbg( $data[ 'message' ] );
 		}
 	}
 
