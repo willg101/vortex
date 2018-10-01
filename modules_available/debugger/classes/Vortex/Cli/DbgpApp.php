@@ -248,8 +248,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
 		{
 			$conn_info[ 'path' ]       = $conn_info[ 'filename' ];
 			$conn_info[ 'active' ]     = $conn_info[ 'active' ] ? 'true' : 'false';
-			$conn_info[ 'session-id' ] = $conn_info[ 'connection_id' ];
-			unset( $conn_info[ 'session_id' ], $conn_info[ 'filename' ], $conn_info[ 'connection' ] );
+			unset( $conn_info[ 'filename' ], $conn_info[ 'connection' ] );
 			$xml .= '<queuedsession ' . html_attrs( $conn_info ) . '"></queuedsession>';
 		}
 		return '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . $xml

@@ -31,7 +31,7 @@ subscribe( 'server-info', function( e )
 		e.jq_message.find( 'queuedsession' ).each( function()
 		{
 			var self       = $( this );
-			var session_id = self.attr( 'session-id' );
+			var session_id = self.attr( 'connection_id' );
 			if ( !session_id )
 			{
 				return;
