@@ -4,6 +4,7 @@ define( 'DEBUGGER_N_MOST_RECENT_FILES', 10 );
 
 use Vortex\Cli\SocketServerStartCommand;
 use Vortex\Cli\SocketServerRunCommand;
+use Vortex\Cli\DbgpApp;
 
 function debugger_provide_windows()
 {
@@ -255,6 +256,7 @@ function debugger_provide_console_commands( $data )
 
 function debugger_ws_message_received( &$data )
 {
+	$cid_prefix = DbgpApp::CONNECTION_ID_PREFIX;
 	if ( preg_match( '/^X-glob /', $data[ 'message' ] ) )
 	{
 		$args = debugger_parse_glob_command( $data[ 'message' ] );
@@ -291,12 +293,12 @@ function debugger_ws_message_received( &$data )
 	{
 		$data[ 'bridge' ]->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $data[ 'bridge' ]->peekQueue() ) . "</wsserver>" );
 	}
-	elseif ( preg_match( '/^X-ctrl:detach_queued_session -s (?<id>c\d+) /', $data[ 'message' ], $match ) )
+	elseif ( preg_match( '/^X-ctrl:detach_queued_session -s (?<id>' . $cid_prefix . '\d+) /', $data[ 'message' ], $match ) )
 	{
 		$data[ 'bridge' ]->detachQueuedSession( $match[ 'id' ] );
 		$data[ 'bridge' ]->sendToWs( '<wsserver session-status-change=neutral status="alert" type="detach_queued_session" session_id="' . $match[ 'id' ] . '">' );
 	}
-	elseif ( preg_match( '/^X-ctrl:switch_session -s (?<id>c\d+) /', $data[ 'message' ], $match ) )
+	elseif ( preg_match( '/^X-ctrl:switch_session -s (?<id>' . $cid_prefix . '\d+) /', $data[ 'message' ], $match ) )
 	{
 		$data[ 'bridge' ]->switchSession( $match[ 'id' ] );
 	}

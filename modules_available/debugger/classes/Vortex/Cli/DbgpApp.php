@@ -8,6 +8,8 @@ use Exception;
 
 class DbgpApp implements MessageComponentInterface
 {
+	const CONNECTION_ID_PREFIX = 'c';
+
 	/**
 	 * @brief
 	 *	Max number of sessions that can be enqueued (additional connections are dropped)
@@ -38,16 +40,30 @@ class DbgpApp implements MessageComponentInterface
 		$bridge->registerDbgApp( $this );
 	}
 
+	/**
+	 * @brief
+	 *	Generate an html-attribute-safe identifier for a connection
+	 *
+	 * @param Ratchet\ConnectionInterface $conn
+	 *
+	 * @retval string
+	 */
+	protected function getConnectionId( ConnectionInterface $conn )
+	{
+		return static::CONNECTION_ID_PREFIX . $conn->resourceId;
+	}
+
 	public function onOpen( ConnectionInterface $conn )
 	{
-		$name = "debug connection $conn->resourceId";
+		$cid = $this->getConnectionId( $conn );
+		$name = "debug connection $cid";
 		logger()->debug( "Connection opened: $name" );
 
 		if ( $this->bridge->hasWsConnection() )
 		{
 			if ( count( $this->queue ) < static::MAX_QUEUE_LENGTH )
 			{
-				$this->queue[ "c$conn->resourceId" ] = [
+				$this->queue[ $cid ] = [
 					'connection' => $conn,
 					'uuid'       => get_random_token( 10 ),
 					'messages'   => [],
@@ -66,7 +82,7 @@ class DbgpApp implements MessageComponentInterface
 
 				$data = [
 					'connection' => $conn,
-					'messages'   => &$this->queue[ "c$conn->resourceId" ][ 'messages' ],
+					'messages'   => &$this->queue[ $cid ][ 'messages' ],
 				];
 				fire_hook( 'dbg_connection_queued', $data );
 			}
@@ -104,33 +120,33 @@ class DbgpApp implements MessageComponentInterface
 		fire_hook( 'before_debugger_detach', $data );
 	}
 
-	public function detachQueuedSession( $sid )
+	public function detachQueuedSession( $cid )
 	{
-		if ( !empty( $this->queue[ $sid ] ) )
+		if ( !empty( $this->queue[ $cid ] ) )
 		{
-			if ( $this->queue[ $sid ][ 'connection' ] == $this->bridge->getDbgConnection() )
+			if ( $this->queue[ $cid ][ 'connection' ] == $this->bridge->getDbgConnection() )
 			{
 				$this->bridge->sendToDbg( "detach -i 0 \0" );
 				return;
 			}
-			$this->beforeDetach( $this->queue[ $sid ][ 'connection' ] );
-			$this->queue[ $sid ][ 'connection' ]->send( "detach -i 0\0" );
-			$this->queue[ $sid ][ 'connection' ]->close();
-			unset( $this->queue[ $sid ] );
+			$this->beforeDetach( $this->queue[ $cid ][ 'connection' ] );
+			$this->queue[ $cid ][ 'connection' ]->send( "detach -i 0\0" );
+			$this->queue[ $cid ][ 'connection' ]->close();
+			unset( $this->queue[ $cid ] );
 		}
 	}
 
-	public function switchSession( $sid, $current_connection )
+	public function switchSession( $cid, $current_connection )
 	{
-		if ( !empty( $this->queue[ $sid ] ) )
+		if ( !empty( $this->queue[ $cid ] ) )
 		{
-			logger()->debug( "Bumping connection #$sid to front of queue" );
-			$new = $this->queue[ $sid ];
-			unset( $this->queue[ $sid ] );
-			$this->queue = array_merge( [ $sid => $new ], $this->queue );
-			logger()->debug( "Bridging connection ($sid)" );
+			logger()->debug( "Bumping connection #$cid to front of queue" );
+			$new = $this->queue[ $cid ];
+			unset( $this->queue[ $cid ] );
+			$this->queue = array_merge( [ $cid => $new ], $this->queue );
+			logger()->debug( "Bridging connection ($cid)" );
 			$this->bridgeConnection( $new[ 'connection' ] );
-			logger()->debug( "Queued connection {$sid} has " . count( $new[ 'messages' ] ) . ' messages waiting.' );
+			logger()->debug( "Queued connection {$cid} has " . count( $new[ 'messages' ] ) . ' messages waiting.' );
 			$this->bridge->sendToWs( '<wsserver status="session_change"></wsserver>' );
 			while ( $msg = array_shift( $new[ 'messages' ] ) )
 			{
@@ -152,6 +168,7 @@ class DbgpApp implements MessageComponentInterface
 
 	public function onClose( ConnectionInterface $conn )
 	{
+		$cid = $this->getConnectionId( $conn );
 		if ( $this->ws_connection == $conn )
 		{
 			$data = [
@@ -172,7 +189,7 @@ class DbgpApp implements MessageComponentInterface
 				if ( $this->queue )
 				{
 					$next = reset( $this->queue );
-					$sid = $next[ 'connection' ]->resourceId;
+					$cid = $next[ 'connection' ]->resourceId;
 					logger()->debug( "Pulling next connection off of queue ({$next[ 'connection' ]->resourceId})" );
 					$this->bridgeConnection( $next[ 'connection' ] );
 					logger()->debug( "Queued connection {$next[ 'connection' ]->resourceId} has " . count( $next[ 'messages' ] ) . ' messages waiting.' );
@@ -183,15 +200,16 @@ class DbgpApp implements MessageComponentInterface
 				}
 			}
 		}
-		else if ( isset( $this->queue[ "c$conn->resourceId" ] ) )
+		else if ( isset( $this->queue[ $cid ] ) )
 		{
-			unset( $this->queue[ "c$conn->resourceId" ] );
+			unset( $this->queue[ $cid ] );
 			$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $this->peekQueue() ) . "</wsserver>" );
 		}
 	}
 
 	public function onMessage( ConnectionInterface $conn, $msg )
 	{
+		$cid = $this->getConnectionId( $conn );
 		if ( $this->bridge->hasWsConnection() )
 		{
 			try
@@ -200,10 +218,10 @@ class DbgpApp implements MessageComponentInterface
 				if ( $root )
 				{
 					$root = @simplexml_load_string( $root );
-					if ( empty( $this->queue[ "c$conn->resourceId" ][ 'filename' ] )
+					if ( empty( $this->queue[ $cid ][ 'filename' ] )
 						&& !empty( $root[ 'fileuri' ] ) )
 					{
-						$this->queue[ "c$conn->resourceId" ][ 'filename' ] = $root[ 'fileuri' ];
+						$this->queue[ $cid ][ 'filename' ] = $root[ 'fileuri' ];
 					}
 
 					if ( !empty( $root[ 'fileuri' ] ) && is_readable( $root[ 'fileuri' ] ) )
@@ -212,7 +230,7 @@ class DbgpApp implements MessageComponentInterface
 						if ( preg_match( '#^<\?php\s*/\*\s*(dpoh|vortex):\s*ignore\s*\*/#', $file_contents ) )
 						{
 							logger()->debug( "$root[fileuri] is marked to be ignored; detaching" );
-							unset( $this->queue[ "c$conn->resourceId" ] );
+							unset( $this->queue[ $cid ] );
 							$conn->close();
 							$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $this->peekQueue() ) . "</wsserver>" );
 							return;
@@ -233,13 +251,13 @@ class DbgpApp implements MessageComponentInterface
 		}
 
 		$current_connection = $this->queue ? reset( $this->queue )[ 'connection' ] : NULL;
-		if ( !empty( $this->queue[ "c$conn->resourceId" ] ) && $current_connection != $conn )
+		if ( !empty( $this->queue[ $cid ] ) && $current_connection != $conn )
 		{
 			$msg = array_get( explode( "\0", $msg ), 1 );
 			if ( $msg )
 			{
-				$this->queue[ "c$conn->resourceId" ][ 'messages' ][] = $msg;
-				if ( count( $this->queue[ "c$conn->resourceId" ][ 'messages' ] ) == 1 )
+				$this->queue[ $cid ][ 'messages' ][] = $msg;
+				if ( count( $this->queue[ $cid ][ 'messages' ] ) == 1 )
 				{
 					$this->bridge->sendToWs( '<wsserver session-status-change=neutral status="alert" type="peek_queue">' . implode( '', $this->peekQueue() ) . "</wsserver>" );
 				}

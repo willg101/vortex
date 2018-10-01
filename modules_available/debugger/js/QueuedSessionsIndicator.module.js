@@ -70,8 +70,8 @@ subscribe( 'session-switched', function()
 
 function onDetachSessionClicked( e )
 {
-	var sid = $( e.currentTarget ).attr( 'data-detach-session' );
-	WsClient.send( 'X-ctrl:detach_queued_session -s ' + sid );
+	var cid = $( e.currentTarget ).attr( 'data-detach-session' );
+	WsClient.send( 'X-ctrl:detach_queued_session -s ' + cid );
 }
 
 function onIndicatorClicked()

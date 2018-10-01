@@ -163,17 +163,17 @@ class ConnectionBridge
 	 * @brief
 	 *	Proxy calls to $this->dbg_app->detachQueuedSession()
 	 */
-	public function detachQueuedSession( $sid )
+	public function detachQueuedSession( $cid )
 	{
-		$this->dbg_app && $this->dbg_app->detachQueuedSession( $sid );
+		$this->dbg_app && $this->dbg_app->detachQueuedSession( $cid );
 	}
 
 	/**
 	 * @brief
 	 *	Proxy calls to $this->dbg_app->switchSession()
 	 */
-	public function switchSession( $sid )
+	public function switchSession( $cid )
 	{
-		$this->dbg_app && $this->dbg_app->switchSession( $sid, $this->dbg_connection );
+		$this->dbg_app && $this->dbg_app->switchSession( $cid, $this->dbg_connection );
 	}
 }
