@@ -51,12 +51,18 @@
 		font-weight: bold;
 		cursor: pointer;
 
-		&.inactive
+		&.inactive,
+		&.no-connection
 		{
 			color: @semitransparent-white;
 		}
 
-		&:hover
+		&.no-connection
+		{
+			cursor: not-allowed;
+		}
+
+		&:hover:not(.no-connection)
 		{
 			background: @subtle-highlight * 4;
 		}

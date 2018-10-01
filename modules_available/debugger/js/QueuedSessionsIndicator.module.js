@@ -9,11 +9,12 @@ subscribe( 'connection-status-changed', function onConnectionStatusChanged( e )
 	if ( e.status == 'connected' )
 	{
 		Debugger.command( 'X-ctrl:peek_queue' );
+		indicator.removeClass( 'no-connection' );
 	}
 	else
 	{
 		var indicator = $( '#connection_queue_indicator' );
-		indicator.find( '.n' ).html( '<i class="fa fa-times">' ).addClass( 'inactive' );
+		indicator.addClass( 'no-connection' ).find( '.n' ).html( '<i class="fa fa-times">' );
 	}
 } );
 
@@ -130,6 +131,6 @@ function onSwitchToSessionClicked( e )
 
 $( document ).on( 'click', '[data-switch-to-session]',    onSwitchToSessionClicked );
 $( document ).on( 'click', '[data-detach-session]',       onDetachSessionClicked );
-$( document ).on( 'click', '#connection_queue_indicator', onIndicatorClicked );
+$( document ).on( 'click', '#connection_queue_indicator:not(.no-connection)', onIndicatorClicked );
 
 subscribe( 'server-info', onServerInfoReceived );
