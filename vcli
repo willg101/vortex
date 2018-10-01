@@ -16,6 +16,7 @@ require_once 'includes/bootstrap.php';
 require_once 'includes/database.php';
 require_once 'includes/exceptions.php';
 require_once 'includes/files.php';
+require_once 'includes/html.php';
 require_once 'includes/models.php';
 require_once 'includes/security.php';
 require_once 'includes/templates.php';

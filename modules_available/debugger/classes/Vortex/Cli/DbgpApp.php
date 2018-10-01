@@ -106,11 +106,17 @@ class DbgpApp implements MessageComponentInterface
 		{
 			$el = array_get( $value, 'messages.0', FALSE );
 
-			logger()->debug( var_export( array_diff_key( $value, ['connection' => '' ] ), TRUE ) );
+			logger()->debug( var_export( array_diff_key( $value, [ 'connection' => '' ] ), TRUE ) );
 
 			$is_first = $first == $key;
 			$hostname = gethostbyaddr( $value[ 'connection' ]->remoteAddress ) ?: $value[ 'connection' ]->remoteAddress;
-			return '<queuedsession active="' . ( $is_first ? 'true' : 'false' ) . '" uuid="' . $value[ 'uuid' ] . '" host="' . $hostname . '" session-id="' . $key . '" path="' . $value[ 'filename' ] . '"></queuedsession>';
+			return '<queuedsession ' . html_attrs( [
+				'active'     => $is_first ? 'true' : 'false',
+				'uuid'       => $value[ 'uuid' ],
+				'host'       => $hostname,
+				'session-id' => $key,
+				'path'       => $value[ 'filename' ],
+			] ) . '"></queuedsession>';
 		}, $keys, $this->queue );
 	}
 
