@@ -39,27 +39,27 @@ table.watch
 	box-shadow: none;
 	height: 0;
 
-	.css-row 
+	.css-row
 	{
 		.transition();
 
 		.css-cell
 		{
 			.transition();
-			border-bottom: 1px solid #F0F0F0;
-			padding: 5px 10px;
-			font-family: consolas, monospace;
+			border-bottom: 1px solid @separator;
+			padding: @spacing-sm/2 @spacing-sm;
+			font-family: @monospace-font;
 
 			&.depth
 			{
-				background: rgba(0,0,0,0.15);
+				background: @subtle-highlight;
 				text-align: right;
 			}
 
 			&.file,
 			&.line
 			{
-				background: rgba(0,0,0,0.1);
+				background: none;
 				text-align: left;
 			}
 
@@ -76,43 +76,25 @@ table.watch
 			}
 		}
 
-		.css-cell:after
-		{
-			.transition();
-			position: absolute;
-			bottom: 0;
-			width: 100%;
-			border-bottom: 3px solid transparent;
-			content: ' ';
-			left: 0;
-		}
-
 		&.active .css-cell
 		{
-			color: #FFF;
+			color: @window-text-color;
 
 			&.depth
 			{
-				background: @primary-color - #111;
-			}
-
-			&.file,
-			&.line
-			{
-				background: @primary-color;
+				background: @active-color;
+				color: @text-contrast-color;
 			}
 		}
 	}
 
 	.css-row:hover .css-cell
 	{
-		background: rgba(0,0,0,0.2);
-		cursor: pointer;
-
-		&:after
+		&:not(.depth)
 		{
-			border-color: @tertiary-color;
+			background: @selectable-hover-color;
 		}
+		cursor: pointer;
 	}
 
 	.css-row:active

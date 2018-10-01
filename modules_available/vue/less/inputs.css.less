@@ -12,16 +12,16 @@ textarea,
 		position: relative;
 		box-sizing: border-box;
 		width: 100%;
-		padding: 0 @default-spacing-sm;
-		border: 0 solid @inactive-gray;
+		padding: 0 @spacing-sm;
+		border: 0 solid @inactive-color;
 		border-width: @standard-border-width;
 
 		&:not(.no-margin-top)
 		{
-			margin-top: @default-spacing-sm;
+			margin-top: @spacing-sm;
 		}
 
-		color: @default-window-text-color;
+		color: @window-text-color;
 
 		overflow: auto;
 		white-space: pre-wrap;
@@ -33,29 +33,29 @@ textarea,
 
 		&.monospace
 		{
-			font-family: @default-monospace-font;
+			font-family: @monospace-font;
 		}
 
 		&.margin-all-sides
 		{
-			margin: @default-spacing-sm;
+			margin: @spacing-sm;
 		}
 
 		&[contenteditable]
 		{
-			padding: @default-spacing-sm;
+			padding: @spacing-sm;
 		}
 
 		&:focus,
 		&:active
 		{
 			outline: none;
-			border-color: @active-color-alt-light;
+			border-color: @active-color-subtle;
 		}
 
 		&::selection,
 		{
-			background: @primary-color;
+			background: @blue;
 			color: #FFF;
 		}
 	}
@@ -101,7 +101,7 @@ textarea,
 
 		&:not(:last-child)
 		{
-			margin-right: @default-spacing-sm/2;
+			margin-right: @spacing-sm/2;
 		}
 	}
 }
@@ -116,13 +116,13 @@ button,
 	cursor: pointer;
 	color: #FFF;
 	display: inline-block;
-	padding: @default-spacing-sm * 1.5;
+	padding: @spacing-sm * 1.5;
 	box-sizing: border-box;
 	border: none;
 
 	&.sm
 	{
-		padding: @default-spacing-sm;
+		padding: @spacing-sm;
 	}
 
 	&.black,
@@ -131,13 +131,13 @@ button,
 	{
 		.fa
 		{
-			color: @default-text-btn-fg;
+			color: @text-btn-fg;
 		}
 	}
 
 	&:not(.no-margin-top)
 	{
-		margin-top: @default-spacing-sm;
+		margin-top: @spacing-sm;
 	}
 
 	&:focus,
@@ -169,8 +169,8 @@ button,
 
 	&.text-btn
 	{
-		background: @default-text-btn-bg;
-		color: @default-text-btn-fg;
+		background: @text-btn-bg;
+		color: @text-btn-fg;
 
 		&:not(.no-bounce)
 		{
@@ -190,8 +190,8 @@ button,
 
 		&:hover
 		{
-			background: @default-text-btn-fg;
-			color: @default-text-btn-bg;
+			background: @text-btn-fg;
+			color: @text-btn-bg;
 		}
 	}
 
@@ -206,7 +206,7 @@ button,
 {
 	&:not(.no-margin)
 	{
-		margin: @default-spacing-sm;
+		margin: @spacing-sm;
 	}
 	flex-grow: 1;
 	flex-shrink: 1;
@@ -222,7 +222,7 @@ button,
 	{
 		flex-grow: 1;
 		flex-shrink: 1;
-		padding: @default-spacing-sm/2 @default-spacing-sm;
+		padding: @spacing-sm/2 @spacing-sm;
 		box-sizing: border-box;
 	}
 }

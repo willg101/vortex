@@ -18,7 +18,7 @@
 {
 	border-radius: @default-border-radius;
 	.transition();
-	background: @default-window-bg;
+	background: @window-bg;
 	box-shadow: @shadow;
 	position: relative;
 	max-width: 600px;
@@ -40,7 +40,7 @@
 {
 	position: relative;
 	background: @title-bar-bg;
-	padding: @default-spacing-sm @default-spacing-sm * 1.5;
+	padding: @spacing-sm @spacing-sm * 1.5;
 	color: @title-bar-fg;
 	font-size: 14px;
 }
@@ -48,7 +48,7 @@
 .modal-exit
 {
 	border-radius: 0 @default-border-radius 0 0 ;
-	padding: @default-spacing-sm;
+	padding: @spacing-sm;
 	background: @title-bar-bg;
 	position: absolute;
 	font-size: 14px;
@@ -62,7 +62,7 @@
 
 .modal-content
 {
-	padding: @default-spacing;
+	padding: @spacing;
 	width: 100%;
 	box-sizing: border-box;
 	border-radius: 0 0 @default-border-radius @default-border-radius;

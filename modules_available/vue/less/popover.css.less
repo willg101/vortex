@@ -8,7 +8,7 @@
 	overflow-x: hidden;
 	text-overflow: ellipsis;
 	overflow-y: auto;
-	background-color: @default-window-bg;
+	background-color: @window-bg;
 	box-shadow: @shadow;
 	box-sizing: border-box;
 	z-index: 99999;
@@ -16,12 +16,12 @@
 
 	&:not(.no-padding)
 	{
-		padding: @default-spacing-sm @default-spacing-sm * 1.5;
+		padding: @spacing-sm @spacing-sm * 1.5;
 	}
 
 	h2
 	{
-		padding: @default-spacing-sm @default-spacing-sm * 1.5;
+		padding: @spacing-sm @spacing-sm * 1.5;
 		margin: 0;
 		font-weight: normal;
 
@@ -35,7 +35,7 @@
 
 		&.swallow-margin
 		{
-			margin: -@default-spacing-sm @default-spacing-sm * -1.5 @default-spacing-sm;
+			margin: -@spacing-sm @spacing-sm * -1.5 @spacing-sm;
 		}
 	}
 
@@ -49,12 +49,12 @@
 	.globber-option,
 	.popover-list-option
 	{
-		padding: @default-spacing-sm @default-spacing-sm * 1.5;
+		padding: @spacing-sm @spacing-sm * 1.5;
 		cursor: pointer;
 		display:block;
 		width: 100%;
 		box-sizing: border-box;
-		color: @default-window-text-color;
+		color: @window-text-color;
 
 		&.globber-dir
 		{

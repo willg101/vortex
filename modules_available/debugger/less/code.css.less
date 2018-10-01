@@ -4,7 +4,7 @@
 {
 	body:not(.active-session) &.nonlocal-file:hover
 	{
-		background-color: @default-window-bg;
+		background-color: @window-bg;
 		cursor: not-allowed;
 	}
 
@@ -17,7 +17,7 @@
 	.host,
 	.filepath
 	{
-		font-family: @default-monospace-font;
+		font-family: @monospace-font;
 		font-size: 90%;
 		display: inline-block;
 	}
@@ -72,18 +72,18 @@
 
 .ace_gutter-cell.ace_breakpoint
 {
-	background: @line-breakpoint-color;
+	background: @red;
 	color: @text-contrast-color;
 
 	&.conditional-breakpoint
 	{
-		background: @conditional-breakpoint-color;
+		background: @orange;
 	}
 }
 
 .ace-solarized-light.ace-solarized-light
 {
-	background: @default-window-bg;
+	background: @window-bg;
 
 	.ace_marker-layer .ace_active-line
 	{
@@ -113,7 +113,7 @@
 
 .ace-current-line
 {
-	background: @active-color-alt-light;
+	background: @active-color-subtle;
 	position: absolute;
 	z-index: 0;
 }
@@ -140,10 +140,10 @@
 {
 	display: none;
 	transition: @transition-duration opacity;
-	background: @default-window-bg;
-	color: @default-window-text-color;
-	padding: @default-spacing-sm;
-	font-family: @default-monospace-font;
+	background: @window-bg;
+	color: @window-text-color;
+	padding: @spacing-sm;
+	font-family: @monospace-font;
 	position: fixed;
 	box-shadow: @shadow;
 
@@ -188,13 +188,13 @@
 {
 	z-index: 6;
 	position: absolute;
-	@margin: @default-spacing-sm;
-	@padding: @default-spacing-sm/2 @default-spacing-sm;
-	bottom: @default-spacing-sm;
-	left: @default-spacing-sm;
-	background: @default-window-bg;
+	@margin: @spacing-sm;
+	@padding: @spacing-sm/2 @spacing-sm;
+	bottom: @spacing-sm;
+	left: @spacing-sm;
+	background: @window-bg;
 	box-shadow: @shadow;
-	padding: @default-spacing-sm/2 @default-spacing-sm;
+	padding: @spacing-sm/2 @spacing-sm;
 	display: flex;
 	align-items: stretch;
 	flex-direction: column;
@@ -206,13 +206,13 @@
 
 	.spinner
 	{
-		margin-right: @default-spacing-sm;
+		margin-right: @spacing-sm;
 	}
 
 	.timer
 	{
-		color: @default-window-text-color;
-		font-family: @default-monospace-font;
+		color: @window-text-color;
+		font-family: @monospace-font;
 		font-weight: bold;
 		display: inline-block;
 	}
@@ -227,6 +227,6 @@
 		color: @deemphasized-text-color;
 		font-size: 80%;
 		text-align: center;
-		font: @default-monospace-font;
+		font: @monospace-font;
 	}
 }

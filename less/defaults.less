@@ -2,106 +2,77 @@
  * Global variables
  *************************************************************************************************/
 
-@primary-color: #21599f;
-@secondary-color: #3ca6de;
-@tertiary-color: #59c203;
-@default-border-radius: 0px;
-
-@red: #FB0416;
+// ---------------------------------------- COLOR PALETTE ----------------------------------------
+@red:    #FB0416;
 @orange: #FF8504;
 @yellow: #FFD704;
-@green: @tertiary-color;
-@blue: @primary-color;
+@green:  #59c203;
+@blue:   #0A93C1;
 
-@active-color: @tertiary-color;
-@active-color-alt-light: lighten( @active-color, 20% );
-@selectable-color: @primary-color;
-@selectable-color-alt-light: lighten( @selectable-color, 20% );
-@selectable-hover-color: lighten( @selectable-color, 50% );
-@default-window-bg: #FFF;
-@default-window-text-color: #444;
-@splash-bg: #333;
-@toolbar-bg: @default-window-text-color;
-@toolbar-fg: @default-window-bg;
-
-@title-bar-bg: #0A93C1;
-@title-bar-fg: #FFF;
-
-@input-bg: #F0F0F0;
-
-@default-text-btn-bg: @input-bg;
-@default-text-btn-fg: @default-window-text-color;
-
-@inactive-gray: #AAA;
-
-@separator: #CCC;
-
-@standard-border-width: 0 0 2px 0;
-
-@default-display-font: 'Open Sans';
-@default-monospace-font: consolas, monospace;
-
-@default-spacing-sm: 10px;
-@default-spacing: 20px;
-@deemphasized-text-color: rgba(0,0,0,0.625);
-@extra-deemphasized-text-color: rgba(0,0,0,0.325);
-@text-contrast-color: #FFF;
-
-@line-breakpoint-color: @red;
-@conditional-breakpoint-color: @orange;
-
-@subtle-highlight: rgba(0,0,0,0.1);
+@black:                 #000;
+@dark-gray:             #333;
+@light-gray:            #AAA;
+@lighter-gray:          #CCC;
+@lightest-gray:         #F0F0F0;
+@white:                 #FFF;
 @semitransparent-white: rgba(255,255,255,0.5);
 
-@text-shadow: 0 0 10px #FFF;
-@shadow: 0 0 10px -2px #000;
+// ---------------------------------------- COLOR DESIGNATIONS -----------------------------------
+// Colors in this section MUST be defined above, or apply a LESS color function to one of the
+// colors in the section above
+// -----------------------------------------------------------------------------------------------
+@active-color: @green;
+@active-color-subtle: lighten( @active-color, 20% );
+
+@inactive-color: @light-gray;
+
+@window-bg: @white;
+@window-text-color: @dark-gray;
+@title-bar-bg: @blue;
+@title-bar-fg: @white;
+
+@splash-bg: @dark-gray;
+
+@toolbar-bg: @dark-gray;
+@toolbar-fg: @white;
+
+@input-bg: @lightest-gray;
+@text-btn-bg: @input-bg;
+@text-btn-fg: @dark-gray;
+@selectable-color: darken( @blue, 20% );
+@selectable-hover-color: fade( @blue, 20% );
+
+@deemphasized-text-color: rgba(0,0,0,0.625);
+@extra-deemphasized-text-color: rgba(0,0,0,0.325);
+@text-contrast-color: @white;
+
+@separator: @lighter-gray;
+
+@subtle-highlight: rgba(0,0,0,0.1);
+
+// ---------------------------------------- FONTS ------------------------------------------------
+@default-font: 'Open Sans';
+@monospace-font: consolas, monospace;
+
+// ---------------------------------------- SIZES ------------------------------------------------
+@default-border-radius: 0px;
+@standard-border-width: 0 0 2px 0;
+@spacing-sm: 10px;
+@spacing: 20px;
+
+// ---------------------------------------- MISC -------------------------------------------------
+@text-shadow: 0 0 @spacing-sm @black;
+@shadow: 0 0 @spacing-sm @spacing-sm*(-.2) @black;
 @transition-duration: 200ms;
+
 /*************************************************************************************************
  * Mixins
  *************************************************************************************************/
 
-.transition(@time: 200ms)
+.transition()
 {
-	-webkit-transition: all @time ease;
-	transition:         all @time ease;
+	-webkit-transition: all @transition-duration ease;
+	transition:         all @transition-duration ease;
 	-webkit-backface-visibility: hidden;
 	-webkit-transform: translateZ(0) scale(1.0, 1.0);
-}
-
-.bouncy(@max-scale : 1.5; @min-scale: 0.7; @border-width: 0px)
-{
-	.transition();
-	border: none; // For <button> elements, to which some browsers add a cheesy 3D-ish border
-	border-bottom: @border-width solid transparent;
-
-	.fa
-	{
-		.transition();
-	}
-
-	&:hover
-	{
-		background: rgba(0,0,0,0.2);
-		border-bottom: @border-width solid #b8ff7e;
-
-		.fa
-		{
-			-webkit-transform: scale(@max-scale, @max-scale);
-			transform:  scale(@max-scale, @max-scale);
-		}
-	}
-
-	&:active
-	{
-		.fa
-		{
-			-webkit-transform: scale(@min-scale, @min-scale);
-			transform:  scale(@min-scale, @min-scale);
-		}
-	}
-
-	&:focus
-	{
-		outline: none;
-	}
 }

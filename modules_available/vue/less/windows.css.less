@@ -8,7 +8,7 @@
 	{
 		background: @title-bar-bg;
 		box-sizing: border-box;
-		padding: @default-spacing-sm @default-spacing-sm * 1.5;
+		padding: @spacing-sm @spacing-sm * 1.5;
 		color: @title-bar-fg;
 		font-size: 14px;
 		width: 100%;
@@ -20,7 +20,7 @@
 			color: @semitransparent-white;
 			display: inline-block;
 			font-weight: normal;
-			margin-left: @default-spacing-sm;
+			margin-left: @spacing-sm;
 		}
 	}
 }
@@ -64,20 +64,16 @@
 [data-unminimize-window]
 {
 	vertical-align: top;
-	&:not(:hover)
-	{
-		border-color: @primary-color;
-	}
 }
 
 [data-role=window]
 {
 	display: flex;
 	position: relative;
-	transition: transform 200ms cubic-bezier(0,.32,.3,1.34)!important;
+	transition: transform @transition-duration cubic-bezier(0,.32,.3,1.34)!important;
 	flex-grow: 1;
 	flex-shrink: 1;
-	background: @default-window-bg;
+	background: @window-bg;
 	height: 100%;
 	width: 100%;
 	opacity: 1;
@@ -98,7 +94,7 @@
 
 	&:not(.no-transition)
 	{
-		.transition( 200ms );
+		.transition();
 	}
 
 	&.maximized
@@ -151,7 +147,7 @@
 
 .label-row > .css-cell
 {
-	.transition( 200ms );
+	.transition();
 
 	&:hover
 	{
@@ -215,11 +211,11 @@
 #layout_in_use
 {
 	height: ~"calc( 100% - 46px )";
-	padding: @default-spacing-sm;
+	padding: @spacing-sm;
 	box-sizing: border-box;
 	.leaf
 	{
-		.transition( 200ms );
+		.transition();
 	}
 
 	&.rearranging
@@ -228,7 +224,7 @@
 		{
 			width: 100px !important;
 			height: 100px !important;
-			background: @default-window-bg;
+			background: @window-bg;
 			box-shadow: @shadow;
 		}
 
@@ -256,13 +252,13 @@
 			&[data-split=horizontal] > .layout-split:not(:first-child),
 			&[data-split=horizontal] > [data-role=window]:not(:first-child)
 			{
-				margin-left: @default-spacing-sm;
+				margin-left: @spacing-sm;
 			}
 
 			&[data-split=vertical] > .layout-split:not(:first-child),
 			&[data-split=vertical] > [data-role=window]:not(:first-child)
 			{
-				margin-top: @default-spacing-sm;
+				margin-top: @spacing-sm;
 			}
 		}
 	}
@@ -290,8 +286,8 @@
 
 			& > .gutter
 			{
-				max-height: @default-spacing-sm;
-				min-height: @default-spacing-sm;
+				max-height: @spacing-sm;
+				min-height: @spacing-sm;
 				width: 100%;
 			}
 		}
@@ -303,8 +299,8 @@
 			& > .gutter
 			{
 				height: 100%;
-				max-width: @default-spacing-sm;
-				min-width: @default-spacing-sm;
+				max-width: @spacing-sm;
+				min-width: @spacing-sm;
 			}
 		}
 
@@ -314,7 +310,7 @@
 			flex-grow: 1;
 			flex-shrink: 1;
 			box-sizing: border-box;
-			background: @inactive-gray;
+			background: @inactive-color;
 		}
 	}
 
@@ -324,7 +320,7 @@
 .layout-controls
 {
 	border-top: 1px solid @separator;
-	padding: @default-spacing-sm @default-spacing;
+	padding: @spacing-sm @spacing;
 	width: 100%;
 	position: absolute;
 	bottom: 0;
