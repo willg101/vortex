@@ -158,6 +158,73 @@ function debugger_ws_maintenance_api()
 
 /**
  * @brief
+ *
+ * @param string
+ * @retval array
+ */
+function debugger_find_codebase_root( $file )
+{
+	$parent_dir = $file;
+	do
+	{
+		$parent_dir  = dirname( $parent_dir );
+		$git_dir     = "$parent_dir/.git";
+		$config_file = "$git_dir/config";
+		if ( is_dir( $git_dir ) && is_readable( $config_file ) )
+		{
+			$config_parsed = parse_ini_file( "$config_file", TRUE );
+			return [
+				'root' => $parent_dir,
+				'id'  => $config_parsed[ 'remote origin' ][ 'url' ],
+			];
+		}
+
+		$vortex_file = "$parent_dir/.vortex-codebase";
+		if ( is_readable( $vortex_file ) )
+		{
+			return [
+				'root' => $parent_dir,
+				'id'  => trim( file_get_contents( $vortex_file ) ),
+			];
+		}
+	} while( $parent_dir != '/' );
+
+	return [];
+}
+
+/**
+ * @retval string
+ *	The code for `debugger_get_source_code_for_codebase_root_finder()` as an anonymous function.
+ *	This allows us to send this to the client via js, which, in turn, can eval the function on
+ *	remote hosts to find codebase roots
+ *
+ * See https://stackoverflow.com/a/7027198
+ */
+function debugger_get_source_code_for_codebase_root_finder()
+{
+	$func       = new ReflectionFunction( 'debugger_find_codebase_root' );
+	$filename   = $func->getFileName();
+	$start_line = $func->getStartLine() - 1;
+	$end_line   = $func->getEndLine();
+	$length     = $end_line - $start_line;
+
+	$source = file( $filename );
+	$body   = implode( "", array_slice( $source, $start_line, $length ) );
+	return str_replace( 'debugger_find_codebase_root', '', $body ); // Convert to anon function
+}
+
+/**
+ * @brief
+ *	Implements hook_alter_js_options
+ */
+function debugger_alter_js_options( &$data )
+{
+	$data[ 'options' ][ 'debugger' ][ 'find_codebase_root' ] =
+		debugger_get_source_code_for_codebase_root_finder();
+}
+
+/**
+ * @brief
  *	Request handler for the files API; sends the contents of a file to the client
  *
  * @param string $path The request path

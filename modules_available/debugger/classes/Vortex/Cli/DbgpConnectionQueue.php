@@ -194,6 +194,10 @@ class DbgpConnectionQueue
 		if ( $this->get( $id ) )
 		{
 			$this->queue[ $id ][ 'filename' ] = $filename;
+
+			$root = debugger_find_codebase_root( $filename );
+			$this->queue[ $id ][ 'codebase_id' ]   = array_get( $root, 'id' );
+			$this->queue[ $id ][ 'codebase_root' ] = array_get( $root, 'root' );
 		}
 		else
 		{
