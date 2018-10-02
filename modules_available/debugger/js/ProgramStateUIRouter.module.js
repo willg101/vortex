@@ -144,10 +144,10 @@ subscribe( 'before-switch-session', function( e )
 	{
 		setTimeout( function()
 		{
-			$( this ).addClass( 'not-loaded' );
-		}.bind( this ), ++delay * 50 );
+			$( this ).addClass( 'hiding not-loaded' );
+		}.bind( this ), ++delay * 30 );
 	} );
-	setTimeout( resolve, delay * 50 );
+	setTimeout( resolve, delay );
 } );
 
 subscribe( 'session-switched', function()
@@ -158,6 +158,6 @@ subscribe( 'session-switched', function()
 		setTimeout( function()
 		{
 			$( this ).removeClass( 'not-loaded' );
-		}.bind( this ), ++delay * 50 );
+		}.bind( this ), ++delay * 30 );
 	} );
 } );
