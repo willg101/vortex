@@ -158,6 +158,16 @@ function subscribe( name, callback )
 }
 
 /**
+ * see https://gist.github.com/getify/3667624
+ *
+ * @param string
+ */
+function escapeDoubleQuotes( str )
+{
+	return str.replace( /\\([\s\S])|(")/g,"\\$1$2" );
+}
+
+/**
  * @brief
  *	Perform an action only after a set of async tasks have all finished
  *
