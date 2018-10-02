@@ -190,7 +190,7 @@ $( document ).on( 'keyup', function( e )
 	}
 } );
 
-// When the code editor is finished initializing, set up the feature for hovering variables to 
+// When the code editor is finished initializing, set up the feature for hovering variables to
 // preview their values
 subscribe( 'editor-ready', function( e )
 {
