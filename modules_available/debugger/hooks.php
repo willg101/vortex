@@ -241,9 +241,9 @@ function debugger_file_api( $path )
 	}
 	elseif ( is_file( $file ) ) // Send the file's contents to the client
 	{
-		$mime = mime_content_type( $file );
-		header( "Content-Type: $mime; charset=utf-8" );
-		echo file_get_contents( $file );
+		$info = debugger_find_codebase_root( $file );
+		$info[ 'contents' ] = file_get_contents( $file );
+		send_json( $info );
 	}
 	else // List the directory's contents for the client
 	{

@@ -16,6 +16,7 @@ var current_line_num   = false;
 var current_file       = false;
 var Range              = ace.require( 'ace/range' ).Range;
 var command_stopwatch_timeout;
+var current_codebase   = {};
 
 subscribe( 'vortex-init', function()
 {
@@ -67,7 +68,7 @@ subscribe( 'vortex-init', function()
 		}
 		else
 		{
-			sessionBreakpoints.toggle( getCurrentFileShowing(), line );
+			sessionBreakpoints.toggle( getCurrentFileShowing(), line, undefined, current_codebase );
 		}
 	} );
 	editor.setReadOnly( true );
@@ -87,7 +88,7 @@ $( document ).on( 'keypress', '.bp-expression-input', function( e )
 
 		vTheme.hideModal();
 		sessionBreakpoints.del( file, line )
-		sessionBreakpoints.create( file, line, expression );
+		sessionBreakpoints.create( file, line, expression, current_codebase );
 	}
 } );
 
@@ -375,6 +376,18 @@ async function showFile( filename, line, cb, skip_cache, scroll_top, no_clear_ac
 		return;
 	}
 
+	if ( data.codebase_root && data.codebase_id )
+	{
+		current_codebase = {
+			root : data.codebase_root,
+			id   : data.codebase_id,
+		}
+	}
+	else
+	{
+		current_codebase = {};
+	}
+
 	var text = data.contents;
 	if ( current_file != filename || skip_cache )
 	{
@@ -430,11 +443,12 @@ function clearCurrentLineIndicator()
 	current_line_num = false;
 }
 
-function showBreakpointsForFile()
+async function showBreakpointsForFile()
 {
 	editor.session.clearBreakpoints();
 	var current_file = getCurrentFileShowing();
-	var file_bps = sessionBreakpoints.listForFile( current_file );
+	var file_bps = await sessionBreakpoints.listForFile( current_file, current_codebase.id,
+		current_codebase.root );
 	for ( let line in file_bps )
 	{
 		updateBreakpointDisplay( file_bps[ line ] );

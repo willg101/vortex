@@ -40,7 +40,12 @@ function push( file )
 	{
 		recentFiles.pop();
 	}
-	recentFiles.unshift( { filename, host : file.hostname } );
+	recentFiles.unshift( {
+		filename,
+		host         : file.hostname,
+		codebase_dir : file.codebase_root,
+		codebase_id  : file.codebase_id,
+	} );
 	localStorage.setItem( PERSISTENT_STORAGE_KEY, JSON.stringify( recentFiles ) );
 }
 

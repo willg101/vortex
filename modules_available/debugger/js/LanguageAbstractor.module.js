@@ -8,6 +8,7 @@ var requiredMethods = [
 	'globDirectory',
 	'getLanguageNameForEditor',
 	'getHostname',
+	'getCodebaseRoot',
 ];
 
 class LanguageAbstractor

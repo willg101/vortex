@@ -14,6 +14,29 @@ class PhpLanguage extends LanguageAbstractor
 	// Public/required functions
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
+	async getCodebaseRoot( file )
+	{
+		file = escapeDoubleQuotes( file );
+
+		await Debugger.command( 'eval', '$__codebase_root_finder__ = '
+			+ Dpoh.options.debugger.find_codebase_root );
+		var root = await Debugger.command( 'eval', `$__codebase_root_finder__( "${file}" )` );
+		Debugger.command( 'eval', 'unset( $__codebase_root_finder__ )' );
+
+		var info = {};
+		if ( root.parsed.value[ 0 ].children && root.parsed.value[ 0 ].children.length )
+		{
+			root.parsed.value[ 0 ].children.forEach( el =>
+			{
+				if ( el.name == 'root' || el.name == 'id' )
+				{
+					info[ el.name ] = el.value;
+				}
+			} );
+		}
+		return info;
+	}
+
 	async getBytesOfMemoryUsed()
 	{
 		var data = await Debugger.command( 'eval', 'memory_get_usage()' );

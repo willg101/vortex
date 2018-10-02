@@ -1,11 +1,15 @@
 import Debugger from './Debugger.module.js'
 import File     from './File.module.js'
 import WsClient from './WsClient.module.js'
+import LanguageAbstractor       from './LanguageAbstractor.module.js'
+
+export default { getCurrentCodebase }
 
 var known_sessions = [];
 
 subscribe( 'connection-status-changed', function onConnectionStatusChanged( e )
 {
+	var indicator = $( '#connection_queue_indicator' );
 	if ( e.status == 'connected' )
 	{
 		Debugger.command( 'X-ctrl:peek_queue' );
@@ -13,7 +17,6 @@ subscribe( 'connection-status-changed', function onConnectionStatusChanged( e )
 	}
 	else
 	{
-		var indicator = $( '#connection_queue_indicator' );
 		indicator.addClass( 'no-connection' ).find( '.n' ).html( '<i class="fa fa-times">' );
 	}
 } );
@@ -22,6 +25,18 @@ subscribe( 'session-status-changed', function()
 {
 	Debugger.command( 'X-ctrl:peek_queue' );
 } );
+
+async function getCurrentCodebase()
+{
+	for ( let i in known_sessions )
+	{
+		if ( known_sessions[ i ].active )
+		{
+			return await LanguageAbstractor.getCodebaseRoot( known_sessions[ i ].file );
+		}
+	}
+	return null;
+}
 
 subscribe( 'server-info', function( e )
 {
@@ -39,11 +54,13 @@ subscribe( 'server-info', function( e )
 
 			var file = self.attr( 'path' ) || '(Unknown file)';
 			known_sessions.push( {
-				id     : session_id,
-				active : self.attr( 'active' ) == 'true',
-				uuid   : self.attr( 'uuid' ),
-				host   : self.attr( 'host' ),
-				file   : file.replace( /^file:\/\//, '' )
+				id            : session_id,
+				active        : self.attr( 'active' ) == 'true',
+				uuid          : self.attr( 'uuid' ),
+				host          : self.attr( 'host' ),
+				codebase_id   : self.attr( 'codebase_id' ),
+				codebase_root : self.attr( 'codebase_root' ),
+				file          : file.replace( /^file:\/\//, '' )
 			} );
 		} );
 

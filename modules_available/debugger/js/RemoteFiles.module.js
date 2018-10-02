@@ -31,26 +31,43 @@ async function fetchFromSever( path, cb )
 
 		var message  = await Debugger.command( 'source', { file : path } );
 		var hostname = await hostname_promise;
+		var codebase_root = await LanguageAbstractor.getCodebaseRoot( path );
+
 		if ( message.jq_message.find( ' > error[code=100]' ).length )
 		{
 			message.parsed.file_contents = false;
 		}
 		var contents      = message.parsed.file_contents || false;
-		filecache[ path ] = contents;
 		var error_reason  = !contents && ( message.is_stopping ? 'stopping' : ( message.is_stopped ? 'stopped' : 'other' ) );
-		return new Promise( ( resolve, reject ) => contents ? resolve( { contents, hostname, path } ) : reject( error_reason ) );
+		if ( !error_reason )
+		{
+			filecache[ path ] = {
+				contents,
+				hostname,
+				path,
+				codebase_root : codebase_root.root,
+				codebase_id   : codebase_root.id,
+			};
+		}
+		return new Promise( ( resolve, reject ) => contents ? resolve( filecache[ path ] ) : reject( error_reason ) );
 	}
 	else
 	{
 		return new Promise( ( resolve, reject ) => {
-			$.get( apiPath( path ), async function( contents )
+			$.get( apiPath( path ), async function( info )
 			{
-				filecache[ path ] = contents;
 				var hostname = await hostname_promise;
-				resolve( { contents, hostname, path } )
+				info.hostname = hostname;
+				filecache[ path ] = {
+					contents : info.contents,
+					hostname,
+					path,
+					codebase_root : info.root,
+					codebase_id   : info.id,
+				};
+				resolve( filecache[ path ] )
 			} ).fail( function( error_reason )
 			{
-				filecache[ path ] = false;
 				reject( error_reason );
 			} );
 		} );

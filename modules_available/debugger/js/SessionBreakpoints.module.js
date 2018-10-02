@@ -1,11 +1,12 @@
 import File     from './File.module.js'
 import Debugger from './Debugger.module.js'
+import QueuedSessionsIndicator  from './QueuedSessionsIndicator.module.js'
 
 class Breakpoint
 {
-	constructor( file, line, expression, id )
+	constructor( file, line, expression, id, codebase )
 	{
-		this.info = { file, line, expression, id };
+		this.info = { file, line, expression, id, codebase };
 		this.info.state = id ? 'confirmed' : 'offline';
 		this.triggerStateChange();
 		this.sendToDebugger();
@@ -30,18 +31,26 @@ class Breakpoint
 			return;
 		}
 
+		var cb = await QueuedSessionsIndicator.getCurrentCodebase();
+
 		this.info.state = 'pending';
 		this.triggerStateChange();
 
-		var data = await Debugger.command( 'breakpoint_set', {
-			type : this.type,
-			line : this.line,
-			file : this.file,
-		}, this.expression );
-		this.info.id = data.parsed.id;
+		if ( !cb.id || !this.info.codebase || this.info.codebase.id == cb.id )
+		{
+			let file = this.info.codebase
+				? this.file.replace( File.stripScheme( this.info.codebase.root ), File.stripScheme( cb.root ) )
+				: this.file;
+			var data = await Debugger.command( 'breakpoint_set', {
+				type : this.type,
+				line : this.line,
+				file,
+			}, this.expression );
+			this.info.id = data.parsed.id;
 
-		this.info.state = 'confirmed'
-		this.triggerStateChange();
+			this.info.state = 'confirmed'
+			this.triggerStateChange();
+		}
 	}
 
 	async removeFromDebugger()
@@ -70,7 +79,8 @@ class SessionBreakpoints
 {
 	constructor()
 	{
-		this.allBreakpoints = [];
+		this.allBreakpoints      = {};
+		this.codebaseBreakpoints = {};
 		subscribe( 'session-status-changed', ( e ) =>
 		{
 			if ( e.status == 'active' )
@@ -84,8 +94,17 @@ class SessionBreakpoints
 		} );
 	}
 
-	listForFile( filename )
+	listForFile( filename, id, cb_root )
 	{
+		if ( Debugger.sessionIsActive() && id && cb_root )
+		{
+			filename = File.stripScheme( filename ).replace( File.stripScheme( cb_root ), '' ).replace( /^\/+/, '' );
+			if ( this.codebaseBreakpoints[ id ] && this.codebaseBreakpoints[ id ][ filename ] )
+			{
+				return this.codebaseBreakpoints[ id ][ filename ];
+			}
+		}
+
 		return this.allBreakpoints[ filename ] || [];
 	}
 
@@ -130,7 +149,7 @@ class SessionBreakpoints
 		this.apply( bp => bp.sendToDebugger() );
 	}
 
-	toggle( file, line, expression )
+	toggle( file, line, expression, codebase )
 	{
 		if ( this.allBreakpoints[ file ] && this.allBreakpoints[ file ][ line ] )
 		{
@@ -138,7 +157,7 @@ class SessionBreakpoints
 		}
 		else
 		{
-			this.create( file, line, expression );
+			this.create( file, line, expression, codebase );
 		}
 	}
 
@@ -152,7 +171,7 @@ class SessionBreakpoints
 		delete this.allBreakpoints[ file ][ line ];
 	}
 
-	create( file, line, expression )
+	create( file, line, expression, codebase )
 	{
 		if ( !this.allBreakpoints[ file ] )
 		{
@@ -160,7 +179,27 @@ class SessionBreakpoints
 		}
 		if ( !this.allBreakpoints[ file ][ line ] )
 		{
-			this.allBreakpoints[ file ][ line ] = new Breakpoint( file, line, expression );
+			this.allBreakpoints[ file ][ line ] = new Breakpoint( file, line, expression, undefined, codebase );
+		}
+
+		if ( codebase && codebase.id && codebase.root )
+		{
+			let rel_file = File.stripScheme( file )
+				.replace( File.stripScheme( codebase.root ), '' )
+				.replace( /^\/+/, '' );
+			if ( !this.codebaseBreakpoints[ codebase.id ] )
+			{
+				this.codebaseBreakpoints[ codebase.id ] = {};
+			}
+			if ( !this.codebaseBreakpoints[ codebase.id ][ rel_file ] )
+			{
+				this.codebaseBreakpoints[ codebase.id ][ rel_file ] = {};
+			}
+			if ( !this.codebaseBreakpoints[ codebase.id ][ rel_file ][ line ] )
+			{
+				this.codebaseBreakpoints[ codebase.id ][ rel_file ][ line ]
+					= this.allBreakpoints[ file ][ line ];
+			}
 		}
 	}
 
