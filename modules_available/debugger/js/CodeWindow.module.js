@@ -50,25 +50,28 @@ subscribe( 'vortex-init', function()
 		}
 
 		var line = e.getDocumentPosition().row + 1;
+		var file = current_codebase.id && current_codebase.root
+			? File.convertToCodebaseRelativePath( current_file, current_codebase.id, current_codebase.root )
+			: file;
 
 		// Middle button or right button
 		if ( !$( target ).is( '.ace_breakpoint:not(.conditional-breakpoint)' )
 			&& ( e.domEvent.button == 1 || 1 == e.domEvent.button&2
-		  	  || e.domEvent.button == 2 || 1 == e.domEvent.button&3 ) )
+			  || e.domEvent.button == 2 || 1 == e.domEvent.button&3 ) )
 		{
 			e.domEvent.preventDefault();
-			var current_bp = sessionBreakpoints.get( current_file, line );
+			var current_bp = sessionBreakpoints.get( file, line );
 			var expression = current_bp && current_bp.expression || '';
 			vTheme.showModal( 'Conditional Breakpoint', render( 'debugger.conditional_bp_modal', {
 				line       : line,
-				file       : getCurrentFileShowing(),
+				file       : file,
 				expression : expression,
 			} ) );
 			setTimeout( function(){ $( '.bp-expression-input' ).focus(); }, 30 );
 		}
 		else
 		{
-			sessionBreakpoints.toggle( getCurrentFileShowing(), line, undefined, current_codebase );
+			sessionBreakpoints.toggle( file, line );
 		}
 	} );
 	editor.setReadOnly( true );
@@ -88,14 +91,24 @@ $( document ).on( 'keypress', '.bp-expression-input', function( e )
 
 		vTheme.hideModal();
 		sessionBreakpoints.del( file, line )
-		sessionBreakpoints.create( file, line, expression, current_codebase );
+		sessionBreakpoints.create( file, line, expression );
 	}
 } );
 
-// Update how a breakpoint from the currently showing file is displayed 
+// Update how a breakpoint from the currently showing file is displayed
 subscribe( 'breakpoint-state-change', function( e )
 {
-	if ( e.breakpoint.file != getCurrentFileShowing() )
+	var file = File.stripScheme( getCurrentFileShowing() );
+	if ( current_codebase.id && current_codebase.root && File.isCodebaseRelative( e.breakpoint.file ) )
+	{
+		let real_path = File.convertFromCodebaseRelativePath( e.breakpoint.file, current_codebase.id,
+			current_codebase.root );
+		if ( real_path != file )
+		{
+			return;
+		}
+	}
+	else if ( File.stripScheme( e.breakpoint.file ) != file ) // Non-codebase-relative path
 	{
 		return;
 	}
@@ -443,12 +456,15 @@ function clearCurrentLineIndicator()
 	current_line_num = false;
 }
 
-async function showBreakpointsForFile()
+function showBreakpointsForFile()
 {
 	editor.session.clearBreakpoints();
-	var current_file = getCurrentFileShowing();
-	var file_bps = await sessionBreakpoints.listForFile( current_file, current_codebase.id,
-		current_codebase.root );
+	var file = getCurrentFileShowing();
+	if ( current_codebase.id && current_codebase.root )
+	{
+		file = File.convertToCodebaseRelativePath( file, current_codebase.id, current_codebase.root );
+	}
+	var file_bps = sessionBreakpoints.listForFile( file );
 	for ( let line in file_bps )
 	{
 		updateBreakpointDisplay( file_bps[ line ] );
