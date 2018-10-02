@@ -24,7 +24,8 @@ class PhpLanguage extends LanguageAbstractor
 		Debugger.command( 'eval', 'unset( $__codebase_root_finder__ )' );
 
 		var info = {};
-		if ( root.parsed.value[ 0 ].children && root.parsed.value[ 0 ].children.length )
+		if ( root.parsed.value && root.parsed.value[ 0 ] && root.parsed.value[ 0 ].children
+			&& root.parsed.value[ 0 ].children.length )
 		{
 			root.parsed.value[ 0 ].children.forEach( el =>
 			{
