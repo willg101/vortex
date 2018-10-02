@@ -39,7 +39,7 @@ LanguageAbstractor.setDefault = function( language )
 	}
 	else
 	{
-		throw new this.Error( 'Cannot use the give language: it is not an instance of '
+		throw new this.Error( 'Cannot use the given language: it is not an instance of '
 			+ 'LanguageAbstractor' );
 	}
 };
