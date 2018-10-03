@@ -1,6 +1,7 @@
 {
 	"allowed_directories" : [ "/srv" ],
 	"tree_root"           : "/srv",
+	"log_level"           : "DEBUG",
 	"allowed_extensions"  : [ "php", "inc", "module", "" ],
 	"recent_dirs"         : [
 		"/srv"
