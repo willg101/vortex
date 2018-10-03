@@ -3,6 +3,7 @@
 	"tree_root"           : "/srv",
 	"log_level"           : "DEBUG",
 	"allowed_extensions"  : [ "php", "inc", "module", "" ],
+	"timezone"            : "America/Detroit",
 	"socket_server"       : {
 		"host"    : "socket_server",
 		"ws_port" : 3001,
