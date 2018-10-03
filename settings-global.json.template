@@ -3,6 +3,11 @@
 	"tree_root"           : "/srv",
 	"log_level"           : "DEBUG",
 	"allowed_extensions"  : [ "php", "inc", "module", "" ],
+	"socket_server"       : {
+		"host"    : "socket_server",
+		"ws_port" : 3001,
+		"de_port" : 9000
+	},
 	"recent_dirs"         : [
 		"/srv"
 	],

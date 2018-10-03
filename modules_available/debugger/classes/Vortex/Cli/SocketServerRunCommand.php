@@ -41,8 +41,8 @@ class SocketServerRunCommand extends Command
 		logger()->info( 'Creating socket servers' );
 
 		$loop = EventLoopFactory::create();
-		$dbg  = new SocketServer( '0.0.0.0:9000', $loop ); // TODO: Configurable
-		$ws   = new SocketServer( '0.0.0.0:3001', $loop ); // TODO: Configurable
+		$dbg  = new SocketServer( '0.0.0.0:' . settings( 'socket_server.de_port' ), $loop );
+		$ws   = new SocketServer( '0.0.0.0:' . settings( 'socket_server.ws_port' ), $loop );
 
 		$wsStack = new HttpServer(
 			new WsServer(
