@@ -21,9 +21,6 @@ $options[volumes]
   socket_server:
     build:
       context: ./socket_server
-    command: ["/var/www/html/vcli", "socket-server:start"]
-    working_dir: /var/www/html/
-    stop_grace_period: 1s
     ports:
       - $options[websocket_port]:3001
       - $options[debug_port]:9000
