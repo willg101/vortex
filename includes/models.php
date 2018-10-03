@@ -3,7 +3,6 @@
 use Dpoh\DataStorage;
 use Dpoh\RequestHandlers;
 
-define( 'USER_CONFIG_FILE', 'user-config.json' );
 define( 'SETTINGS_FILE',    'settings-global.ini' );
 define( 'MODULES_PATH',     'modules_enabled' );
 
