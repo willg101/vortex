@@ -311,7 +311,7 @@ function login_handle_reset_password_api( $url )
 			':expires' => date('Y-m-d H:i:s', strtotime( '+1 day' ) ),
 		] );
 		$message = render( 'reset_password_email', [
-			'ip' => $_SERVER[ 'REMOTE_ADDR' ],
+			'ip' => get_user_ip(),
 			'reset_url' => base_url() . '?' . http_build_query( [ 'otlt' => $token, 'tid' => db()->lastInsertId() ] ) ] );
 		$headers[] = 'MIME-Version: 1.0';
 		$headers[] = 'Content-type: text/html; charset=iso-8859-1';
@@ -506,7 +506,7 @@ function login_user( $username, $password = NULL )
 		[
 			':user_id'       => $account[ 'id' ],
 			':session_token' => login_hash_password( $session_token ),
-			':user_ip'       => $_SERVER[ 'REMOTE_ADDR' ],
+			':user_ip'       => get_user_ip(),
 		]
 	);
 	setcookie( 'dpoh_session_id',    db()->lastInsertId(), 0, '/' );
@@ -518,7 +518,7 @@ function dpoh_session_id_is_valid( $session_id = FALSE, $session_token = FALSE, 
 {
 	$session_id    = $session_id    ?: array_get( $_COOKIE, 'dpoh_session_id' );
 	$session_token = $session_token ?: array_get( $_COOKIE, 'dpoh_session_token' );
-	$user_ip       = $user_ip ?: $_SERVER[ 'REMOTE_ADDR' ];
+	$user_ip       = $user_ip ?: get_user_ip();
 
 	$session_record = db_query( 'SELECT * FROM sessions WHERE id = :session_id', [
 		':session_id' => $session_id
