@@ -2,6 +2,7 @@
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use \Monolog\Handler\ErrorLogHandler;
 
 /**
  * @brief
@@ -48,32 +49,32 @@ function logger()
 
 	if ( !$logger )
 	{
-		$filename = '';
+		$handler = NULL;
+		$label   = '';
+		$log_level = settings( 'log_level' );
+		$log_level = constant( Logger::CLASS . "::$log_level" );
 		if ( php_sapi_name() == 'cli' )
 		{
-			$filename = 'cli';
-		}
-		elseif ( IS_AJAX_REQUEST )
-		{
-			$filename = 'http_ajax';
+			$label   = 'cli';
+			$handler = new ErrorLogHandler( ErrorLogHandler::OPERATING_SYSTEM, $log_level );
 		}
 		else
 		{
-			$filename = 'http';
+			$label   = 'http';
+			$handler = new StreamHandler( __DIR__ . "/../logs/http.log", $log_level );
 		}
 
 		$data = [
-			'logger'   => NULL,
-			'label'    => $filename,
-			'filename' => __DIR__ . "/../logs/$filename.log",
-			'level'    => Logger::DEBUG,
+			'logger'  => NULL,
+			'label'   => $label,
+			'handler' => $handler,
 		];
 		fire_hook( 'init_logger', $data );
 
 		if ( !$data[ 'logger' ] )
 		{
 			$logger = new Logger( "Vortex Logger ($data[label])" );
-			$logger->pushHandler( new StreamHandler( $data[ 'filename' ], $data[ 'level' ] ) );
+			$logger->pushHandler( $handler );
 		}
 		else
 		{
