@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+chdir( __DIR__ );
+
 function generate_docker_compose_file( array $options )
 {
 	$timestamp = date( 'Y-m-d g:i A' );
@@ -41,10 +43,21 @@ function check_for_requirements()
 
 	exec( 'which docker-compose', $_, $status );
 	echo " - docker-compose: " . ( !$status ? 'OK' : 'FAIL' ) . "\n";
+
+	exec( 'docker info 2>&1', $output, $status );
+	echo " - docker daemon access: " . (!$status ? 'OK' : 'FAIL') . "\n";
+	if ( $status )
+	{
+		$output = implode( "\n", $output );
+		echo "   ==> Error message: $output\n";
+	}
 	return $missing_any && !$status;
 }
 
-check_for_requirements();
+if ( !check_for_requirements() )
+{
+	die( 1 );
+}
 
 $options[ 'web_port' ]       = 3008;
 $options[ 'debug_port' ]     = 9000;
@@ -52,3 +65,6 @@ $options[ 'websocket_port' ] = 3005;
 $options[ 'volumes' ]        = '      - /srv:/srv';
 
 file_put_contents( 'docker-compose.yml', generate_docker_compose_file( $options ) );
+$docker_compose_cmd = 'docker-compose up --build --detach';
+echo "$docker_compose_cmd\n";
+exec( $docker_compose_cmd );
