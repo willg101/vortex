@@ -35,9 +35,4 @@ DirectoryIndex index.php index.html index.htm
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !=/favicon.ico
   RewriteRule ^ index.php [L]
-
-  # Proxying
-  #RewriteBase    "/dpoh/"
-  #ProxyPassReverse "/bridge2" "ws://localhost:3001/bridge"
-
 </IfModule>
