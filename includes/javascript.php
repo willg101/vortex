@@ -28,7 +28,7 @@ function build_script_requirements()
 	$included_external_assets = [];
 	foreach ( modules()->get() as $module_name => $module )
 	{
-		foreach ( $module[ 'settings' ][ 'external_dependencies' ][ 'js' ] as $js_file )
+		foreach ( $module[ 'settings' ][ 'external_js' ] as $js_file )
 		{
 			if ( empty( $included_external_assets[ $js_file ] ) )
 			{

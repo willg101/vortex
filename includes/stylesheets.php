@@ -14,7 +14,7 @@ function build_css_requirements()
 	$included_external_assets = [];
 	foreach ( modules()->get() as $module )
 	{
-		foreach ( $module[ 'settings' ][ 'external_dependencies' ][ 'css' ] as $css_file )
+		foreach ( $module[ 'settings' ][ 'external_css' ] as $css_file )
 		{
 			if ( empty( $included_external_assets[ $css_file ] ) )
 			{

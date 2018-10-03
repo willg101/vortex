@@ -12,7 +12,7 @@ cd /var/www/html
 
 # Require a proper settings file to be available before continuing; otherwise, the socket server
 # will immediately terminate
-SETTINGS_FILE=settings-global.json
+SETTINGS_FILE=settings-global.ini
 POLLING_DELAY=10
 while [[ ! -e "$SETTINGS_FILE" ]]; do
 	echo "'$PWD/$SETTINGS_FILE' does not exist; this file MUST exist before continuing."

@@ -4,7 +4,7 @@ use Dpoh\DataStorage;
 use Dpoh\RequestHandlers;
 
 define( 'USER_CONFIG_FILE', 'user-config.json' );
-define( 'SETTINGS_FILE',    'settings-global.json' );
+define( 'SETTINGS_FILE',    'settings-global.ini' );
 define( 'MODULES_PATH',     'modules_enabled' );
 
 require_once 'DataStorage.class.php';
@@ -25,10 +25,8 @@ require_once 'RequestHandlers.class.php';
  *		'less'                 => [ 'modules_enabled/foo/less/a/b.css.less', 'modules/foo/less/d.css.less' ],
  *		'templates'            => [ 'modules_enabled/foo/templates/a.tpl.php' ],
  *		'settings'             => [
- *			'external_dependencies' => [
- *				'js'  => [ '//a.com/b/c.js' ],
- *				'css' => [ '//a.com/b/c.css' ],
- *			],
+ *			'external_js'  => [ '//a.com/b/c.js' ],
+ *			'external_css' => [ '//a.com/b/c.css' ],
  *		],
  *	]
  *	@endcode
@@ -45,14 +43,12 @@ function load_all_modules()
 	];
 	$standard_files        = [
 		'hook_implementations' => 'hooks.php',
-		'ajax_api_script'      => 'ajax-api.php',
-		'page_template'        => 'page-template.tpl.php',
+		'ajax_api_script'      => 'ajax-api.php',          // TODO: Don't need this
+		'page_template'        => 'page-template.tpl.php', // TODO: Don't need this
 	];
 	$default_settings = [
-		'external_dependencies' => [
-			'js'  => [],
-			'css' => [],
-		],
+		'external_js'  => [],
+		'external_css' => [],
 	];
 
 	$mod_dir_contents = glob( MODULES_PATH . '/*' );
@@ -81,8 +77,9 @@ function load_all_modules()
 					: FALSE;
 			}
 
-			$settings = file_exists( "$item/settings.json" )
-				? json_decode( file_get_contents( "$item/settings.json" ), TRUE )
+			$potential_settings_file = "$item/settings.ini";
+			$settings = file_exists( $potential_settings_file )
+				? parse_ini_file( $potential_settings_file )
 				: [];
 			$modules[ $mod_name ][ 'settings' ] = array_merge( $default_settings, $settings );
 		}
@@ -142,7 +139,7 @@ function settings( $key = NULL, $default_val = NULL )
 			throw new FatalConfigError( 'The global settings file (' . SETTINGS_FILE . ') does '
 				. "not exist or cannot be read by $user_name." );
 		}
-		$settings = json_decode( file_get_contents( SETTINGS_FILE ), TRUE ) ?: [];
+		$settings = parse_ini_file( SETTINGS_FILE ) ?: [];
 		$default_settings = [
 			'allowed_directories' => [],
 			'tree_root' => '/dev/null',

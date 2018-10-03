@@ -1,0 +1,37 @@
+allowed_directories[] = /srv
+
+tree_root = /srv
+
+; log_level: INFO, ERROR, DEBUG, etc.
+log_level = DEBUG
+
+; File types that the file finder will show
+; DO NOT treat this like as a security feature; it is ONLY intended to decrease clutter
+allowed_extensions[] = php
+allowed_extensions[] = inc
+allowed_extensions[] = module
+allowed_extensions[] = ""
+
+; Timezone MUST be set
+timezone = America/Detroit
+
+; The hostname and web socket port of the socket server (bridge).
+socket_server[host]    = socket_server
+socket_server[ws_port] = 3001
+; Port 9000 is standard for DBGp
+socket_server[de_port] = 9000
+
+; One or more directories to include in the file finder's 'recently edited listing'
+recent_dirs[] = /srv
+
+; JavaScript dependencies required by Vortex core
+core_js[] = //ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js
+core_js[] = //code.jquery.com/ui/1.12.1/jquery-ui.js
+core_js[] = //cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js
+core_js[] = js/core.js
+
+; Directory to store compiled LESS stylesheets
+less_output_dir = storage/css
+
+; SQLite databases used by Vortex
+database[default] = storage/db/vortex.db
