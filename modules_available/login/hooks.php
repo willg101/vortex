@@ -224,7 +224,6 @@ function login_ws_connection_opened( $data )
 	$cookies       = parse_cookie_str( array_get( $cookies_raw, 0 ) );
 	$session_id    = array_get( $cookies, 'dpoh_session_id', -1 );
 	$session_token = array_get( $cookies, 'dpoh_session_token', '' );
-
 	$user_ip       = array_get( $data[ 'connection' ]->httpRequest->getHeader( 'X-Forwarded-For' ), 0, '' );
 
 	if ( !dpoh_session_id_is_valid( $session_id, $session_token, $user_ip ) )

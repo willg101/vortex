@@ -75,7 +75,7 @@ function error_response( $message, $code = 400, $http_message = 'Bad Request' )
  * - http://example.com/index.php?page=1 returns an empty string.
  *
  * @return
- *	 The requested Drupal URL path 
+ *	 The requested Drupal URL path
  */
 function request_path() {
 	static $path;
