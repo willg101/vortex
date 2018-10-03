@@ -24,6 +24,7 @@ use \Monolog\Handler\ErrorLogHandler;
  */
 function bootstrap()
 {
+	date_default_timezone_set( settings( 'timezone' ) );
 	spl_autoload_register( 'vortex_autoloader' );
 	$boot_vars = [];
 	fire_hook( 'preboot', $boot_vars );
