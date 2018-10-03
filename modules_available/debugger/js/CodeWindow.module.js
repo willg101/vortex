@@ -103,7 +103,7 @@ subscribe( 'breakpoint-state-change', function( e )
 	{
 		let real_path = File.convertFromCodebaseRelativePath( e.breakpoint.file, current_codebase.id,
 			current_codebase.root );
-		if ( real_path != file )
+		if ( File.stripScheme( real_path ) != file )
 		{
 			return;
 		}
