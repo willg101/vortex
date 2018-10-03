@@ -460,10 +460,7 @@ function user( $key = NULL)
 
 function login_handle_login()
 {
-	if ( $_SERVER[ 'REQUEST_METHOD' ] != 'POST' )
-	{
-		error_response( "This API only accepts POST requests" );
-	}
+	require_method( 'POST' );
 
 	$result = FALSE;
 	$username = input( 'username' );
