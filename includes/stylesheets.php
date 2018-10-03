@@ -1,7 +1,5 @@
 <?php
 
-define( 'LESS_OUTPUT_DIR', 'css'  );
-
 /**
  * @brief
  *	Generates the link tags for including each required CSS file (this DOES NOT include or consider
@@ -78,9 +76,11 @@ function compile_less( $input_file, $output_prefix )
 		$request_timestamp = time();
 	}
 
+	$less_output_dir = settings( 'less_output_dir' );
+
 	if ( $clear )
 	{
-		$contents = glob( LESS_OUTPUT_DIR . '/cached-*' );
+		$contents = glob( $less_output_dir . '/cached-*' );
 		array_walk( $contents, function( $fn )
 		{
 			if ( is_file( $fn ) )
@@ -91,7 +91,7 @@ function compile_less( $input_file, $output_prefix )
 		$clear = FALSE;
 	}
 
-	$output_file = LESS_OUTPUT_DIR . "/cached-$output_prefix-$request_timestamp-"
+	$output_file = $less_output_dir . "/cached-$output_prefix-$request_timestamp-"
 		. without_file_extension( $input_file ) . '.css';
 
 	$less = new Less_Parser();

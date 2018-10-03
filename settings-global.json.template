@@ -18,7 +18,8 @@
 		"//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js",
 		"js/core.js"
 	],
+	"less_output_dir" : "storage/css",
 	"database" : {
-		"default" : "db/vortex.db"
+		"default" : "storage/db/vortex.db"
 	}
 }
