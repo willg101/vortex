@@ -19,7 +19,8 @@ services:
 $options[volumes]
 
   socket_server:
-    image: php:5.6.38-cli-stretch
+    build:
+      context: ./socket_server
     command: ["/var/www/html/vcli", "socket-server:start"]
     working_dir: /var/www/html/
     stop_grace_period: 1s
