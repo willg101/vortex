@@ -54,7 +54,7 @@ function vue_render_preprocess( &$data )
 	if ( $data[ 'template' ] == 'vortex_logo' )
 	{
 		// Provide the directory that contains the graphics for the logo
-		$data[ 'vars' ][ 'img_path' ] = base_path() . '/modules_enabled/vue/img';
+		$data[ 'vars' ][ 'img_path' ] = base_path() . 'modules_enabled/vue/img';
 	}
 }
 

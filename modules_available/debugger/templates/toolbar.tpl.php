@@ -6,7 +6,7 @@
 		<?php $show( 'toolbar_center' ) ?>
 	</div>
 	<div class="right" >
-		<img class="window-separator" src="<?php echo base_path() ?>/modules_enabled/debugger/img/separator.svg"/>
+		<img class="window-separator" src="<?php echo base_path() ?>modules_enabled/debugger/img/separator.svg"/>
 		<?php $show( 'toolbar_right' ) ?>
 	</div>
 </div>
