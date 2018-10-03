@@ -210,3 +210,17 @@ function parse_cookie_str( $str )
 	}
 	return $cookies;
 }
+
+/**
+ * @retval string
+ */
+function get_user_ip()
+{
+	static $ip;
+	if ( $ip === NULL )
+	{
+		$all_headers = getallheaders();
+		$ip = array_get( $all_headers, 'X-Forwarded-For', $_SERVER[ 'REMOTE_ADDR' ] );
+	}
+	return $ip;
+}
