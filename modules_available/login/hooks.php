@@ -393,7 +393,7 @@ function login_create_tables()
 				id       INTEGER      PRIMARY KEY AUTOINCREMENT,
 				username VARCHAR(30)  NOT NULL    UNIQUE,
 				email    VARCHAR(128) NOT NULL,
-				password VARCHAR(60) NOT NULL
+				password VARCHAR(60)  NOT NULL
 			);
 		" );
 		db_query( "
@@ -411,10 +411,10 @@ function login_create_tables()
 		" );
 		db_query( "
 			CREATE TABLE IF NOT EXISTS login_tokens (
-				id      INTEGER      PRIMARY KEY AUTOINCREMENT,
+				id      INTEGER     PRIMARY KEY AUTOINCREMENT,
 				token   VARCHAR(60) NOT NULL,
-				user_id INTEGER      NOT NULL,
-				expires DATETIME     DEFAULT CURRENT_TIMESTAMP,
+				user_id INTEGER     NOT NULL,
+				expires DATETIME    DEFAULT CURRENT_TIMESTAMP,
 				CONSTRAINT      fk_tokens
 					FOREIGN KEY (user_id)
 					REFERENCES  users(id)
@@ -423,9 +423,9 @@ function login_create_tables()
 		" );
 		db_query( "
 			CREATE TABLE IF NOT EXISTS invitation_tokens (
-				id      INTEGER      PRIMARY KEY AUTOINCREMENT,
+				id      INTEGER     PRIMARY KEY AUTOINCREMENT,
 				token   VARCHAR(60) NOT NULL,
-				expires DATETIME     DEFAULT CURRENT_TIMESTAMP
+				expires DATETIME    DEFAULT CURRENT_TIMESTAMP
 			);
 		" );
 	}
