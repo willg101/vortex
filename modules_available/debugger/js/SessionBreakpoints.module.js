@@ -37,7 +37,7 @@ class Breakpoint
 		if ( File.isCodebaseRelative( filename ) )
 		{
 			var codebase = await QueuedSessionsIndicator.getCurrentCodebase();
-			if ( codebaseb.id && codebase.root )
+			if ( codebase.id && codebase.root )
 			{
 				filename = File.convertFromCodebaseRelativePath( filename, codebase.id, codebase.root );
 				// If the path is still codebase-relative, it's not a reference to a file in the
