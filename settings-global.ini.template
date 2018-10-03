@@ -15,6 +15,10 @@ allowed_extensions[] = ""
 ; Timezone MUST be set
 timezone = America/Detroit
 
+; OPTIONAL. Specify a port to expose on the web container. When omitted, an open port is
+; automatically selected. This value ONLY takes effect when spinning up Vortex.
+; http_port = 8080
+
 ; The hostname and web socket port of the socket server (bridge).
 socket_server[host]    = socket_server
 socket_server[ws_port] = 3001

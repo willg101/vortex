@@ -1,10 +1,297 @@
 #!/usr/bin/env php
 <?php
 
-chdir( __DIR__ );
+require_once '../includes/arrays.php'; # array_get()
 
+// Constants
+define( 'SETTINGS_FILE',         __DIR__ . '/../settings-global.ini' );
+define( 'PORT_AUTOSELECT_START', 7000 );
+define( 'PORT_AUTOSELECT_END',   8000 );
+
+/**
+ * @brief
+ *	Ensure a settings file exists, attempting to create one if necessary; then parse the settings
+ *	file. If any errors are detected, terminates this script with a non-zero exit status.
+ *
+ * @retval array
+ *	The 'values' element from the return value of validate_config()
+ */
+function do_settings_verification()
+{
+	$settings_file = realpath( SETTINGS_FILE ) ?: SETTINGS_FILE;
+	if ( is_readable( $settings_file ) )
+	{
+		if ( $settings = parse_ini_file( $settings_file ) )
+		{
+			return display_config( $settings, $settings_file );
+		}
+		else
+		{
+			echo "Failed to parse your settings file ($settings_file).";
+			die( 1 );
+		}
+	}
+	elseif ( file_exists( $settings_file ) )
+	{
+		echo "Cannot read your settings file ($settings_file).";
+		die( 1 );
+	}
+	elseif ( is_writeable( dirname( $settings_file ) ) )
+	{
+		copy( "$settings_file.template", $settings_file );
+		if ( $settings = parse_ini_file( $settings_file ) )
+		{
+			return display_config( $settings, $settings_file );
+		}
+		else
+		{
+			echo "The template config file is invalid";
+			die( 1 );
+		}
+	}
+	else
+	{
+		echo "No settings file exists (and we don't have sufficient permissions to create one in "
+			. dirname( $settings_file ) . ")";
+		die( 1 );
+	}
+}
+
+/**
+ * @brief
+ *	Display the parsed config file and any errors that were detected. If any errors are detected,
+ *	terminates this script with a non-zero exit status
+ *
+ * @param array  $config The contents of the parsed settings file
+ * @param string $path   The path to the config file
+ *
+ * @retval array
+ */
+function display_config( array $config, $path )
+{
+	$validated = validate_config( $config );
+
+	$key_length = 0;
+
+	echo "\nConfiguration:\n";
+	foreach ( $validated[ 'values' ] as $key => $value )
+	{
+		$key_length = max( $key_length, mb_strlen( $key ) );
+	}
+	foreach ( $validated[ 'values' ] as $key => $value )
+	{
+		$err_msg = !empty( $validated[ 'errors' ][ $key ] )
+			? '[' . $validated[ 'errors' ][ $key ] . ']'
+			: FALSE;
+		$err_marker = $err_msg ? '[!]' : '';
+		if ( is_array( $value ) )
+		{
+			$indent = "\n" . str_repeat( ' ', $key_length + 6 );
+			$value = implode( $indent, $validated[ 'values' ][ 'recent_dirs' ] ) . "$indent";
+		}
+		printf( "%3s %{$key_length}s : %s %s\n", $err_marker, $key, $value, $err_msg );
+	}
+
+	if ( $validated[ 'errors' ] )
+	{
+		echo "Your configuration file ($path) contains one or more errors that must be addressed before continuing.";
+		die( 1 );
+	}
+
+	return $validated[ 'values' ];
+}
+
+/**
+ * @param array $config The contents of the parsed settings file
+ * @retval array
+ */
+function validate_config( array $config )
+{
+	static $spec = [
+		'http_port'             => 'optional_port',
+		'socket_server.host'    => '=socket_server',
+		'socket_server.ws_port' => 'optional_port',
+		'socket_server.de_port' => 'port',
+		'timezone'              => 'timezone',
+		'less_output_dir'       => '=storage/css',
+		'database.default'      => '=storage/db/vortex.db',
+		'recent_dirs'           => 'volumes',
+	];
+
+	$output = [];
+	$errors = [];
+
+	foreach ( $spec as $key => $validator )
+	{
+		$value = array_get( $config, $key, FALSE );
+		if ( strpos( $key, '.' ) !== FALSE )
+		{
+			$key = str_replace( '.', '[', $key ) . ']';
+		}
+
+		if ( !$value && strpos( $validator, 'optional_' !== 0 ) )
+		{
+			$output[ $key ] = '-';
+			$errors[ $key ] = 'MISSING';
+			continue;
+		}
+
+		$output[ $key ] = $value;
+		$error = '';
+
+		if ( strpos( $validator, '=' ) === 0 )
+		{
+			$validator = substr( $validator, 1 );
+			if ( $value != $validator )
+			{
+				$error = "UNSUPPORTED - Expected '$validator'";
+			}
+		}
+		else switch ( $validator )
+		{
+			case 'optional_port':
+				if ( !$value )
+				{
+					for ( $port = PORT_AUTOSELECT_START; $port <= PORT_AUTOSELECT_END; $port++ )
+					{
+						if ( port_is_available( $port ) )
+						{
+							$output[ $key ] = $port;
+							break;
+						}
+					}
+					if ( !$output[ $key ] )
+					{
+						$output[ $key ] = '-';
+						$errors[ $key ] = 'Could not find an open port between '
+							. PORT_AUTOSELECT_START . ' and ' . PORT_AUTOSELECT_END;
+					}
+					break;
+				}
+				// Fall through to standard port validation
+
+			case 'port':
+				if ( intval( $value ) == $value && $value > 0 && $value <= 65535 )
+				{
+					if ( !port_is_available( (int) $value ) )
+					{
+						$error = 'PORT IS ALREADY IN USE';
+					}
+				}
+				else
+				{
+					$error = 'INVALID';
+				}
+				break;
+
+			case 'timezone':
+				if ( !in_array( $value, timezone_identifiers_list() ) )
+				{
+					$error = 'INVALID';
+				}
+				break;
+
+			case 'volumes':
+				$all_volumes = [];
+				if ( is_array( $value ) )
+				{
+					foreach ( $value as $dir )
+					{
+						if ( !is_dir( $dir ) )
+						{
+							$error = ( $error ? "$error; " : '' ) . "$dir IS NOT A DIRECTORY";
+						}
+					}
+				}
+				else
+				{
+					$error = 'INVALID - Expected array';
+				}
+				$validated_value = $all_volumes;
+				break;
+
+			default:
+				throw new LogicException( "Unknown validator '$validator'" );
+		}
+		if ( $error )
+		{
+			$errors[ $key ] = $error;
+		}
+	}
+
+	return [
+		'values' => $output,
+		'errors' => $errors,
+	];
+}
+
+/**
+ * @brief
+ *	Verify that the current user can use `docker` and `docker-compose`
+ */
+function check_for_requirements()
+{
+	$missing_any = FALSE;
+	echo "Checking for docker and docker-compose:\n";
+
+	exec( 'which docker', $_, $status );
+	echo " - docker: " . ( !$status ? 'OK' : 'FAIL' ) . "\n";
+	$missing_any = $status;
+
+	exec( 'which docker-compose', $_, $status );
+	echo " - docker-compose: " . ( !$status ? 'OK' : 'FAIL' ) . "\n";
+	$missing_any = $missing_any || $status;
+
+	exec( 'docker info 2>&1', $output, $status );
+	echo " - docker daemon access: " . (!$status ? 'OK' : 'FAIL') . "\n";
+	if ( $status )
+	{
+		$output = implode( "\n", $output );
+		echo "   ==> Error message: $output\n";
+	}
+
+	if ( $missing_any || $status )
+	{
+		echo "\nOne or more prerequisites were not met.\n";
+		die( 1 );
+	}
+}
+
+/**
+ * @param int $port
+ * @retval bool
+ *	TRUE if the port is available for us to bind to; FALSE otherwise
+ */
+function port_is_available( $port )
+{
+	$sock = @fsockopen( 'localhost', $port );
+	if ( is_resource( $sock ) )
+	{
+		fclose( $sock );
+		return FALSE; // Something accepted our connection; port is in use
+	}
+	else
+	{
+		return TRUE;
+	}
+}
+
+/**
+ * @param array $options The return value of display_config()
+ */
 function generate_docker_compose_file( array $options )
 {
+	$http_port = $options[ 'http_port' ];
+	$de_port   = $options[ 'socket_server[de_port]' ];
+	$ws_port   = $options[ 'socket_server[ws_port]' ];
+
+	$indent = '      -';
+	$volumes = '';
+	foreach ( $options[ 'recent_dirs' ] as $dir )
+	{
+		$volumes .= "$indent $dir:$dir\n";
+	}
+
 	$timestamp = date( 'Y-m-d g:i A' );
 	$my_name   = __FILE__;
 	return <<<EOF
@@ -15,61 +302,30 @@ services:
     build:
       context: ./web
     ports:
-      - $options[web_port]:80
+      - $http_port:80
     volumes:
       - ..:/var/www/html
       - shared_storage:/var/www/html/storage
-$options[volumes]
+$volumes
 
   socket_server:
     build:
       context: ./socket_server
     ports:
-      - $options[websocket_port]:3001
-      - $options[debug_port]:9000
+      - $ws_port:$ws_port
+      - $de_port:9000
     volumes:
       - ..:/var/www/html
       - shared_storage:/var/www/html/storage
-$options[volumes]
+$volumes
 
 volumes:
   shared_storage:
 EOF;
 }
 
-function check_for_requirements()
-{
-	$missing_any = FALSE;
-	echo "Checking for docker and docker-compose:\n";
-
-	exec( 'which docker', $_, $status );
-	echo " - docker: " . ( !$status ? 'OK' : 'FAIL' ) . "\n";
-	$missing_any = !$status;
-
-	exec( 'which docker-compose', $_, $status );
-	echo " - docker-compose: " . ( !$status ? 'OK' : 'FAIL' ) . "\n";
-
-	exec( 'docker info 2>&1', $output, $status );
-	echo " - docker daemon access: " . (!$status ? 'OK' : 'FAIL') . "\n";
-	if ( $status )
-	{
-		$output = implode( "\n", $output );
-		echo "   ==> Error message: $output\n";
-	}
-	return $missing_any && !$status;
-}
-
-if ( !check_for_requirements() )
-{
-	die( 1 );
-}
-
-$options[ 'web_port' ]       = 3008;
-$options[ 'debug_port' ]     = 9000;
-$options[ 'websocket_port' ] = 3005;
-$options[ 'volumes' ]        = '      - /srv:/srv';
+check_for_requirements();
+$options = do_settings_verification();
 
 file_put_contents( 'docker-compose.yml', generate_docker_compose_file( $options ) );
-$docker_compose_cmd = 'docker-compose up --build --detach';
-echo "$docker_compose_cmd\n";
-exec( $docker_compose_cmd );
+exec( 'docker-compose up --build --detach' );
