@@ -4,26 +4,402 @@
 require_once '../includes/arrays.php'; # array_get()
 
 // Constants
-define( 'SETTINGS_FILE',         __DIR__ . '/../settings-global.ini' );
-define( 'PORT_AUTOSELECT_START', 7000 );
-define( 'PORT_AUTOSELECT_END',   8000 );
+define( 'SETTINGS_FILE', __DIR__ . '/../settings-global.ini' );
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Classes
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief
- *	Ensure a settings file exists, attempting to create one if necessary; then parse the settings
- *	file. If any errors are detected, terminates this script with a non-zero exit status.
+ *	Container for a set of validated items.
  *
- * @retval array
- *	The 'values' element from the return value of validate_config()
+ * Conceptually, the set is considered "valid" if none of the items failed validation, and invalid
+ * if one or more items failed validation.
  */
-function do_settings_verification()
+class ValidationResult
+{
+	/**
+	 * @var array
+	 */
+	protected $items        = [];
+
+	/**
+	 * @var bool
+	 */
+	protected $has_errors   = FALSE;
+
+	/**
+	 * The length of the longest key (after being converted to "ini" form, e.g., foo.bar =>
+	 * foo[bar]). This is used when printing a table of validation results.
+	 *
+	 * @var int
+	 */
+	protected $key_length   = 0;
+
+	/**
+	 * The length of the longest line of a value (scalar values are treated as single lines; arrays
+	 * are treated as multiple lines). This is used when printing a table of validation results.
+	 *
+	 * @var int
+	 */
+	protected $value_length = 0;
+
+	/**
+	 * @brief
+	 *	Record an item's validation
+	 *
+	 * @param string       $key
+	 * @param mixed        $value
+	 * @param string|FALSE $error OPTIONAL. Omit this paramater for items that pass validation
+	 *
+	 * @throws InvalidArgumentException When calling this with the same $key parameter more than once
+	 */
+	public function record( $key, $value, $error = FALSE )
+	{
+		if ( isset( $this->items[ $key ] ) )
+		{
+			throw new InvalidArgumentException( "Cannot record a result for '$key' because we "
+				. "already have a result for '$key'." );
+		}
+
+		$this->items[ $key ] = [
+			'value' => $value,
+			'error' => $error,
+		];
+
+		$this->has_errors = $this->has_errors || $error;
+
+		$dot_to_bracket_offset = strpos( $key, '.' ) !== FALSE ? 1 : 0;
+		$this->key_length  = max( $this->key_length, mb_strlen( $key ) + $dot_to_bracket_offset );
+
+		// To handle both arrays and scalars when updating $this->value_length, treat scalars as
+		// single-element arrays, then iterate over the value(s) in the array in order to update
+		// $this->value_length appropriately
+		if ( !is_array( $value ) )
+		{
+			$value = [ $value ];
+		}
+		foreach ( $value as $str )
+		{
+			$this->value_length = max( $this->value_length, mb_strlen( $str ) );
+		}
+	}
+
+	/**
+	 * @retval bool
+	 */
+	public function hasErrors()
+	{
+		return $this->has_errors;
+	}
+
+	/**
+	 * @param string $key A key from an item previously passed to $this->record()
+	 *
+	 * @retval mixed
+	 *	The $value parameter passed to to $this->record(), or NULL if $key has not been passed to
+	 *	$this->record()
+	 */
+	public function getValue( $key )
+	{
+		return isset( $this->items[ $key ] )
+			? $this->items[ $key ][ 'value' ]
+			: NULL;
+	}
+
+	/**
+	 * Print the results of this validation set as a pretty table
+	 */
+	public function display()
+	{
+		foreach ( $this->items as $key => $info )
+		{
+			// Convert the key from "dot" notation to "ini" notation (e.g., foo.bar => foo[bar])
+			$key = strpos( $key, '.' )
+				? str_replace( '.', '[', $key ) . ']'
+				: $key;
+
+			$err_marker = $info[ 'error' ] ? $this->redText( '[!]' )            : '';
+			$error      = $info[ 'error' ] ? $this->redText( $info[ 'error' ] ) : '';
+
+			// Align the elements of arrays in a column, as they will span multiple rows
+			if ( is_array( $info[ 'value' ] ) )
+			{
+				// Add 7 to $this->key_length to account for:
+				//  - the 4 characters at the beginning of the line, plus
+				//  - the 3-character separator between keys and values (' : ')
+				$indent = "\n" . str_repeat( ' ', $this->key_length + 7 );
+
+				// Display the error message on the same line as the first value
+				$first = array_shift( $info[ 'value' ] );
+				$first = str_pad( $first, $this->value_length + 1, ' ' ) . $error;
+				$error = FALSE;
+				array_unshift( $info[ 'value' ], $first );
+
+				$info[ 'value' ] = implode( $indent, $info[ 'value' ] ) . $indent;
+			}
+
+			printf( "%3s %{$this->key_length}s : %-{$this->value_length}s %s\n",
+				$err_marker, $key, $info[ 'value' ], $error );
+		}
+	}
+
+	/**
+	 * Surround the given string with an escape sequence to make the text show up red in a terminal
+	 *
+	 * @param string $text
+	 * @retval string
+	 */
+	protected function redText( $text )
+	{
+		return "\033[0;31m$text\033[0m";
+	}
+}
+
+/**
+ * Validate a global settings file
+ */
+class ConfigurationValidator
+{
+	/**
+	 * Start at this port when searching for an available port
+	 *
+	 * @var int
+	 */
+	const PORT_AUTOSELECT_START = 7000;
+
+	/**
+	 * Stop at this port when searching for an available port
+	 *
+	 * @var int
+	 */
+	const PORT_AUTOSELECT_END   = 8000;
+
+	/**
+	 * Items to validate within the global settings file.
+	 *
+	 * Keys are dot-notation references to items within the settings file, and each points to an
+	 * array that must at least contain the key 'type', which determines the validator to use on
+	 * the item. For instance, when 'type' == 'port', $this->validatePort() is used.
+	 * Each array may also contain the key 'required', which may point to FALSE (this is assumed to
+	 * be TRUE, to including 'required' => TRUE is acceptable but redundant). When 'required' ==
+	 * FALSE, then an applicable provide() method is used; for example, when 'type' == 'port',
+	 * providePort() is called in order to suggest a value.
+	 * Each array may also contain any number of other keys to assist the validator method - the
+	 * entire array is passed to the validator method, in addition to the actual value being
+	 * validated.
+	 *
+	 * @var array
+	 */
+	protected $spec = [
+		'http_port'             => [ 'type' => 'port',    'required' => FALSE ],
+		'socket_server.host'    => [ 'type' => 'literal', 'value' => 'socket_server' ],
+		'socket_server.ws_port' => [ 'type' => 'port' ],
+		'socket_server.de_port' => [ 'type' => 'port' ],
+		'timezone'              => [ 'type' => 'timezone' ],
+		'less_output_dir'       => [ 'type' => 'literal', 'value' => 'storage/css' ],
+		'database.default'      => [ 'type' => 'literal', 'value' => 'storage/db/vortex.db' ],
+		'recent_dirs'           => [ 'type' => 'volumes' ],
+	];
+
+	/**
+	 * @param array $settings An array of settings parsed from the global settings file
+	 * @retval ValidationResult
+	 */
+	public function validate( array $settings )
+	{
+		$results = new ValidationResult;
+
+		foreach ( $this->spec as $key => $info )
+		{
+			$value = array_get( $settings, $key, FALSE );
+			if ( $value )
+			{
+				$method    = 'validate' . ucfirst( $info[ 'type' ] );
+				$error_msg = $this->$method( $value, $info );
+				$results->record( $key, $value, $error_msg );
+			}
+			else
+			{
+				if ( array_get( $info, 'required' ) === FALSE )
+				{
+					$method = 'provide' . ucfirst( $info[ 'type' ] );
+					$results->record( $key, $this->$method() );
+				}
+				else
+				{
+					$results->record( $key, FALSE, 'This value is required (but is not in the config file)' );
+				}
+			}
+		}
+		return $results;
+	}
+
+	/**
+	 * @param int $port
+	 * @retval bool
+	 *	TRUE if the port is available for us to bind to; FALSE otherwise
+	 */
+	protected function portIsAvailable( $port )
+	{
+		$sock = @fsockopen( 'localhost', $port );
+		if ( is_resource( $sock ) )
+		{
+			fclose( $sock );
+			return FALSE; // Something accepted our connection; port is in use
+		}
+		else
+		{
+			return TRUE;
+		}
+	}
+
+	//@{
+
+	/**
+	 * Validate an item
+	 *
+	 * @param mixed $value
+	 * @param array $spec
+	 *
+	 * @retval NULL|string
+	 *	NULL indicates no errors; strings describe a problem with validating $value
+	 */
+	protected function validatePort( $value, array $spec )
+	{
+		if ( is_numeric( $value ) && $value % 1 == 0 && $value > 0 && $value <= 65535 )
+		{
+			if ( !$this->portIsAvailable( $value ) )
+			{
+				return "This port is already in use";
+			}
+		}
+		else
+		{
+			return 'Invalid port';
+		}
+	}
+	protected function validateTimezone( $value, array $spec )
+	{
+		return !in_array( $value, timezone_identifiers_list() ) ? 'Invalid timezone' : FALSE;
+	}
+	protected function validateVolumes( $value, array $spec )
+	{
+		$errors = '';
+		if ( is_array( $value ) )
+		{
+			foreach ( $value as $dir )
+			{
+				if ( !is_dir( $dir ) )
+				{
+					$errors = ( $errors ? "$errors, " : 'At least one directory is invalid (' ) . $dir;
+				}
+			}
+		}
+		else
+		{
+			$errors = 'Invalid value (expected an array of paths)';
+		}
+		return $errors ? $errors . ')' : FALSE;
+	}
+	protected function validateLiteral( $value, array $spec )
+	{
+		$expected = array_get( $spec, 'value' );
+		return $value != $expected ? "Unsupported value (expected '$expected')" : FALSE;
+	}
+
+	//@}
+
+	/**
+	 * @retval int
+	 *	An available TCP port between static::PORT_AUTOSELECT_START and static::PORT_AUTOSELECT_END,
+	 *	inclusive
+	 *
+	 * @throws RuntimeException if no available port is found
+	 */
+	protected function providePort()
+	{
+		for ( $port = static::PORT_AUTOSELECT_START; $port <= static::PORT_AUTOSELECT_END; $port++ )
+		{
+			if ( $this->portIsAvailable( $port ) )
+			{
+				return $port;
+			}
+		}
+		throw new RuntimeException( 'Could not find an open port between '
+			. PORT_AUTOSELECT_START . ' and ' . PORT_AUTOSELECT_END );
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Utility functions
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @retval ValidationResult
+ */
+function validate_requirements()
+{
+	$results = new ValidationResult;
+	$commands = [
+		'docker is installed'         => 'which docker',
+		'docker-compose is installed' => 'which docker-compose',
+		'docker daemon is accessible' => 'docker info',
+	];
+	foreach ( $commands as $key => $command )
+	{
+		$output = [];
+		$status = 0;
+		exec( "$command 2>&1", $output, $status );
+		$error_message = $status
+			? ( implode( " ", $output ) ?: 'This needs to be installed.' )
+			: '';
+		$results->record( $key, !$status ? 'Yes' : 'No', $error_message );
+	}
+
+	echo "Prerequisites:\n";
+	$results->display();
+
+	if ( $results->hasErrors() )
+	{
+		echo "\nOne or more prerequisites were not met.\n";
+		die( 1 );
+	}
+}
+
+/**
+ * @brief
+ *	Ensure a settings file exists, attempting to create one if necessary; then parse and validate
+ *	the settings file. If any errors are detected, terminates this script with a non-zero exit
+ *	status.
+ *
+ * @retval ValidationResult
+ */
+function validate_configuration()
 {
 	$settings_file = realpath( SETTINGS_FILE ) ?: SETTINGS_FILE;
+
+	$do_validation = function( array $parsed_settings ) use ( $settings_file )
+	{
+		$result = (new ConfigurationValidator)->validate( $parsed_settings );
+
+		echo "\nConfiguration:\n";
+		$result->display();
+
+		if ( $result->hasErrors() )
+		{
+			echo "One or more problems exist in your configuration file ($settings_file)\n";
+			die( 1 );
+		}
+		return $result;
+	};
+
 	if ( is_readable( $settings_file ) )
 	{
 		if ( $settings = parse_ini_file( $settings_file ) )
 		{
-			return display_config( $settings, $settings_file );
+			return $do_validation( $settings );
 		}
 		else
 		{
@@ -41,7 +417,7 @@ function do_settings_verification()
 		copy( "$settings_file.template", $settings_file );
 		if ( $settings = parse_ini_file( $settings_file ) )
 		{
-			return display_config( $settings, $settings_file );
+			return $do_validation( $settings );
 		}
 		else
 		{
@@ -58,236 +434,26 @@ function do_settings_verification()
 }
 
 /**
- * @brief
- *	Display the parsed config file and any errors that were detected. If any errors are detected,
- *	terminates this script with a non-zero exit status
- *
- * @param array  $config The contents of the parsed settings file
- * @param string $path   The path to the config file
- *
- * @retval array
+ * @param ValidationResult $config Return value of validate_configuration()
  */
-function display_config( array $config, $path )
+function build_application( ValidationResult $config )
 {
-	$validated = validate_config( $config );
-
-	$key_length = 0;
-
-	echo "\nConfiguration:\n";
-	foreach ( $validated[ 'values' ] as $key => $value )
-	{
-		$key_length = max( $key_length, mb_strlen( $key ) );
-	}
-	foreach ( $validated[ 'values' ] as $key => $value )
-	{
-		$err_msg = !empty( $validated[ 'errors' ][ $key ] )
-			? '[' . $validated[ 'errors' ][ $key ] . ']'
-			: FALSE;
-		$err_marker = $err_msg ? '[!]' : '';
-		if ( is_array( $value ) )
-		{
-			$indent = "\n" . str_repeat( ' ', $key_length + 6 );
-			$value = implode( $indent, $validated[ 'values' ][ 'recent_dirs' ] ) . "$indent";
-		}
-		printf( "%3s %{$key_length}s : %s %s\n", $err_marker, $key, $value, $err_msg );
-	}
-
-	if ( $validated[ 'errors' ] )
-	{
-		echo "Your configuration file ($path) contains one or more errors that must be addressed before continuing.";
-		die( 1 );
-	}
-
-	return $validated[ 'values' ];
+	file_put_contents( 'docker-compose.yml', generate_docker_compose_file( $config ) );
+	exec( 'docker-compose up --build --detach' );
 }
 
 /**
- * @param array $config The contents of the parsed settings file
- * @retval array
+ * @param ValidationResult $result
  */
-function validate_config( array $config )
+function generate_docker_compose_file( ValidationResult $result )
 {
-	static $spec = [
-		'http_port'             => 'optional_port',
-		'socket_server.host'    => '=socket_server',
-		'socket_server.ws_port' => 'optional_port',
-		'socket_server.de_port' => 'port',
-		'timezone'              => 'timezone',
-		'less_output_dir'       => '=storage/css',
-		'database.default'      => '=storage/db/vortex.db',
-		'recent_dirs'           => 'volumes',
-	];
-
-	$output = [];
-	$errors = [];
-
-	foreach ( $spec as $key => $validator )
-	{
-		$value = array_get( $config, $key, FALSE );
-		if ( strpos( $key, '.' ) !== FALSE )
-		{
-			$key = str_replace( '.', '[', $key ) . ']';
-		}
-
-		if ( !$value && strpos( $validator, 'optional_' !== 0 ) )
-		{
-			$output[ $key ] = '-';
-			$errors[ $key ] = 'MISSING';
-			continue;
-		}
-
-		$output[ $key ] = $value;
-		$error = '';
-
-		if ( strpos( $validator, '=' ) === 0 )
-		{
-			$validator = substr( $validator, 1 );
-			if ( $value != $validator )
-			{
-				$error = "UNSUPPORTED - Expected '$validator'";
-			}
-		}
-		else switch ( $validator )
-		{
-			case 'optional_port':
-				if ( !$value )
-				{
-					for ( $port = PORT_AUTOSELECT_START; $port <= PORT_AUTOSELECT_END; $port++ )
-					{
-						if ( port_is_available( $port ) )
-						{
-							$output[ $key ] = $port;
-							break;
-						}
-					}
-					if ( !$output[ $key ] )
-					{
-						$output[ $key ] = '-';
-						$errors[ $key ] = 'Could not find an open port between '
-							. PORT_AUTOSELECT_START . ' and ' . PORT_AUTOSELECT_END;
-					}
-					break;
-				}
-				// Fall through to standard port validation
-
-			case 'port':
-				if ( intval( $value ) == $value && $value > 0 && $value <= 65535 )
-				{
-					if ( !port_is_available( (int) $value ) )
-					{
-						$error = 'PORT IS ALREADY IN USE';
-					}
-				}
-				else
-				{
-					$error = 'INVALID';
-				}
-				break;
-
-			case 'timezone':
-				if ( !in_array( $value, timezone_identifiers_list() ) )
-				{
-					$error = 'INVALID';
-				}
-				break;
-
-			case 'volumes':
-				$all_volumes = [];
-				if ( is_array( $value ) )
-				{
-					foreach ( $value as $dir )
-					{
-						if ( !is_dir( $dir ) )
-						{
-							$error = ( $error ? "$error; " : '' ) . "$dir IS NOT A DIRECTORY";
-						}
-					}
-				}
-				else
-				{
-					$error = 'INVALID - Expected array';
-				}
-				$validated_value = $all_volumes;
-				break;
-
-			default:
-				throw new LogicException( "Unknown validator '$validator'" );
-		}
-		if ( $error )
-		{
-			$errors[ $key ] = $error;
-		}
-	}
-
-	return [
-		'values' => $output,
-		'errors' => $errors,
-	];
-}
-
-/**
- * @brief
- *	Verify that the current user can use `docker` and `docker-compose`
- */
-function check_for_requirements()
-{
-	$missing_any = FALSE;
-	echo "Checking for docker and docker-compose:\n";
-
-	exec( 'which docker', $_, $status );
-	echo " - docker: " . ( !$status ? 'OK' : 'FAIL' ) . "\n";
-	$missing_any = $status;
-
-	exec( 'which docker-compose', $_, $status );
-	echo " - docker-compose: " . ( !$status ? 'OK' : 'FAIL' ) . "\n";
-	$missing_any = $missing_any || $status;
-
-	exec( 'docker info 2>&1', $output, $status );
-	echo " - docker daemon access: " . (!$status ? 'OK' : 'FAIL') . "\n";
-	if ( $status )
-	{
-		$output = implode( "\n", $output );
-		echo "   ==> Error message: $output\n";
-	}
-
-	if ( $missing_any || $status )
-	{
-		echo "\nOne or more prerequisites were not met.\n";
-		die( 1 );
-	}
-}
-
-/**
- * @param int $port
- * @retval bool
- *	TRUE if the port is available for us to bind to; FALSE otherwise
- */
-function port_is_available( $port )
-{
-	$sock = @fsockopen( 'localhost', $port );
-	if ( is_resource( $sock ) )
-	{
-		fclose( $sock );
-		return FALSE; // Something accepted our connection; port is in use
-	}
-	else
-	{
-		return TRUE;
-	}
-}
-
-/**
- * @param array $options The return value of display_config()
- */
-function generate_docker_compose_file( array $options )
-{
-	$http_port = $options[ 'http_port' ];
-	$de_port   = $options[ 'socket_server[de_port]' ];
-	$ws_port   = $options[ 'socket_server[ws_port]' ];
+	$http_port = $result->getValue( 'http_port' );
+	$de_port   = $result->getValue( 'socket_server.de_port' );
+	$ws_port   = $result->getValue( 'socket_server.ws_port' );
 
 	$indent = '      -';
 	$volumes = '';
-	foreach ( $options[ 'recent_dirs' ] as $dir )
+	foreach ( $result->getValue( 'recent_dirs' ) as $dir )
 	{
 		$volumes .= "$indent $dir:$dir\n";
 	}
@@ -324,8 +490,10 @@ volumes:
 EOF;
 }
 
-check_for_requirements();
-$options = do_settings_verification();
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Main entry point
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
-file_put_contents( 'docker-compose.yml', generate_docker_compose_file( $options ) );
-exec( 'docker-compose up --build --detach' );
+validate_requirements();
+$config = validate_configuration();
+build_application( $config );
