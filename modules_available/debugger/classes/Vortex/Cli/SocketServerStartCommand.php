@@ -41,16 +41,16 @@ class SocketServerStartCommand extends Command
 			$samples[] = $now;
 			if ( $now - $least_recent_sample < static::TIGHT_LOOP_KILL_SAMPLE_WINDOW_SECONDS )
 			{
-				$output->writeln( "<warning>Potential infinite loop - killing in 3 seconds</warning>" );
+				logger()->warn( "Potential infinite loop - killing in 3 seconds" );
 				sleep( 3 );
 				exit( 1 );
 			}
 
 			$cmd_output = [];
-			$last_line = exec( 'php -d "xdebug.remote_port=9003" vcli socket-server:run', $cmd_output, $status );
 			// TODO: Use built-in API for running a symphony cli command in another process
 			// TODO: Don't hardcode `vortex-cli` name
 			$last_line = exec( 'php -d "xdebug.remote_port=9003" vortex-cli socket-server:run', $cmd_output, $status );
+			logger()->info( "socket-server:run exited with exit status $status", $cmd_output );
 			if ( $last_line == 'stop' )
 			{
 				exit( $status );
