@@ -21,7 +21,7 @@ while [[ ! -e "$SETTINGS_FILE" ]]; do
 done
 
 echo "Waiting for 'web' container to come online..."
-/wait-for-it.sh web:80
+/wait-for-it.sh web:80 -t 0
 
 echo "'web' container is online; starting socket server..."
 ./vortex-cli socket-server:start &
