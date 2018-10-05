@@ -195,7 +195,7 @@ class ConfigurationValidator
 	protected $spec = [
 		'http_port'             => [ 'type' => 'port',    'required' => FALSE ],
 		'socket_server.host'    => [ 'type' => 'literal', 'value' => 'socket_server' ],
-		'socket_server.ws_port' => [ 'type' => 'port' ],
+		'socket_server.ws_port' => [ 'type' => 'literal', 'value' => '3001' ],
 		'socket_server.de_port' => [ 'type' => 'port' ],
 		'timezone'              => [ 'type' => 'timezone' ],
 		'less_output_dir'       => [ 'type' => 'literal', 'value' => 'storage/css' ],
@@ -478,7 +478,6 @@ $volumes
     build:
       context: ./socket_server
     ports:
-      - $ws_port:$ws_port
       - $de_port:9000
     volumes:
       - ..:/var/www/html

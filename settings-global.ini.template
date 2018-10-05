@@ -15,14 +15,15 @@ allowed_extensions[] = ""
 ; Timezone MUST be set
 timezone = America/Detroit
 
-; OPTIONAL. Specify a port to expose on the web container. When omitted, an open port is
-; automatically selected. This value ONLY takes effect when spinning up Vortex.
+; OPTIONAL. Specify a port to expose the app on. When omitted, an open port is automatically
+; selected. This value ONLY takes effect when spinning up Vortex.
 ; http_port = 8080
 
-; The hostname and web socket port of the socket server (bridge).
+; The hostname and web socket port of the socket server (bridge). The ws port is NOT published on
+; the host.
 socket_server[host]    = socket_server
 socket_server[ws_port] = 3001
-; Port 9000 is standard for DBGp
+; Port 9000 is standard for DBGp. This port is published on the host.
 socket_server[de_port] = 9000
 
 ; One or more directories to include in the file finder's 'recently edited listing'

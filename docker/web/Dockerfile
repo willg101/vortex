@@ -1,9 +1,9 @@
 FROM php:7.2.10-apache-stretch
 
-RUN a2enmod rewrite               \
-	&& pecl install xdebug        \
-	&& apt-get update             \
-	&& apt-get install -y unzip   \
+RUN a2enmod rewrite proxy proxy_wstunnel \
+	&& pecl install xdebug               \
+	&& apt-get update                    \
+	&& apt-get install -y unzip          \
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY 000-default.conf /etc/apache2/sites-available/
