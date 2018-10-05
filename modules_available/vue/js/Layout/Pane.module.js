@@ -294,7 +294,7 @@ Pane.prototype.suggestOwner = function( a_window )
 		}
 		else
 		{
-			return this.element.find( selectors.leaf_pane ).first().data( 'pane' );
+			return this.element.find( selectors.leaf_pane ).sort( ( a, b ) => a.children.length - b.children.length ).first().data( 'pane' );
 		}
 	}
 };
