@@ -24,5 +24,5 @@ echo "Waiting for 'web' container to come online..."
 /wait-for-it.sh web:80
 
 echo "'web' container is online; starting socket server..."
-./vcli socket-server:start &
+./vortex-cli socket-server:start &
 wait $!
