@@ -10,7 +10,7 @@ var selected_item = false;
  */
 function getCurrentMode()
 {
-	return localStorage.getItem( 'vortex_autoplay_mode' ) || 'not_focused';
+	return localStorage.getItem( 'vortex_autoplay_mode' ) || 'disabled';
 }
 
 /**
