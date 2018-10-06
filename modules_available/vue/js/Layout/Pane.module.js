@@ -13,6 +13,9 @@ var selectors = {
 	leaf_pane      : '.leaf',
 };
 
+const DEFAULT_LAYOUT         = 'outer0_3';
+const SELECTED_LAYOUT_LS_KEY = 'dpoh_selected_layout';
+
 /**
  * @brief
  *	Normalizes an Array of numbers so that the numbers all remain proportional to each other
@@ -481,7 +484,6 @@ Pane.prototype.attach = function( a_window )
 		if ( index_to_remove != -1 )
 		{
 			a_window.owner.windows.splice( index_to_remove, 1 );
-
 		}
 	}
 
@@ -514,13 +516,39 @@ Pane.prototype.attach = function( a_window )
 	this.refreshAll();
 };
 
+subscribe( 'apply-default-layout-settings', function( e )
+{
+	if ( e.layout == 'outer0_3' )
+	{
+		e.settings.defaults = e.settings.defaults.concat(
+		[
+			{ layout_el : "inner-top_3_size",    key : "size", value : 70 },
+			{ layout_el : "inner-bottom_4_size", key : "size", value : 30 },
+			{ layout_el : "middle-l_3_size",     key : "size", value : 75 },
+			{ layout_el : "middle-r_6_size",     key : "size", value : 25 },
+		] );
+	}
+} );
+
 /**
  * @brief
  *	Determine which root Pane to use as the layout and initialize that Pane
  */
 Pane.boot = function()
 {
-	var layout_id = localStorage.getItem( 'dpoh_selected_layout' ) || $( selectors.pane ).first().attr( attr.split_id );
+	var layout_id = localStorage.getItem( SELECTED_LAYOUT_LS_KEY );
+	if ( !layout_id )
+	{
+		var e = { layout : DEFAULT_LAYOUT, settings : { defaults : [] } };
+		publish( 'apply-default-layout-settings', e );
+		e.settings.defaults.forEach( params =>
+		{
+			var p = new Persistor( params.layout_el );
+			p[ params.key ] = params.def_value;
+		} );
+		layout_id = e.layout;
+		localStorage.setItem( SELECTED_LAYOUT_LS_KEY, layout_id );
+	}
 	var layout_element = $( '[' + attr.split_id + '="' + layout_id + '"]' );
 	layout_element.appendTo( selectors.current_layout );
 	this.current_layout = new Pane( layout_element );
