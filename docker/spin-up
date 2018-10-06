@@ -439,7 +439,8 @@ function validate_configuration()
 function build_application( ValidationResult $config )
 {
 	file_put_contents( 'docker-compose.yml', generate_docker_compose_file( $config ) );
-	exec( 'docker-compose up --build --detach' );
+	exec( 'docker-compose up --build --detach', $_, $status );
+	return !$status;
 }
 
 /**
@@ -495,4 +496,12 @@ EOF;
 
 validate_requirements();
 $config = validate_configuration();
-build_application( $config );
+if ( !build_application( $config ) )
+{
+	echo "Vortex failed to build.";
+	die( 1 );
+}
+
+echo "\nVortex is ready! Remember to adjust your firewall so that:
+  - Your browser can connect on port " . $config->getValue( 'http_port' ) . "
+  - PHP hosts can connect on port " . $config->getValue( 'socket_server.de_port' ) . "\n";
