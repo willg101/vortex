@@ -153,16 +153,16 @@ subscribe( 'apply-default-layout-settings', function( e )
 	if ( e.layout == 'outer0_3' )
 	{
 		e.settings.defaults = e.settings.defaults.concat( [
-			{ layout_el : "inner-bottom_4_suggested_windows", key : "console", def_value : 0   },
-			{ layout_el : "inner-top_3_suggested_windows",    key : "code",    def_value : 0   },
-			{ layout_el : "inner-top_3_suggested_windows",    key : "stack",   def_value : 1   },
-			{ layout_el : "middle-r_6_suggested_windows",     key : "watch",   def_value : 0   },
-			{ layout_el : "middle-r_6_suggested_windows",     key : "context", def_value : 1   },
-			{ layout_el : "code_persistor",                   key : "size",    def_value : 75  },
-			{ layout_el : "stack_persistor",                  key : "size",    def_value : 25  },
-			{ layout_el : "console_persistor",                key : "size",    def_value : 100 },
-			{ layout_el : "watch_persistor",                  key : "size",    def_value : 40  },
-			{ layout_el : "context_persistor",                key : "size",    def_value : 60  },
+			{ layout_el : "inner-bottom_4_suggested_windows", key : "console", value : 0   },
+			{ layout_el : "inner-top_3_suggested_windows",    key : "code",    value : 0   },
+			{ layout_el : "inner-top_3_suggested_windows",    key : "stack",   value : 1   },
+			{ layout_el : "middle-r_6_suggested_windows",     key : "watch",   value : 0   },
+			{ layout_el : "middle-r_6_suggested_windows",     key : "context", value : 1   },
+			{ layout_el : "code_persistor",                   key : "size",    value : 75  },
+			{ layout_el : "stack_persistor",                  key : "size",    value : 25  },
+			{ layout_el : "console_persistor",                key : "size",    value : 100 },
+			{ layout_el : "watch_persistor",                  key : "size",    value : 40  },
+			{ layout_el : "context_persistor",                key : "size",    value : 60  },
 		] );
 	}
 } );

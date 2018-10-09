@@ -544,7 +544,7 @@ Pane.boot = function()
 		e.settings.defaults.forEach( params =>
 		{
 			var p = new Persistor( params.layout_el );
-			p[ params.key ] = params.def_value;
+			p[ params.key ] = params.value;
 		} );
 		layout_id = e.layout;
 		localStorage.setItem( SELECTED_LAYOUT_LS_KEY, layout_id );
