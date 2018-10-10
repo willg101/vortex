@@ -2,10 +2,9 @@
 
 .label-row
 {
-	height: 0;
-
 	.css-cell
 	{
+		height: 0;
 		background: @title-bar-bg;
 		box-sizing: border-box;
 		padding: @spacing-sm @spacing-sm * 1.5;
@@ -77,6 +76,11 @@
 	height: 100%;
 	width: 100%;
 	opacity: 1;
+
+	.css-row:not(.label-row) .css-cell
+	{
+		height: 100%;
+	}
 
 	&.sortable-ghost
 	{
