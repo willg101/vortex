@@ -81,7 +81,7 @@ async function fetchFromSever( path, cb )
  * @param string path    The absolute path of the file to load
  * @param object filters An object containing GET params to include with the request
  *
- * @retval string
+ * @return string
  */
 function apiPath( path, filters )
 {

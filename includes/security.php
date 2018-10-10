@@ -7,7 +7,7 @@ class SecurityException extends Exception {}
  *	Generate a cryptographically secure random token
  *
  * @param int $bytes The number of random bytes (*NOT* characters)
- * @retval string
+ * @return string
  *
  * @throws SecurityException if `openssl_random_pseudo_bytes` sets $crypto_strong to FALSE
  */

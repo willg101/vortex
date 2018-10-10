@@ -4,7 +4,7 @@
  * @brief
  *	Builds the script tags for the response
  *
- * @retval string
+ * @return string
  */
 function build_script_requirements()
 {
@@ -48,7 +48,7 @@ function build_script_requirements()
 }
 
 /**
- * @retval array
+ * @return array
  */
 function load_handlebar_templates()
 {

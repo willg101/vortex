@@ -45,7 +45,7 @@
  * @param string $name
  * @param array  $vars OPTIONAL
  *
- * @retval string
+ * @return string
  */
 function render( $name, $vars = [] )
 {
@@ -88,7 +88,7 @@ function render( $name, $vars = [] )
  * @param string $template_file
  * @param array  $vars          (OPTIONAL)
  *
- * @retval string
+ * @return string
  */
 function render_template( $template_file, $vars = [] )
 {
@@ -117,7 +117,7 @@ function render_template( $template_file, $vars = [] )
  * @param string $template_name
  * @param bool   $use_cache     OPTIONAL. Default is FALSE
  *
- * @retval array
+ * @return array
  */
 function get_template_implementations( $template_name, $use_cache = TRUE )
 {

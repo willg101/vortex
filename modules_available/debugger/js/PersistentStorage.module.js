@@ -7,7 +7,7 @@ var data_store = {};
 /**
  * @param string key
  *
- * @retval string
+ * @return string
  */
 function reduceKeyCollisionProbability( key )
 {
@@ -42,7 +42,7 @@ function get( key )
  * @param string key
  * @param mixed  value
  *
- * @retval mixed
+ * @return mixed
  *	The item actually stored; typically `value`, but may be altered when the
  *	'set-persistent-data' is triggered
  */
@@ -68,7 +68,7 @@ function set( key, value )
 /**
  * @param string key
  *
- * @retval bool
+ * @return bool
  *	Indicates if the deletion occurred (true) or was prevented when the 'delete-persistent-data'
  *	event was triggered (false)
  */

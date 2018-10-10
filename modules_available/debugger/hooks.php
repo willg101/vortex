@@ -71,7 +71,7 @@ function debugger_boot()
  *	Create a maintenance token (a short-lived, one-time login token intended for use exclusively
  *	by the server)
  *
- * @retval string
+ * @return string
  */
 function make_maintenance_token()
 {
@@ -97,7 +97,7 @@ function make_maintenance_token()
  * NOTE: if the token is validated, ALL tokens are deleted immediately.
  *
  * @param string $token
- * @retval bool
+ * @return bool
  */
 function validate_maintenance_token( $token )
 {
@@ -162,7 +162,7 @@ function debugger_ws_maintenance_api()
  * @brief
  *
  * @param string
- * @retval array
+ * @return array
  */
 function debugger_find_codebase_root( $file )
 {
@@ -195,7 +195,7 @@ function debugger_find_codebase_root( $file )
 }
 
 /**
- * @retval string
+ * @return string
  *	The code for `debugger_get_source_code_for_codebase_root_finder()` as an anonymous function.
  *	This allows us to send this to the client via js, which, in turn, can eval the function on
  *	remote hosts to find codebase roots
@@ -401,7 +401,7 @@ function debugger_before_debugger_detach( $data )
  *
  * @param string $snippet
  *
- * @retval bool
+ * @return bool
  */
 function debugger_validate_php_syntax( $snippet )
 {
@@ -420,7 +420,7 @@ function debugger_validate_php_syntax( $snippet )
  *
  * @param string $str
  *
- * @retval string
+ * @return string
  */
 function quote_string( $str )
 {

@@ -300,7 +300,7 @@ subscribe( 'program-state-ui-refresh-needed', ( e ) =>
 } );
 
 /**
- * @retval string
+ * @return string
  *	The full URI of the current file
  */
 function getCurrentFileShowing()

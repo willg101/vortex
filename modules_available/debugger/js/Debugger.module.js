@@ -142,7 +142,7 @@ function command( name /*, ... */ )
 }
 
 /**
- * @retval bool
+ * @return bool
  */
 function sessionIsActive()
 {

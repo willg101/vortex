@@ -68,7 +68,7 @@ function onConnectionStatusChanged( new_status )
  *
  * @param object params HTTP GET params to include with the request
  *
- * @retval bool
+ * @return bool
  *	true if the connection was attempted; false if not (a connection already exists)
  */
 function openConnection( params )
@@ -270,7 +270,7 @@ function processMessage( message )
  *
  * @param jQuery jq_message
  *
- * @retval string|false
+ * @return string|false
  */
 function determineMessageType( jq_message )
 {
@@ -332,7 +332,7 @@ function registerMessageProcessor( fn )
 
 
 /**
- * @retval bool
+ * @return bool
  */
 function isConnected()
 {
@@ -340,7 +340,7 @@ function isConnected()
 }
 
 /**
- * @retval WebSocket|null
+ * @return WebSocket|null
  */
 function getConnection()
 {

@@ -6,7 +6,7 @@ var $ = jQuery;
 var selected_item = false;
 
 /**
- * @retval string
+ * @return string
  */
 function getCurrentMode()
 {
@@ -45,7 +45,7 @@ function onSessionInit( e )
 }
 
 /**
- * @retval Array
+ * @return Array
  *	An Array of plain objects that represent the available autorun modes
  */
 function getModes()

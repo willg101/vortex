@@ -9,7 +9,7 @@
  *
  * @throws HttpException when the request method is not POST or GET
  *
- * @retval mixed
+ * @return mixed
  */
 function input( $key, $default = NULL )
 {
@@ -139,7 +139,7 @@ function send_json( $data, $die = TRUE )
  * @brief
  *	Get the base path of this website; helpful for installations that are not at document root
  *
- * @retval string
+ * @return string
  *	A string ending with '/'
  */
 function base_path()
@@ -198,7 +198,7 @@ function require_method( $methods )
 
 /**
  * @param string $str The content of a cookie header
- * @retval array
+ * @return array
  */
 function parse_cookie_str( $str )
 {
@@ -212,7 +212,7 @@ function parse_cookie_str( $str )
 }
 
 /**
- * @retval string
+ * @return string
  */
 function get_user_ip()
 {

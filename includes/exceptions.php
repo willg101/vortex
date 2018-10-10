@@ -23,7 +23,7 @@ class HttpException extends Exception
 	}
 
 	/**
-	 * @retval array
+	 * @return array
 	 */
 	public function getHeaders()
 	{

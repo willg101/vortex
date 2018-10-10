@@ -43,7 +43,7 @@ class ConsoleCommandDisplay
 	/**
 	 * @param string text
 	 * @param string level ('error' is the only non-default value accepted right now)
-	 * @retval jQuery
+	 * @return jQuery
 	 */
 	makeText( text, level )
 	{

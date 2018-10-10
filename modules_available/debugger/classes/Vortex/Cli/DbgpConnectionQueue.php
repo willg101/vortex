@@ -79,7 +79,7 @@ class DbgpConnectionQueue
 	}
 
 	/**
-	 * @retval array
+	 * @return array
 	 */
 	public function listAll()
 	{
@@ -135,7 +135,7 @@ class DbgpConnectionQueue
 	 *	Get the information for a single queued connection
 	 *
 	 * @param string $id
-	 * @retval array
+	 * @return array
 	 *	The connection's info, or an empty array if the connection is not in this queue
 	 */
 	public function get( $id )
@@ -149,7 +149,7 @@ class DbgpConnectionQueue
 	}
 
 	/**
-	 * @retval array
+	 * @return array
 	 *	The info for the first connection in this queue, or an empty array if the queue is empty
 	 */
 	public function getTop()
@@ -158,7 +158,7 @@ class DbgpConnectionQueue
 	}
 
 	/**
-	 * @retval bool
+	 * @return bool
 	 */
 	public function isEmpty()
 	{
@@ -168,7 +168,7 @@ class DbgpConnectionQueue
 	/**
 	 * @param string $id
 	 *
-	 * @retval array
+	 * @return array
 	 *	The removed connection's info, or an empty array if the connection was not in this queue
 	 */
 	public function remove( $id )
@@ -210,7 +210,7 @@ class DbgpConnectionQueue
 	 * @param string $id
 	 * @param string $message
 	 *
-	 * @retval int
+	 * @return int
 	 */
 	public function stashMessage( $id, $msg )
 	{

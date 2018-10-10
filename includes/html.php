@@ -9,7 +9,7 @@
  *	https://api.drupal.org/api/drupal/includes%21bootstrap.inc/function/check_plain/7.x
  *
  * @param string $str
- * @retval string
+ * @return string
  */
 function sanitize_text_for_html( $str )
 {
@@ -25,7 +25,7 @@ function sanitize_text_for_html( $str )
  *	https://api.drupal.org/api/drupal/includes%21common.inc/function/drupal_attributes/7.x
  *
  * @param array $attributes
- * @retval string
+ * @return string
  */
 function html_attrs( array $attributes = [] )
 {

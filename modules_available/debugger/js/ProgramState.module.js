@@ -29,7 +29,7 @@ class StackFrame
 	get level()              { return this.frameData.level;              }
 
 	/**
-	 * @retval Promise
+	 * @return Promise
 	 */
 	fetchContext()
 	{

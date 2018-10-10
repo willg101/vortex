@@ -8,7 +8,7 @@ class DatabaseException extends Exception {}
  *
  * @param string $connection OPTIONAL. The name of a database connection defined in settings
  *
- * @retval PDO
+ * @return PDO
  */
 function db( $connection = 'default' )
 {
@@ -35,7 +35,7 @@ function db( $connection = 'default' )
  * @param array  $params     OPTIONAL. An array of paramters to inject into the query
  * @param string $connection OPTIONAL. The DB connection to run the query on
  *
- * @retval array
+ * @return array
  */
 function db_query( $query, array $params = [], $connection = NULL )
 {

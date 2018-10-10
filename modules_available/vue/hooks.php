@@ -64,7 +64,7 @@ function vue_render_preprocess( &$data )
  *
  * @param array $layout
  *
- * @retval string
+ * @return string
  */
 function vue_build_layout( $layout )
 {

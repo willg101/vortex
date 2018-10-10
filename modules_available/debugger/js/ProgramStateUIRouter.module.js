@@ -90,7 +90,7 @@ function setStackPosition( pos )
 }
 
 /**
- * @retval int
+ * @return int
  */
 function getStackPosition()
 {
@@ -120,7 +120,7 @@ function setFile( filename )
 }
 
 /**
- * @retval string
+ * @return string
  */
 function getFile()
 {

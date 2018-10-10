@@ -20,7 +20,7 @@ use \Monolog\Handler\ErrorLogHandler;
  *
  * @throws FatalConfigError
  *
- * @retval string|NULL
+ * @return string|NULL
  */
 function bootstrap()
 {
@@ -42,7 +42,7 @@ function bootstrap()
  *	default logging mechanism via hook_init_logger(), and then returns a monolog
  *	(or monolog-compatible) logger instance
  *
- * @retval Monolog\Logger
+ * @return Monolog\Logger
  */
 function logger()
 {

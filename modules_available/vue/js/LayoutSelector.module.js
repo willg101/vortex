@@ -21,7 +21,7 @@ LayoutError.prototype.name = 'Vue.LayoutSelector.LayoutError';
  *                         ... etc.
  * @param bool layout_only Render only the layout preview, not the controls
  *
- * @retval string
+ * @return string
  */
 function renderLayoutSelector( i, layout_only )
 {

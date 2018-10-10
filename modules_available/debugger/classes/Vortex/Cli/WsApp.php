@@ -16,7 +16,7 @@ class WsApp implements MessageComponentInterface
 	 * @note See https://xdebug.org/docs-dbgp.php#message-packets
 	 *
 	 * @param string $msg
-	 * @retval string
+	 * @return string
 	 */
 	public static function prepareMessage( $msg )
 	{
@@ -54,7 +54,7 @@ class WsApp implements MessageComponentInterface
 	 * @param Ratchet\ConnectionInterface $conn
 	 * @param array                       $params GET params sent with the WS request
 	 *
-	 * @retval bool
+	 * @return bool
 	 *	Indicates if the request was handled (and thus the connection should be closed)
 	 */
 	protected function handleMaintenanceRequest( ConnectionInterface $conn, array $params )

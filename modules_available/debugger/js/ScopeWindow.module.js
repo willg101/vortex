@@ -77,7 +77,7 @@ class TreeState
 	/**
 	 * @param object node The value passed to either close() or open()
 	 *
-	 * @retval Array
+	 * @return Array
 	 *	An array node addresses, with the last element being `node`'s address, and the first
 	 *	element being the address of the node's furthest ancestor
 	 */

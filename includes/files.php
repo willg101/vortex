@@ -7,7 +7,7 @@
  *
  * @param string $path
  *
- * @retval bool
+ * @return bool
  */
 function client_can_access_path( $path )
 {
@@ -34,7 +34,7 @@ function client_can_access_path( $path )
  *
  * @param string $file_name
  *
- * @retval bool
+ * @return bool
  */
 function client_can_view_file( $file_name )
 {
@@ -92,7 +92,7 @@ function file_put_contents_safe( $file_name, $data_to_save )
  * @param array  $dirs_seen       OPTIONAL. Should only be passed when calling this function
  *                                recursively
  *
- * @retval array
+ * @return array
  *	An array where each element is the absolute path of a file within $dir with the
  *	extension $extension
  */

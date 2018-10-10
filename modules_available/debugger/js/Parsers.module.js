@@ -8,7 +8,7 @@ export default { ParserError, list }
  *
  * @param jQuery jq_element
  *
- * @retval mixed
+ * @return mixed
  */
 function parseCdata( jq_element )
 {
@@ -31,7 +31,7 @@ function parseCdata( jq_element )
  * @param Array attr_list
  *	An Array of attribute names
  *
- * @retval object
+ * @return object
  *	A key for each attribute name from attr_list will exist, even if the corresponding value is
  *	undefined
  */
@@ -60,7 +60,7 @@ var response_parsers = {
 	 *
 	 * @param jQuery jq_message
 	 *
-	 * @retval object
+	 * @return object
 	 */
 	eval : function( jq_message )
 	{
@@ -76,7 +76,7 @@ var response_parsers = {
 	 *
 	 * @param jQuery jq_message
 	 *
-	 * @retval object
+	 * @return object
 	 */
 	source : function( jq_message )
 	{
@@ -91,7 +91,7 @@ var response_parsers = {
 	 *
 	 * @param jQuery jq_message
 	 *
-	 * @retval object
+	 * @return object
 	 */
 	stack_get : function( jq_message )
 	{
@@ -110,7 +110,7 @@ var response_parsers = {
 	 *
 	 * @param jQuery jq_message
 	 *
-	 * @retval object
+	 * @return object
 	 */
 	context_names : function( jq_message )
 	{
@@ -150,7 +150,7 @@ var response_parsers = {
  *
  * @param jQuery jq_message
  *
- * @retval object
+ * @return object
  */
 function parseContextGet( jq_message )
 {
@@ -199,7 +199,7 @@ function parseContextGet( jq_message )
  *
  * @param jQuery jq_message
  *
- * @retval object
+ * @return object
  */
 function parseBreakpointAddRemove( jq_message )
 {
@@ -215,7 +215,7 @@ function parseBreakpointAddRemove( jq_message )
  *
  * @param jQuery jq_message
  *
- * @retval object
+ * @return object
  */
 function parseContinuationCommand( jq_message )
 {
@@ -234,7 +234,7 @@ function parseContinuationCommand( jq_message )
  *
  * @param jQuery jq_message
  *
- * @retval object
+ * @return object
  */
 function parseBreakpoints( jq_message )
 {

@@ -13,7 +13,7 @@ require_once 'RequestHandlers.class.php';
  * @brief
  *	Loads all module information
  *
- * @retval array
+ * @return array
  *	@code
  *	[
  *		'hook_implementations' => 'modules_enabled/foo/hooks.php'             // or FALSE
@@ -94,7 +94,7 @@ function load_all_modules()
  * @param string $key         (OPTIONAL)
  * @param string $default_val (OPTIONAL)
  *
- * @retval mixed
+ * @return mixed
  *	If $key is given, this acts as an alias to $modules_model->get(); otherwise this returns
  *	$modules_models
  */
@@ -119,7 +119,7 @@ function modules( $key = NULL, $default_val = NULL )
  * @param string $key         (OPTIONAL)
  * @param string $default_val (OPTIONAL)
  *
- * @retval mixed
+ * @return mixed
  *	If $key is given, this acts as an alias to $settings_model->get(); otherwise this returns
  *	$settings_model
  */
@@ -163,7 +163,7 @@ function settings( $key = NULL, $default_val = NULL )
 }
 
 /**
- * @retval RequestHandlers
+ * @return RequestHandlers
  */
 function request_handlers()
 {

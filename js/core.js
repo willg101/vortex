@@ -65,7 +65,7 @@ $( () => window.PageTitle.setFormat( document.title.trim() ) );
  *
  * @param string path
  *
- * @retval string
+ * @return string
  */
 function makeUrl( path )
 {
@@ -83,7 +83,7 @@ function makeUrl( path )
  * @param string template_name E.g. for modules_enabled/foo/hbs/bar.hbs, pass 'foo.bar'
  * @param object vars          The variables to render the template with
  *
- * @retval string
+ * @return string
  *
  * @throw RenderError
  */
@@ -181,7 +181,7 @@ function escapeDoubleQuotes( str )
  *
  * @param string name
  *
- * @retval Promise
+ * @return Promise
  */
 function whenReadyTo( name )
 {

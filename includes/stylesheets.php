@@ -5,7 +5,7 @@
  *	Generates the link tags for including each required CSS file (this DOES NOT include or consider
  *	LESS files)
  *
- * @retval string
+ * @return string
  */
 function build_css_requirements()
 {
@@ -37,7 +37,7 @@ function build_css_requirements()
  *	Generates the link tags for including each required LESS file (and additionally compiles all
  *	LESS files)
  *
- * @retval string
+ * @return string
  */
 function build_less_requirements()
 {

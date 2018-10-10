@@ -97,7 +97,7 @@ Object.defineProperty( Pane.prototype, 'size', {
  *
  * @param function transformer Receives a Pane instance as its only argument; returns a jQuery
  *
- * @retval jQuery
+ * @return jQuery
  */
 Pane.prototype.transform = function( transformer )
 {
@@ -130,7 +130,7 @@ Pane.prototype.transform = function( transformer )
  *
  * @param int n_preview_windows The number of preview "windows" to include in each leaf Pane
  *
- * @retval string
+ * @return string
  */
 Pane.prototype.buildPreviewLayout = function( n_preview_windows )
 {
@@ -228,7 +228,7 @@ Pane.prototype.save = function( no_recurse )
  *	Leaves are Panes with no Pane children and are thus capable of containing Window
  *	instances
  *
- * @retval bool
+ * @return bool
  */
 Pane.prototype.isLeaf = function()
 {
@@ -236,7 +236,7 @@ Pane.prototype.isLeaf = function()
 }
 
 /**
- * @retval bool
+ * @return bool
  */
 Pane.prototype.isRoot = function()
 {

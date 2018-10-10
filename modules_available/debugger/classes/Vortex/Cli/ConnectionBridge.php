@@ -26,7 +26,7 @@ class ConnectionBridge
 	protected $dbg_app;
 
 	/**
-	 * @retval bool
+	 * @return bool
 	 */
 	public function hasWsConnection()
 	{
@@ -34,7 +34,7 @@ class ConnectionBridge
 	}
 
 	/**
-	 * @retval bool
+	 * @return bool
 	 */
 	public function hasDbgConnection()
 	{
@@ -42,7 +42,7 @@ class ConnectionBridge
 	}
 
 	/**
-	 * @retval ConnectionInterface
+	 * @return ConnectionInterface
 	 */
 	public function getWsConnection()
 	{
@@ -50,7 +50,7 @@ class ConnectionBridge
 	}
 
 	/**
-	 * @retval ConnectionInterface
+	 * @return ConnectionInterface
 	 */
 	public function getDbgConnection()
 	{
@@ -158,7 +158,7 @@ class ConnectionBridge
 	 *	Proxy calls to $this->dbg_app->getQueueAsXml(), returning an empty string if $this->dbg_app
 	 *	is not defined
 	 *
-	 * @retval string
+	 * @return string
 	 */
 	public function getQueueAsXml()
 	{

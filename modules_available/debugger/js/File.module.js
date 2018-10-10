@@ -15,7 +15,7 @@ function normalize( filename )
 
 /**
  * @param string filename
- * @retval string
+ * @return string
  */
 function basename( filename )
 {
@@ -24,7 +24,7 @@ function basename( filename )
 
 /**
  * @param string filename
- * @retval string
+ * @return string
  */
 function dirname( filename )
 {
@@ -38,7 +38,7 @@ function dirname( filename )
 
 /**
  * @param string filename
- * @retval string
+ * @return string
  */
 function stripScheme( filename )
 {
@@ -47,7 +47,7 @@ function stripScheme( filename )
 
 /**
  * @param int size
- * @retval string
+ * @return string
  */
 function bytesToHumanReadable( size )
 {
@@ -64,7 +64,7 @@ function bytesToHumanReadable( size )
  * @param string codebase_id
  * @param string codebase_root
  *
- * @retval string
+ * @return string
  */
 function convertToCodebaseRelativePath( path, codebase_id, codebase_root )
 {
@@ -87,7 +87,7 @@ function convertToCodebaseRelativePath( path, codebase_id, codebase_root )
  * @param string codebase_id
  * @param string codebase_root
  *
- * @retval string
+ * @return string
  */
 function convertFromCodebaseRelativePath( path, codebase_id, codebase_root )
 {
@@ -102,7 +102,7 @@ function convertFromCodebaseRelativePath( path, codebase_id, codebase_root )
 /**
  * @param string path
  *
- * @retval bool
+ * @return bool
  */
 function isCodebaseRelative( path )
 {

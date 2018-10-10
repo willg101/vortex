@@ -47,7 +47,7 @@ class DataStorage
 	 * @param mixed  $default_val OPTIONAL. When $key is given, but no corresponding value is found,
 	 *	this is returned instead
 	 *
-	 * @retval mixed
+	 * @return mixed
 	 */
 	public function get( $key = NULL, $default_val = NULL )
 	{
@@ -57,7 +57,7 @@ class DataStorage
 	}
 
 	/**
-	 * @retval bool
+	 * @return bool
 	 */
 	public function isReadOnly()
 	{
@@ -65,7 +65,7 @@ class DataStorage
 	}
 
 	/**
-	 * @retval string
+	 * @return string
 	 */
 	public function getName()
 	{
@@ -79,7 +79,7 @@ class DataStorage
 	 * @param string $key   The key within $data to set; may be given in "dot" notation
 	 * @param mixed  $value
 	 *
-	 * @retval bool
+	 * @return bool
 	 *	FALSE if the value was not set becuase the instance is read-only; the return value of
 	 *	commitChange() otherwise
 	 */
@@ -106,7 +106,7 @@ class DataStorage
 	 *
 	 * @param string $hook_name
 	 *
-	 * @retval string
+	 * @return string
 	 */
 	protected function generateHookName( $hook_name )
 	{
@@ -120,7 +120,7 @@ class DataStorage
 	 * @param string $key   The key within $data to set; may be given in "dot" notation
 	 * @param mixed  $value
 	 *
-	 * @retval bool
+	 * @return bool
 	 *	Indicates whether the value was updated successfully
 	 */
 	protected function commitChange( $key, $value )

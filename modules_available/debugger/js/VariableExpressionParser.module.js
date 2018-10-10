@@ -107,7 +107,7 @@ Parser.sequences = {
  *
  * @param TokenIterator it
  *
- * @retval object|false
+ * @return object|false
  *	The return value of Parser.parse(), or false if the hovered character is not within a
  *	variable expression
  */

@@ -87,7 +87,7 @@ class ValidationResult
 	}
 
 	/**
-	 * @retval bool
+	 * @return bool
 	 */
 	public function hasErrors()
 	{
@@ -97,7 +97,7 @@ class ValidationResult
 	/**
 	 * @param string $key A key from an item previously passed to $this->record()
 	 *
-	 * @retval mixed
+	 * @return mixed
 	 *	The $value parameter passed to to $this->record(), or NULL if $key has not been passed to
 	 *	$this->record()
 	 */
@@ -149,7 +149,7 @@ class ValidationResult
 	 * Surround the given string with an escape sequence to make the text show up red in a terminal
 	 *
 	 * @param string $text
-	 * @retval string
+	 * @return string
 	 */
 	protected function redText( $text )
 	{
@@ -205,7 +205,7 @@ class ConfigurationValidator
 
 	/**
 	 * @param array $settings An array of settings parsed from the global settings file
-	 * @retval ValidationResult
+	 * @return ValidationResult
 	 */
 	public function validate( array $settings )
 	{
@@ -238,7 +238,7 @@ class ConfigurationValidator
 
 	/**
 	 * @param int $port
-	 * @retval bool
+	 * @return bool
 	 *	TRUE if the port is available for us to bind to; FALSE otherwise
 	 */
 	protected function portIsAvailable( $port )
@@ -263,7 +263,7 @@ class ConfigurationValidator
 	 * @param mixed $value
 	 * @param array $spec
 	 *
-	 * @retval NULL|string
+	 * @return NULL|string
 	 *	NULL indicates no errors; strings describe a problem with validating $value
 	 */
 	protected function validatePort( $value, array $spec )
@@ -312,7 +312,7 @@ class ConfigurationValidator
 	//@}
 
 	/**
-	 * @retval int
+	 * @return int
 	 *	An available TCP port between static::PORT_AUTOSELECT_START and static::PORT_AUTOSELECT_END,
 	 *	inclusive
 	 *
@@ -337,7 +337,7 @@ class ConfigurationValidator
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @retval ValidationResult
+ * @return ValidationResult
  */
 function validate_requirements()
 {
@@ -374,7 +374,7 @@ function validate_requirements()
  *	the settings file. If any errors are detected, terminates this script with a non-zero exit
  *	status.
  *
- * @retval ValidationResult
+ * @return ValidationResult
  */
 function validate_configuration()
 {

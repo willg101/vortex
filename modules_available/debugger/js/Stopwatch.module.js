@@ -45,7 +45,7 @@ function refreshOne( jq )
  *
  * @param number n
  *
- * @retval string
+ * @return string
  */
 function leadingZeros( n )
 {
@@ -58,7 +58,7 @@ function leadingZeros( n )
  *
  * @param number n
  *
- * @retval string
+ * @return string
  */
 function formatTime( seconds )
 {

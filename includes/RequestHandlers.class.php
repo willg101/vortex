@@ -69,7 +69,7 @@ class RequestHandlers
 	 *
 	 * @param string $url
 	 *
-	 * @retval string
+	 * @return string
 	 */
 	protected function normalize( $url )
 	{
@@ -84,7 +84,7 @@ class RequestHandlers
 	 * @param string $pattern See documentation from register()'s `$pattern` argument
 	 * @param string $url
 	 *
-	 * @retval bool
+	 * @return bool
 	 */
 	protected function matches( $pattern, $url )
 	{
@@ -131,7 +131,7 @@ class RequestHandlers
 	 *
 	 * @param string $url OPTIONAL. When omitted, retrieves the URL from `request_path()`
 	 *
-	 * @retval bool
+	 * @return bool
 	 *	Indicates whether the request was handled or not
 	 */
 	public function handle( $url = NULL )

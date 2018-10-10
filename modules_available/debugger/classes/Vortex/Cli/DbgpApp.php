@@ -30,7 +30,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
 	 * @note See https://xdebug.org/docs-dbgp.php#message-packets
 	 *
 	 * @param string $msg
-	 * @retval string
+	 * @return string
 	 */
 	public static function prepareMessage( $msg )
 	{
@@ -237,7 +237,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
 	###############################################################################################
 
 	/**
-	 * @retval string
+	 * @return string
 	 *	An xml fragment in which the root element is a wsserver element and contains one child for
 	 *	each queued connection
 	 */
@@ -323,7 +323,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
 	 *
 	 * @param Ratchet\ConnectionInterface $conn
 	 *
-	 * @retval string
+	 * @return string
 	 */
 	protected function getConnectionId( ConnectionInterface $conn )
 	{
