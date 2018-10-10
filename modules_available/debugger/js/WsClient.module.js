@@ -167,21 +167,6 @@ function send( command )
 
 /**
  * @brief
- *	Escapes all unescaped double quotes in a string
- *
- * @param string str
- *
- * @retval string
- *
- * @see https://gist.github.com/getify/3667624
- */
-function escapeDoubleQuotes( str )
-{
-	return str.replace( /\\([\s\S])|(")/g , "\\$1$2" );
-}
-
-/**
- * @brief
  *	Processes incoming messages from the socket server
  *
  * @param object data

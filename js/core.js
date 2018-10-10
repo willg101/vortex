@@ -8,30 +8,6 @@ class RenderError extends Error {
 	}
 }
 
-/**
- * @brief
- *	Create a faux namespace, implemented as a nested object
- *
- * @param string ns The namespace, separated by dots; e.g., 'foo.bar'
- *
- * @retval object
- */
-function namespace( ns )
-{
-	var context = window;
-
-	ns.split( '.' ).forEach( function( part )
-	{
-		if ( typeof context[ part ] == "undefined" )
-		{
-			context[ part ] = {};
-		}
-		context = context[ part ];
-	} );
-
-	return context;
-}
-
 vTheme = new Proxy( {}, {
 	get : ( target, key ) =>
 	{
