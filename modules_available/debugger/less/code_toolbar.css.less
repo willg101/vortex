@@ -19,6 +19,26 @@
 	}
 }
 
+@keyframes session-change
+{
+	0%
+	{
+		width: 0;
+		height: 0;
+		top: 50%;
+		left: 50%;
+		opacity: 1;
+	}
+	100%
+	{
+		width:100vw;
+		height:100vw;
+		opacity: 0;
+		left: 0;
+		top: ~"calc( -50vw + 23px )";
+	}
+}
+
 .toolbar
 {
 	height: 46px;
@@ -27,6 +47,15 @@
 	background: @toolbar-bg;
 	z-index: 2;
 	display: flex;
+
+	&.session-change:before
+	{
+		animation: session-change 500ms 1 ease;
+		content: " ";
+		position: absolute;
+		background: @active-color;
+		border-radius: 100vw;
+	}
 
 	.window-separator
 	{

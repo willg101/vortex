@@ -138,26 +138,14 @@ function refreshState()
 
 subscribe( 'before-switch-session', function( e )
 {
-	var resolve = e.register();
-	var delay = 0;
-	$( '[data-role="window"]' ).each( function()
-	{
-		setTimeout( function()
-		{
-			$( this ).addClass( 'hiding not-loaded' );
-		}.bind( this ), ++delay * 30 );
-	} );
-	setTimeout( resolve, delay );
+	$( '.toolbar' ).removeClass( 'session-change' );
+	setTimeout( () => $( '.toolbar' ).addClass( 'session-change' ), 1 );
 } );
 
-subscribe( 'session-switched', function()
+$( document ).on( 'animationend', '.toolbar', e =>
 {
-	var delay = 0;
-	$( '[data-role="window"]' ).each( function()
+	if ( e.originalEvent.animationName == 'session-change' )
 	{
-		setTimeout( function()
-		{
-			$( this ).removeClass( 'not-loaded' );
-		}.bind( this ), ++delay * 30 );
-	} );
+		$( e.target ).removeClass( 'session-change' );
+	}
 } );
