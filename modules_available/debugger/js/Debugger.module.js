@@ -63,7 +63,9 @@ var command_args_conversion = {
 	value       : 'v',
 	transaction : 'i',
 	pattern     : 'p',
-	max_data    : 'm'
+	max_data    : 'm',
+
+	session     : 'Xs',
 };
 
 function translateArgs( args_object )

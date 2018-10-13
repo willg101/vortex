@@ -1,5 +1,6 @@
-import Debugger from './Debugger.module.js'
-import WsClient from './WsClient.module.js'
+import Debugger                from './Debugger.module.js'
+import WsClient                from './WsClient.module.js'
+import QueuedSessionsIndicator from './QueuedSessionsIndicator.module.js'
 
 var $                  = jQuery;
 var reconnect_delay_ms = 5000;
@@ -117,7 +118,7 @@ subscribe( 'response-received', function( e )
 	{
 		// Sometimes the debugger engine will wait for a continuation command in order to end a
 		// session, so if the DE indicates it's stopping, let's encourage it to end the session
-		Debugger.command( 'run' );
+		Debugger.command( 'run', { session : QueuedSessionsIndicator.getSessionId() } );
 	}
 } );
 

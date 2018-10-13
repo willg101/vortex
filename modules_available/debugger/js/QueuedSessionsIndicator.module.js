@@ -3,9 +3,10 @@ import File     from './File.module.js'
 import WsClient from './WsClient.module.js'
 import LanguageAbstractor       from './LanguageAbstractor.module.js'
 
-export default { getCurrentCodebase }
+export default { getCurrentCodebase, getSessionId }
 
 var known_sessions = [];
+var session_id     = '';
 
 subscribe( 'connection-status-changed', function onConnectionStatusChanged( e )
 {
@@ -43,10 +44,11 @@ subscribe( 'server-info', function( e )
 	if ( e.jq_message.is( '[type=peek_queue]' ) )
 	{
 		known_sessions = [];
+		session_id     = '';
 		e.jq_message.find( 'queuedsession' ).each( function()
 		{
-			var self       = $( this );
-			var session_id = self.attr( 'connection_id' );
+			var self   = $( this );
+			session_id = self.attr( 'connection_id' );
 			if ( !session_id )
 			{
 				return;
@@ -125,6 +127,11 @@ $( document ).on( 'click', '[data-switch-to-session]', function( e )
 	var session_id = $( e.target ).closest( '[data-switch-to-session]' ).attr( 'data-switch-to-session' );
 	Debugger.command( 'X-ctrl:switch_session -s ' + session_id );
 } );
+
+function getSessionId()
+{
+	return session_id;
+}
 
 function showPopover( rendered_items )
 {

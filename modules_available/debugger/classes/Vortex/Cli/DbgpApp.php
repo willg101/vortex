@@ -25,6 +25,19 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
 
 	/**
 	 * @brief
+	 *	Generate an html-attribute-safe identifier for a connection
+	 *
+	 * @param Ratchet\ConnectionInterface $conn
+	 *
+	 * @return string
+	 */
+	public static function getConnectionId( ConnectionInterface $conn )
+	{
+		return static::CONNECTION_ID_PREFIX . $conn->resourceId;
+	}
+
+	/**
+	 * @brief
 	 *	Prepare a message to be sent to the DE by ensuring that the message ends with a null char
 	 *
 	 * @note See https://xdebug.org/docs-dbgp.php#message-packets
@@ -103,7 +116,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
 
 	public function onOpen( ConnectionInterface $conn )
 	{
-		$cid = $this->getConnectionId( $conn );
+		$cid = static::getConnectionId( $conn );
 		$name = "debug connection $cid";
 		logger()->debug( "Connection opened: $name" );
 
@@ -120,7 +133,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
 
 	public function onClose( ConnectionInterface $conn )
 	{
-		$cid = $this->getConnectionId( $conn );
+		$cid = static::getConnectionId( $conn );
 		logger()->debug( "Connection closing: $cid" );
 		if ( $this->bridge->getDbgConnection() == $conn )
 		{
@@ -155,7 +168,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
 
 	public function onMessage( ConnectionInterface $conn, $msg )
 	{
-		$cid = $this->getConnectionId( $conn );
+		$cid = static::getConnectionId( $conn );
 		if ( $this->bridge->hasWsConnection() )
 		{
 			try
@@ -227,7 +240,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
 
 	public function onError( ConnectionInterface $conn, Exception $e )
 	{
-		$cid = $this->getConnectionId( $conn );
+		$cid = static::getConnectionId( $conn );
 		logger()->error( "Error with debug connection $cid: $e" );
 		$conn->close();
 	}
@@ -315,19 +328,6 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
 		{
 			$this->bridge->sendToWs( $msg );
 		}
-	}
-
-	/**
-	 * @brief
-	 *	Generate an html-attribute-safe identifier for a connection
-	 *
-	 * @param Ratchet\ConnectionInterface $conn
-	 *
-	 * @return string
-	 */
-	protected function getConnectionId( ConnectionInterface $conn )
-	{
-		return static::CONNECTION_ID_PREFIX . $conn->resourceId;
 	}
 
 	/**

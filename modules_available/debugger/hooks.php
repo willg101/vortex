@@ -371,6 +371,14 @@ function debugger_ws_message_received( &$data )
 	{
 		$data[ 'bridge' ]->switchSession( $match[ 'id' ] );
 	}
+	elseif ( preg_match( '/\s+-Xs (?<id>' . $cid_prefix . '\d+)/', $data[ 'message' ], $match ) )
+	{
+		$dbg_conn = $data[ 'bridge' ]->getDbgConnection();
+		if ( $dbg_conn && Vortex\Cli\DbgpApp::getConnectionId( $dbg_conn ) != $match[ 'id' ] )
+		{
+			$data[ 'abort' ] = TRUE;
+		}
+	}
 	elseif ( strpos( $data[ 'message' ], 'property_set ' ) === 0 )
 	{
 		logger()->debug( 'Detected `property_set` command; checking syntax...' );
