@@ -11,9 +11,9 @@
  * @param string $str
  * @return string
  */
-function sanitize_text_for_html( $str )
+function sanitize_text_for_html($str)
 {
-	return htmlspecialchars( $str, ENT_QUOTES, 'UTF-8' );
+    return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
 }
 
 /**
@@ -27,16 +27,14 @@ function sanitize_text_for_html( $str )
  * @param array $attributes
  * @return string
  */
-function html_attrs( array $attributes = [] )
+function html_attrs(array $attributes = [])
 {
-	$attrs_rendered = '';
-	foreach ( $attributes as $attribute => $data )
-	{
-		if ( is_array( $data ) )
-		{
-			$data = implode( ' ', $data );
-		}
-		$attrs_rendered .= $attribute . '="' . sanitize_text_for_html( $data ) . '" ';
-	}
-	return $attrs_rendered;
+    $attrs_rendered = '';
+    foreach ($attributes as $attribute => $data) {
+        if (is_array($data)) {
+            $data = implode(' ', $data);
+        }
+        $attrs_rendered .= $attribute . '="' . sanitize_text_for_html($data) . '" ';
+    }
+    return $attrs_rendered;
 }

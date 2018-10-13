@@ -24,16 +24,15 @@ use \Monolog\Handler\ErrorLogHandler;
  */
 function bootstrap()
 {
-	date_default_timezone_set( settings( 'timezone' ) );
-	spl_autoload_register( 'vortex_autoloader' );
-	$boot_vars = [];
-	fire_hook( 'preboot', $boot_vars );
-	fire_hook( 'boot',    $boot_vars, TRUE );
+    date_default_timezone_set(settings('timezone'));
+    spl_autoload_register('vortex_autoloader');
+    $boot_vars = [];
+    fire_hook('preboot', $boot_vars);
+    fire_hook('boot', $boot_vars, true);
 
-	if ( !request_handlers()->handle() )
-	{
-		throw new HttpException( "Page not found: " . request_path(), [ 'HTTP/1.1 404 Not found' ] );
-	}
+    if (!request_handlers()->handle()) {
+        throw new HttpException("Page not found: " . request_path(), [ 'HTTP/1.1 404 Not found' ]);
+    }
 }
 
 /**
@@ -46,44 +45,37 @@ function bootstrap()
  */
 function logger()
 {
-	static $logger;
+    static $logger;
 
-	if ( !$logger )
-	{
-		$handler = NULL;
-		$label   = '';
-		$log_level = settings( 'log_level' );
-		$log_level = constant( Logger::CLASS . "::$log_level" );
-		if ( php_sapi_name() == 'cli' )
-		{
-			$label   = 'cli';
-			$handler = new ErrorLogHandler( ErrorLogHandler::OPERATING_SYSTEM, $log_level );
-		}
-		else
-		{
-			$label   = 'http';
-			$handler = new StreamHandler( __DIR__ . "/../logs/http.log", $log_level );
-		}
+    if (!$logger) {
+        $handler = null;
+        $label   = '';
+        $log_level = settings('log_level');
+        $log_level = constant(Logger::class . "::$log_level");
+        if (php_sapi_name() == 'cli') {
+            $label   = 'cli';
+            $handler = new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $log_level);
+        } else {
+            $label   = 'http';
+            $handler = new StreamHandler(__DIR__ . "/../logs/http.log", $log_level);
+        }
 
-		$data = [
-			'logger'  => NULL,
-			'label'   => $label,
-			'handler' => $handler,
-		];
-		fire_hook( 'init_logger', $data );
+        $data = [
+            'logger'  => null,
+            'label'   => $label,
+            'handler' => $handler,
+        ];
+        fire_hook('init_logger', $data);
 
-		if ( !$data[ 'logger' ] )
-		{
-			$logger = new Logger( "Vortex Logger ($data[label])" );
-			$logger->pushHandler( $handler );
-		}
-		else
-		{
-			$logger = $data[ 'logger' ];
-		}
-	}
+        if (!$data[ 'logger' ]) {
+            $logger = new Logger("Vortex Logger ($data[label])");
+            $logger->pushHandler($handler);
+        } else {
+            $logger = $data[ 'logger' ];
+        }
+    }
 
-	return $logger;
+    return $logger;
 }
 
 /**
@@ -100,34 +92,28 @@ function logger()
  * @param bool           $reload OPTIONAL. Default is FALSE. Forces the function to clear its cache
  *	of available modules. This should be used after disabling a module.
  */
-function fire_hook( $hook_name, array &$data = [], $reload = FALSE )
+function fire_hook($hook_name, array &$data = [], $reload = false)
 {
-	static $hook_modules;
-	if ( $reload || $hook_modules === NULL )
-	{
-		$hook_modules = [];
-		foreach ( modules()->get() as $module_name => $module )
-		{
-			if ( $module[ 'hook_implementations' ] )
-			{
-				$hook_modules[] = $module_name;
-				require_once( $module[ 'hook_implementations' ] );
-			}
-		}
-	}
+    static $hook_modules;
+    if ($reload || $hook_modules === null) {
+        $hook_modules = [];
+        foreach (modules()->get() as $module_name => $module) {
+            if ($module[ 'hook_implementations' ]) {
+                $hook_modules[] = $module_name;
+                require_once($module[ 'hook_implementations' ]);
+            }
+        }
+    }
 
-	$results = [];
-	foreach ( $hook_modules as $module_name )
-	{
-		$function_name = $module_name . '_' . $hook_name;
-		if ( function_exists( $function_name ) )
-		{
-			$current_result = $function_name( $data );
-			if ( $current_result !== NULL )
-			{
-				$results[ $module_name ] = $current_result;
-			}
-		}
-	}
-	return $results;
+    $results = [];
+    foreach ($hook_modules as $module_name) {
+        $function_name = $module_name . '_' . $hook_name;
+        if (function_exists($function_name)) {
+            $current_result = $function_name($data);
+            if ($current_result !== null) {
+                $results[ $module_name ] = $current_result;
+            }
+        }
+    }
+    return $results;
 }

@@ -9,21 +9,19 @@
  *
  * @return bool
  */
-function client_can_access_path( $path )
+function client_can_access_path($path)
 {
-	// Resolve symlinks, '..', etc.
-	$path = realpath( $path ) . '/';
+    // Resolve symlinks, '..', etc.
+    $path = realpath($path) . '/';
 
-	foreach ( settings( 'allowed_directories' ) as $allowed_dir )
-	{
-		// Prevent /a/b/cdef from matching the path /a/b/c
-		if ( strpos( $path, $allowed_dir . '/' ) === 0 )
-		{
-			return TRUE;
-		}
-	}
+    foreach (settings('allowed_directories') as $allowed_dir) {
+        // Prevent /a/b/cdef from matching the path /a/b/c
+        if (strpos($path, $allowed_dir . '/') === 0) {
+            return true;
+        }
+    }
 
-	return FALSE;
+    return false;
 }
 
 /**
@@ -36,16 +34,16 @@ function client_can_access_path( $path )
  *
  * @return bool
  */
-function client_can_view_file( $file_name )
+function client_can_view_file($file_name)
 {
-	$file_name       = preg_replace( '#^.*?://#', '', $file_name );
-	$extension_regex = implode( '|', array_map( 'preg_quote', settings( 'allowed_extensions' ) ) );
+    $file_name       = preg_replace('#^.*?://#', '', $file_name);
+    $extension_regex = implode('|', array_map('preg_quote', settings('allowed_extensions')));
 
-	return client_can_access_path( $file_name )
-		&& is_file( $file_name )
-		&& ( preg_match( "/\.($extension_regex)$/", $file_name )
-			|| ( in_array( '', settings( 'allowed_extensions' ) )
-				&& preg_match( '/^\./', basename( $file_name ) ) ) );
+    return client_can_access_path($file_name)
+        && is_file($file_name)
+        && (preg_match("/\.($extension_regex)$/", $file_name)
+            || (in_array('', settings('allowed_extensions'))
+                && preg_match('/^\./', basename($file_name))));
 }
 
 /**
@@ -58,29 +56,25 @@ function client_can_view_file( $file_name )
  * @param string $file_name
  * @param string $data_to_save
  */
-function file_put_contents_safe( $file_name, $data_to_save )
+function file_put_contents_safe($file_name, $data_to_save)
 {
-	if ( $fp = fopen( $file_name, 'w' ) )
-	{
-		$start_time = microtime( TRUE );
-		do
-		{
-			$can_write = flock( $fp, LOCK_EX );
-			// If lock not obtained sleep for 0 - 100 milliseconds, to avoid collision and CPU load
-			if( !$can_write )
-			{
-				usleep( round( rand( 0, 100 ) * 1000 ) );
-			}
-		} while ( ( !$can_write ) and ( ( microtime( TRUE ) - $start_time ) < 5 ) );
+    if ($fp = fopen($file_name, 'w')) {
+        $start_time = microtime(true);
+        do {
+            $can_write = flock($fp, LOCK_EX);
+            // If lock not obtained sleep for 0 - 100 milliseconds, to avoid collision and CPU load
+            if (!$can_write) {
+                usleep(round(rand(0, 100) * 1000));
+            }
+        } while ((!$can_write) and ((microtime(true) - $start_time) < 5));
 
-		// File was locked so now we can store information
-		if ( $can_write )
-		{
-			fwrite( $fp, $data_to_save );
-			flock( $fp, LOCK_UN );
-		}
-		fclose( $fp );
-	}
+        // File was locked so now we can store information
+        if ($can_write) {
+            fwrite($fp, $data_to_save);
+            flock($fp, LOCK_UN);
+        }
+        fclose($fp);
+    }
 }
 
 /**
@@ -96,44 +90,36 @@ function file_put_contents_safe( $file_name, $data_to_save )
  *	An array where each element is the absolute path of a file within $dir with the
  *	extension $extension
  */
-function recursive_file_scan( $extension, $dir, &$dirs_seen = [] )
+function recursive_file_scan($extension, $dir, &$dirs_seen = [])
 {
-	// Account for symlink cycles
-	$real_path = realpath( $dir );
-	if ( isset( $dirs_seen[ $real_path ] ) )
-	{
-		return [];
-	}
-	else
-	{
-		$dirs_seen[ $real_path ] = TRUE;
-	}
+    // Account for symlink cycles
+    $real_path = realpath($dir);
+    if (isset($dirs_seen[ $real_path ])) {
+        return [];
+    } else {
+        $dirs_seen[ $real_path ] = true;
+    }
 
-	$result            = [];
-	$extension_escaped = preg_quote( $extension, '/' );
+    $result            = [];
+    $extension_escaped = preg_quote($extension, '/');
 
-	foreach ( glob( "$dir/*" ) as $item )
-	{
-		if ( is_dir( $item ) )
-		{
-			$result = array_merge( $result, recursive_file_scan( $extension, $item, $dirs_seen ) );
-		}
-		else
-		{
-			if ( preg_match( "/\.$extension_escaped$/", $item ) )
-			{
-				$result[] = $item;
-			}
-		}
-	}
-	return $result;
+    foreach (glob("$dir/*") as $item) {
+        if (is_dir($item)) {
+            $result = array_merge($result, recursive_file_scan($extension, $item, $dirs_seen));
+        } else {
+            if (preg_match("/\.$extension_escaped$/", $item)) {
+                $result[] = $item;
+            }
+        }
+    }
+    return $result;
 }
 
 /**
  * @brief
  *	Converts a path to a filename stripped of its extension
  */
-function without_file_extension( $path )
+function without_file_extension($path)
 {
-	return preg_replace( '/\..*$/', '', basename( $path ) );
+    return preg_replace('/\..*$/', '', basename($path));
 }

@@ -47,34 +47,32 @@
  *
  * @return string
  */
-function render( $name, $vars = [] )
+function render($name, $vars = [])
 {
-	$data = [
-		'template'        => $name,
-		'vars'            => &$vars,
-		'implementations' => get_template_implementations( $name ),
-	];
+    $data = [
+        'template'        => $name,
+        'vars'            => &$vars,
+        'implementations' => get_template_implementations($name),
+    ];
 
-	fire_hook( 'render_preprocess', $data );
-	fire_hook( 'render_process',    $data );
-	usort( $data[ 'implementations' ], function( $a, $b )
-	{
-		return $a[ 'weight' ] - $b[ 'weight' ];
-	} );
+    fire_hook('render_preprocess', $data);
+    fire_hook('render_process', $data);
+    usort($data[ 'implementations' ], function ($a, $b) {
+        return $a[ 'weight' ] - $b[ 'weight' ];
+    });
 
-	$html = '';
-	foreach ( $data[ 'implementations' ] as $module_name => $implementation )
-	{
-		$postprocess = [
-			'rendered' => render_template( $implementation[ 'file' ], $vars ),
-			'vars'     => $vars,
-			'template' => $name,
-			'module'   => $module_name,
-		];
-		fire_hook( 'render_postprocess', $postprocess );
-		$html .= $postprocess[ 'rendered' ];
-	}
-	return $html;
+    $html = '';
+    foreach ($data[ 'implementations' ] as $module_name => $implementation) {
+        $postprocess = [
+            'rendered' => render_template($implementation[ 'file' ], $vars),
+            'vars'     => $vars,
+            'template' => $name,
+            'module'   => $module_name,
+        ];
+        fire_hook('render_postprocess', $postprocess);
+        $html .= $postprocess[ 'rendered' ];
+    }
+    return $html;
 }
 
 /**
@@ -90,27 +88,23 @@ function render( $name, $vars = [] )
  *
  * @return string
  */
-function render_template( $template_file, $vars = [] )
+function render_template($template_file, $vars = [])
 {
-	if ( empty( $vars[ 'has' ] ) )
-	{
-		$vars[ 'has' ] = function( $name )
-		{
-			return !!get_template_implementations( $name );
-		};
-	}
-	if ( empty( $vars[ 'show' ] ) )
-	{
-		$vars[ 'show' ] = function( $name )
-		{
-			echo render( $name );
-		};
-	}
+    if (empty($vars[ 'has' ])) {
+        $vars[ 'has' ] = function ($name) {
+            return !!get_template_implementations($name);
+        };
+    }
+    if (empty($vars[ 'show' ])) {
+        $vars[ 'show' ] = function ($name) {
+            echo render($name);
+        };
+    }
 
-	ob_start();
-	extract( $vars );
-	include( $template_file );
-	return ob_get_clean();
+    ob_start();
+    extract($vars);
+    include($template_file);
+    return ob_get_clean();
 }
 
 /**
@@ -119,27 +113,23 @@ function render_template( $template_file, $vars = [] )
  *
  * @return array
  */
-function get_template_implementations( $template_name, $use_cache = TRUE )
+function get_template_implementations($template_name, $use_cache = true)
 {
-	static $cache;
-	if ( $cache === NULL || !$use_cache )
-	{
-		foreach ( modules()->get() as $module_name => $module )
-		{
-			foreach ( $module[ 'templates' ] as $file )
-			{
-				$key = without_file_extension( $file );
-				if ( !isset( $cache[ $key ] ) )
-				{
-					$cache[ $key ] = [];
-				}
-				$cache[ $key ][ $module_name ] = [
-					'file'   => $file,
-					'weight' => 0,
-				];
-			}
-		}
-	}
+    static $cache;
+    if ($cache === null || !$use_cache) {
+        foreach (modules()->get() as $module_name => $module) {
+            foreach ($module[ 'templates' ] as $file) {
+                $key = without_file_extension($file);
+                if (!isset($cache[ $key ])) {
+                    $cache[ $key ] = [];
+                }
+                $cache[ $key ][ $module_name ] = [
+                    'file'   => $file,
+                    'weight' => 0,
+                ];
+            }
+        }
+    }
 
-	return array_get( $cache, $template_name, [] );
+    return array_get($cache, $template_name, []);
 }

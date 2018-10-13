@@ -12,8 +12,8 @@
 			<div class="css-row">
 				<div class="css-cell">
 					<div id="login_form_container" class="login-animate-element">
-						<div class="logo"><?php $show( 'vortex_logo' ) ?></div>
-						<?php if ( $mode == 'login' ): ?>
+						<div class="logo"><?php $show('vortex_logo') ?></div>
+						<?php if ($mode == 'login'): ?>
 						<div class="login-form">
 							<input name="username" class="no-bg" placeholder="Username" type="text"/>
 							<input name="password" class="no-bg" placeholder="Password" type="password"/>
@@ -29,13 +29,13 @@
 								<button class="btn text-btn reset-pw-submit">Submit</button>
 							</div>
 						</div>
-						<?php elseif ( $mode == 'create' ): ?>
+						<?php elseif ($mode == 'create'): ?>
 						<div class="create-account-form">
 							<input name="username"  class="no-bg" placeholder="Username" type="text"/>
 							<input name="email"     class="no-bg" placeholder="Email" type="text"/>
 							<input name="password1" class="no-bg" placeholder="Password" type="password"/>
 							<input name="password2" class="no-bg" placeholder="Password (confirm)" type="password"/>
-							<?php if ( isset( $it, $iid ) ): ?>
+							<?php if (isset($it, $iid)): ?>
 								<input name="it"  type="hidden" value="<?php echo $it ?>"/>
 								<input name="iid" type="hidden" value="<?php echo $iid ?>"/>
 							<?php endif ?>

@@ -12,7 +12,7 @@
 
 	</head>
 	<body>
-		<?php $show( 'toolbar' ) ?>
+		<?php $show('toolbar') ?>
 		<div class="hidden">
 			<div class="all-layouts">
 				<?php echo $layouts ?>
@@ -23,8 +23,8 @@
 		</div>
 		<div id="layout_in_use" class="blurable">
 		</div>
-		<?php $show( 'after_main' ) ?>
-		<?php $show( 'splash' ) ?>
+		<?php $show('after_main') ?>
+		<?php $show('splash') ?>
 		<?php echo build_script_requirements() ?>
 	</body>
 </html>

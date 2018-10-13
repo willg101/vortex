@@ -11,35 +11,30 @@
  *
  * @return mixed
  */
-function input( $key, $default = NULL )
+function input($key, $default = null)
 {
-	static $request_data;
-	if ( $request_data === NULL )
-	{
-		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' )
-		{
-			$request_data = $_POST;
-		}
-		else if ( $_SERVER[ 'REQUEST_METHOD' ] === 'GET' )
-		{
-			$request_data = $_GET;
-		}
-		else
-		{
-			throw new HttpException( 'Unsupported request method' );
-		}
-	}
+    static $request_data;
+    if ($request_data === null) {
+        if ($_SERVER[ 'REQUEST_METHOD' ] === 'POST') {
+            $request_data = $_POST;
+        } elseif ($_SERVER[ 'REQUEST_METHOD' ] === 'GET') {
+            $request_data = $_GET;
+        } else {
+            throw new HttpException('Unsupported request method');
+        }
+    }
 
-	return trim( array_get( $request_data, $key, $default ) );
+    return trim(array_get($request_data, $key, $default));
 }
 
 function base_url()
 {
-	return sprintf( "%s://%s%s",
-		isset( $_SERVER[ 'HTTPS' ] ) && $_SERVER[ 'HTTPS' ] != 'off' ? 'https' : 'http',
-		$_SERVER[ 'SERVER_NAME' ],
-		base_path()
-	);
+    return sprintf(
+        "%s://%s%s",
+        isset($_SERVER[ 'HTTPS' ]) && $_SERVER[ 'HTTPS' ] != 'off' ? 'https' : 'http',
+        $_SERVER[ 'SERVER_NAME' ],
+        base_path()
+    );
 }
 
 /**
@@ -50,14 +45,14 @@ function base_url()
  * @param int    $code         OPTIONAL. Default is 400. The status code to use
  * @param string $http_message OPTIONAL. Default is 'Bad Request'
  */
-function error_response( $message, $code = 400, $http_message = 'Bad Request' )
+function error_response($message, $code = 400, $http_message = 'Bad Request')
 {
-	header( "HTTP/1.1 $code $http_message" );
-	header( "Content-Type: application/json;charset=utf-8" );
-	echo json_encode( [
-		'error' => $message,
-	] );
-	exit;
+    header("HTTP/1.1 $code $http_message");
+    header("Content-Type: application/json;charset=utf-8");
+    echo json_encode([
+        'error' => $message,
+    ]);
+    exit;
 }
 
 /**
@@ -77,60 +72,55 @@ function error_response( $message, $code = 400, $http_message = 'Bad Request' )
  * @return
  *	 The requested Drupal URL path
  */
-function request_path() {
-	static $path;
+function request_path()
+{
+    static $path;
 
-	if (isset($path)) {
-		return $path;
-	}
+    if (isset($path)) {
+        return $path;
+    }
 
-	if (isset($_GET['q']) && is_string($_GET['q'])) {
-		// This is a request with a ?q=foo/bar query string. $_GET['q'] is
-		// overwritten in drupal_path_initialize(), but request_path() is called
-		// very early in the bootstrap process, so the original value is saved in
-		// $path and returned in later calls.
-		$path = $_GET['q'];
-	}
-	elseif ( isset($_SERVER['REQUEST_URI'] ) )
-	{
-		// This request is either a clean URL, or 'index.php', or nonsense.
-		// Extract the path from REQUEST_URI.
-		$request_path = strtok($_SERVER['REQUEST_URI'], '?');
-		$base_path_len = strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '\/'));
-		// Unescape and strip $base_path prefix, leaving q without a leading slash.
-		$path = substr(urldecode($request_path), $base_path_len + 1);
-		// If the path equals the script filename, either because 'index.php' was
-		// explicitly provided in the URL, or because the server added it to
-		// $_SERVER['REQUEST_URI'] even when it wasn't provided in the URL (some
-		// versions of Microsoft IIS do this), the front page should be served.
-		if ($path == basename($_SERVER['PHP_SELF']))
-		{
-			$path = '';
-		}
-	}
-	else
-	{
-		// This is the front page.
-		$path = '';
-	}
+    if (isset($_GET['q']) && is_string($_GET['q'])) {
+        // This is a request with a ?q=foo/bar query string. $_GET['q'] is
+        // overwritten in drupal_path_initialize(), but request_path() is called
+        // very early in the bootstrap process, so the original value is saved in
+        // $path and returned in later calls.
+        $path = $_GET['q'];
+    } elseif (isset($_SERVER['REQUEST_URI'])) {
+        // This request is either a clean URL, or 'index.php', or nonsense.
+        // Extract the path from REQUEST_URI.
+        $request_path = strtok($_SERVER['REQUEST_URI'], '?');
+        $base_path_len = strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '\/'));
+        // Unescape and strip $base_path prefix, leaving q without a leading slash.
+        $path = substr(urldecode($request_path), $base_path_len + 1);
+        // If the path equals the script filename, either because 'index.php' was
+        // explicitly provided in the URL, or because the server added it to
+        // $_SERVER['REQUEST_URI'] even when it wasn't provided in the URL (some
+        // versions of Microsoft IIS do this), the front page should be served.
+        if ($path == basename($_SERVER['PHP_SELF'])) {
+            $path = '';
+        }
+    } else {
+        // This is the front page.
+        $path = '';
+    }
 
-	// Under certain conditions Apache's RewriteRule directive prepends the value
-	// assigned to $_GET['q'] with a slash. Moreover we can always have a trailing
-	// slash in place, hence we need to normalize $_GET['q'].
-	$path = trim($path, '/');
+    // Under certain conditions Apache's RewriteRule directive prepends the value
+    // assigned to $_GET['q'] with a slash. Moreover we can always have a trailing
+    // slash in place, hence we need to normalize $_GET['q'].
+    $path = trim($path, '/');
 
-	return $path;
+    return $path;
 }
 
-function send_json( $data, $die = TRUE )
+function send_json($data, $die = true)
 {
-	header( "Content-Type: application/json; charset=utf-8" );
-	echo json_encode( $data );
+    header("Content-Type: application/json; charset=utf-8");
+    echo json_encode($data);
 
-	if ( $die )
-	{
-		die;
-	}
+    if ($die) {
+        die;
+    }
 }
 
 /**
@@ -144,24 +134,20 @@ function send_json( $data, $die = TRUE )
  */
 function base_path()
 {
-	static $base_path;
+    static $base_path;
 
-	if ( !isset( $base_path ) )
-	{
-		// $_SERVER['SCRIPT_NAME'] can, in contrast to $_SERVER['PHP_SELF'], not
-		// be modified by a visitor.
-		if ( $dir = rtrim( dirname( $_SERVER[ 'SCRIPT_NAME' ] ), '\/' ) )
-		{
-			$base_path = $dir;
-			$base_path .= '/';
-		}
-		else
-		{
-			$base_path = '/';
-		}
-	}
+    if (!isset($base_path)) {
+        // $_SERVER['SCRIPT_NAME'] can, in contrast to $_SERVER['PHP_SELF'], not
+        // be modified by a visitor.
+        if ($dir = rtrim(dirname($_SERVER[ 'SCRIPT_NAME' ]), '\/')) {
+            $base_path = $dir;
+            $base_path .= '/';
+        } else {
+            $base_path = '/';
+        }
+    }
 
-	return $base_path;
+    return $base_path;
 }
 
 /**
@@ -171,44 +157,39 @@ function base_path()
  *
  * @param string|array A string containing an HTTP method name, or an array of such strings
  */
-function require_method( $methods )
+function require_method($methods)
 {
-	if ( !is_array( $methods ) )
-	{
-		$methods = [ $methods ];
-	}
+    if (!is_array($methods)) {
+        $methods = [ $methods ];
+    }
 
-	$methods = array_map( 'strtoupper', $methods );
+    $methods = array_map('strtoupper', $methods);
 
-	if ( in_array( $_SERVER[ 'REQUEST_METHOD' ], $methods ) )
-	{
-		return;
-	}
-	else
-	{
-		$method_list = implode( ', ', $methods );
-		$headers = [
-			'HTTP/1.1 405 Not allowed',
-			"Allow: $method_list",
-		];
-		throw new HttpException( "Method '$_SERVER[REQUEST_METHOD]' not allowed. "
-			. "Allowed methods: $method_list", $headers );
-	}
+    if (in_array($_SERVER[ 'REQUEST_METHOD' ], $methods)) {
+        return;
+    } else {
+        $method_list = implode(', ', $methods);
+        $headers = [
+            'HTTP/1.1 405 Not allowed',
+            "Allow: $method_list",
+        ];
+        throw new HttpException("Method '$_SERVER[REQUEST_METHOD]' not allowed. "
+            . "Allowed methods: $method_list", $headers);
+    }
 }
 
 /**
  * @param string $str The content of a cookie header
  * @return array
  */
-function parse_cookie_str( $str )
+function parse_cookie_str($str)
 {
-	$cookies = [];
-	foreach ( explode( '; ', $str ) as $raw_cookie )
-	{
-		preg_match( '/^(?P<key>.*?)=(?P<value>.*?)$/i', trim( $raw_cookie ), $matches );
-		$cookies[ trim( $matches[ 'key' ] ) ]  = urldecode( $matches[ 'value' ] );
-	}
-	return $cookies;
+    $cookies = [];
+    foreach (explode('; ', $str) as $raw_cookie) {
+        preg_match('/^(?P<key>.*?)=(?P<value>.*?)$/i', trim($raw_cookie), $matches);
+        $cookies[ trim($matches[ 'key' ]) ]  = urldecode($matches[ 'value' ]);
+    }
+    return $cookies;
 }
 
 /**
@@ -216,11 +197,10 @@ function parse_cookie_str( $str )
  */
 function get_user_ip()
 {
-	static $ip;
-	if ( $ip === NULL )
-	{
-		$all_headers = getallheaders();
-		$ip = array_get( $all_headers, 'X-Forwarded-For', $_SERVER[ 'REMOTE_ADDR' ] );
-	}
-	return $ip;
+    static $ip;
+    if ($ip === null) {
+        $all_headers = getallheaders();
+        $ip = array_get($all_headers, 'X-Forwarded-For', $_SERVER[ 'REMOTE_ADDR' ]);
+    }
+    return $ip;
 }

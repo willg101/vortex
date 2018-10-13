@@ -3,8 +3,8 @@
 use Dpoh\DataStorage;
 use Dpoh\RequestHandlers;
 
-define( 'SETTINGS_FILE',    'settings-global.ini' );
-define( 'MODULES_PATH',     'modules_enabled' );
+define('SETTINGS_FILE', 'settings-global.ini');
+define('MODULES_PATH', 'modules_enabled');
 
 require_once 'DataStorage.class.php';
 require_once 'RequestHandlers.class.php';
@@ -32,59 +32,54 @@ require_once 'RequestHandlers.class.php';
  */
 function load_all_modules()
 {
-	$standard_dirs  = [
-		'js'      => 'js',
-		'hbs'     => 'hbs',
-		'css'     => 'css',
-		'less'    => 'less',
-		'tpl.php' => 'templates',
-		'php'     => 'classes',
-	];
-	$standard_files        = [
-		'hook_implementations' => 'hooks.php',
-		'ajax_api_script'      => 'ajax-api.php',          // TODO: Don't need this
-		'page_template'        => 'page-template.tpl.php', // TODO: Don't need this
-	];
-	$default_settings = [
-		'external_js'  => [],
-		'external_css' => [],
-	];
+    $standard_dirs  = [
+        'js'      => 'js',
+        'hbs'     => 'hbs',
+        'css'     => 'css',
+        'less'    => 'less',
+        'tpl.php' => 'templates',
+        'php'     => 'classes',
+    ];
+    $standard_files        = [
+        'hook_implementations' => 'hooks.php',
+        'ajax_api_script'      => 'ajax-api.php',          // TODO: Don't need this
+        'page_template'        => 'page-template.tpl.php', // TODO: Don't need this
+    ];
+    $default_settings = [
+        'external_js'  => [],
+        'external_css' => [],
+    ];
 
-	$mod_dir_contents = glob( MODULES_PATH . '/*' );
-	$modules          = [];
+    $mod_dir_contents = glob(MODULES_PATH . '/*');
+    $modules          = [];
 
-	foreach ( $mod_dir_contents as $item )
-	{
-		$mod_name = basename( $item );
-		if ( is_dir( $item ) )
-		{
-			$modules[ $mod_name ] = [];
+    foreach ($mod_dir_contents as $item) {
+        $mod_name = basename($item);
+        if (is_dir($item)) {
+            $modules[ $mod_name ] = [];
 
-			foreach ( $standard_dirs as $extension => $dir )
-			{
-				$modules[ $mod_name ][ $dir ] = [];
-				if ( file_exists( "$item/$dir" ) )
-				{
-					$modules[ $mod_name ][ $dir ] = recursive_file_scan( $extension, "$item/$dir" );
-				}
-			}
+            foreach ($standard_dirs as $extension => $dir) {
+                $modules[ $mod_name ][ $dir ] = [];
+                if (file_exists("$item/$dir")) {
+                    $modules[ $mod_name ][ $dir ] = recursive_file_scan($extension, "$item/$dir");
+                }
+            }
 
-			foreach ( $standard_files as $key => $filename )
-			{
-				$modules[ $mod_name ][ $key ] = file_exists( "$item/$filename" )
-					? "$item/$filename"
-					: FALSE;
-			}
+            foreach ($standard_files as $key => $filename) {
+                $modules[ $mod_name ][ $key ] = file_exists("$item/$filename")
+                    ? "$item/$filename"
+                    : false;
+            }
 
-			$potential_settings_file = "$item/settings.ini";
-			$settings = file_exists( $potential_settings_file )
-				? parse_ini_file( $potential_settings_file )
-				: [];
-			$modules[ $mod_name ][ 'settings' ] = array_merge( $default_settings, $settings );
-		}
-	}
+            $potential_settings_file = "$item/settings.ini";
+            $settings = file_exists($potential_settings_file)
+                ? parse_ini_file($potential_settings_file)
+                : [];
+            $modules[ $mod_name ][ 'settings' ] = array_merge($default_settings, $settings);
+        }
+    }
 
-	return $modules;
+    return $modules;
 }
 
 /**
@@ -98,18 +93,17 @@ function load_all_modules()
  *	If $key is given, this acts as an alias to $modules_model->get(); otherwise this returns
  *	$modules_models
  */
-function modules( $key = NULL, $default_val = NULL )
+function modules($key = null, $default_val = null)
 {
-	// Lazy load the modules model if necessary
-	static $modules_model;
-	if ( $modules_model === NULL )
-	{
-		$modules_model = new DataStorage( 'modules', load_all_modules() );
-	}
+    // Lazy load the modules model if necessary
+    static $modules_model;
+    if ($modules_model === null) {
+        $modules_model = new DataStorage('modules', load_all_modules());
+    }
 
-	return $key !== NULL
-		? $modules_model->get( $key, $default_val )
-		: $modules_model;
+    return $key !== null
+        ? $modules_model->get($key, $default_val)
+        : $modules_model;
 }
 
 /**
@@ -123,43 +117,40 @@ function modules( $key = NULL, $default_val = NULL )
  *	If $key is given, this acts as an alias to $settings_model->get(); otherwise this returns
  *	$settings_model
  */
-function settings( $key = NULL, $default_val = NULL )
+function settings($key = null, $default_val = null)
 {
-	// Lazy load the global setting model if necessary
-	static $settings_model;
-	if ( $settings_model === NULL )
-	{
-		if ( !is_readable( SETTINGS_FILE ) )
-		{
-			$uid = posix_getuid();
-			$info = $uid ? posix_getpwuid( $uid ) : [];
-			$user_name = array_get( $info, 'name' );
-			$user_name = $user_name ? "the user '$user_name'" : 'the current user';
-			throw new FatalConfigError( 'The global settings file (' . SETTINGS_FILE . ') does '
-				. "not exist or cannot be read by $user_name." );
-		}
-		$settings = parse_ini_file( SETTINGS_FILE ) ?: [];
-		$default_settings = [
-			'allowed_directories' => [],
-			'tree_root' => '/dev/null',
-			'less_variables' => [
-				'defaults' =>  "~'" . DPOH_ROOT . "/less/defaults'",
-			],
-		];
+    // Lazy load the global setting model if necessary
+    static $settings_model;
+    if ($settings_model === null) {
+        if (!is_readable(SETTINGS_FILE)) {
+            $uid = posix_getuid();
+            $info = $uid ? posix_getpwuid($uid) : [];
+            $user_name = array_get($info, 'name');
+            $user_name = $user_name ? "the user '$user_name'" : 'the current user';
+            throw new FatalConfigError('The global settings file (' . SETTINGS_FILE . ') does '
+                . "not exist or cannot be read by $user_name.");
+        }
+        $settings = parse_ini_file(SETTINGS_FILE) ?: [];
+        $default_settings = [
+            'allowed_directories' => [],
+            'tree_root' => '/dev/null',
+            'less_variables' => [
+                'defaults' =>  "~'" . DPOH_ROOT . "/less/defaults'",
+            ],
+        ];
 
-		$settings = array_merge( $default_settings, $settings );
-		$settings[ 'tree_root' ] = realpath( $settings[ 'tree_root' ] );
-		foreach ( $settings[ 'allowed_directories' ] as &$dir )
-		{
-			$dir = realpath( $dir );
-		}
+        $settings = array_merge($default_settings, $settings);
+        $settings[ 'tree_root' ] = realpath($settings[ 'tree_root' ]);
+        foreach ($settings[ 'allowed_directories' ] as &$dir) {
+            $dir = realpath($dir);
+        }
 
-		$settings_model = new DataStorage( 'global_settings', $settings );
-	}
+        $settings_model = new DataStorage('global_settings', $settings);
+    }
 
-	return $key !== NULL
-		? $settings_model->get( $key, $default_val )
-		: $settings_model;
+    return $key !== null
+        ? $settings_model->get($key, $default_val)
+        : $settings_model;
 }
 
 /**
@@ -167,12 +158,11 @@ function settings( $key = NULL, $default_val = NULL )
  */
 function request_handlers()
 {
-	static $model;
+    static $model;
 
-	if ( $model === NULL )
-	{
-		$model = new RequestHandlers;
-	}
+    if ($model === null) {
+        $model = new RequestHandlers;
+    }
 
-	return $model;
+    return $model;
 }

@@ -25,35 +25,36 @@ require_once 'includes/templates.php';
 
 class SocketServerRunCommand extends Command
 {
-	protected function configure()
-	{
-		$this
-			->setName( 'socket-server:run' )
-			->setDescription( 'Run the socket server' )
-			->setHelp( 'This should not be started directly from the command line' )
-			->setHidden( TRUE );
-	}
+    protected function configure()
+    {
+        $this
+            ->setName('socket-server:run')
+            ->setDescription('Run the socket server')
+            ->setHelp('This should not be started directly from the command line')
+            ->setHidden(true);
+    }
 
-	protected function execute( InputInterface $input, OutputInterface $output )
-	{
-		$bridge = new ConnectionBridge;
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $bridge = new ConnectionBridge;
 
-		logger()->info( 'Creating socket servers' );
+        logger()->info('Creating socket servers');
 
-		$loop = EventLoopFactory::create();
-		$dbg  = new SocketServer( '0.0.0.0:' . settings( 'socket_server.de_port' ), $loop );
-		$ws   = new SocketServer( '0.0.0.0:' . settings( 'socket_server.ws_port' ), $loop );
+        $loop = EventLoopFactory::create();
+        $dbg  = new SocketServer('0.0.0.0:' . settings('socket_server.de_port'), $loop);
+        $ws   = new SocketServer('0.0.0.0:' . settings('socket_server.ws_port'), $loop);
 
-		$wsStack = new HttpServer(
-			new WsServer(
-				new WsApp( $bridge )
-		) );
+        $wsStack = new HttpServer(
+            new WsServer(
+                new WsApp($bridge)
+        )
+        );
 
-		$DbgApp = new IoServer( new DbgpApp( $bridge ), $dbg, $loop );
-		$wsApp  = new IoServer( $wsStack, $ws, $loop );
+        $DbgApp = new IoServer(new DbgpApp($bridge), $dbg, $loop);
+        $wsApp  = new IoServer($wsStack, $ws, $loop);
 
-		logger()->info( 'Entering run loop' );
+        logger()->info('Entering run loop');
 
-		$loop->run();
-	}
+        $loop->run();
+    }
 }

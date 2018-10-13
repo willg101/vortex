@@ -7,12 +7,12 @@
 		
 		<?php echo build_css_requirements() ?>
 		
-		<?php $errs = []; echo build_less_requirements( $errs ) ?>
+		<?php $errs = []; echo build_less_requirements($errs) ?>
 	</head>
 	<body id="login_page">
-		<?php if ( $errs ): ?>
+		<?php if ($errs): ?>
 		<pre>Less Errors:
-<?php var_export( $errs ) ?></pre>
+<?php var_export($errs) ?></pre>
 		<?php endif ?>
 		<div class="css-table">
 			<div class="css-row">
