@@ -175,7 +175,8 @@ $( document ).on( 'dblclick.jstree', '#context', async function( e )
 	} );
 	var currentVal = $('<div>').text( (e.parsed[ 0 ] || {}).value || '' ).html();
 	vTheme.showModal( 'Update Value',
-		render( 'debugger.change_variable_value', { identifier, stackDepth, cid, size } ) );
+		render( 'debugger.change_variable_value', { identifier, stackDepth, cid, size,
+			current_val : currentVal } ) );
 	$( '.value-input' ).focus();
 	document.execCommand( 'selectAll', false, null );
 } );
