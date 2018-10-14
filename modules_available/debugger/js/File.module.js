@@ -6,10 +6,6 @@ export default { basename,
   convertFromCodebaseRelativePath,
   isCodebaseRelative }
 
-var $ = jQuery
-
-var File = {}
-
 const CODEBASE_RELATIVE_PATH_ID_SEPARATOR = '::'
 
 function normalize (filename) {

@@ -120,8 +120,7 @@ Window.prototype.minimize = function (enableOrDisable, onFinish) {
       }).addClass('minimize-blur')
       this.addMinimizedIcon()
     }
-  } else if (this.state == 'minimized') // Otherwise, if we should un-minimize (and are minimized)
-  {
+  } else if (this.state == 'minimized') { // Otherwise, if we should un-minimize (and are minimized)
     this.state = 'normal'
     var newCss = { display: '' }
     newCss[ this.owner.direction == 'vertical' ? 'height' : 'width' ] = 0
@@ -202,8 +201,6 @@ Window.prototype.maximize = function (enableOrDisable, onFinish) {
       return
     }
   }
-  var that = this
-
   // If we should maximize...
   if (enableOrDisable == 'enable') {
     // ..and we are not currently maximized
@@ -243,8 +240,7 @@ Window.prototype.maximize = function (enableOrDisable, onFinish) {
 
       this.save()
     }
-  } else if (this.state == 'maximized') // Otherwise, if we should un-maximize (and are maximized)
-  {
+  } else if (this.state == 'maximized') { // Otherwise, if we should un-maximize (and are maximized)
     publish('window-unmaximized', { window: this })
     this.element.removeClass('maximized blurable')
     this.element.position({

@@ -1,5 +1,4 @@
 import Persistor from './Persistor.module.js'
-import Debugger from './Debugger.module.js'
 import LanguageAbstractor from './LanguageAbstractor.module.js'
 
 var $ = jQuery
@@ -111,11 +110,11 @@ async function evalWatchedExpression (expression, output) {
     })
     $(output).html('').vtree(result.return_value)
   } else if (result.message) {
-    var message = $('<i class="fa fa-exclamation-triangle"></i>').attr('title', result.message)
+    message = $('<i class="fa fa-exclamation-triangle"></i>').attr('title', result.message)
     $(output).html(message)
     notifyUserOfWatchWarning()
   } else {
-    var message = $('<i class="fa fa-exclamation-triangle"></i>')
+    message = $('<i class="fa fa-exclamation-triangle"></i>')
       .attr('title', 'An empty response was received')
     $(output).html(message)
   }

@@ -1,5 +1,3 @@
-var $ = jQuery
-
 var requiredMethods = [
   'evalCommand',
   'getBytesOfMemoryUsed',

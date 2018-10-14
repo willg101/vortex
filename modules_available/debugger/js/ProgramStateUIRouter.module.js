@@ -1,4 +1,3 @@
-import File from './File.module.js'
 import Debugger from './Debugger.module.js'
 import ProgramState from './ProgramState.module.js'
 export default { setStackPosition, setFile, getStackPosition, getFile, refreshState }
@@ -67,7 +66,7 @@ function setStackPosition (pos) {
   }
 
   var posAsInt = parseInt(pos)
-  var stackDepth = mostRecentState && mostRecentState.stack.depth || 0
+  var stackDepth = ( mostRecentState && mostRecentState.stack.depth ) || 0
   if (posAsInt < 0 || posAsInt != Number(pos) || posAsInt > stackDepth) {
     throw new Error(`Illegal stack position: '${pos}' (expected an integer between 0 and` +
       ` ${stackDepth})`)

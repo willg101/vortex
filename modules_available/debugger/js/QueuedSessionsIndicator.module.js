@@ -25,7 +25,7 @@ subscribe('session-status-changed', function () {
 async function getCurrentCodebase () {
   for (let i in knownSessions) {
     if (knownSessions[ i ].active) {
-      return await LanguageAbstractor.getCodebaseRoot(knownSessions[ i ].file)
+      return LanguageAbstractor.getCodebaseRoot(knownSessions[ i ].file)
     }
   }
   return null

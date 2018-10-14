@@ -147,13 +147,13 @@ $(document).on('dblclick.jstree', '#context', async function (e) {
   var cid = li.attr('data-cid')
   var size = li.attr('data-size')
 
-  var e = await Debugger.command('property_get', {
+  var result = await Debugger.command('property_get', {
     name: identifier,
     stack_depth: stackDepth,
     context: cid,
     max_data: size
   })
-  var currentVal = $('<div>').text((e.parsed[ 0 ] || {}).value || '').html()
+  var currentVal = $('<div>').text((result.parsed[ 0 ] || {}).value || '').html()
   vTheme.showModal('Update Value',
     render('debugger.change_variable_value', { identifier,
       stackDepth,

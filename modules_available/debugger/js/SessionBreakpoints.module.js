@@ -164,7 +164,7 @@ class SessionBreakpoints {
   }
 
   get (file, line) {
-    return this.allBreakpoints[ file ] && this.allBreakpoints[ file ][ line ] || null
+    return ( this.allBreakpoints[ file ] && this.allBreakpoints[ file ][ line ] ) || null
   }
 }
 

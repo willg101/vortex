@@ -117,10 +117,9 @@ Parser.getContainingExpression = function (it) {
       pos.row <= candidateExpr.range.end.row &&
       pos.column <= candidateExpr.range.end.column) {
       return candidateExpr
-    }
-    // Otherwise, continue walking backwards. This covers cases where, e.g., `$bar` is
-    // hovered in the expression $biz[ $foo ][ $bar ].
-    else {
+    } else {
+      // Otherwise, continue walking backwards. This covers cases where, e.g., `$bar` is
+      // hovered in the expression $biz[ $foo ][ $bar ].
       it.stepBackward()
       token = it.getCurrentToken()
     }
@@ -180,7 +179,6 @@ Parser.prototype.parse = function () {
     restart: false
   }
   var sequence = []
-  var current
   var action
 
   for (var step = 0; !step || step < sequence.length; step++) {
@@ -312,15 +310,6 @@ subscribe('provide-tests', function () {
         expect(result.range.end.row).toBe(expectedRange[ 2 ])
         expect(result.range.end.column).toBe(expectedRange[ 3 ])
       }
-      function verifyResult (iter, expectedExpr, expectedRange) {
-        var result = Parser.parse(iter)
-        expect(!!result).toBe(true)
-        expect(result.expr).toBe(expectedExpr)
-        expect(result.range.start.row).toBe(expectedRange[ 0 ])
-        expect(result.range.start.column).toBe(expectedRange[ 1 ])
-        expect(result.range.end.row).toBe(expectedRange[ 2 ])
-        expect(result.range.end.column).toBe(expectedRange[ 3 ])
-      }
 
       var emptyIter = new MockTokenIterator([])
       var trivialIter = new MockTokenIterator([
@@ -412,30 +401,6 @@ subscribe('provide-tests', function () {
       verifyResult(objMultilineIter, '$hello->foo->bar', [ 1, 1, 3, 6 ])
       verifyResult(objVariableIter, '$hello->$foo->bar', [ 1, 1, 3, 6 ])
       verifyResult(complexIter, '$world->buzz[$_GET]->bar', [ 1, 1, 3, 6 ])
-    })
-
-    it('getContainingExpression', function () {
-      var noExpr = new MockTokenIterator([
-        { row: 1, col: 1, value: '"fizz"', type: 'string' }
-      ])
-      var simpleExpr = new MockTokenIterator([
-        { row: 1, col: 1, value: '$fizz', type: 'variable' }
-      ])
-      expect(Parser.getContainingExpression(noExpr)).toBe(false)
-
-      var nestestIter = new MockTokenIterator([
-        { row: 1, col: 1, value: '$fizz', type: 'variable' },
-        { row: 1, col: 6, value: '[', type: 'paren.lparen' },
-        { row: 1, col: 7, value: '$foo', type: 'variable' },
-        { row: 2, col: 5, value: '[', type: 'paren.lparen' },
-        { row: 2, col: 6, value: '"nested"', type: 'string' },
-        { row: 2, col: 10, value: ']', type: 'paren.rparen' },
-        { row: 1, col: 11, value: ']', type: 'paren.rparen' },
-        { row: 2, col: 1, value: '    ', type: 'text' },
-        { row: 2, col: 5, value: '[', type: 'paren.lparen' },
-        { row: 2, col: 6, value: '"uv"', type: 'string' },
-        { row: 2, col: 10, value: ']', type: 'paren.rparen' }
-      ])
     })
   })
 })

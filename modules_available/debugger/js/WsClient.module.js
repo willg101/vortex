@@ -251,7 +251,7 @@ function processMessage (message) {
 function determineMessageType (jqMessage) {
   var type
   for (var i in typeDeterminers) {
-    type = tyddeterminers[ i ](jqMessage)
+    type = typedeterminers[ i ](jqMessage)
     if (type) {
       return type
     }

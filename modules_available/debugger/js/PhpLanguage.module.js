@@ -182,16 +182,15 @@ class PhpLanguage extends LanguageAbstractor {
   }
 
   startDummyDebugSession () {
-    var resolve = null
-    var reject = null
-    var promise = new Promise((resolvePromise, rejectPromise) => {
-      resolve = resolvePromise
-      reject = rejectPromise
+    var resolvePromise, rejectPromise
+    var promise = new Promise((resolve, reject) => {
+      resolvePromise = resolve
+      rejectPromise  = reject
     })
 
     if (!Debugger.sessionIsActive()) {
       if (!WsClient.isConnected()) {
-        reject('Error: no connection to socket server')
+        rejectPromise('Error: no connection to socket server')
         return promise
       }
 
@@ -205,13 +204,13 @@ class PhpLanguage extends LanguageAbstractor {
       var url = options.url + '?' + $.param(options.params)
       $.get(url)
 
-      function tryProcessing () {
+      var tryProcessing = function () {
         if (!Debugger.sessionIsActive()) {
-          reject('Could not initiate a new session (timed out)')
+          rejectPromise('Could not initiate a new session (timed out)')
         } else {
           resolve()
         }
-      }
+      };
       this.dummySessionTimeout = setTimeout(tryProcessing, DUMMY_SESSION_TIMEOUT_MS)
     }
     return promise

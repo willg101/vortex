@@ -55,8 +55,8 @@ subscribe('vortex-init', function () {
       (e.domEvent.button == 1 || e.domEvent.button == 1 & 2 ||
         e.domEvent.button == 2 || e.domEvent.button == 1 & 3)) {
       e.domEvent.preventDefault()
-      var currentBp = sessionBreakpoints.get(file, line)
-      var expression = currentBp && currentBp.expression || ''
+      var currentBp  = sessionBreakpoints.get(file, line)
+      var expression = ( currentBp && currentBp.expression ) || ''
       vTheme.showModal('Conditional Breakpoint', render('debugger.conditional_bp_modal', {
         line: line,
         file: file,
@@ -347,7 +347,7 @@ async function showFile (filename, line, cb, skipCache, scrollTop, noClearActive
   if (currentFile != filename || skipCache) {
     editor.setValue(text, -1)
     $('#filename').text(File.basename(filename))
-    if (text.match(/^\<\?php \/\* dpoh: ignore \*\//)) {
+    if (text.match(/^<\?php \/\* dpoh: ignore \*\//)) {
       $('#filename').prepend('<span class="fa fa-low-vision"></span> ')
     }
     editor.resize(true)

@@ -69,8 +69,7 @@ $(document).on('click', '#file_finder', function () {
 })
 
 $(document).on('keydown', '#file_finder', function (e) {
-  if (e.which == 9) // tab
-  {
+  if (e.which == 9) { // tab
     e.preventDefault() // Don't let `tab` remove focus from the element
     var currentVal = $(e.target).val()
 
@@ -133,8 +132,7 @@ $(document).on('keydown', '#file_finder', function (e) {
         $('#file_finder').moveCursorToEnd()
       })
     }
-  } else if (e.which == 13) // `Enter` key
-  {
+  } else if (e.which == 13) { // `Enter` key
     e.preventDefault()
     var file = $(e.target).val()
     processGlobOnServer(file, function (items) {

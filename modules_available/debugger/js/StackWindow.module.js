@@ -9,8 +9,7 @@ var $ = jQuery
 subscribe('program-state-ui-refresh-needed', (e) => {
   $('.stack-row.active').removeClass('active')
 
-  if (e.stackPos < 0) // A stack frame is not currently being shown
-  {
+  if (e.stackPos < 0) { // A stack frame is not currently being shown
     return
   }
 

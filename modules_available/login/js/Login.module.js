@@ -131,7 +131,6 @@ function inviteUser (e) {
     return
   }
 
-  var email = $('#invite_user').val()
   $.ajax({
     method: 'post',
     url: makeUrl('api/users/invite/' + $('#invite_user').val()),

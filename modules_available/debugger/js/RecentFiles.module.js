@@ -1,8 +1,6 @@
 import File from './File.module.js'
 export default { push, list }
 
-var $ = jQuery
-
 const MAX_FILES_IN_HISTORY = 10
 const PERSISTENT_STORAGE_KEY = 'vortexRecentFiles'
 

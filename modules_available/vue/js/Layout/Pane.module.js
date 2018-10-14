@@ -58,8 +58,7 @@ function Pane (el, parent) {
   this.children = []
 
   var childPanes = this.element.children(selectors.pane)
-  if (childPanes.length) // Recursively initialize child Panes if applicable
-  {
+  if (childPanes.length) { // Recursively initialize child Panes if applicable
     var that = this
     childPanes.each(function () {
       that.children.push(new Pane($(this), that))
@@ -124,7 +123,6 @@ Pane.prototype.buildPreviewLayout = function (nPreviewWindows) {
 
   var transformer = function (pane) {
     var isLeaf = pane.isLeaf()
-    var isRoot = pane.isRoot()
     var jquery = $('<div class="layout-pane-preview ' + pane.direction + '">')
 
     if (isLeaf) {
@@ -150,7 +148,6 @@ Pane.prototype.initSortable = function () {
     return
   }
 
-  var i = 0
   var layout = this.element
   layout.find(selectors.leaf_pane).each(function () {
     Sortable.create(this, {
@@ -401,7 +398,7 @@ Pane.prototype.attach = function (aWindow) {
   var htmlElementNeedsMove = !this.element.find(aWindow.element).length
 
   if (aWindow.owner) {
-    if (htmlElemensNeedsMove) {
+    if (htmlElementNeedsMove) {
       aWindow.element = aWindow.element.detach()
     }
     var indexToRemove = aWindow.owner.windows.indexOf(aWindow)

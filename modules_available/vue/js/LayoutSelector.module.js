@@ -65,7 +65,7 @@ $(document).on('click', '.next-layout', function () {
     currentIndex = 0
   }
 
-  validateLayoutModal(curreIIndex)
+  validateLayoutModal(currentIndex)
 })
 
 /**

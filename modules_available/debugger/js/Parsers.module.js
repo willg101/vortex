@@ -1,5 +1,5 @@
 class ParserError extends Error {};
-var list = () => responseRarsers
+var list = () => responseParsers
 export default { ParserError, list }
 
 /**
@@ -462,8 +462,8 @@ subscribe('provide-tests', function () {
       expect(output.lineno).toBeUndefined()
 
       // reason & status, no filename or lineno
-      var jqMsg = $('<root status="xxx-status" reason="xxx-reason"></root>')
-      var output = parseContinuationCommand(jqMsg)
+      jqMsg = $('<root status="xxx-status" reason="xxx-reason"></root>')
+      output = parseContinuationCommand(jqMsg)
       expect(output.is_continuation).toBe(true)
       expect(output.status).toBe('xxx-status')
       expect(output.reason).toBe('xxx-reason')
@@ -471,8 +471,8 @@ subscribe('provide-tests', function () {
       expect(output.lineno).toBeUndefined()
 
       // filename & lineno, no reason or status
-      var jqMsg = $('<root><xdebug:message filename="xxx-fn" lineno="xxx-ln"></xdebug:message></response></root>')
-      var output = parseContinuationCommand(jqMsg)
+      jqMsg = $('<root><xdebug:message filename="xxx-fn" lineno="xxx-ln"></xdebug:message></response></root>')
+      output = parseContinuationCommand(jqMsg)
       expect(output.is_continuation).toBe(true)
       expect(output.status).toBeUndefined()
       expect(output.reason).toBeUndefined()
@@ -480,8 +480,8 @@ subscribe('provide-tests', function () {
       expect(output.lineno).toBe('xxx-ln')
 
       // filename & status, no lineno or reason
-      var jqMsg = $('<root status="xxx-status"><xdebug:message filename="xxx-fn" ></xdebug:message></response></root>')
-      var output = parseContinuationCommand(jqMsg)
+      jqMsg = $('<root status="xxx-status"><xdebug:message filename="xxx-fn" ></xdebug:message></response></root>')
+      output = parseContinuationCommand(jqMsg)
       expect(output.is_continuation).toBe(true)
       expect(output.status).toBe('xxx-status')
       expect(output.reason).toBeUndefined()
@@ -489,8 +489,8 @@ subscribe('provide-tests', function () {
       expect(output.lineno).toBeUndefined()
 
       // lineno and reason, no filename or status
-      var jqMsg = $('<root reason="xxx-reason"><xdebug:message lineno="xxx-ln" ></xdebug:message></response></root>')
-      var output = parseContinuationCommand(jqMsg)
+      jqMsg = $('<root reason="xxx-reason"><xdebug:message lineno="xxx-ln" ></xdebug:message></response></root>')
+      output = parseContinuationCommand(jqMsg)
       expect(output.is_continuation).toBe(true)
       expect(output.status).toBeUndefined()
       expect(output.reason).toBe('xxx-reason')

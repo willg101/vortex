@@ -67,7 +67,7 @@ function translateArgs (argsObject) {
   var out = {}
   for (var niceName in argsObject) {
     if (typeof commandArgsConversion[ niceName ] === 'string') {
-      if (args_object[ niceName ] || argsObject[ niceName ] === 0) {
+      if (argsObject[ niceName ] || argsObject[ niceName ] === 0) {
         out[ commandArgsConversion[ niceName ] ] = argsObject[ niceName ]
       }
     } else {
@@ -95,7 +95,7 @@ function command (name /*, ... */) {
 
   var data = ''
 
-  var callback = undefined
+  var callback
 
   var maxArgs = Math.min(4, arguments.length)
 
@@ -167,7 +167,7 @@ function processMessage (type, message, processed) {
   // Wrap the XML message in a jQuery in order to examinine it more easily, and then discard
   // info we don't need, such as the XML declaration
   var jqResponseElement = null
-  var jqMessage = message.each(function (i, el) {
+  message.each(function (i, el) {
     el = $(el)
     if (el.is('[command],init,[status]')) {
       jqResponseElement = el

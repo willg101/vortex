@@ -140,23 +140,23 @@ function escapeDoubleQuotes (str) {
  * @code
  *  function performAnAction()
  *  {
- *	  console.log( 'Performed an action' );
+ *    console.log( 'Performed an action' );
  *  }
  *
  *  function prepare( on_finish )
  *  {
- *	  setTimeout( on_finish, 1000 );
+ *    setTimeout( on_finish, 1000 );
  *  }
  *
  *  function getReady( on_finish )
  *  {
- *	  setTimeout( on_finish, 1500 );
+ *    setTimeout( on_finish, 1500 );
  *  }
  *
  *  subscribe( 'before-perform-action', function( e )
  *  {
- *	  prepare( e.register() );
- *	  getReady( e.register() );
+ *    prepare( e.register() );
+ *    getReady( e.register() );
  *  } );
  *
  *  whenReadyTo( 'perform-action' ).then( performAnAction );
