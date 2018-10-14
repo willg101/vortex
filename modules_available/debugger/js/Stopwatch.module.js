@@ -1,13 +1,13 @@
 /**
  * @file
- *	A lightweight "stopwatch" implementation that allows any HTML element to become a "stopwatch"
- *	via $( '.my-class' ).stopwatch( 'start' );
+ *  A lightweight "stopwatch" implementation that allows any HTML element to become a "stopwatch"
+ *  via $( '.my-class' ).stopwatch( 'start' );
  */
 var timestampAttr = 'data-stopwatch-start'
 
 /**
  * @brief
- *	Update the time elapsed on all active stopwatches
+ *  Update the time elapsed on all active stopwatches
  */
 function refreshAll () {
   $('[' + timestampAttr + ']').each(function () {
@@ -17,7 +17,7 @@ function refreshAll () {
 
 /**
  * @brief
- *	Update the time elapsed one active stopwatch
+ *  Update the time elapsed one active stopwatch
  *
  * @param jQuery jq
  */
@@ -35,7 +35,7 @@ function refreshOne (jq) {
 
 /**
  * @brief
- *	Convert a number to a string; add a leading 0 to single-digit numbers
+ *  Convert a number to a string; add a leading 0 to single-digit numbers
  *
  * @param number n
  *
@@ -47,7 +47,7 @@ function leadingZeros (n) {
 
 /**
  * @brief
- *	Convert the given number of seconds to a format like hh:mm:ss (e.g., 1:22:33, or 0:22)
+ *  Convert the given number of seconds to a format like hh:mm:ss (e.g., 1:22:33, or 0:22)
  *
  * @param number n
  *
@@ -70,7 +70,7 @@ function formatTime (seconds) {
 
 /**
  * @brief
- *	Start the interva for refreshing all stopwatches periodically
+ *  Start the interva for refreshing all stopwatches periodically
  */
 function init () {
   setInterval(refreshAll, 100)
@@ -94,7 +94,7 @@ subscribe('provide-tests', function () {
 
 /**
  * @brief
- *	jQuery convenience plugin
+ *  jQuery convenience plugin
  *
  * @code
  * $( '.my-class' ).stopwatch( 'start' );

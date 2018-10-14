@@ -47,7 +47,7 @@ function renderLayoutSelector (i, layoutOnly) {
 
 /**
  * @brief
- *	Updates the modal to display to correct layout preview
+ *  Updates the modal to display to correct layout preview
  *
  * @param int i @c renderLayoutSelector()'s documentation for this parameter
  */
@@ -57,7 +57,7 @@ function validateLayoutModal (i) {
 
 /**
  * @brief
- *	Handles click events on the "next layout" button in the settings modal
+ *  Handles click events on the "next layout" button in the settings modal
  */
 $(document).on('click', '.next-layout', function () {
   var currentIndex = Number($('.layout-preview-container').attr('data-index')) + 1
@@ -70,7 +70,7 @@ $(document).on('click', '.next-layout', function () {
 
 /**
  * @brief
- *	Handles click events on the "previous layout" button in the settings modal
+ *  Handles click events on the "previous layout" button in the settings modal
  */
 $(document).on('click', '.prev-layout', function () {
   var currentIndex = Number($('.layout-preview-container').attr('data-index')) - 1
@@ -82,7 +82,7 @@ $(document).on('click', '.prev-layout', function () {
 
 /**
  * @brief
- *	Adds the "Page Layout" to the list of settings
+ *  Adds the "Page Layout" to the list of settings
  */
 subscribe('gather-settings-pages', function (e) {
   e.pages.push({
@@ -94,7 +94,7 @@ subscribe('gather-settings-pages', function (e) {
 
 /**
  * @brief
- *	Adds the layout selector to the Page Layout settings page
+ *  Adds the layout selector to the Page Layout settings page
  */
 subscribe('gather-settings-page-widgets', function (e) {
   if (e.page == 'page_layout') {
@@ -104,8 +104,8 @@ subscribe('gather-settings-page-widgets', function (e) {
 
 /**
  * @brief
- *	Saves the currently selected layout to local storage when the settings "save" button is
- *	clicked
+ *  Saves the currently selected layout to local storage when the settings "save" button is
+ *  clicked
  */
 subscribe('save-settings', function () {
   if (selectedLayout !== false && localStorage.getItem('dpoh_selected_layout') != selectedLayout) {
@@ -116,8 +116,8 @@ subscribe('save-settings', function () {
 
 /**
  * @brief
- *	Caches the currently selected layout when the user switches away from the "Page Layout"
- *	settings page
+ *  Caches the currently selected layout when the user switches away from the "Page Layout"
+ *  settings page
  */
 subscribe('cache-settings', function (e) {
   if (e.page == 'page_layout') {
@@ -127,7 +127,7 @@ subscribe('cache-settings', function (e) {
 
 /**
  * @brief
- *	Clears selectedLayout
+ *  Clears selectedLayout
  */
 subscribe('clear-cached-settings', function () {
   selectedLayout = false
@@ -135,7 +135,7 @@ subscribe('clear-cached-settings', function () {
 
 /**
  * @brief
- *	Refreshes the page after a new layout has been chosen
+ *  Refreshes the page after a new layout has been chosen
  */
 subscribe('settings-saved', function () {
   if (restartNeeded) {

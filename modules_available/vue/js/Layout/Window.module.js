@@ -17,7 +17,7 @@ var selectors = {
 
 /**
  * @brief
- *	Constructor for a Window
+ *  Constructor for a Window
  *
  * @param HTMLElement|jQuery
  */
@@ -69,7 +69,7 @@ Object.defineProperty(Window.prototype, 'size', {
 
 /*
  * @brief
- *	Put the window into a minimized state, or take it out of a minimized state
+ *  Put the window into a minimized state, or take it out of a minimized state
  *
  * @param string   enableOrDisable OPTIONAL. When omitted, the current minimize state is
  *                                 toggled. Must be either 'enable' or 'disable'
@@ -170,7 +170,7 @@ Window.prototype.onOtherWindowUnmaximized = function (e) {
 }
 /**
  * @brief
- *	Put the window into a maximized state, or take it out of a maximized state
+ *  Put the window into a maximized state, or take it out of a maximized state
  *
  * @param string   enableOrDisable OPTIONAL. When omitted, the current maximize state is
  *                                 toggled. Must be either 'enable' or 'disable'
@@ -279,7 +279,7 @@ Window.prototype.maximize = function (enableOrDisable, onFinish) {
 
 /**
  * @brief
- *	Initializes all windows on the page
+ *  Initializes all windows on the page
  */
 Window.boot = function () {
   Window.all_windows = []

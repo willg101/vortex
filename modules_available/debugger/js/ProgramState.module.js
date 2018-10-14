@@ -7,7 +7,7 @@ var $ = jQuery
 
 /**
  * @brief
- *	A single frame within the stack
+ *  A single frame within the stack
  */
 class StackFrame {
   /**
@@ -63,7 +63,7 @@ class StackFrame {
 
 /**
  * @brief
- *	A series of a stack frames received from the DE
+ *  A series of a stack frames received from the DE
  */
 class Stack {
   /**

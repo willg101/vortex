@@ -11,7 +11,7 @@ var allowReconnect = true
 
 /**
  * @brief
- *	Document.ready handler
+ *  Document.ready handler
  */
 $(() => {
   if (!Dpoh.settings.js_test_mode) {

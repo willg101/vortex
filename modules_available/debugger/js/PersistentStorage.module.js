@@ -36,8 +36,8 @@ function get (key) {
  * @param mixed  value
  *
  * @return mixed
- *	The item actually stored; typically `value`, but may be altered when the
- *	'set-persistent-data' is triggered
+ *  The item actually stored; typically `value`, but may be altered when the
+ *  'set-persistent-data' is triggered
  */
 function set (key, value) {
   var lsKey = reduceKeyCollisionProbability(key)
@@ -60,8 +60,8 @@ function set (key, value) {
  * @param string key
  *
  * @return bool
- *	Indicates if the deletion occurred (true) or was prevented when the 'delete-persistent-data'
- *	event was triggered (false)
+ *  Indicates if the deletion occurred (true) or was prevented when the 'delete-persistent-data'
+ *  event was triggered (false)
  */
 function del (key) {
   var lsKey = reduceKeyCollisionProbability(key)

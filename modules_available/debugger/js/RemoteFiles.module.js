@@ -10,7 +10,7 @@ var filecache = {}
 
 /**
  * @brief
- *	Gets the content of a file or directory directly from the server (i.e., ignores the cache)
+ *  Gets the content of a file or directory directly from the server (i.e., ignores the cache)
  *
  * @param string   path The absolute path of the file
  * @param function cb   Handles the response from the server; passed up to two arguments:
@@ -67,7 +67,7 @@ async function fetchFromSever (path, cb) {
 
 /**
  * @brief
- *	Generate the URL to request a file's contents
+ *  Generate the URL to request a file's contents
  *
  * @param string path    The absolute path of the file to load
  * @param object filters An object containing GET params to include with the request
@@ -81,7 +81,7 @@ function apiPath (path, filters) {
 
 /**
  * @brief
- *	Gets the contents of a file or directory
+ *  Gets the contents of a file or directory
  *
  * @param string   path       @c fetchFromSever()
  * @param bool     skipCache  OPTIONAL. Default is FALSE. When true, ignores the cache and
@@ -99,8 +99,8 @@ function get (path, skipCache) {
 
 /**
  * @brief
- *	Gets a list of the most recently modified files within the 'watched' directories on the
- *	server
+ *  Gets a list of the most recently modified files within the 'watched' directories on the
+ *  server
  *
  * @param function cb   Handles the response from the server; passed two arguments:
  *                       - A boolean indicating if the response indicates success
@@ -117,7 +117,7 @@ function listRecentlyModified (cb) {
 
 /**
  * @brief
- *	Clears part or all of the file cache
+ *  Clears part or all of the file cache
  *
  * @param string file OPTIONAL. When given, removes the cached value for the given file;
  *                              when omitted, the entire cache is cleared.

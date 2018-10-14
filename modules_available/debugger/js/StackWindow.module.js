@@ -4,7 +4,7 @@ var $ = jQuery
 
 /**
  * @brief
- *	Update the stack window contents as needed
+ *  Update the stack window contents as needed
  */
 subscribe('program-state-ui-refresh-needed', (e) => {
   $('.stack-row.active').removeClass('active')
@@ -23,7 +23,7 @@ subscribe('program-state-ui-refresh-needed', (e) => {
 
 /**
  * @brief
- *	Handle click events on the buttons in the stack window
+ *  Handle click events on the buttons in the stack window
  */
 $(document).on('click', '.stack-row', function (e) {
   var stackDepth = $(e.currentTarget).attr('data-stack-depth')

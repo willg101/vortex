@@ -8,7 +8,7 @@ export default { send,
 
 /**
  * @file
- *	Communicate with the socket server
+ *  Communicate with the socket server
  *
  * @note 'Web Socket' is frequently abbreviated in this file as 'WS'
  */
@@ -49,10 +49,10 @@ const NULL_CHAR = String.fromCharCode(0)
 
 /**
  * @brief
- *	Handles the changing of a WS connection status and fires an appropriate event
+ *  Handles the changing of a WS connection status and fires an appropriate event
  *
  * @param string newStatus
- *	One of 'connected', 'disconnected', or 'error'
+ *  One of 'connected', 'disconnected', or 'error'
  */
 function onConnectionStatusChanged (newStatus) {
   // Unless we're now connected, drop the our reference to a now-nonexistent WS
@@ -67,12 +67,12 @@ function onConnectionStatusChanged (newStatus) {
 
 /**
  * @brief
- *	Attempts to open a WS connection
+ *  Attempts to open a WS connection
  *
  * @param object params HTTP GET params to include with the request
  *
  * @return bool
- *	true if the connection was attempted; false if not (a connection already exists)
+ *  true if the connection was attempted; false if not (a connection already exists)
  */
 function openConnection (params) {
   // Allow connections to be aborted by other modules
@@ -102,7 +102,7 @@ function openConnection (params) {
 
 /**
  * @brief
- *	Sends a command to the socket server
+ *  Sends a command to the socket server
  *
  * @param string name The command to send
  * @param mixed  ...  Any 3 of the following:
@@ -162,7 +162,7 @@ function send (command) {
 
 /**
  * @brief
- *	Processes incoming messages from the socket server
+ *  Processes incoming messages from the socket server
  *
  * @param object data
  */
@@ -200,7 +200,7 @@ function onMessageReceived (data) {
 
 /**
  * @brief
- *	Processes incoming messages from the socket server
+ *  Processes incoming messages from the socket server
  */
 function processMessage (message) {
   var jqMessage = $(message)
@@ -241,8 +241,8 @@ function processMessage (message) {
 
 /**
  * @brief
- *	Examines a message in order to determine its type (i.e., whether it indicates that a session
- *	has been initiated, a certain command has been processed, etc.)
+ *  Examines a message in order to determine its type (i.e., whether it indicates that a session
+ *  has been initiated, a certain command has been processed, etc.)
  *
  * @param jQuery jqMessage
  *
@@ -262,12 +262,12 @@ function determineMessageType (jqMessage) {
 
 /**
  * @brief
- *	Adds a function to the list of type determiners
+ *  Adds a function to the list of type determiners
  *
  * @param function fn
- *	A function that receives a jQuery of message from the websocket, and optionally returns
- *	the type of message. The first such callback to return a non-false value determines the
- *	type of the message.
+ *  A function that receives a jQuery of message from the websocket, and optionally returns
+ *  the type of message. The first such callback to return a non-false value determines the
+ *  type of the message.
  */
 function registerTypeDeterminer (fn) {
   if (typeof fn === 'function') {
@@ -279,13 +279,13 @@ function registerTypeDeterminer (fn) {
 
 /**
  * @brief
- *	Adds a function to the list of message processors
+ *  Adds a function to the list of message processors
  *
  * @param function fn
- *	A function that receives three arguments:
- *	 - A string indicating the message type
- *	 - A jQuery of message from the websocket
- *	 - An object in which processed data should be placed
+ *  A function that receives three arguments:
+ *   - A string indicating the message type
+ *   - A jQuery of message from the websocket
+ *   - An object in which processed data should be placed
  */
 function registerMessageProcessor (fn) {
   if (typeof fn === 'function') {

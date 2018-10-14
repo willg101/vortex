@@ -14,7 +14,7 @@ function getCurrentMode () {
 
 /**
  * @brief
- *	Session init handler; determines if the debug session should use autorun
+ *  Session init handler; determines if the debug session should use autorun
  */
 function onSessionInit (e) {
   var mode = getCurrentMode()
@@ -39,7 +39,7 @@ function onSessionInit (e) {
 
 /**
  * @return Array
- *	An Array of plain objects that represent the available autorun modes
+ *  An Array of plain objects that represent the available autorun modes
  */
 function getModes () {
   var currentMode = getCurrentMode()
@@ -69,7 +69,7 @@ function getModes () {
 
 /**
  * @brief
- *	gather-settings-pages handler
+ *  gather-settings-pages handler
  */
 function provideSettingsPage (e) {
   e.pages.push({
@@ -81,7 +81,7 @@ function provideSettingsPage (e) {
 
 /**
  * @brief
- *	gather-settings-page-widgets handler
+ *  gather-settings-page-widgets handler
  */
 function provideSettingsPageWidgets (e) {
   if (e.page == 'autorun') {
@@ -93,7 +93,7 @@ function provideSettingsPageWidgets (e) {
 
 /**
  * @brief
- *	save-settings handler
+ *  save-settings handler
  */
 function saveSettings (e) {
   if (selectedItem && selectedItem != getCurrentMode()) {
@@ -103,7 +103,7 @@ function saveSettings (e) {
 
 /**
  * @brief
- *	cache-settings handler
+ *  cache-settings handler
  */
 function cacheSettings (e) {
   if (e.page == 'autorun') {
@@ -113,7 +113,7 @@ function cacheSettings (e) {
 
 /**
  * @brief
- *	clear-cache-settings handler
+ *  clear-cache-settings handler
  */
 function clearCachedSettings () {
   selectedItem = false
@@ -121,7 +121,7 @@ function clearCachedSettings () {
 
 /**
  * @brief
- *	alter-dummy-session-request handler; adds a GET param to the request to prevent autorun
+ *  alter-dummy-session-request handler; adds a GET param to the request to prevent autorun
  */
 function alterDummySessionRequest (e) {
   e.options.params.VORTEX_NO_AUTORUN = 1

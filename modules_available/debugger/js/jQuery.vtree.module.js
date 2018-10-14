@@ -2,34 +2,34 @@ var $ = jQuery
 
 /**
  * @brief
- *	jQuery plugin to build a jsTree representingthe value of one or more variables
+ *  jQuery plugin to build a jsTree representingthe value of one or more variables
  *
  * Samples Usages:
- *	var data = await Debugger.command( 'property_get' ... );
+ *  var data = await Debugger.command( 'property_get' ... );
  *
- *	# Basic
- *	$( '.my-selector' ).vtree( data.parsed.value )
+ *  # Basic
+ *  $( '.my-selector' ).vtree( data.parsed.value )
  *
- *	# Hide all icons
- *	$( '.my-selector' ).vtree( data.parsed.value, { pickIcon : () => '' } );
+ *  # Hide all icons
+ *  $( '.my-selector' ).vtree( data.parsed.value, { pickIcon : () => '' } );
  *
- *	# Show only bool values
- *	$( '.my-selector' ).vtree( data.parsed.value, { preprocess : prop => return prop.type == 'bool' } );
+ *  # Show only bool values
+ *  $( '.my-selector' ).vtree( data.parsed.value, { preprocess : prop => return prop.type == 'bool' } );
  *
  * Supported options:
- *	- `pickIcon`    : A function that receives the property being added to the tree and returns
- *	                  string containing the CSS icon class
- *	- `preprocess`  : A function that receives three values: a jQuery of an element that $.jstree
- *	                  will be called on, the data for the tree, and the original value passed to the
- *	                  plugin. This function is called once for each element in the jQuery selection,
- *	                  and is called immediately before calling $.jstree(). If this returns `false`,
- *	                  $.jstree is NOT called on the current element (other falsy return values like
- *	                  `undefined` are ignored)
- *	- `postprocess` : A function that receives three values: a jQuery of an element that $.jstree
- *	                  was called on, the data for the tree, and the original value passed to the
- *	                  plugin. This function is called once for each element in the jQuery selection
- *	                  that preprocess() did NOT return `false` for. The return value of this
- *	                  function is ignored.
+ *  - `pickIcon`    : A function that receives the property being added to the tree and returns
+ *                    string containing the CSS icon class
+ *  - `preprocess`  : A function that receives three values: a jQuery of an element that $.jstree
+ *                    will be called on, the data for the tree, and the original value passed to the
+ *                    plugin. This function is called once for each element in the jQuery selection,
+ *                    and is called immediately before calling $.jstree(). If this returns `false`,
+ *                    $.jstree is NOT called on the current element (other falsy return values like
+ *                    `undefined` are ignored)
+ *  - `postprocess` : A function that receives three values: a jQuery of an element that $.jstree
+ *                    was called on, the data for the tree, and the original value passed to the
+ *                    plugin. This function is called once for each element in the jQuery selection
+ *                    that preprocess() did NOT return `false` for. The return value of this
+ *                    function is ignored.
  */
 $.fn.vtree = function (ctx, options) {
   function pickIcon (property) {

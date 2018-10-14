@@ -13,7 +13,7 @@ var currentLine = -1
 
 /**
  * @brief
- *	Relay program state changes to the UI
+ *  Relay program state changes to the UI
  */
 subscribe('program-state-changed', (e) => {
   mostRecentState = e.programState
@@ -31,7 +31,7 @@ subscribe('session-status-changed', function (e) {
 
 /**
  * @brief
- *	Instruct all UI subscribers to refresh their view
+ *  Instruct all UI subscribers to refresh their view
  *
  * @param bool force Force the refresh, even if the current stack frame is unavailable
  */
@@ -59,7 +59,7 @@ function applyPositionFromStackFrame (n) {
 
 /**
  * @brief
- *	Switch to a different frame of the stack
+ *  Switch to a different frame of the stack
  */
 function setStackPosition (pos) {
   if (!Debugger.sessionIsActive()) {

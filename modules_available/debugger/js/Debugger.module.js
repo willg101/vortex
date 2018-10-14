@@ -4,7 +4,7 @@ export default { sessionIsActive, command }
 
 /**
  * @file
- *	Communicate with the debugger engine (DE) over a websocket (WS)
+ *  Communicate with the debugger engine (DE) over a websocket (WS)
  *
  * A working knowledge of https://xdebug.org/docs-dbgp.php may help clarify some of the terminology
  * used in this file
@@ -28,8 +28,8 @@ subscribe('connection-status-changed', function (e) {
 
 /**
  * @brief
- *	Updates the flag for whether or not a session with the DE is currently active. If the call
- *	to this function actually alters the flag, an event is published
+ *  Updates the flag for whether or not a session with the DE is currently active. If the call
+ *  to this function actually alters the flag, an event is published
  *
  * @param bool sessionIsActiveLocal
  * @param bool isNewSession         ignored when `sessionIsActiveLocal` is true
@@ -80,7 +80,7 @@ function translateArgs (argsObject) {
 
 /**
  * @brief
- *	Sends a command to the DE
+ *  Sends a command to the DE
  *
  * @param string name The command to send, get 'context_get', 'eval'
  * @param mixed  ...  Any 3 of the following:
@@ -141,7 +141,7 @@ function sessionIsActive () {
 
 /**
  * @brief
- *	A type determiner for WsClient
+ *  A type determiner for WsClient
  */
 function determineMessageType (message) {
   if (message.is('init')) {
@@ -155,7 +155,7 @@ function determineMessageType (message) {
 
 /**
  * @brief
- *	A message processor for WsClient
+ *  A message processor for WsClient
  */
 function processMessage (type, message, processed) {
   if (!type.match(/^(init$|server_info$|debugger_command:)/)) {

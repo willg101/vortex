@@ -256,7 +256,7 @@ subscribe('program-state-ui-refresh-needed', (e) => {
 
 /**
  * @return string
- *	The full URI of the current file
+ *  The full URI of the current file
  */
 function getCurrentFileShowing () {
   return currentFile
@@ -264,7 +264,7 @@ function getCurrentFileShowing () {
 
 /**
  * @brief
- *	Updates the display of a breakpoint
+ *  Updates the display of a breakpoint
  *
  * @param Breakpoint breakpoint
  */
@@ -303,7 +303,7 @@ function updateBreakpointDisplay (breakpoint) {
 
 /**
  * @brief
- *	Gets a file from the server and displays it
+ *  Gets a file from the server and displays it
  *
  * @param sring    filename             Absolute path of the file
  * @param int      line                 Optional; 1-indexed line number to highlight (indicates

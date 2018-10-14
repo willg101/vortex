@@ -11,11 +11,11 @@ var $ = jQuery
  * Of particular importance, we want to handle cases in which a user is browsing through the
  * current set of stack frames. Consider the following sequence of actions, starting with the user
  * looking at the tree in frame 0:
- *	1. Open the set of Locals
- *	2. Open Locals > $foo
- *	3. Switch to frame 1
- *	4. Open Locals > $bar
- *	5. Switch to frame 0
+ *  1. Open the set of Locals
+ *  2. Open Locals > $foo
+ *  3. Switch to frame 1
+ *  4. Open Locals > $bar
+ *  5. Switch to frame 0
  * In step 3, the 'Locals' node was still intentionally open, despite being a different context and
  * tree. And in step 5, `Locals` and $foo were open again, picking up where the user left off
  * in step 2.
@@ -27,7 +27,7 @@ class TreeState {
 
   /**
    * @brief
-   *	Track the opening of a tree node
+   *  Track the opening of a tree node
    *
    * @param object node The `node` argument passed to an `open_node.jstree` event handler
    */
@@ -43,7 +43,7 @@ class TreeState {
 
   /**
    * @brief
-   *	Track the closing of a tree node
+   *  Track the closing of a tree node
    *
    * @param object node The `node` argument passed to a `clos_node.jstree` event handler
    */
@@ -69,8 +69,8 @@ class TreeState {
    * @param object node The value passed to either close() or open()
    *
    * @return Array
-   *	An array node addresses, with the last element being `node`'s address, and the first
-   *	element being the address of the node's furthest ancestor
+   *  An array node addresses, with the last element being `node`'s address, and the first
+   *  element being the address of the node's furthest ancestor
    */
   tracePath (node) {
     var container = node.instance.get_container()
@@ -86,7 +86,7 @@ class TreeState {
 
   /**
    * @brief
-   *	Restore the state stored in this instance to the given jstree container
+   *  Restore the state stored in this instance to the given jstree container
    *
    * @param jQuery container
    * @param object jstree    OPTIONAL. Only passed to this while recursing
@@ -110,7 +110,7 @@ var treeState = new TreeState()
 
 /**
  * @brief
- *	Update the state of the Scope window as needed
+ *  Update the state of the Scope window as needed
  */
 subscribe('program-state-ui-refresh-needed', async (e) => {
   if (e.stackPos < 0) {
@@ -133,8 +133,8 @@ subscribe('program-state-ui-refresh-needed', async (e) => {
 
 /**
  * @brief
- *	When a writeable node from the context tree is double-clicked, show a modal for updating the
- *	node's value
+ *  When a writeable node from the context tree is double-clicked, show a modal for updating the
+ *  node's value
  */
 $(document).on('dblclick.jstree', '#context', async function (e) {
   var li = $(e.target).closest('li')
@@ -166,7 +166,7 @@ $(document).on('dblclick.jstree', '#context', async function (e) {
 
 /**
  * @brief
- *	Handle the submission for a new variable value
+ *  Handle the submission for a new variable value
  */
 $(document).on('keypress', '.value-input', async function (e) {
   if (e.which == 13 && !e.ctrlKey && !e.shiftKey) {

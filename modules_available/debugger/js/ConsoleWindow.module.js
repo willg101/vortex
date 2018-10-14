@@ -47,7 +47,7 @@ class ConsoleCommandDisplay {
 
   /**
    * @brief
-   *	Append a line of output
+   *  Append a line of output
    *
    * @param string text
    * @param string level @see makeText()
@@ -58,7 +58,7 @@ class ConsoleCommandDisplay {
 
   /**
    * @brief
-   *	Prepend a line of output
+   *  Prepend a line of output
    *
    * @param string text
    * @param string level @see makeText()
@@ -81,7 +81,7 @@ class ConsoleCommandDisplay {
 
 /**
  * @brief
- *	Trigger a state refresh after at least DELALYED_REFRESH_INTERVAL_MS milliseconds
+ *  Trigger a state refresh after at least DELALYED_REFRESH_INTERVAL_MS milliseconds
  *
  * This helps us avoid making the console trigger a bunch of overlapping state refreshes
  */

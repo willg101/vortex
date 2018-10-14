@@ -4,7 +4,7 @@ export default { ParserError, list }
 
 /**
  * @brief
- *	Parses CDATA from within an XML element
+ *  Parses CDATA from within an XML element
  *
  * @param jQuery jqElement
  *
@@ -23,15 +23,15 @@ function parseCdata (jqElement) {
 
 /**
  * @brief
- *	Extracts a list of attributes from a jQuery-wrapped object into a plain object
+ *  Extracts a list of attributes from a jQuery-wrapped object into a plain object
  *
  * @param jQuery jqEl
  * @param Array attrList
- *	An Array of attribute names
+ *  An Array of attribute names
  *
  * @return object
- *	A key for each attribute name from attrList will exist, even if the corresponding value is
- *	undefined
+ *  A key for each attribute name from attrList will exist, even if the corresponding value is
+ *  undefined
  */
 function extractAttrs (jqElement, attrList) {
   if (!jqElement.length) {
@@ -51,7 +51,7 @@ function extractAttrs (jqElement, attrList) {
 var responseParsers = {
   /**
    * @brief
-   *	Parses the response from an 'eval' command
+   *  Parses the response from an 'eval' command
    *
    * @param jQuery jqMessage
    *
@@ -66,7 +66,7 @@ var responseParsers = {
 
   /**
    * @brief
-   *	Parses the response from an 'source' command
+   *  Parses the response from an 'source' command
    *
    * @param jQuery jqMessage
    *
@@ -80,7 +80,7 @@ var responseParsers = {
 
   /**
    * @brief
-   *	Parses the response from a stack_get command
+   *  Parses the response from a stack_get command
    *
    * @param jQuery jqMessage
    *
@@ -97,7 +97,7 @@ var responseParsers = {
 
   /**
    * @brief
-   *	Parses the response from a context_names command
+   *  Parses the response from a context_names command
    *
    * @param jQuery jqMessage
    *
@@ -134,8 +134,8 @@ var responseParsers = {
 
 /**
  * @brief
- *	Parses the response from a context_get command. This is defined as a standalone function due
- *	to its recursive nature (items within the context can have items nested within them)
+ *  Parses the response from a context_get command. This is defined as a standalone function due
+ *  to its recursive nature (items within the context can have items nested within them)
  *
  * @param jQuery jqMessage
  *
@@ -174,7 +174,7 @@ function parseContextGet (jqMessage) {
 
 /**
  * @brief
- *	Parses the response from breakpoint_add and breakpoint_remove command.
+ *  Parses the response from breakpoint_add and breakpoint_remove command.
  *
  * @param jQuery jqMessage
  *
@@ -188,8 +188,8 @@ function parseBreakpointAddRemove (jqMessage) {
 
 /**
  * @brief
- *	Parses the response from a continuation command such as 'step_into', 'step_over', 'run',
- *	etc.
+ *  Parses the response from a continuation command such as 'step_into', 'step_over', 'run',
+ *  etc.
  *
  * @param jQuery jqMessage
  *
@@ -206,7 +206,7 @@ function parseContinuationCommand (jqMessage) {
 
 /**
  * @brief
- *	Parses the response from a breakpoint_get or breakpoint_list command
+ *  Parses the response from a breakpoint_get or breakpoint_list command
  *
  * @param jQuery jqMessage
  *

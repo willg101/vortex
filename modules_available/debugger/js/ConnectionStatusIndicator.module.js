@@ -14,7 +14,7 @@ subscribe('session-status-changed', function onSessionStatusChanged (e) {
 
 /**
  * @brief
- *	Update the connection status indicator
+ *  Update the connection status indicator
  *
  * @param string level One of 'disconnected', 'connected', 'active-session'
  */

@@ -18,8 +18,8 @@ const SELECTED_LAYOUT_LS_KEY = 'dpoh_selected_layout'
 
 /**
  * @brief
- *	Normalizes an Array of numbers so that the numbers all remain proportional to each other
- *	but add up to 100.
+ *  Normalizes an Array of numbers so that the numbers all remain proportional to each other
+ *  but add up to 100.
  */
 function normalizeSizes (sizes) {
   if (!sizes.length) {
@@ -36,7 +36,7 @@ function normalizeSizes (sizes) {
 
 /**
  * @brief
- *	Pane constructor
+ *  Pane constructor
  *
  * @param HTMLElement|jQuery el
  * @param Pane               parent OPTIONAL. Should only be given when this constructor is
@@ -83,7 +83,7 @@ Object.defineProperty(Pane.prototype, 'size', {
 
 /**
  * @brief
- *	Transform the Pane and its descendants using the given callback
+ *  Transform the Pane and its descendants using the given callback
  *
  * @param function transformer Receives a Pane instance as its only argument; returns a jQuery
  *
@@ -111,7 +111,7 @@ Pane.prototype.transform = function (transformer) {
 
 /**
  * @brief
- *	Generate the HTML for a preview of this Pane and its children
+ *  Generate the HTML for a preview of this Pane and its children
  *
  * @param int nPreviewWindows The number of preview "windows" to include in each leaf Pane
  *
@@ -176,7 +176,7 @@ Pane.prototype.initSortable = function () {
 
 /**
  * @brief
- *	Save this Pane's state in localStorage, along with all child panes' states.
+ *  Save this Pane's state in localStorage, along with all child panes' states.
  *
  * @param noRecurse OPTIONAL. When passed (and non-false), prevents a recursive save.
  */
@@ -197,8 +197,8 @@ Pane.prototype.save = function (noRecurse) {
 
 /**
  * @note
- *	Leaves are Panes with no Pane children and are thus capable of containing Window
- *	instances
+ *  Leaves are Panes with no Pane children and are thus capable of containing Window
+ *  instances
  *
  * @return bool
  */
@@ -215,8 +215,8 @@ Pane.prototype.isRoot = function () {
 
 /**
  * @brief
- *	Suggest which Pane should contain the given window based on previously saved preferences,
- *	and falling back to suggesting the first leaf Pane in the DOM
+ *  Suggest which Pane should contain the given window based on previously saved preferences,
+ *  and falling back to suggesting the first leaf Pane in the DOM
  *
  * @param Window|string aWindow
  */
@@ -261,8 +261,8 @@ Pane.prototype.suggestOwner = function (aWindow) {
 
 /**
  * @brief
- *	Show this Pane and all of its ancestors so that if any anscestor Pane is currently
- *	hidden, it does not prevent this Pane from showing
+ *  Show this Pane and all of its ancestors so that if any anscestor Pane is currently
+ *  hidden, it does not prevent this Pane from showing
  */
 Pane.prototype.show = function () {
   this.element.show()
@@ -273,7 +273,7 @@ Pane.prototype.show = function () {
 
 /**
  * @brief
- *	Triggers a recursive refresh on one or more Panes
+ *  Triggers a recursive refresh on one or more Panes
  *
  * @param bool skipBubbleToRoot Only recursive downward, effectively refreshing just this
  *                              Pane and its children
@@ -295,8 +295,8 @@ Pane.prototype.refreshAll = function (skipBubbleToRoot) {
 
 /**
  * @brief
- *	Perform all tasks necessary to ensure this Pane's visual state (hidden/showing) and Split
- *	instance are both appropriate
+ *  Perform all tasks necessary to ensure this Pane's visual state (hidden/showing) and Split
+ *  instance are both appropriate
  *
  * @param bool didShow OPTIONAL. Should only be passed when called recursively; indicates that
  *                               it's not necessary to call this.show(), since it has already
@@ -374,7 +374,7 @@ Pane.prototype.refresh = function (didShow) {
 
 /**
  * @brief
- *	Store this Pane's Split sizes in localStorage
+ *  Store this Pane's Split sizes in localStorage
  */
 Pane.prototype.storeSizes = function () {
   var sizes = this.split ? this.split.getSizes() : [ 100 ]
@@ -389,7 +389,7 @@ Pane.prototype.storeSizes = function () {
 
 /**
  * @brief
- *	Attach a Window to this leaf Pane
+ *  Attach a Window to this leaf Pane
  *
  * @param Window aWindow
  */
@@ -446,7 +446,7 @@ subscribe('apply-default-layout-settings', function (e) {
 
 /**
  * @brief
- *	Determine which root Pane to use as the layout and initialize that Pane
+ *  Determine which root Pane to use as the layout and initialize that Pane
  */
 Pane.boot = function () {
   var layoutId = localStorage.getItem(SELECTED_LAYOUT_LS_KEY)

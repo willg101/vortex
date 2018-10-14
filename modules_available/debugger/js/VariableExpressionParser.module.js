@@ -2,8 +2,8 @@ export default Parser
 
 /**
  * @file
- *	Find and parse simple variable expressions to aid in showing values when expressions in the
- *	code window are hovered
+ *  Find and parse simple variable expressions to aid in showing values when expressions in the
+ *  code window are hovered
  */
 var TokenIterator = ace.require('./token_iterator').TokenIterator
 var Range = ace.require('ace/range').Range
@@ -78,13 +78,13 @@ Parser.sequences = {
 
 /**
  * @brief
- *	Given a hovered token, find the variable expression that contains the hovered token
+ *  Given a hovered token, find the variable expression that contains the hovered token
  *
  * @param TokenIterator it
  *
  * @return object|false
- *	The return value of Parser.parse(), or false if the hovered character is not within a
- *	variable expression
+ *  The return value of Parser.parse(), or false if the hovered character is not within a
+ *  variable expression
  */
 Parser.getContainingExpression = function (it) {
   // Get the token that was hovered

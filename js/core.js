@@ -52,7 +52,7 @@ $(() => window.PageTitle.setFormat(document.title.trim()))
 
 /**
  * @brief
- *	Create a URL for by prefixing the given path with this site's base path
+ *  Create a URL for by prefixing the given path with this site's base path
  *
  * @param string path
  *
@@ -68,7 +68,7 @@ function makeUrl (path) {
 
 /**
  * @brief
- *	Render the a handlebars template
+ *  Render the a handlebars template
  *
  * @param string templateName E.g. for modules_enabled/foo/hbs/bar.hbs, pass 'foo.bar'
  * @param object vars          The variables to render the template with
@@ -94,7 +94,7 @@ render = (function () {
 
 /**
  * @brief
- *	Publish an event
+ *  Publish an event
  *
  * @param string name
  * @param object data
@@ -107,7 +107,7 @@ function publish (name, data) {
 
 /**
  * @brief
- *	Listen for an event
+ *  Listen for an event
  *
  * @param string   name     The name of the event as passed to `publish`
  * @param function callback The event handler; passed an Event object
@@ -128,7 +128,7 @@ function escapeDoubleQuotes (str) {
 
 /**
  * @brief
- *	Perform an action only after a set of async tasks have all finished
+ *  Perform an action only after a set of async tasks have all finished
  *
  * If action `A` should only happen after actions `b` and `c`, the whatever code that is
  * responsible for doing `A` should do something like `whenReadyTo( 'A' ).then( doA );`. This will
@@ -138,28 +138,28 @@ function escapeDoubleQuotes (str) {
  * For example, assume that before calling `performAnAction()`, two functions `prepare()` and
  * `getReady()` need to perform some asynchronous processing. This can be achieved as follows:
  * @code
- *	function performAnAction()
- *	{
- *		console.log( 'Performed an action' );
- *	}
+ *  function performAnAction()
+ *  {
+ *	  console.log( 'Performed an action' );
+ *  }
  *
- *	function prepare( on_finish )
- *	{
- *		setTimeout( on_finish, 1000 );
- *	}
+ *  function prepare( on_finish )
+ *  {
+ *	  setTimeout( on_finish, 1000 );
+ *  }
  *
- *	function getReady( on_finish )
- *	{
- *		setTimeout( on_finish, 1500 );
- *	}
+ *  function getReady( on_finish )
+ *  {
+ *	  setTimeout( on_finish, 1500 );
+ *  }
  *
- *	subscribe( 'before-perform-action', function( e )
- *	{
- *		prepare( e.register() );
- *		getReady( e.register() );
- *	} );
+ *  subscribe( 'before-perform-action', function( e )
+ *  {
+ *	  prepare( e.register() );
+ *	  getReady( e.register() );
+ *  } );
  *
- *	whenReadyTo( 'perform-action' ).then( performAnAction );
+ *  whenReadyTo( 'perform-action' ).then( performAnAction );
  * @endcode
  *
  * @param string name
