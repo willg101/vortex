@@ -81,8 +81,8 @@ $.fn.vtree = function (ctx, options) {
         },
         icon: 'identifier-icon fa fa-fw ' + icon,
         text: '<span class="identifier">' +
-					(isRecursive ? property.name : property.fullname) +
-					'</span>'
+          (isRecursive ? property.name : property.fullname) +
+          '</span>'
       }
 
       if (property.isReadOnly) { node.li_attr[ 'data-no-alter' ] = 'true' }

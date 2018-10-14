@@ -24,8 +24,8 @@ var stateRefreshTimeout = null
  */
 class ConsoleCommandDisplay {
   /**
-	 * @param jQueryTerminal term
-	 */
+   * @param jQueryTerminal term
+   */
   constructor (term) {
     this.id = 'ccd_' + this.constructor.id_ctr++
     var innerFn = () => `<div id="${this.id}"></div>`
@@ -37,39 +37,39 @@ class ConsoleCommandDisplay {
   }
 
   /**
-	 * @param string text
-	 * @param string level ('error' is the only non-default value accepted right now)
-	 * @return jQuery
-	 */
+   * @param string text
+   * @param string level ('error' is the only non-default value accepted right now)
+   * @return jQuery
+   */
   makeText (text, level) {
     return $('<div>').text(text).css('color', level == 'error' ? '#f46242' : '')
   }
 
   /**
-	 * @brief
-	 *	Append a line of output
-	 *
-	 * @param string text
-	 * @param string level @see makeText()
-	 */
+   * @brief
+   *	Append a line of output
+   *
+   * @param string text
+   * @param string level @see makeText()
+   */
   append (text, level) {
     this.element.append(this.makeText(text, level))
   }
 
   /**
-	 * @brief
-	 *	Prepend a line of output
-	 *
-	 * @param string text
-	 * @param string level @see makeText()
-	 */
+   * @brief
+   *	Prepend a line of output
+   *
+   * @param string text
+   * @param string level @see makeText()
+   */
   prepend (text, level) {
     this.element.prepend(this.makeText(text, level))
   }
 
   /**
-	 * @param jQuery|string replacement
-	 */
+   * @param jQuery|string replacement
+   */
   replaceSpinner (replacement) {
     this.spinner.after(replacement).remove()
   }

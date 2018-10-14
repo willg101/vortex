@@ -226,7 +226,7 @@ function processMessage (message) {
 
   // Call the explicitly specified callback, if applicable
   var tid = processed.transactionId ||
-		jqMessage.filter('[transaction_id]').attr('transaction_id')
+    jqMessage.filter('[transaction_id]').attr('transaction_id')
   if (typeof transactionCallbacks[ parseInt(tid) ] === 'function') {
     transactionCallbacks[ Number(tid) ](processed)
   }

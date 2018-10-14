@@ -26,11 +26,11 @@ class TreeState {
   }
 
   /**
-	 * @brief
-	 *	Track the opening of a tree node
-	 *
-	 * @param object node The `node` argument passed to an `open_node.jstree` event handler
-	 */
+   * @brief
+   *	Track the opening of a tree node
+   *
+   * @param object node The `node` argument passed to an `open_node.jstree` event handler
+   */
   open (node) {
     var prevNode = this.tree
     this.tracePath(node).forEach(addr => {
@@ -42,11 +42,11 @@ class TreeState {
   }
 
   /**
-	 * @brief
-	 *	Track the closing of a tree node
-	 *
-	 * @param object node The `node` argument passed to a `clos_node.jstree` event handler
-	 */
+   * @brief
+   *	Track the closing of a tree node
+   *
+   * @param object node The `node` argument passed to a `clos_node.jstree` event handler
+   */
   close (node) {
     var prevNode = this.tree
     var path = this.tracePath(node)
@@ -66,12 +66,12 @@ class TreeState {
   }
 
   /**
-	 * @param object node The value passed to either close() or open()
-	 *
-	 * @return Array
-	 *	An array node addresses, with the last element being `node`'s address, and the first
-	 *	element being the address of the node's furthest ancestor
-	 */
+   * @param object node The value passed to either close() or open()
+   *
+   * @return Array
+   *	An array node addresses, with the last element being `node`'s address, and the first
+   *	element being the address of the node's furthest ancestor
+   */
   tracePath (node) {
     var container = node.instance.get_container()
     var path = [ node.node.li_attr[ 'data-address' ] ];
@@ -85,13 +85,13 @@ class TreeState {
   }
 
   /**
-	 * @brief
-	 *	Restore the state stored in this instance to the given jstree container
-	 *
-	 * @param jQuery container
-	 * @param object jstree    OPTIONAL. Only passed to this while recursing
-	 * @param object ctx       OPTIONAL. Only passed to this while recursing
-	 */
+   * @brief
+   *	Restore the state stored in this instance to the given jstree container
+   *
+   * @param jQuery container
+   * @param object jstree    OPTIONAL. Only passed to this while recursing
+   * @param object ctx       OPTIONAL. Only passed to this while recursing
+   */
   restore (container, jstree, ctx) {
     jstree = jstree || $.jstree.reference(container)
     ctx = ctx || this.tree

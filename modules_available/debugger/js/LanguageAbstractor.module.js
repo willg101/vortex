@@ -31,7 +31,7 @@ LanguageAbstractor.setDefault = function (language) {
     this.defaultLanguage = language
   } else {
     throw new this.Error('Cannot use the given language: it is not an instance of ' +
-			'LanguageAbstractor')
+      'LanguageAbstractor')
   }
 }
 

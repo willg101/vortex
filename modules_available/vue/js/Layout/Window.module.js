@@ -82,13 +82,13 @@ Window.prototype.minimize = function (enableOrDisable, onFinish) {
     onFinish = function () {}
   } else if (typeof onFinish !== 'function') {
     throw new Error('Window.minimize(): when given, argument `onFinish` must be ' +
-			'a function; ' + (typeof onFinish) + ' was given.')
+      'a function; ' + (typeof onFinish) + ' was given.')
   }
   if (typeof enableOrDisable === 'undefined') {
     enableOrDisable = this.state == 'minimized' ? 'disable' : 'enable'
   } else if (enableOrDisable != 'enable' && enableOrDisable != 'disable') {
     throw new Error('Window.minimize(): when given, argument `enableOrDisable` must be ' +
-			'either "enable" or "disable"; "' + enableOrDisable + '" was given.')
+      'either "enable" or "disable"; "' + enableOrDisable + '" was given.')
   }
 
   // If we're currently maximized...
@@ -183,13 +183,13 @@ Window.prototype.maximize = function (enableOrDisable, onFinish) {
     onFinish = function () {}
   } else if (typeof onFinish !== 'function') {
     throw new Error('Window.maximize(): when given, argument `onFinish` must be ' +
-			'a function; ' + (typeof onFinish) + ' was given.')
+      'a function; ' + (typeof onFinish) + ' was given.')
   }
   if (typeof enableOrDisable === 'undefined') {
     enableOrDisable = this.state == 'maximized' ? 'disable' : 'enable'
   } else if (enableOrDisable != 'enable' && enableOrDisable != 'disable') {
     throw new Error('Window.maximize(): when given, argument `enableOrDisable` must be ' +
-			'either "enable" or "disable"; "' + enableOrDisable + '" was given.')
+      'either "enable" or "disable"; "' + enableOrDisable + '" was given.')
   }
 
   // If we're currently minimized...

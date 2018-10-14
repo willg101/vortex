@@ -11,8 +11,8 @@ var $ = jQuery
  */
 class StackFrame {
   /**
-	 * @param Array frameData
-	 */
+   * @param Array frameData
+   */
   constructor (frameData) {
     frameData.schemelessFilename = File.stripScheme(frameData.filename)
     frameData.pathlessFilename = File.basename(frameData.filename)
@@ -27,8 +27,8 @@ class StackFrame {
   get level () { return this.frameData.level }
 
   /**
-	 * @return Promise
-	 */
+   * @return Promise
+   */
   fetchContext () {
     if (this.contextPromise) {
       return this.contextPromise
@@ -67,8 +67,8 @@ class StackFrame {
  */
 class Stack {
   /**
-	 * @param Array frameArray
-	 */
+   * @param Array frameArray
+   */
   constructor (frameArray) {
     frameArray = frameArray || []
 

@@ -113,9 +113,9 @@ Parser.getContainingExpression = function (it) {
     // If the hovered character is within `token`'s full variable expression, we've found
     // the containing expression.
     if (pos.row >= candidateExpr.range.start.row &&
-			pos.column >= candidateExpr.range.start.column &&
-			pos.row <= candidateExpr.range.end.row &&
-			pos.column <= candidateExpr.range.end.column) {
+      pos.column >= candidateExpr.range.start.column &&
+      pos.row <= candidateExpr.range.end.row &&
+      pos.column <= candidateExpr.range.end.column) {
       return candidateExpr
     }
     // Otherwise, continue walking backwards. This covers cases where, e.g., `$bar` is

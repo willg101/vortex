@@ -25,9 +25,9 @@ vTheme.hideModal = function () {
 
 $(document).on('click', function (e) {
   if (($(e.target).closest(selectors.modal).length &&
-		!$(e.target).closest(selectors.exit_button).length) ||
-		$(e.target).closest(selectors.open_modal).length ||
-		!$(e.target).closest('body').length) {
+    !$(e.target).closest(selectors.exit_button).length) ||
+    $(e.target).closest(selectors.open_modal).length ||
+    !$(e.target).closest('body').length) {
     return
   }
   vTheme.hideModal()

@@ -50,13 +50,13 @@ function extractAttrs (jqElement, attrList) {
 // functions is included on 'response-received' events, under the key 'parsed'
 var responseParsers = {
   /**
-	 * @brief
-	 *	Parses the response from an 'eval' command
-	 *
-	 * @param jQuery jqMessage
-	 *
-	 * @return object
-	 */
+   * @brief
+   *	Parses the response from an 'eval' command
+   *
+   * @param jQuery jqMessage
+   *
+   * @return object
+   */
   eval: function (jqMessage) {
     var data = {}
     data.value = parseContextGet(jqMessage)
@@ -65,13 +65,13 @@ var responseParsers = {
   },
 
   /**
-	 * @brief
-	 *	Parses the response from an 'source' command
-	 *
-	 * @param jQuery jqMessage
-	 *
-	 * @return object
-	 */
+   * @brief
+   *	Parses the response from an 'source' command
+   *
+   * @param jQuery jqMessage
+   *
+   * @return object
+   */
   source: function (jqMessage) {
     var data = {}
     data.file_contents = parseCdata(jqMessage)
@@ -79,13 +79,13 @@ var responseParsers = {
   },
 
   /**
-	 * @brief
-	 *	Parses the response from a stack_get command
-	 *
-	 * @param jQuery jqMessage
-	 *
-	 * @return object
-	 */
+   * @brief
+   *	Parses the response from a stack_get command
+   *
+   * @param jQuery jqMessage
+   *
+   * @return object
+   */
   stack_get: function (jqMessage) {
     var stack = []
     jqMessage.find('stack').each(function (i, el) {
@@ -96,13 +96,13 @@ var responseParsers = {
   },
 
   /**
-	 * @brief
-	 *	Parses the response from a context_names command
-	 *
-	 * @param jQuery jqMessage
-	 *
-	 * @return object
-	 */
+   * @brief
+   *	Parses the response from a context_names command
+   *
+   * @param jQuery jqMessage
+   *
+   * @return object
+   */
   context_names: function (jqMessage) {
     var data = []
 
@@ -299,13 +299,13 @@ subscribe('provide-tests', function () {
 
       // Array
       jqMsg = $(`
-				<response>
-					<property address="140736699921712" type="array" children="1" numchildren="3" page="0" pagesize="128">
-						<property name="0" address="139919608516592" type="int"><![CDATA[1]]></property>
-						<property name="1" address="139919608519464" type="string" size="3" encoding="base64"><![CDATA[YWJj]]></property>
-						<property name="2" address="139919608519720" type="array" children="0" numchildren="0" page="0" pagesize="128"></property>
-					</property>
-				</response>`
+        <response>
+          <property address="140736699921712" type="array" children="1" numchildren="3" page="0" pagesize="128">
+            <property name="0" address="139919608516592" type="int"><![CDATA[1]]></property>
+            <property name="1" address="139919608519464" type="string" size="3" encoding="base64"><![CDATA[YWJj]]></property>
+            <property name="2" address="139919608519720" type="array" children="0" numchildren="0" page="0" pagesize="128"></property>
+          </property>
+        </response>`
       )
       output = responseParsers.eval(jqMsg)
       expect(output.message).toBeUndefined()

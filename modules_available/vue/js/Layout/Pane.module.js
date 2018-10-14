@@ -130,8 +130,8 @@ Pane.prototype.buildPreviewLayout = function (nPreviewWindows) {
     if (isLeaf) {
       jquery.addClass('leaf')
       var html = '<div class="preview-window"></div>' +
-				(nPreviewWindows > 1 ? '<div class="gutter"></div>' +
-				'<div class="preview-window"></div>'.repeat(nPreviewWindows - 1) : '')
+        (nPreviewWindows > 1 ? '<div class="gutter"></div>' +
+        '<div class="preview-window"></div>'.repeat(nPreviewWindows - 1) : '')
       jquery.append($(html))
     }
 
@@ -314,7 +314,7 @@ Pane.prototype.refresh = function (didShow) {
   // the browser to update, before continuing
   if (!this.refresh_queued) {
     this.refresh_queued = true // If the browser is running slowly, don't let multiple
-			                         // validations pile up here
+                               // validations pile up here
     setTimeout(function () {
       this.refresh_queued = false
 

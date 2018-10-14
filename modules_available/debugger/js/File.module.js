@@ -70,7 +70,7 @@ function convertToCodebaseRelativePath (path, codebaseId, codebaseRoot) {
 
   if (pathStripped.startsWith(codebaseRoot)) {
     return codebaseId + CODEBASE_RELATIVE_PATH_ID_SEPARATOR +
-			pathStripped.replace(codebaseRoot, '').replace(/^\/+/, '')
+      pathStripped.replace(codebaseRoot, '').replace(/^\/+/, '')
   } else {
     return path
   }
@@ -98,8 +98,8 @@ function convertFromCodebaseRelativePath (path, codebaseId, codebaseRoot) {
  */
 function isCodebaseRelative (path) {
   return path.search(CODEBASE_RELATIVE_PATH_ID_SEPARATOR) !== -1 &&
-		!path.startsWith(CODEBASE_RELATIVE_PATH_ID_SEPARATOR) &&
-		!path.endsWith(CODEBASE_RELATIVE_PATH_ID_SEPARATOR)
+    !path.startsWith(CODEBASE_RELATIVE_PATH_ID_SEPARATOR) &&
+    !path.endsWith(CODEBASE_RELATIVE_PATH_ID_SEPARATOR)
 }
 
 subscribe('provide-tests', function () {

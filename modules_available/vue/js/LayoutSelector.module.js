@@ -29,7 +29,7 @@ function renderLayoutSelector (i, layoutOnly) {
     : $($('.all-layouts').children()[ i - 1 ])
   if (!el.length) {
     throw new LayoutError('No ' + (typeof i === 'undefined' ? '' : 'matching ') +
-			'layout found')
+      'layout found')
   }
 
   var panePreview = i == 0

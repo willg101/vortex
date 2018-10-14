@@ -68,7 +68,7 @@ $(document).on('dblclick', '#watch .display-expression', function (e) {
 function notifyUserOfWatchWarning () {
   if (!settings.no_notify && !hasWarnedThisSession) {
     vTheme.notify('error', 'A watched expression failed to execute and may cause stray' +
-			' warnings or notices in your output.', '', { timeOut: 10000 })
+      ' warnings or notices in your output.', '', { timeOut: 10000 })
     hasWarnedThisSession = true
   }
 }

@@ -17,13 +17,13 @@ class PhpLanguage extends LanguageAbstractor {
     file = escapeDoubleQuotes(file)
 
     await Debugger.command('eval', '$__codebase_root_finder__ = ' +
-			Dpoh.options.debugger.find_codebase_root)
+      Dpoh.options.debugger.find_codebase_root)
     var root = await Debugger.command('eval', `$__codebase_root_finder__( "${file}" )`)
     Debugger.command('eval', 'unset( $__codebase_root_finder__ )')
 
     var info = {}
     if (root.parsed.value && root.parsed.value[ 0 ] && root.parsed.value[ 0 ].children &&
-			root.parsed.value[ 0 ].children.length) {
+      root.parsed.value[ 0 ].children.length) {
       root.parsed.value[ 0 ].children.forEach(el => {
         if (el.name == 'root' || el.name == 'id') {
           info[ el.name ] = el.value
@@ -60,7 +60,7 @@ class PhpLanguage extends LanguageAbstractor {
     if (!Debugger.sessionIsActive()) {
       if (flags & LanguageAbstractor.NO_CREATE_SESSION) {
         throw new this.constructor.Error('Cannot eval the command: no debug session is ' +
-					'active and the `NO_CREATE_SESSION` flag is set')
+          'active and the `NO_CREATE_SESSION` flag is set')
       }
 
       try {
@@ -108,9 +108,9 @@ class PhpLanguage extends LanguageAbstractor {
       prompt: `${this.name}> `,
       greetings: function (cb) {
         cb('Tip: if you have trouble running a multi-statement ' +
-				'snippet, try including the magic variable [[b;#21599f;]' + MAGIC_EVAL_VAR_NAME +
-				']. This will cause your code to be processed slightly differently and will ' +
-				'[[b;;]output the final value of ][[b;#21599f;]' + MAGIC_EVAL_VAR_NAME + '].')
+        'snippet, try including the magic variable [[b;#21599f;]' + MAGIC_EVAL_VAR_NAME +
+        ']. This will cause your code to be processed slightly differently and will ' +
+        '[[b;;]output the final value of ][[b;#21599f;]' + MAGIC_EVAL_VAR_NAME + '].')
       }
     }
   }
@@ -143,13 +143,13 @@ class PhpLanguage extends LanguageAbstractor {
   async globDirectory (dir) {
     Debugger.command('feature_set', { name: 'max_depth', value: 2 })
     var rawEntries = await this.evalCommand(`
-			$__ = [];
-			foreach ( glob( '${dir}*' ) as $item )
-			{
-					$type = is_dir( $item ) ? 'dir' : 'file';
-					$__[ $item ] = [ 'type' => $type, 'name' => $item ];
-			}
-			return $__;`
+      $__ = [];
+      foreach ( glob( '${dir}*' ) as $item )
+      {
+          $type = is_dir( $item ) ? 'dir' : 'file';
+          $__[ $item ] = [ 'type' => $type, 'name' => $item ];
+      }
+      return $__;`
     )
     Debugger.command('feature_set', { name: 'max_depth', value: 1 })
     return (rawEntries.returnValue[ 0 ].children || []).map(entry => {

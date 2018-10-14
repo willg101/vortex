@@ -84,7 +84,7 @@ $(document).on('keydown', '#file_finder', function (e) {
           popover && popover.remove()
         } else if (items.length == 1) {
           $('#file_finder').blur().focus().val('').val(items[ 0 ].name +
-						(items[ 0 ].type == 'dir' ? '/' : ''))
+            (items[ 0 ].type == 'dir' ? '/' : ''))
           popover && popover.remove()
         } else if (items.length > 1) {
           let commonPrefix = new CommonPrefixFinder()

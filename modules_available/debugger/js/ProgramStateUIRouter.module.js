@@ -70,7 +70,7 @@ function setStackPosition (pos) {
   var stackDepth = mostRecentState && mostRecentState.stack.depth || 0
   if (posAsInt < 0 || posAsInt != Number(pos) || posAsInt > stackDepth) {
     throw new Error(`Illegal stack position: '${pos}' (expected an integer between 0 and` +
-			` ${stackDepth})`)
+      ` ${stackDepth})`)
   }
 
   applyPositionFromStackFrame(posAsInt)
