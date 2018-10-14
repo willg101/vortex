@@ -1,63 +1,54 @@
 class RenderError extends Error {
-	constructor( message, ...args )
-	{
-		super( message, ...args );
-		this.name = 'RenderError';
-		this.message = message;
-		this.stack = (new Error()).stack;
-	}
+  constructor (message, ...args) {
+    super(message, ...args)
+    this.name = 'RenderError'
+    this.message = message
+    this.stack = (new Error()).stack
+  }
 }
 
-vTheme = new Proxy( {}, {
-	get : ( target, key ) =>
-	{
-		if ( target.hasOwnProperty( key ) )
-		{
-			return target[ key ];
-		}
-	},
+vTheme = new Proxy({}, {
+  get: (target, key) => {
+    if (target.hasOwnProperty(key)) {
+      return target[ key ]
+    }
+  },
 
-	set : ( target, key, value ) =>
-	{
-		if ( typeof value != 'function' )
-		{
-			throw new Error( 'Cannot add non-function properties to `vTheme`' );
-		}
-		publish( 'update-vtree-item', { key, oldValue : target[ key ], newValue : value } );
-		target[ key ] = value;
-		return true;
-	},
+  set: (target, key, value) => {
+    if (typeof value !== 'function') {
+      throw new Error('Cannot add non-function properties to `vTheme`')
+    }
+    publish('update-vtree-item', { key, oldValue: target[ key ], newValue: value })
+    target[ key ] = value
+    return true
+  },
 
-	deleteProperty : ( target, key ) =>
-	{
-		publish( 'delete-vtree-item', { key, value : target[ key ] } );
-		return delete target[ key ];
-	},
-} );
+  deleteProperty: (target, key) => {
+    publish('delete-vtree-item', { key, value: target[ key ] })
+    return delete target[ key ]
+  }
+})
 
 window.PageTitle = {
-	state     : {},
-	format    : () => 'Vortex',
+  state: {},
+  format: () => 'Vortex',
 
-	setFormat : function( str )
-	{
-		this.format = Handlebars.compile( str );
-		this.refreshTitle();
-	},
+  setFormat: function (str) {
+    this.format = Handlebars.compile(str)
+    this.refreshTitle()
+  },
 
-	updateState : function( vars )
-	{
-		$.extend( true, this.state, vars );
-		this.refreshTitle();
-	},
+  updateState: function (vars) {
+    $.extend(true, this.state, vars)
+    this.refreshTitle()
+  },
 
-	refreshTitle : function()
-	{
-		document.title = this.format( this.state );
-	},
-};
+  refreshTitle: function () {
+    document.title = this.format(this.state)
+  }
+}
 
-$( () => window.PageTitle.setFormat( document.title.trim() ) );
+$(() => window.PageTitle.setFormat(document.title.trim()))
 
 /**
  * @brief
@@ -67,43 +58,38 @@ $( () => window.PageTitle.setFormat( document.title.trim() ) );
  *
  * @return string
  */
-function makeUrl( path )
-{
-	var settings = typeof Dpoh.settings == 'object'
-		? Dpoh.settings
-		: { base_path : '/' };
+function makeUrl (path) {
+  var settings = typeof Dpoh.settings === 'object'
+    ? Dpoh.settings
+    : { base_path: '/' }
 
-	return settings.base_path + path;
+  return settings.base_path + path
 }
 
 /**
  * @brief
  *	Render the a handlebars template
  *
- * @param string template_name E.g. for modules_enabled/foo/hbs/bar.hbs, pass 'foo.bar'
+ * @param string templateName E.g. for modules_enabled/foo/hbs/bar.hbs, pass 'foo.bar'
  * @param object vars          The variables to render the template with
  *
  * @return string
  *
  * @throw RenderError
  */
-render = (function()
-{
-	var cache = {};
+render = (function () {
+  var cache = {}
 
-	return function( template_name, vars )
-	{
-		if ( !cache[ template_name ] )
-		{
-			if ( !Dpoh.templates[ template_name ] )
-			{
-				throw new RenderError( 'Unknown template "' + template_name + '"' );
-			}
-			cache[ template_name ] = Handlebars.compile( Dpoh.templates[ template_name ] );
-		}
+  return function (templateName, vars) {
+    if (!cache[ templateName ]) {
+      if (!Dpoh.templates[ templateName ]) {
+        throw new RenderError('Unknown template "' + templateName + '"')
+      }
+      cache[ templateName ] = Handlebars.compile(Dpoh.templates[ templateName ])
+    }
 
-		return cache[ template_name ]( vars );
-	};
+    return cache[ templateName ](vars)
+  }
 }())
 
 /**
@@ -113,11 +99,10 @@ render = (function()
  * @param string name
  * @param object data
  */
-function publish( name, data )
-{
-	data = data || {};
-	data.type = 'dpoh:' + name;
-	$( document ).trigger( data );
+function publish (name, data) {
+  data = data || {}
+  data.type = 'dpoh:' + name
+  $(document).trigger(data)
 }
 
 /**
@@ -127,10 +112,9 @@ function publish( name, data )
  * @param string   name     The name of the event as passed to `publish`
  * @param function callback The event handler; passed an Event object
  */
-function subscribe( name, callback )
-{
-	name = 'dpoh:' + name;
-	$( document ).on( name, callback );
+function subscribe (name, callback) {
+  name = 'dpoh:' + name
+  $(document).on(name, callback)
 }
 
 /**
@@ -138,9 +122,8 @@ function subscribe( name, callback )
  *
  * @param string
  */
-function escapeDoubleQuotes( str )
-{
-	return str.replace( /\\([\s\S])|(")/g,"\\$1$2" );
+function escapeDoubleQuotes (str) {
+  return str.replace(/\\([\s\S])|(")/g, '\\$1$2')
 }
 
 /**
@@ -183,16 +166,14 @@ function escapeDoubleQuotes( str )
  *
  * @return Promise
  */
-function whenReadyTo( name )
-{
-	var before_callbacks = [];
-	publish( 'before-' + name, {
-		register : function()
-		{
-			var d = $.Deferred();
-			before_callbacks.push( d );
-			return d.resolve.bind( d );
-		}
-	} );
-	return $.when.apply( $, before_callbacks );
+function whenReadyTo (name) {
+  var beforeCallbacks = []
+  publish('before-' + name, {
+    register: function () {
+      var d = $.Deferred()
+      beforeCallbacks.push(d)
+      return d.resolve.bind(d)
+    }
+  })
+  return $.when.apply($, beforeCallbacks)
 };

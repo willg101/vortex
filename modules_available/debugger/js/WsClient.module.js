@@ -1,5 +1,10 @@
-export default { send, openConnection, isConnected, getConnection, onMessageReceived,
-	registerTypeDeterminer, registerMessageProcessor }
+export default { send,
+  openConnection,
+  isConnected,
+  getConnection,
+  onMessageReceived,
+  registerTypeDeterminer,
+  registerMessageProcessor }
 
 /**
  * @file
@@ -9,57 +14,55 @@ export default { send, openConnection, isConnected, getConnection, onMessageRece
  */
 
 // A reference to the current websocket connection
-var current_connection = null;
+var currentConnection = null
 
 // The path (relative to location.host) to send initial WS requests to
-var ws_path = '/bridge'
+var wsPath = '/bridge'
 
-var identifier = 0;
+var identifier = 0
 
 // The initiator of a socket server message can opt to have a function called automatically
 // when a response is received for that particular message, though whatever mechanism that
 // generates the response on the server must support transcation ids (the Xdebug debugger
 // engine does, for example). This object maps transaction ids to respective callbacks
-var transaction_callbacks = {};
+var transactionCallbacks = {}
 
 // tid => promise
-var promises = {};
+var promises = {}
 
 // A list of functions that help determine what type of response was received from the server.
 // See determineMessageType() for more information.
-var type_determiners   = [];
+var typeDeterminers = []
 
 // A list of functions that process messages from the socket server. See processMessage() for
 // more information.
-var message_processors = [];
+var messageProcessors = []
 
 // As we receive data from the socket server, especially when receiving the data in bursts, the
 // messages may get split up or multiple messages may get combined into one. In the case where
 // messages get broken up between multiple communications, these variables keep track of the
 // current expected message length and message text
-var pending_data = '';
-var pending_data_length;
+var pendingData = ''
+var pendingDataLength
 
-const NULL_CHAR = String.fromCharCode( 0 );
+const NULL_CHAR = String.fromCharCode(0)
 
 /**
  * @brief
  *	Handles the changing of a WS connection status and fires an appropriate event
  *
- * @param string new_status
+ * @param string newStatus
  *	One of 'connected', 'disconnected', or 'error'
  */
-function onConnectionStatusChanged( new_status )
-{
-	// Unless we're now connected, drop the our reference to a now-nonexistent WS
-	if ( new_status != 'connected' )
-	{
-		current_connection = null;
-	}
+function onConnectionStatusChanged (newStatus) {
+  // Unless we're now connected, drop the our reference to a now-nonexistent WS
+  if (newStatus != 'connected') {
+    currentConnection = null
+  }
 
-	publish( 'connection-status-changed', {
-		status : new_status,
-	} );
+  publish('connection-status-changed', {
+    status: newStatus
+  })
 }
 
 /**
@@ -71,34 +74,30 @@ function onConnectionStatusChanged( new_status )
  * @return bool
  *	true if the connection was attempted; false if not (a connection already exists)
  */
-function openConnection( params )
-{
-	// Allow connections to be aborted by other modules
-	var options = { 'abort' : false };
-	publish( 'attempt-connection', { options, params } );
-	if ( options.abort )
-	{
-		return;
-	}
+function openConnection (params) {
+  // Allow connections to be aborted by other modules
+  var options = { 'abort': false }
+  publish('attempt-connection', { options, params })
+  if (options.abort) {
+    return
+  }
 
-	// Don't open a new connection if one is currently open
-	if ( current_connection )
-	{
-		return false;
-	}
+  // Don't open a new connection if one is currently open
+  if (currentConnection) {
+    return false
+  }
 
-	var ws_url = ( location.protocol == 'http:' ? 'ws://' : 'wss://' ) + location.host + ws_path;
-	if ( params )
-	{
-		ws_url += '?' + $.param( params );
-	}
-	current_connection = new WebSocket( ws_url );
+  var wsUrl = (location.protocol == 'http:' ? 'ws://' : 'wss://') + location.host + wsPath
+  if (params) {
+    wsUrl += '?' + $.param(params)
+  }
+  currentConnection = new WebSocket(wsUrl)
 
-	current_connection.onclose   = onConnectionStatusChanged.bind( undefined, 'disconnected' );
-	current_connection.onerror   = onConnectionStatusChanged.bind( undefined, 'error' );
-	current_connection.onmessage = onMessageReceived;
+  currentConnection.onclose = onConnectionStatusChanged.bind(undefined, 'disconnected')
+  currentConnection.onerror = onConnectionStatusChanged.bind(undefined, 'error')
+  currentConnection.onmessage = onMessageReceived
 
-	return true;
+  return true
 }
 
 /**
@@ -112,57 +111,53 @@ function openConnection( params )
  *                     - A function to handle the socket server's response (requires transaction
  *                       id support from the server)
  */
-function send( command )
-{
-	if ( !isConnected() )
-	{
-		return false;
-	}
+function send (command) {
+  if (!isConnected()) {
+    return false
+  }
 
-	var command_args = {},
-		data         = '',
-		callback     = null,
-		tid          = identifier++,
-		max_args     = Math.min( 4, arguments.length );
+  var commandArgs = {}
 
-	for ( var i = 1; i < max_args; i++ )
-	{
-		switch ( typeof arguments[ i ] )
-		{
-			case 'string'   : data         = arguments[ i ]; break;
-			case 'object'   : command_args = arguments[ i ]; break;
-			case 'function' : callback     = arguments[ i ]; break;
-		}
-	}
+  var data = ''
 
-	// If applicable, associate the given callback with this command's transaction id so that we
-	// can call it when the socket server responds to the command specifically
-	if ( typeof callback == "function" )
-	{
-		transaction_callbacks[ tid ] = callback;
-	}
+  var callback = null
 
-	if ( typeof command_args.i == "undefined" )
-	{
-		command_args.i = tid;
-	}
+  var tid = identifier++
 
-	for ( var arg in command_args )
-	{
-		command += ( arg.length == 1 ? ' -' : ' --' ) + arg + ' ';
-		command += typeof command_args[ arg ] == 'string'
-			? '"' + escapeDoubleQuotes( command_args[ arg ] ) + '"'
-			: command_args[ arg ];
-	}
+  var maxArgs = Math.min(4, arguments.length)
 
-	// If applicable, base64 encode the additional data to include with the command
-	if ( data )
-	{
-		command += ' -- ' + btoa( data );
-	}
+  for (var i = 1; i < maxArgs; i++) {
+    switch (typeof arguments[ i ]) {
+      case 'string' : data = arguments[ i ]; break
+      case 'object' : commandArgs = arguments[ i ]; break
+      case 'function' : callback = arguments[ i ]; break
+    }
+  }
 
-	current_connection.send( command );
-	return new Promise( resolve => { promises[ tid ] = resolve } );
+  // If applicable, associate the given callback with this command's transaction id so that we
+  // can call it when the socket server responds to the command specifically
+  if (typeof callback === 'function') {
+    transactionCallbacks[ tid ] = callback
+  }
+
+  if (typeof commandArgs.i === 'undefined') {
+    commandArgs.i = tid
+  }
+
+  for (var arg in commandArgs) {
+    command += (arg.length == 1 ? ' -' : ' --') + arg + ' '
+    command += typeof commandArgs[ arg ] === 'string'
+      ? '"' + escapeDoubleQuotes(commandArgs[ arg ]) + '"'
+      : commandArgs[ arg ]
+  }
+
+  // If applicable, base64 encode the additional data to include with the command
+  if (data) {
+    command += ' -- ' + btoa(data)
+  }
+
+  currentConnection.send(command)
+  return new Promise(resolve => { promises[ tid ] = resolve })
 }
 
 /**
@@ -171,96 +166,77 @@ function send( command )
  *
  * @param object data
  */
-function onMessageReceived( data )
-{
-	var message = data.data;
+function onMessageReceived (data) {
+  var message = data.data
 
-	// Skip responses that contain no data
-	if ( !message )
-	{
-		return;
-	}
+  // Skip responses that contain no data
+  if (!message) {
+    return
+  }
 
-	for ( var i = 0; i < message.length; i++ )
-	{
-		var current_char = message.charAt( i );
-		if ( current_char == NULL_CHAR )
-		{
-			var as_number = Number( pending_data );
-			// If the string contained in pending_data looks like a non-zero integer
-			if ( as_number && as_number % 1 === 0  )
-			{
-				pending_data_length = as_number;
-				pending_data        = '';
-			}
-			else if ( pending_data.length != pending_data_length )
-			{
-				pending_data        = '';
-				pending_data_length = false;
-				throw new Error( 'DPOH: Data length mismatch' );
-			}
-			else
-			{
-				var temp_message = pending_data;
-				pending_data        = '';
-				pending_data_length = false;
-				processMessage( temp_message );
-			}
-		}
-		else
-		{
-			pending_data += current_char;
-		}
-	}
+  for (var i = 0; i < message.length; i++) {
+    var currentChar = message.charAt(i)
+    if (currentChar == NULL_CHAR) {
+      var asNumber = Number(pendingData)
+      // If the string contained in pendingData looks like a non-zero integer
+      if (asNumber && asNumber % 1 === 0) {
+        pendingDataLength = asNumber
+        pendingData = ''
+      } else if (pendingData.length != pendingDataLength) {
+        pendingData = ''
+        pendingDataLength = false
+        throw new Error('DPOH: Data length mismatch')
+      } else {
+        var tempMessage = pendingData
+        pendingData = ''
+        pendingDataLength = false
+        processMessage(tempMessage)
+      }
+    } else {
+      pendingData += currentChar
+    }
+  }
 }
 
 /**
  * @brief
  *	Processes incoming messages from the socket server
  */
-function processMessage( message )
-{
-	var jq_message = $( message );
-	if ( jq_message.is( '[status=no_exclusive_access]' ) )
-	{
-		onConnectionStatusChanged( 'no-exclusive-access' );
-		return;
-	}
-	else if ( jq_message.is( '[status=connection_accepted]' ) )
-	{
-		onConnectionStatusChanged( 'connected' );
-		return;
-	}
+function processMessage (message) {
+  var jqMessage = $(message)
+  if (jqMessage.is('[status=no_exclusive_access]')) {
+    onConnectionStatusChanged('no-exclusive-access')
+    return
+  } else if (jqMessage.is('[status=connection_accepted]')) {
+    onConnectionStatusChanged('connected')
+    return
+  }
 
-	var type = determineMessageType( jq_message );
+  var type = determineMessageType(jqMessage)
 
-	var processed  = {
-		jq_message    : jq_message,
-		message_raw   : message,
-		response_type : type,
-	};
+  var processed = {
+    jqMessage: jqMessage,
+    message_raw: message,
+    response_type: type
+  }
 
-	message_processors.forEach( function( cb )
-	{
-		cb( type, jq_message, processed );
-	} );
+  messageProcessors.forEach(function (cb) {
+    cb(type, jqMessage, processed)
+  })
 
+  // Call the explicitly specified callback, if applicable
+  var tid = processed.transactionId ||
+		jqMessage.filter('[transaction_id]').attr('transaction_id')
+  if (typeof transactionCallbacks[ parseInt(tid) ] === 'function') {
+    transactionCallbacks[ Number(tid) ](processed)
+  }
 
-	// Call the explicitly specified callback, if applicable
-	var tid = processed.transaction_id
-		|| jq_message.filter( '[transaction_id]' ).attr( 'transaction_id' );
-	if ( typeof transaction_callbacks[ parseInt( tid ) ] == 'function' )
-	{
-		transaction_callbacks[ Number( tid ) ]( processed );
-	}
+  if (promises[ Number(tid) ]) {
+    promises[ Number(tid) ](processed)
+    delete promises[ Number(tid) ]
+  }
 
-	if ( promises[ Number( tid ) ] )
-	{
-		promises[ Number( tid ) ]( processed );
-		delete promises[ Number( tid ) ];
-	}
-
-	return processed;
+  return processed
 }
 
 /**
@@ -268,23 +244,20 @@ function processMessage( message )
  *	Examines a message in order to determine its type (i.e., whether it indicates that a session
  *	has been initiated, a certain command has been processed, etc.)
  *
- * @param jQuery jq_message
+ * @param jQuery jqMessage
  *
  * @return string|false
  */
-function determineMessageType( jq_message )
-{
-	var type;
-	for ( var i in type_determiners )
-	{
-		type = type_determiners[ i ]( jq_message );
-		if ( type )
-		{
-			return type;
-		}
-	}
+function determineMessageType (jqMessage) {
+  var type
+  for (var i in typeDeterminers) {
+    type = tyddeterminers[ i ](jqMessage)
+    if (type) {
+      return type
+    }
+  }
 
-	return 'unknown';
+  return 'unknown'
 }
 
 /**
@@ -296,16 +269,12 @@ function determineMessageType( jq_message )
  *	the type of message. The first such callback to return a non-false value determines the
  *	type of the message.
  */
-function registerTypeDeterminer( fn )
-{
-	if ( typeof fn == 'function' )
-	{
-		type_determiners.push( fn );
-	}
-	else
-	{
-		throw new Error( 'Expected a function; received ' + typeof fn );
-	}
+function registerTypeDeterminer (fn) {
+  if (typeof fn === 'function') {
+    typeDeterminers.push(fn)
+  } else {
+    throw new Error('Expected a function; received ' + typeof fn)
+  }
 }
 
 /**
@@ -318,31 +287,24 @@ function registerTypeDeterminer( fn )
  *	 - A jQuery of message from the websocket
  *	 - An object in which processed data should be placed
  */
-function registerMessageProcessor( fn )
-{
-	if ( typeof fn == 'function' )
-	{
-		message_processors.push( fn );
-	}
-	else
-	{
-		throw new Error( 'Expected a function; received ' + typeof fn );
-	}
+function registerMessageProcessor (fn) {
+  if (typeof fn === 'function') {
+    messageProcessors.push(fn)
+  } else {
+    throw new Error('Expected a function; received ' + typeof fn)
+  }
 }
-
 
 /**
  * @return bool
  */
-function isConnected()
-{
-	return !!getConnection();
+function isConnected () {
+  return !!getConnection()
 }
 
 /**
  * @return WebSocket|null
  */
-function getConnection()
-{
-	return current_connection;
+function getConnection () {
+  return currentConnection
 }

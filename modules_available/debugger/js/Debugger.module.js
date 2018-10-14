@@ -1,4 +1,4 @@
-import Parsers  from './Parsers.module.js'
+import Parsers from './Parsers.module.js'
 import WsClient from './WsClient.module.js'
 export default { sessionIsActive, command }
 
@@ -11,82 +11,71 @@ export default { sessionIsActive, command }
  */
 
 // Whether or not a session with the DE is currently active
-var session_is_active = false;
+var sessionIsActiveFlag = false
 
-var response_parsers = Parsers.list();
+var responseParsers = Parsers.list()
 
-function init()
-{
-	WsClient.registerMessageProcessor( processMessage );
-	WsClient.registerTypeDeterminer( determineMessageType );
+function init () {
+  WsClient.registerMessageProcessor(processMessage)
+  WsClient.registerTypeDeterminer(determineMessageType)
 }
 
-subscribe( 'connection-status-changed', function( e )
-{
-	if ( e.status == 'error' || e.status == 'closed' )
-	{
-		setActiveSessionStatus( false );
-	}
-} );
+subscribe('connection-status-changed', function (e) {
+  if (e.status == 'error' || e.status == 'closed') {
+    setActiveSessionStatus(false)
+  }
+})
 
 /**
  * @brief
  *	Updates the flag for whether or not a session with the DE is currently active. If the call
  *	to this function actually alters the flag, an event is published
  *
- * @param bool session_is_active_local
- * @param bool is_new_session          ignored when `session_is_active_local` is true
+ * @param bool sessionIsActiveLocal
+ * @param bool isNewSession         ignored when `sessionIsActiveLocal` is true
  */
-function setActiveSessionStatus( session_is_active_local, is_new_session )
-{
-	if ( (!!session_is_active_local) != session_is_active )
-	{
-		session_is_active = !session_is_active;
+function setActiveSessionStatus (sessionIsActiveLocal, isNewSession) {
+  if ((!!sessionIsActiveLocal) != sessionIsActiveFlag) {
+    sessionIsActiveFlag = !sessionIsActiveFlag
 
-		publish( 'session-status-changed', {
-			status : session_is_active
-				? 'active'
-				: 'inactive',
-			is_new_session : session_is_active_local && is_new_session,
-		} );
-	}
+    publish('session-status-changed', {
+      status: sessionIsActiveFlag
+        ? 'active'
+        : 'inactive',
+      isNewSession: sessionIsActiveLocal && isNewSession
+    })
+  }
 }
 
-var command_args_conversion = {
-	breakpoint  : 'd',
-	context     : 'c',
-	file        : 'f',
-	line        : 'n',
-	name        : 'n',
-	stack_depth : 'd',
-	type        : 't',
-	value       : 'v',
-	transaction : 'i',
-	pattern     : 'p',
-	max_data    : 'm',
+var commandArgsConversion = {
+  breakpoint: 'd',
+  context: 'c',
+  file: 'f',
+  line: 'n',
+  name: 'n',
+  stack_depth: 'd',
+  type: 't',
+  value: 'v',
+  transaction: 'i',
+  pattern: 'p',
+  max_data: 'm',
 
-	session     : 'Xs',
-};
+  session: 'Xs'
+}
 
-function translateArgs( args_object )
-{
-	var out = {};
-	for ( var nice_name in args_object )
-	{
-		if ( typeof command_args_conversion[ nice_name ] == 'string' )
-		{
-			if ( args_object[ nice_name ] || args_object[ nice_name ] === 0 )
-			{
-				out[ command_args_conversion[ nice_name ] ] = args_object[ nice_name ]
-			}
-		}
-		else
-		{
-			throw new Error( 'Unrecognized argument "' + nice_name + '"' );
-		}
-	}
+function translateArgs (argsObject) {
+  var out = {}
+  for (var niceName in argsObject) {
+    if (typeof commandArgsConversion[ niceName ] === 'string') {
+      if (args_object[ niceName ] || argsObject[ niceName ] === 0) {
+        out[ commandArgsConversion[ niceName ] ] = argsObject[ niceName ]
+      }
+    } else {
+      throw new Error('Unrecognized argument "' + niceName + '"')
+    }
+  }
 
-	return out;
+  return out
 }
 
 /**
@@ -99,141 +88,123 @@ function translateArgs( args_object )
  *                     - A string of additional data to include with the command
  *                     - A function to handle the debugger engine's response
  */
-function command( name /*, ... */ )
-{
-	var command_args = {},
-		command      = name,
-		data         = '',
-		callback     = undefined,
-		max_args     = Math.min( 4, arguments.length );
+function command (name /*, ... */) {
+  var commandArgs = {}
 
-	for ( var i = 1; i < max_args; i++ )
-	{
-		switch ( typeof arguments[ i ] )
-		{
-			case 'string'   : data         = arguments[ i ]; break;
-			case 'object'   : command_args = arguments[ i ]; break;
-			case 'function' : callback     = arguments[ i ]; break;
-		}
-	}
+  var command = name
 
-	// Data that we'll include under the 'alter_data' within the event object; this will allow
-	// other entities to modify the command details
-	var alter_data = {
-		allow_send    : true,
-		command       : command,
-		command_args  : command_args,
-		callback      : callback,
-		data : data,
-	};
+  var data = ''
 
-	publish( 'before-send', { alter_data : alter_data } );
+  var callback = undefined
 
-	// Check if a recipient of the 'before-send' event prevented the data from being sent
-	if ( !alter_data.allow_send )
-	{
-		return false;
-	}
+  var maxArgs = Math.min(4, arguments.length)
 
-	callback     = alter_data.callback;
-	command      = alter_data.command;
-	command_args = translateArgs( alter_data.command_args );
-	data         = alter_data.data;
+  for (var i = 1; i < maxArgs; i++) {
+    switch (typeof arguments[ i ]) {
+      case 'string' : data = arguments[ i ]; break
+      case 'object' : commandArgs = arguments[ i ]; break
+      case 'function' : callback = arguments[ i ]; break
+    }
+  }
 
-	return WsClient.send( command, command_args, data, callback );
+  // Data that we'll include under the 'alterData' within the event object; this will allow
+  // other entities to modify the command details
+  var alterData = {
+    allow_send: true,
+    command: command,
+    commandArgs: commandArgs,
+    callback: callback,
+    data: data
+  }
+
+  publish('before-send', { alterData })
+
+  // Check if a recipient of the 'before-send' event prevented the data from being sent
+  if (!alterData.allow_send) {
+    return false
+  }
+
+  callback = alterData.callback
+  command = alterData.command
+  commandArgs = translateArgs(alterData.commandArgs)
+  data = alterData.data
+
+  return WsClient.send(command, commandArgs, data, callback)
 }
 
 /**
  * @return bool
  */
-function sessionIsActive()
-{
-	return session_is_active;
+function sessionIsActive () {
+  return sessionIsActiveFlag
 }
 
 /**
  * @brief
  *	A type determiner for WsClient
  */
-function determineMessageType( message )
-{
-	if ( message.is( 'init' ) )
-	{
-		return 'init';
-	}
-	else if ( message.is( 'response[command]' ) )
-	{
-		return 'debugger_command:' + message.filter( 'response:first' ).attr( 'command' );
-	}
-	else if ( message.is( 'wsserver' ) )
-	{
-		return 'server_info'
-	}
+function determineMessageType (message) {
+  if (message.is('init')) {
+    return 'init'
+  } else if (message.is('response[command]')) {
+    return 'debugger_command:' + message.filter('response:first').attr('command')
+  } else if (message.is('wsserver')) {
+    return 'server_info'
+  }
 }
 
 /**
  * @brief
  *	A message processor for WsClient
  */
-function processMessage( type, message, processed )
-{
-	if ( !type.match( /^(init$|server_info$|debugger_command:)/ ) )
-	{
-		return;
-	}
+function processMessage (type, message, processed) {
+  if (!type.match(/^(init$|server_info$|debugger_command:)/)) {
+    return
+  }
 
-	type = type.replace( /^debugger_command:/, '' );
+  type = type.replace(/^debugger_command:/, '')
 
-	// Wrap the XML message in a jQuery in order to examinine it more easily, and then discard
-	// info we don't need, such as the XML declaration
-	var jq_response_element = null;
-	var jq_message = message.each( function( i, el )
-	{
-		el = $( el );
-		if ( el.is( '[command],init,[status]' ) )
-		{
-			jq_response_element = el;
-			return false;
-		}
-	} );
+  // Wrap the XML message in a jQuery in order to examinine it more easily, and then discard
+  // info we don't need, such as the XML declaration
+  var jqResponseElement = null
+  var jqMessage = message.each(function (i, el) {
+    el = $(el)
+    if (el.is('[command],init,[status]')) {
+      jqResponseElement = el
+      return false
+    }
+  })
 
-	if ( !jq_response_element )
-	{
-		return;
-	}
+  if (!jqResponseElement) {
+    return
+  }
 
-	var is_stopping   = jq_response_element.is( '[status=stopping]' );
-	var is_stopped    = jq_response_element.is( '[status=stopped]' );
-	var session_ended = jq_response_element.is( '[status=session_end]' );
+  var isStopping = jqResponseElement.is('[status=stopping]')
+  var isStopped = jqResponseElement.is('[status=stopped]')
+  var sessionEnded = jqResponseElement.is('[status=session_end]')
 
-	if ( !jq_response_element.is( '[session-status-change=neutral]' ) )
-	{
-		setActiveSessionStatus( !(is_stopping || is_stopped || session_ended), type == 'init' );
-	}
+  if (!jqResponseElement.is('[session-status-change=neutral]')) {
+    setActiveSessionStatus(!(isStopping || isStopped || sessionEnded), type == 'init')
+  }
 
-	// The type of data for 'session-init' and 'response-received' events is nearly identical,
-	// so we build it now
-	$.extend( processed, {
-		jq_message    : jq_response_element,
-		parsed        : response_parsers[ type ] ? response_parsers[ type ]( jq_response_element ) : {},
-		is_stopping   : is_stopping,
-		is_stopped    : is_stopped,
-		session_ended : session_ended,
-	} );
+  // The type of data for 'session-init' and 'response-received' events is nearly identical,
+  // so we build it now
+  $.extend(processed, {
+    jqMessage: jqResponseElement,
+    parsed: responseParsers[ type ] ? responseParsers[ type ](jqResponseElement) : {},
+    isStopping: isStopping,
+    isStopped: isStopped,
+    sessionEnded: sessionEnded
+  })
 
-	// Publish the appropriate type of event
-	if ( type == 'init' )
-	{
-		publish( 'session-init', processed )
-	}
-	else if ( type == 'server_info' )
-	{
-		publish( 'server-info', processed )
-	}
-	else
-	{
-		publish( 'response-received', processed );
-	}
+  // Publish the appropriate type of event
+  if (type == 'init') {
+    publish('session-init', processed)
+  } else if (type == 'server_info') {
+    publish('server-info', processed)
+  } else {
+    publish('response-received', processed)
+  }
 }
 
-$( init );
+$(init)

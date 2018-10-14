@@ -1,4 +1,4 @@
-var $ = jQuery;
+var $ = jQuery
 
 /**
  * @brief
@@ -31,194 +31,163 @@ var $ = jQuery;
  *	                  that preprocess() did NOT return `false` for. The return value of this
  *	                  function is ignored.
  */
-$.fn.vtree = function( ctx, options )
-{
-	function pickIcon( property )
-	{
-		switch ( property.type )
-		{
-			case 'Superglobals' : return 'fa-globe';
-			case 'Locals'       : return 'fa-location-arrow';
-			case 'bool'         : return 'fa-toggle-on';
-			case 'null'         : return 'fa-ban';
-			case 'string'       : return 'fa-quote-left';
-			case 'object'       : return 'fa-cogs';
-			case 'array'        : return 'fa-th-list';
-			case 'int'          : return 'fa-hashtag';
-			case 'float'        : return 'fa-dot-circle';
-			default             : return 'fa-question-circle';
-		}
-	}
+$.fn.vtree = function (ctx, options) {
+  function pickIcon (property) {
+    switch (property.type) {
+      case 'Superglobals' : return 'fa-globe'
+      case 'Locals' : return 'fa-location-arrow'
+      case 'bool' : return 'fa-toggle-on'
+      case 'null' : return 'fa-ban'
+      case 'string' : return 'fa-quote-left'
+      case 'object' : return 'fa-cogs'
+      case 'array' : return 'fa-th-list'
+      case 'int' : return 'fa-hashtag'
+      case 'float' : return 'fa-dot-circle'
+      default : return 'fa-question-circle'
+    }
+  }
 
-	options = $.extend( {
-		preprocess  : () => true,
-		postprocess : () => true,
-		pickIcon,
-	}, options || {} );
+  options = $.extend({
+    preprocess: () => true,
+    postprocess: () => true,
+    pickIcon
+  }, options || {})
 
-	function buildContextTree( context, is_recursive )
-	{
-		var nodes = [];
+  function buildContextTree (context, isRecursive) {
+    var nodes = [];
 
-		(context instanceof Array ? context : context.children || [] ).forEach( function( property )
-		{
-			var stack_depth = property.stackDepth || 0;
-			var cid         = property.cid || 0;
-			var value       = $( '<div>' ).text( property.value || '' ).html();
-			var address     = property.address || `s${stack_depth}c${cid}` + btoa( property.fullname );
+    (context instanceof Array ? context : context.children || []).forEach(function (property) {
+      var stackDepth = property.stackDepth || 0
+      var cid = property.cid || 0
+      var value = $('<div>').text(property.value || '').html()
+      var address = property.address || `s${stackDepth}c${cid}` + btoa(property.fullname)
 
-			if ( property.type == 'null' )
-			{
-				value = 'NULL'
-			}
-			else if ( property.type == 'bool' )
-			{
-				value = Number( value ) ? 'TRUE' : 'FALSE';
-			}
+      if (property.type == 'null') {
+        value = 'NULL'
+      } else if (property.type == 'bool') {
+        value = Number(value) ? 'TRUE' : 'FALSE'
+      }
 
-			var icon = options.pickIcon( property );
+      var icon = options.pickIcon(property)
 
-			var node = {
-				li_attr : {
-					'data-identifier'    : property.fullname,
-					'class'              : 'identifier-leaf',
-					'data-stack-depth'   : stack_depth,
-					'data-current-value' : value,
-					'data-size'          : property.size,
-					'data-address'       : address,
-				},
-				icon    : 'identifier-icon fa fa-fw ' + icon,
-				text    : '<span class="identifier">'
-					+ ( is_recursive ? property.name : property.fullname )
-					+ '</span>',
-			};
+      var node = {
+        li_attr: {
+          'data-identifier': property.fullname,
+          'class': 'identifier-leaf',
+          'data-stack-depth': stackDepth,
+          'data-current-value': value,
+          'data-size': property.size,
+          'data-address': address
+        },
+        icon: 'identifier-icon fa fa-fw ' + icon,
+        text: '<span class="identifier">' +
+					(isRecursive ? property.name : property.fullname) +
+					'</span>'
+      }
 
-			if ( property.isReadOnly ){ node.li_attr[ 'data-no-alter' ] = 'true'; }
-			if ( cid               ){ node.li_attr[ 'data-cid' ] = cid; }
+      if (property.isReadOnly) { node.li_attr[ 'data-no-alter' ] = 'true' }
+      if (cid) { node.li_attr[ 'data-cid' ] = cid }
 
-			if ( [ 'uninitialized', 'object', 'array', 'Superglobals', 'Locals' ]
-				.indexOf( property.type ) == -1 )
-			{
-				node.text += ( property.name ? ': ' : '' ) + value;
-			}
+      if ([ 'uninitialized', 'object', 'array', 'Superglobals', 'Locals' ]
+        .indexOf(property.type) == -1) {
+        node.text += (property.name ? ': ' : '') + value
+      }
 
-			if ( property.children )
-			{
-				node.children = buildContextTree( property.children, true );
-			}
-			else if ( property.hasChildren )
-			{
-				node.children     = true;
-				node.get_children = async function( cb )
-				{
-					var children = await property.fetchChildren();
-					var tree = buildContextTree( children, true );
-					cb( tree );
-					return tree;
-				};
-			}
+      if (property.children) {
+        node.children = buildContextTree(property.children, true)
+      } else if (property.hasChildren) {
+        node.children = true
+        node.get_children = async function (cb) {
+          var children = await property.fetchChildren()
+          var tree = buildContextTree(children, true)
+          cb(tree)
+          return tree
+        }
+      }
 
-			nodes.push( node );
-		} );
+      nodes.push(node)
+    })
 
-		if ( is_recursive )
-		{
-			return nodes;
-		}
-		else
-		{
-			return function( obj, cb )
-			{
-				if ( obj.id == '#' )
-				{
-					cb( nodes );
-				}
-				else if ( typeof obj.original.get_children == 'function' )
-				{
-					obj.original.get_children( cb );
-				}
-			};
-		}
-	}
+    if (isRecursive) {
+      return nodes
+    } else {
+      return function (obj, cb) {
+        if (obj.id == '#') {
+          cb(nodes)
+        } else if (typeof obj.original.get_children === 'function') {
+          obj.original.get_children(cb)
+        }
+      }
+    }
+  }
 
-	var tree = buildContextTree( ctx );
+  var tree = buildContextTree(ctx)
 
-	return this.each( () => {
+  return this.each(() => {
+    if (options.preprocess(this, tree, ctx) === false) {
+      return
+    }
 
-		if ( options.preprocess( this, tree, ctx ) === false )
-		{
-			return;
-		}
+    this.jstree('destroy').jstree({
+      core: {
+        data: tree
+      }
+    })
 
-		this.jstree( "destroy" ).jstree( {
-			core : {
-				data : tree
-			}
-		} );
-
-		options.postprocess( this, tree, ctx );
-	} );
+    options.postprocess(this, tree, ctx)
+  })
 }
 
-subscribe( 'provide-tests', function()
-{
-	describe( "$.vtree", function()
-	{
-		it( "Basic usage", function()
-		{
-			var element = $( '<div>' );
-			expect( element.hasClass( 'jstree' ) ).toBe( false );
-			element.vtree( [] );
-			expect( element.hasClass( 'jstree' ) ).toBe( true );
-		} );
+subscribe('provide-tests', function () {
+  describe('$.vtree', function () {
+    it('Basic usage', function () {
+      var element = $('<div>')
+      expect(element.hasClass('jstree')).toBe(false)
+      element.vtree([])
+      expect(element.hasClass('jstree')).toBe(true)
+    })
 
-		it( "pickIcon", function()
-		{
-			var element = $( '<div>' );
-			var didCall = false;
-			element.vtree( [ { value : 'hello', type : 'string' } ], { pickIcon : function( p )
-			{
-				expect( p.value ).toBe( 'hello' );
-				didCall = true;
-			} } );
-			expect( didCall ).toBe( true );
-		} );
+    it('pickIcon', function () {
+      var element = $('<div>')
+      var didCall = false
+      element.vtree([ { value: 'hello', type: 'string' } ], { pickIcon: function (p) {
+        expect(p.value).toBe('hello')
+        didCall = true
+      } })
+      expect(didCall).toBe(true)
+    })
 
-		it( "preprocess", function()
-		{
-			var element = $( '<div>' );
-			var didCall = false;
-			var ctx = [ { value : 'hello', type : 'string' } ];
-			element.vtree( ctx, { preprocess : function( ...args )
-			{
-				expect( args.length ).toBe( 3 );
-				expect( args[ 0 ] instanceof jQuery ).toBe( true );
-				expect( typeof args[ 1 ] ).toBe( 'function' );
-				expect( args[ 2 ] ).toBe( ctx );
-				didCall = true;
-			} } );
-			expect( didCall ).toBe( true );
+    it('preprocess', function () {
+      var element = $('<div>')
+      var didCall = false
+      var ctx = [ { value: 'hello', type: 'string' } ]
+      element.vtree(ctx, { preprocess: function (...args) {
+        expect(args.length).toBe(3)
+        expect(args[ 0 ] instanceof jQuery).toBe(true)
+        expect(typeof args[ 1 ]).toBe('function')
+        expect(args[ 2 ]).toBe(ctx)
+        didCall = true
+      } })
+      expect(didCall).toBe(true)
 
-			element = $( '<div>' );
-			expect( element.hasClass( 'jstree' ) ).toBe( false );
-			element.vtree( [], { preprocess : () => false } );
-			expect( element.hasClass( 'jstree' ) ).toBe( false );
-		} );
+      element = $('<div>')
+      expect(element.hasClass('jstree')).toBe(false)
+      element.vtree([], { preprocess: () => false })
+      expect(element.hasClass('jstree')).toBe(false)
+    })
 
-		it( "postprocess", function()
-		{
-			var element = $( '<div>' );
-			var didCall = false;
-			var ctx = [ { value : 'hello', type : 'string' } ];
-			element.vtree( ctx, { preprocess : function( ...args )
-			{
-				expect( args.length ).toBe( 3 );
-				expect( args[ 0 ] instanceof jQuery ).toBe( true );
-				expect( typeof args[ 1 ] ).toBe( 'function' );
-				expect( args[ 2 ] ).toBe( ctx );
-				didCall = true;
-			} } );
-			expect( didCall ).toBe( true );
-		} );
-	} );
-} );
+    it('postprocess', function () {
+      var element = $('<div>')
+      var didCall = false
+      var ctx = [ { value: 'hello', type: 'string' } ]
+      element.vtree(ctx, { preprocess: function (...args) {
+        expect(args.length).toBe(3)
+        expect(args[ 0 ] instanceof jQuery).toBe(true)
+        expect(typeof args[ 1 ]).toBe('function')
+        expect(args[ 2 ]).toBe(ctx)
+        didCall = true
+      } })
+      expect(didCall).toBe(true)
+    })
+  })
+})
