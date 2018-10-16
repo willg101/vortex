@@ -30,11 +30,11 @@ async function fetchFromSever (path, cb) {
     var hostname = await hostnamePromise
     var codebaseRoot = await LanguageAbstractor.getCodebaseRoot(path)
 
-    if (message.jq_message.find(' > error[code=100]').length) {
-      message.parsed.file_contents = false
+    if (message.jqMessage.find(' > error[code=100]').length) {
+      message.parsed.fileContents = false
     }
-    var contents = message.parsed.file_contents || false
-    var errorReason = !contents && (message.is_stopping ? 'stopping' : (message.is_stopped ? 'stopped' : 'other'))
+    var contents = message.parsed.fileContents || false
+    var errorReason = !contents && (message.isStopping ? 'stopping' : (message.isStopped ? 'stopped' : 'other'))
     if (!errorReason) {
       filecache[ path ] = {
         contents,

@@ -74,7 +74,7 @@ $(document).on('click', '.all-user-accounts .remove-account', function (e) {
   var btn = $(e.target).closest('button')
   var row = $(e.target).closest('[data-user-id]')
   var userId = row.attr('data-user-id')
-  var content = render('login.confirmation', { userId: userId, comfirm_type: 'remove' })
+  var content = render('login.confirmation', { userId: userId, comfirmType: 'remove' })
   new vTheme.Popover(content, [ 'remove-account-popover' ], {
     at: 'left bottom',
     my: 'left top',

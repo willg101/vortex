@@ -32,10 +32,10 @@ async function getCurrentCodebase () {
 }
 
 subscribe('server-info', function (e) {
-  if (e.jq_message.is('[type=peek_queue]')) {
+  if (e.jqMessage.is('[type=peek_queue]')) {
     knownSessions = []
     sessionId = ''
-    e.jq_message.find('queuedsession').each(function () {
+    e.jqMessage.find('queuedsession').each(function () {
       var self = $(this)
       sessionId = self.attr('connection_id')
       if (!sessionId) {
@@ -48,8 +48,8 @@ subscribe('server-info', function (e) {
         active: self.attr('active') == 'true',
         uuid: self.attr('uuid'),
         host: self.attr('host'),
-        codebase_id: self.attr('codebase_id'),
-        codebase_root: self.attr('codebase_root'),
+        codebaseId: self.attr('codebase_id'),
+        codebaseRoot: self.attr('codebase_root'),
         file: file.replace(/^file:\/\//, '')
       })
     })
@@ -61,7 +61,7 @@ subscribe('server-info', function (e) {
     } else {
       indicator.addClass('inactive')
     }
-  } else if (e.jq_message.is('[type=detach_queued_session]')) {
+  } else if (e.jqMessage.is('[type=detach_queued_session]')) {
     Debugger.command('X-ctrl:peek_queue')
   }
 })

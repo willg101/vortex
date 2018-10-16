@@ -45,7 +45,7 @@ class TreeState {
    * @brief
    *  Track the closing of a tree node
    *
-   * @param object node The `node` argument passed to a `clos_node.jstree` event handler
+   * @param object node The `node` argument passed to a `close_node.jstree` event handler
    */
   close (node) {
     var prevNode = this.tree
@@ -149,9 +149,9 @@ $(document).on('dblclick.jstree', '#context', async function (e) {
 
   var result = await Debugger.command('property_get', {
     name: identifier,
-    stack_depth: stackDepth,
+    stackDepth: stackDepth,
     context: cid,
-    max_data: size
+    maxData: size
   })
   var currentVal = $('<div>').text((result.parsed[ 0 ] || {}).value || '').html()
   vTheme.showModal('Update Value',
@@ -159,7 +159,7 @@ $(document).on('dblclick.jstree', '#context', async function (e) {
       stackDepth,
       cid,
       size,
-      current_val: currentVal }))
+      currentVal }))
   $('.value-input').focus()
   document.execCommand('selectAll', false, null)
 })
@@ -180,7 +180,7 @@ $(document).on('keypress', '.value-input', async function (e) {
 
     await Debugger.command('property_set', {
       name: identifier,
-      stack_depth: stackDepth,
+      stackDepth,
       context: cid
     }, newValue)
 

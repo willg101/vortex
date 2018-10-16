@@ -99,7 +99,7 @@ Parser.getContainingExpression = function (it) {
 
       // If we walked back to the beginning of the token stream, or encountered an
       // expression separator, the hovered character is not within a variable expression.
-      if (!token || this.expression_separators.has(token.value)) {
+      if (!token || this.expressionSeparators.has(token.value)) {
         return false
       }
     }
@@ -127,7 +127,7 @@ Parser.getContainingExpression = function (it) {
   return false
 }
 
-Parser.expression_separators = new Set([ ':', ';', ')', '(', ',' ])
+Parser.expressionSeparators = new Set([ ':', ';', ')', '(', ',' ])
 
 Parser.prototype.selectSequence = function (token) {
   if (token) {
@@ -174,7 +174,7 @@ Parser.prototype.parse = function () {
 
   // Flags
   var flags = {
-    skip_seek: false,
+    skipSeek: false,
     stop: false,
     restart: false
   }
@@ -182,7 +182,7 @@ Parser.prototype.parse = function () {
   var action
 
   for (var step = 0; !step || step < sequence.length; step++) {
-    if (flags.skip_seek) {
+    if (flags.skipSeek) {
       current = this.iter.getCurrentToken()
     } else {
       current = this.next()
@@ -198,7 +198,7 @@ Parser.prototype.parse = function () {
       action = sequence[ step ](current)
     }
 
-    flags = { no_seek: false, stop: false, restart: false }
+    flags = { noSeek: false, stop: false, restart: false }
     this.applyAction(action, current, flags)
     if (flags.stop) {
       return
@@ -223,7 +223,7 @@ Parser.prototype.applyAction = function (action, token, flags) {
         this.pendingExpr += parsed.expr
         this.end.column = parsed.range.end.column // TODO: we need a pending end?
         this.end.row = parsed.range.end.row // TODO: we need a pending end?
-        flags.skip_seek = true // We're already at the correct token now;
+        flags.skipSeek = true // We're already at the correct token now;
       } else {
         throw new Error('Failed to parse variable expression')
       }

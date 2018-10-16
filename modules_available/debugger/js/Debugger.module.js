@@ -53,12 +53,12 @@ var commandArgsConversion = {
   file: 'f',
   line: 'n',
   name: 'n',
-  stack_depth: 'd',
+  stackDepth: 'd',
   type: 't',
   value: 'v',
   transaction: 'i',
   pattern: 'p',
-  max_data: 'm',
+  maxData: 'm',
 
   session: 'Xs'
 }
@@ -110,7 +110,7 @@ function command (name /*, ... */) {
   // Data that we'll include under the 'alterData' within the event object; this will allow
   // other entities to modify the command details
   var alterData = {
-    allow_send: true,
+    allowSend: true,
     command: command,
     commandArgs: commandArgs,
     callback: callback,
@@ -120,7 +120,7 @@ function command (name /*, ... */) {
   publish('before-send', { alterData })
 
   // Check if a recipient of the 'before-send' event prevented the data from being sent
-  if (!alterData.allow_send) {
+  if (!alterData.allowSend) {
     return false
   }
 

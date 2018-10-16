@@ -37,9 +37,9 @@ function renderLayoutSelector (i, layoutOnly) {
     : new Pane(el)
 
   return render('vue.layout_selector', {
-    include_controls: !layoutOnly,
+    includeControls: !layoutOnly,
     layoutTitle: el.attr('data-title'),
-    split_id: el.attr('data-split-id'),
+    splitId: el.attr('data-split-id'),
     index: i,
     layoutPreview: panePreview.buildPreviewLayout()
   })

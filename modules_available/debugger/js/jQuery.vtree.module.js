@@ -97,7 +97,7 @@ $.fn.vtree = function (ctx, options) {
         node.children = buildContextTree(property.children, true)
       } else if (property.hasChildren) {
         node.children = true
-        node.get_children = async function (cb) {
+        node.getChildren = async function (cb) {
           var children = await property.fetchChildren()
           var tree = buildContextTree(children, true)
           cb(tree)
@@ -114,8 +114,8 @@ $.fn.vtree = function (ctx, options) {
       return function (obj, cb) {
         if (obj.id == '#') {
           cb(nodes)
-        } else if (typeof obj.original.get_children === 'function') {
-          obj.original.get_children(cb)
+        } else if (typeof obj.original.getChildren === 'function') {
+          obj.original.getChildren(cb)
         }
       }
     }

@@ -31,8 +31,8 @@ function push (file) {
   recentFiles.unshift({
     filename,
     host: file.hostname,
-    codebase_dir: file.codebase_root,
-    codebase_id: file.codebase_id
+    codebaseDir: file.codebaseRoot,
+    codebaseId: file.codebaseId
   })
   localStorage.setItem(PERSISTENT_STORAGE_KEY, JSON.stringify(recentFiles))
 }

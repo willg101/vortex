@@ -43,11 +43,11 @@ function set (key, value) {
   var lsKey = reduceKeyCollisionProbability(key)
   var data = {
     key: key,
-    new_value: value,
+    newValue: value,
     prevent: false,
-    old_value: dataStore[ key ]
+    oldValue: dataStore[ key ]
   }
-  value = data.new_value
+  value = data.newValue
   publish('set-persistent-data', { data: data })
   if (!data.prevent) {
     localStorage.setItem(lsKey, JSON.stringify(value))

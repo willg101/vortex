@@ -27,7 +27,7 @@ class ConsoleCommandDisplay {
    * @param jQueryTerminal term
    */
   constructor (term) {
-    this.id = 'ccd_' + this.constructor.id_ctr++
+    this.id = 'ccd_' + this.constructor.idCtr++
     var innerFn = () => `<div id="${this.id}"></div>`
     term.echo(() => innerFn(), { raw: true })
 
@@ -97,7 +97,7 @@ subscribe('program-state-ui-refresh-needed', (e) => {
   clearTimeout(stateRefreshTimeout)
 })
 
-ConsoleCommandDisplay.id_ctr = 0
+ConsoleCommandDisplay.idCtr = 0
 
 // Initialize the console
 subscribe('vortex-init', function () {
@@ -111,7 +111,7 @@ subscribe('vortex-init', function () {
       display.removeSpinner()
       display.append(result.message, result.status)
     } else {
-      display.replaceSpinner($('<div>').vtree(result.return_value))
+      display.replaceSpinner($('<div>').vtree(result.returnValue))
     }
 
     performDelayedStateRefresh()

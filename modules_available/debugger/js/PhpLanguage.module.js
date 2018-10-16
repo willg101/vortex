@@ -208,7 +208,7 @@ class PhpLanguage extends LanguageAbstractor {
         if (!Debugger.sessionIsActive()) {
           rejectPromise('Could not initiate a new session (timed out)')
         } else {
-          resolve()
+          resolvePromise()
         }
       };
       this.dummySessionTimeout = setTimeout(tryProcessing, DUMMY_SESSION_TIMEOUT_MS)

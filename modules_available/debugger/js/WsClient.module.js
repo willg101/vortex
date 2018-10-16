@@ -216,8 +216,8 @@ function processMessage (message) {
 
   var processed = {
     jqMessage: jqMessage,
-    message_raw: message,
-    response_type: type
+    messageRaw: message,
+    responseType: type
   }
 
   messageProcessors.forEach(function (cb) {
@@ -251,7 +251,7 @@ function processMessage (message) {
 function determineMessageType (jqMessage) {
   var type
   for (var i in typeDeterminers) {
-    type = typedeterminers[ i ](jqMessage)
+    type = typeDeterminers[ i ](jqMessage)
     if (type) {
       return type
     }

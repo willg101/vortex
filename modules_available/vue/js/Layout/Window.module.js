@@ -3,16 +3,16 @@ import Pane from './Pane.module.js'
 export default Window
 
 var attr = {
-  window_id: 'data-window-id',
-  minimize_icon: 'data-minimize-icon'
+  windowId: 'data-window-id',
+  minimizeIcon: 'data-minimize-icon'
 }
 
 var selectors = {
-  minimize_btn: '.btn.minimize',
-  maximize_btn: '.btn.maximize',
-  unmaximize_btn: '.btn.unmaximize',
-  minimized_icons_container: '.toolbar .right',
-  current_layout: '#layout_in_use'
+  minimizeBtn: '.btn.minimize',
+  maximizeBtn: '.btn.maximize',
+  unmaximizeBtn: '.btn.unmaximize',
+  minimizedIconsContainer: '.toolbar .right',
+  currentLayout: '#layout_in_use'
 }
 
 /**
@@ -23,13 +23,13 @@ var selectors = {
  */
 function Window (el) {
   this.element = $(el)
-  this.id = this.element.attr(attr.window_id) // used in saving/restoring state
+  this.id = this.element.attr(attr.windowId) // used in saving/restoring state
 
   this.persistor = new Persistor(this.id + '_persistor')
   this.element.data('window', this)
 
   // Find out which Pane should contain this window, and then attach to validate that Pane
-  Pane.current_layout.suggestOwner(this).attach(this)
+  Pane.currentLayout.suggestOwner(this).attach(this)
 
   if (this.state == 'minimized') {
     this.state = 'normal'
@@ -41,8 +41,8 @@ function Window (el) {
     this.state = 'normal'
   }
 
-  $(selectors.minimize_btn, el).on('click', this.minimize.bind(this, undefined, undefined))
-  $(selectors.maximize_btn + ', ' + selectors.unmaximize_btn, el).on('click', this.maximize.bind(this, undefined, undefined))
+  $(selectors.minimizeBtn, el).on('click', this.minimize.bind(this, undefined, undefined))
+  $(selectors.maximizeBtn + ', ' + selectors.unmaximizeBtn, el).on('click', this.maximize.bind(this, undefined, undefined))
   subscribe('window-maximized', this.onOtherWindowMaximized.bind(this))
   subscribe('window-unmaximized', this.onOtherWindowUnmaximized.bind(this))
 }
@@ -140,7 +140,7 @@ Window.prototype.save = function () {
 
 Window.prototype.addMinimizedIcon = function () {
   var that = this
-  var icon = this.element.attr(attr.minimize_icon)
+  var icon = this.element.attr(attr.minimizeIcon)
   $('<span>').addClass('fa fa-' + icon).appendTo('<button class="no-margin-top btn">')
     .parent()
     .data('related_window', this)
@@ -151,7 +151,7 @@ Window.prototype.addMinimizedIcon = function () {
       })
         .addClass('window-restored')
     })
-    .prependTo(selectors.minimized_icons_container)
+    .prependTo(selectors.minimizedIconsContainer)
 }
 
 Window.prototype.onOtherWindowMaximized = function (e) {
@@ -208,7 +208,7 @@ Window.prototype.maximize = function (enableOrDisable, onFinish) {
       publish('window-maximized', { window: this })
       this.state = 'maximized'
       this.element.addClass('maximized blurable')
-      this.maximized_placeholder = $('<div data-role="placeholder">')
+      this.maximizedPlaceholder = $('<div data-role="placeholder">')
         .css({
           height: this.element.css('height'),
           width: this.element.css('width')
@@ -219,12 +219,12 @@ Window.prototype.maximize = function (enableOrDisable, onFinish) {
         .css({
           position: 'fixed'
         })
-      this.maximized_placeholder.insertAfter(this.element)
-      this.element.detach().insertAfter(selectors.current_layout)
+      this.maximizedPlaceholder.insertAfter(this.element)
+      this.element.detach().insertAfter(selectors.currentLayout)
         .position({
           my: 'left top',
           at: 'left top',
-          of: this.maximized_placeholder,
+          of: this.maximizedPlaceholder,
           collision: 'none'
         }).removeClass('no-transition')
       setTimeout(function () {
@@ -246,7 +246,7 @@ Window.prototype.maximize = function (enableOrDisable, onFinish) {
     this.element.position({
       my: 'left top',
       at: 'left top',
-      of: this.maximized_placeholder,
+      of: this.maximizedPlaceholder,
       collision: 'none'
     })
     var newCss = {
@@ -257,13 +257,13 @@ Window.prototype.maximize = function (enableOrDisable, onFinish) {
       height: ''
     }
     this.element.css({
-      height: this.maximized_placeholder.css('height'),
-      width: this.maximized_placeholder.css('width')
+      height: this.maximizedPlaceholder.css('height'),
+      width: this.maximizedPlaceholder.css('width')
     })
     setTimeout(function () {
-      this.element.addClass('no-transition').detach().insertAfter(this.maximized_placeholder)
-      this.maximized_placeholder.remove()
-      this.maximized_placeholder = undefined
+      this.element.addClass('no-transition').detach().insertAfter(this.maximizedPlaceholder)
+      this.maximizedPlaceholder.remove()
+      this.maximizedPlaceholder = undefined
       this.element.css(newCss).removeClass('no-transition')
       this.owner.refresh()
     }.bind(this), 200)
@@ -278,9 +278,9 @@ Window.prototype.maximize = function (enableOrDisable, onFinish) {
  *  Initializes all windows on the page
  */
 Window.boot = function () {
-  Window.all_windows = []
-  $('[' + attr.window_id + ']').each(function () {
-    Window.all_windows.push(new Window($(this)))
+  Window.allWindows = []
+  $('[' + attr.windowId + ']').each(function () {
+    Window.allWindows.push(new Window($(this)))
   })
 }
 

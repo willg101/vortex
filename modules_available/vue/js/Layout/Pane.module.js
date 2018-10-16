@@ -9,8 +9,8 @@ var attr = {
 
 var selectors = {
   pane: '.layout-split',
-  current_layout: '#layout_in_use',
-  leaf_pane: '.leaf'
+  currentLayout: '#layout_in_use',
+  leafPane: '.leaf'
 }
 
 const DEFAULT_LAYOUT = 'outer0_3'
@@ -64,18 +64,18 @@ function Pane (el, parent) {
       that.children.push(new Pane($(this), that))
     })
   } else {
-    this.suggested_windows = new Persistor(this.id + '_suggested_windows')
+    this.suggestedWindows = new Persistor(this.id + '_suggested_windows')
   }
 
-  this.size_persistor = new Persistor(this.id + '_size')
+  this.sizePersistor = new Persistor(this.id + '_size')
 }
 
 Object.defineProperty(Pane.prototype, 'size', {
   get: function () {
-    return this.size_persistor.size
+    return this.sizePersistor.size
   },
   set: function (val) {
-    this.size_persistor.size = val
+    this.sizePersistor.size = val
     return val
   }
 })
@@ -149,7 +149,7 @@ Pane.prototype.initSortable = function () {
   }
 
   var layout = this.element
-  layout.find(selectors.leaf_pane).each(function () {
+  layout.find(selectors.leafPane).each(function () {
     Sortable.create(this, {
       group: 'omega',
       handle: '.label-row',
@@ -157,12 +157,12 @@ Pane.prototype.initSortable = function () {
       scroll: false,
       animation: 150,
       onStart: function () {
-        $(selectors.current_layout).addClass('rearranging').find(selectors.pane).css('display', '')
+        $(selectors.currentLayout).addClass('rearranging').find(selectors.pane).css('display', '')
       },
       onEnd: function (e) {
         var self = $(this)
         self.css(self.is('.horizontal') ? 'height' : 'width', '')
-        $(selectors.current_layout).removeClass('rearranging')
+        $(selectors.currentLayout).removeClass('rearranging')
         $(e.to).data('pane').attach($(e.item).data('window'))
 
         publish('layout-changed')
@@ -178,11 +178,11 @@ Pane.prototype.initSortable = function () {
  * @param noRecurse OPTIONAL. When passed (and non-false), prevents a recursive save.
  */
 Pane.prototype.save = function (noRecurse) {
-  for (var key in this.suggested_windows) {
-    delete this.suggested_windows[ key ]
+  for (var key in this.suggestedWindows) {
+    delete this.suggestedWindows[ key ]
   }
   this.windows.forEach(function (el, i) {
-    this.suggested_windows[ el.id ] = i
+    this.suggestedWindows[ el.id ] = i
   }.bind(this))
 
   if (!noRecurse) {
@@ -225,14 +225,14 @@ Pane.prototype.suggestOwner = function (aWindow) {
   // When the root Pane is a leaf, it is the only Pane that may contain windows
   if (this.isLeaf() && this.isRoot()) {
     // Don't associate the window id with this Pane more than once
-    if (typeof this.suggested_windows[ aWindow ] !== 'undefined') {
-      this.suggested_windows[ aWindow ] = Object.keys(this.suggested_windows).length
+    if (typeof this.suggestedWindows[ aWindow ] !== 'undefined') {
+      this.suggestedWindows[ aWindow ] = Object.keys(this.suggestedWindows).length
     }
 
     return this
   } else if (this.isLeaf()) {
     // Check if this leaf is known to own the given window
-    return typeof this.suggested_windows[ aWindow ] !== 'undefined'
+    return typeof this.suggestedWindows[ aWindow ] !== 'undefined'
       ? this
       : false
   } else {
@@ -251,7 +251,7 @@ Pane.prototype.suggestOwner = function (aWindow) {
     if (!this.isRoot()) {
       return false
     } else {
-      return this.element.find(selectors.leaf_pane).sort((a, b) => a.children.length - b.children.length).first().data('pane')
+      return this.element.find(selectors.leafPane).sort((a, b) => a.children.length - b.children.length).first().data('pane')
     }
   }
 }
@@ -309,11 +309,11 @@ Pane.prototype.refresh = function (didShow) {
   // Because the call this.show() does not always take effect immediately, we will finish this
   // validation later using setTimeout(), which will allow this function to return, and for
   // the browser to update, before continuing
-  if (!this.refresh_queued) {
-    this.refresh_queued = true // If the browser is running slowly, don't let multiple
+  if (!this.refreshQueued) {
+    this.refreshQueued = true // If the browser is running slowly, don't let multiple
                                // validations pile up here
     setTimeout(function () {
-      this.refresh_queued = false
+      this.refreshQueued = false
 
       var visibleChildren = this.element.children(':visible:not(.gutter)')
 
@@ -409,8 +409,8 @@ Pane.prototype.attach = function (aWindow) {
 
   aWindow.owner = this
 
-  var index = this.suggested_windows[ aWindow.id ]
-  if (htmlElemenyNeedsMove) {
+  var index = this.suggestedWindows[ aWindow.id ]
+  if (htmlElementNeedsMove) {
     if (typeof index !== 'undefined' && this.element.children().length > index) {
       this.element.children().eq(index).before(aWindow.element)
       this.windows.splice(index, 0, aWindow)
@@ -422,8 +422,8 @@ Pane.prototype.attach = function (aWindow) {
     this.windows.splice(aWindow.element.index(), 0, aWindow)
   }
 
-  if (Pane.saving_allowed) {
-    Pane.current_layout.save()
+  if (Pane.savingAllowed) {
+    Pane.currentLayout.save()
   }
 
   this.refreshAll()
@@ -458,13 +458,13 @@ Pane.boot = function () {
     localStorage.setItem(SELECTED_LAYOUT_LS_KEY, layoutId)
   }
   var layoutElement = $('[' + attr.splitId + '="' + layoutId + '"]')
-  layoutElement.appendTo(selectors.current_layout)
-  this.current_layout = new Pane(layoutElement)
-  this.current_layout.initSortable()
-  this.current_layout.refreshAll()
+  layoutElement.appendTo(selectors.currentLayout)
+  this.currentLayout = new Pane(layoutElement)
+  this.currentLayout.initSortable()
+  this.currentLayout.refreshAll()
 
   publish('pane-boot')
-  Pane.saving_allowed = true
+  Pane.savingAllowed = true
 }
 
 $(Pane.boot.bind(Pane))

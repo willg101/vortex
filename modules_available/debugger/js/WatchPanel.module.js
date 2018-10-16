@@ -50,7 +50,7 @@ subscribe('session-status-changed', function (e) {
 })
 
 subscribe('response-received', function (e) {
-  if (e.parsed && e.parsed.is_continuation) {
+  if (e.parsed && e.parsed.isContinuation) {
     renderExpressions()
   }
 })
@@ -65,7 +65,7 @@ $(document).on('dblclick', '#watch .display-expression', function (e) {
 })
 
 function notifyUserOfWatchWarning () {
-  if (!settings.no_notify && !hasWarnedThisSession) {
+  if (!settings.noNotify && !hasWarnedThisSession) {
     vTheme.notify('error', 'A watched expression failed to execute and may cause stray' +
       ' warnings or notices in your output.', '', { timeOut: 10000 })
     hasWarnedThisSession = true
@@ -103,12 +103,12 @@ async function evalWatchedExpression (expression, output) {
     $(output).jstree('destroy')
   }
 
-  if (result.return_value && result.return_value.length) {
-    result.return_value.forEach(function (item) {
+  if (result.returnValue && result.returnValue.length) {
+    result.returnValue.forEach(function (item) {
       item.name = item.name || ''
       item.fullname = item.fullname || ''
     })
-    $(output).html('').vtree(result.return_value)
+    $(output).html('').vtree(result.returnValue)
   } else if (result.message) {
     message = $('<i class="fa fa-exclamation-triangle"></i>').attr('title', result.message)
     $(output).html(message)
@@ -128,7 +128,7 @@ function renderExpression (expr, id) {
   var existingRow = $('#watch [data-watch-id="' + id + '"]')
   if (!existingRow.length) {
     $('#watch table.watch').append(render('debugger.watch_panel', {
-      no_table: true,
+      noTable: true,
       expressions: fauxExpressions
     }))
   } else {

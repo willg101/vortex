@@ -39,7 +39,7 @@ class StackFrame {
     } else {
       this.contextPromise = new Promise(async (resolve) => {
         var response = await Debugger.command('context_names', {
-          stack_depth: this.level
+          stackDepth: this.level
         })
         var contexts = []
         var contextDescriptor = null
@@ -47,7 +47,7 @@ class StackFrame {
           contextDescriptor = response.parsed[ i ]
           var contextItems = await Debugger.command('context_get', {
             context: contextDescriptor.id,
-            stack_depth: this.level
+            stackDepth: this.level
           })
           contexts.push(new ContextRoot(contextDescriptor.name,
             contextDescriptor.id, contextItems.parsed, this.level))
@@ -134,7 +134,7 @@ class ContextNode {
         this.fetchingChildrenPromise = new Promise(async (resolve) => {
           var children = await Debugger.command('property_get', {
             name: this.fullname,
-            stack_depth: this.stackDepth || 0,
+            stackDepth: this.stackDepth || 0,
             context: this.cid || undefined
           })
           children = children.parsed[ 0 ].children
@@ -204,7 +204,7 @@ function refreshState () {
 
 subscribe('server-info', function (e) {
   // Handle a debug session change
-  if (e.jq_message.is('[status=session_change]')) {
+  if (e.jqMessage.is('[status=session_change]')) {
     whenReadyTo('switch-session').then(async () => {
       var state = new ProgramState()
       await state.ctorFinished
@@ -214,7 +214,7 @@ subscribe('server-info', function (e) {
 })
 
 subscribe('response-received', e => {
-  if (e.parsed.is_continuation && !e.parsed.is_stopping) {
+  if (e.parsed.isContinuation && !e.parsed.isStopping) {
     refreshState()
   }
 })

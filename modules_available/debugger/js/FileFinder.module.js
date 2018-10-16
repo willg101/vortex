@@ -188,7 +188,7 @@ async function processGlobOnServer (prefix, cb) {
   if (!Debugger.sessionIsActive()) {
     WsClient.send('X-glob', { p: prefix }, function (e) {
       var items = []
-      $(e.message_raw).find('[type]').each(function () {
+      $(e.messageRaw).find('[type]').each(function () {
         items.push({
           type: $(this).attr('type'),
           name: $(this).text()

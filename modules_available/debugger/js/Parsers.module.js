@@ -74,7 +74,7 @@ var responseParsers = {
    */
   source: function (jqMessage) {
     var data = {}
-    data.file_contents = parseCdata(jqMessage)
+    data.fileContents = parseCdata(jqMessage)
     return data
   },
 
@@ -197,7 +197,7 @@ function parseBreakpointAddRemove (jqMessage) {
  */
 function parseContinuationCommand (jqMessage) {
   var info = extractAttrs(jqMessage, [ 'status', 'reason' ])
-  info.is_continuation = true
+  info.isContinuation = true
   if (jqMessage.children().length) {
     $.extend(info, extractAttrs(jqMessage.children(), [ 'filename', 'lineno' ]))
   }
@@ -227,7 +227,7 @@ function parseBreakpoints (jqMessage) {
     var attrs = extractAttrs(el, [ 'type', 'filename', 'lineno', 'state', 'function',
       'temporary', 'hit_count', 'hit_value', 'hit_condition', 'exception',
       'expression', 'id' ])
-    attrs.expression_element = parseCdata(el.find('expression'))
+    attrs.expressionElement = parseCdata(el.find('expression'))
     if (breakpoints[ attrs.type ]) {
       breakpoints[ attrs.type ].push(attrs)
     } else {
@@ -455,7 +455,7 @@ subscribe('provide-tests', function () {
       // Empty
       var jqMsg = $('<root></root>')
       var output = parseContinuationCommand(jqMsg)
-      expect(output.is_continuation).toBe(true)
+      expect(output.isContinuation).toBe(true)
       expect(output.status).toBeUndefined()
       expect(output.reason).toBeUndefined()
       expect(output.filename).toBeUndefined()
@@ -464,7 +464,7 @@ subscribe('provide-tests', function () {
       // reason & status, no filename or lineno
       jqMsg = $('<root status="xxx-status" reason="xxx-reason"></root>')
       output = parseContinuationCommand(jqMsg)
-      expect(output.is_continuation).toBe(true)
+      expect(output.isContinuation).toBe(true)
       expect(output.status).toBe('xxx-status')
       expect(output.reason).toBe('xxx-reason')
       expect(output.filename).toBeUndefined()
@@ -473,7 +473,7 @@ subscribe('provide-tests', function () {
       // filename & lineno, no reason or status
       jqMsg = $('<root><xdebug:message filename="xxx-fn" lineno="xxx-ln"></xdebug:message></response></root>')
       output = parseContinuationCommand(jqMsg)
-      expect(output.is_continuation).toBe(true)
+      expect(output.isContinuation).toBe(true)
       expect(output.status).toBeUndefined()
       expect(output.reason).toBeUndefined()
       expect(output.filename).toBe('xxx-fn')
@@ -482,7 +482,7 @@ subscribe('provide-tests', function () {
       // filename & status, no lineno or reason
       jqMsg = $('<root status="xxx-status"><xdebug:message filename="xxx-fn" ></xdebug:message></response></root>')
       output = parseContinuationCommand(jqMsg)
-      expect(output.is_continuation).toBe(true)
+      expect(output.isContinuation).toBe(true)
       expect(output.status).toBe('xxx-status')
       expect(output.reason).toBeUndefined()
       expect(output.filename).toBe('xxx-fn')
@@ -491,7 +491,7 @@ subscribe('provide-tests', function () {
       // lineno and reason, no filename or status
       jqMsg = $('<root reason="xxx-reason"><xdebug:message lineno="xxx-ln" ></xdebug:message></response></root>')
       output = parseContinuationCommand(jqMsg)
-      expect(output.is_continuation).toBe(true)
+      expect(output.isContinuation).toBe(true)
       expect(output.status).toBeUndefined()
       expect(output.reason).toBe('xxx-reason')
       expect(output.filename).toBeUndefined()

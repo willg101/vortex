@@ -18,8 +18,8 @@ function init () {
 
   for (var i in data) {
     var filename = data[ i ].filename
-    for (var j in data[ i ].bp_list) {
-      sessionBreakpoints.create(filename, data[ i ].bp_list[ j ].line, data[ i ].bp_list[ j ].expression)
+    for (var j in data[ i ].bpList) {
+      sessionBreakpoints.create(filename, data[ i ].bpList[ j ].line, data[ i ].bpList[ j ].expression)
     }
   }
 }

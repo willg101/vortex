@@ -49,7 +49,7 @@ PopoverList.prototype.renderLists = function () {
         var attr = options[ i ].attr || {}
         var content = options[ i ].content
         var item = $('<' + tagName + '>').addClass('popover-list-option').attr(attr).html(content).appendTo(container)
-        if (!options[ i ].no_close) {
+        if (!options[ i ].noClose) {
           item.addClass('close-popover-on-click')
         }
       }

@@ -52,7 +52,7 @@ subscribe('connection-status-changed', function (e) {
 })
 
 subscribe('server-info', function (e) {
-  if (e.jq_message.is('[status=session_commandeered]')) {
+  if (e.jqMessage.is('[status=session_commandeered]')) {
     // This session has been commandeered; disable the UI and show a message explaining what
     // has happened.
     vTheme.notify('error', 'This session was transferred to another tab or browser.', '', {
@@ -93,7 +93,7 @@ subscribe('session-status-changed', function (e) {
 })
 
 subscribe('response-received', function (e) {
-  if (e.is_stopping) {
+  if (e.isStopping) {
     // Sometimes the debugger engine will wait for a continuation command in order to end a
     // session, so if the DE indicates it's stopping, let's encourage it to end the session
     Debugger.command('run', { session: QueuedSessionsIndicator.getSessionId() })
@@ -126,16 +126,16 @@ subscribe('before-inspect-context', function beforeInspectContext (e) {
 subscribe('apply-default-layout-settings', function (e) {
   if (e.layout == 'outer0_3') {
     e.settings.defaults = e.settings.defaults.concat([
-      { layout_el: 'inner-bottom_4_suggested_windows', key: 'console', value: 0 },
-      { layout_el: 'inner-top_3_suggested_windows', key: 'code', value: 0 },
-      { layout_el: 'inner-top_3_suggested_windows', key: 'stack', value: 1 },
-      { layout_el: 'middle-r_6_suggested_windows', key: 'watch', value: 0 },
-      { layout_el: 'middle-r_6_suggested_windows', key: 'context', value: 1 },
-      { layout_el: 'code_persistor', key: 'size', value: 75 },
-      { layout_el: 'stack_persistor', key: 'size', value: 25 },
-      { layout_el: 'console_persistor', key: 'size', value: 100 },
-      { layout_el: 'watch_persistor', key: 'size', value: 40 },
-      { layout_el: 'context_persistor', key: 'size', value: 60 }
+      { layoutEl: 'inner-bottom_4_suggested_windows', key: 'console', value: 0 },
+      { layoutEl: 'inner-top_3_suggested_windows', key: 'code', value: 0 },
+      { layoutEl: 'inner-top_3_suggested_windows', key: 'stack', value: 1 },
+      { layoutEl: 'middle-r_6_suggested_windows', key: 'watch', value: 0 },
+      { layoutEl: 'middle-r_6_suggested_windows', key: 'context', value: 1 },
+      { layoutEl: 'code_persistor', key: 'size', value: 75 },
+      { layoutEl: 'stack_persistor', key: 'size', value: 25 },
+      { layoutEl: 'console_persistor', key: 'size', value: 100 },
+      { layoutEl: 'watch_persistor', key: 'size', value: 40 },
+      { layoutEl: 'context_persistor', key: 'size', value: 60 }
     ])
   }
 })

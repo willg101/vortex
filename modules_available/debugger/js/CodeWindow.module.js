@@ -104,14 +104,14 @@ subscribe('breakpoint-state-change', function (e) {
 
 // Show and start the command timer when the DE begins executing a continuation command
 subscribe('before-send', function (data) {
-  if ((data.alter_data.command || '').match(/^(step_|run)/)) {
+  if ((data.alterData.command || '').match(/^(step_|run)/)) {
     showCommandTimer()
   }
 })
 
 // Hide the command timer when the DE finishes executing a continuation command
 subscribe('response-received', function (e) {
-  if (e.parsed && e.parsed.is_continuation) {
+  if (e.parsed && e.parsed.isContinuation) {
     hideCommandTimer()
   }
 })
@@ -334,10 +334,10 @@ async function showFile (filename, line, cb, skipCache, scrollTop, noClearActive
     return
   }
 
-  if (data.codebase_root && data.codebase_id) {
+  if (data.codebaseRoot && data.codebaseId) {
     currentCodebase = {
-      root: data.codebase_root,
-      id: data.codebase_id
+      root: data.codebaseRoot,
+      id: data.codebaseId
     }
   } else {
     currentCodebase = {}
