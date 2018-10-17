@@ -7,7 +7,6 @@ define( 'DPOH_ROOT', __DIR__ );
 require __DIR__.'/vendor/autoload.php';
 
 require_once 'includes/arrays.php';
-require_once 'includes/autoloader.php';
 require_once 'includes/bootstrap.php';
 require_once 'includes/database.php';
 require_once 'includes/exceptions.php';
@@ -24,8 +23,6 @@ date_default_timezone_set( settings( 'timezone' ) );
 $whoops = new Whoops\Run;
 $whoops->pushHandler( new Whoops\Handler\PlainTextHandler );
 $whoops->register();
-
-spl_autoload_register( 'vortex_autoloader' );
 
 $application = new Application();
 $data = [ 'application' => $application ];

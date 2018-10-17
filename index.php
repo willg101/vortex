@@ -11,7 +11,6 @@ $whoops->pushHandler(IS_AJAX_REQUEST
 $whoops->register();
 
 require_once 'includes/arrays.php';
-require_once 'includes/autoloader.php';
 require_once 'includes/bootstrap.php';
 require_once 'includes/database.php';
 require_once 'includes/exceptions.php';
