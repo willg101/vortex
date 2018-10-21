@@ -19,7 +19,6 @@ class PhpLanguage extends LanguageAbstractor {
     await Debugger.command('eval', '$__codebase_root_finder__ = ' +
       Dpoh.options.debugger.find_codebase_root)
     var root = await Debugger.command('eval', `$__codebase_root_finder__( "${file}" )`)
-    Debugger.command('eval', 'unset( $__codebase_root_finder__ )')
 
     var info = {}
     if (root.parsed.value && root.parsed.value[ 0 ] && root.parsed.value[ 0 ].children &&
