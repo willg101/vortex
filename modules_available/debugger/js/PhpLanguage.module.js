@@ -24,7 +24,7 @@ class PhpLanguage extends LanguageAbstractor {
     if (root.parsed.value && root.parsed.value[ 0 ] && root.parsed.value[ 0 ].children &&
       root.parsed.value[ 0 ].children.length) {
       root.parsed.value[ 0 ].children.forEach(el => {
-        if (el.name == 'root' || el.name == 'id') {
+        if (el.name == 'root' || el.name == 'id' || el.name == 'is_nested') {
           info[ el.name ] = el.value
         }
       })

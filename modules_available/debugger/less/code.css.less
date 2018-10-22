@@ -1,5 +1,20 @@
 @import "@{defaults}";
 
+.nested-codebase-indicator
+{
+	color: @yellow;
+	cursor: pointer;
+	margin-left: @spacing-sm;
+	opacity: .5;
+	.transition();
+	background: rgba(0,0,0,0.01);
+
+	&:hover
+	{
+		opacity: 1;
+	}
+}
+
 .recent-file
 {
 	body:not(.active-session) &.nonlocal-file:hover

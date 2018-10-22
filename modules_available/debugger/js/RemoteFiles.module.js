@@ -41,7 +41,8 @@ async function fetchFromSever (path, cb) {
         hostname,
         path,
         codebaseRoot: codebaseRoot.root,
-        codebaseId: codebaseRoot.id
+        codebaseId: codebaseRoot.id,
+        isNestedCodebase: codebaseRoot.is_nested != "0",
       }
     }
     return new Promise((resolve, reject) => contents ? resolve(filecache[ path ]) : reject(errorReason))
@@ -55,7 +56,8 @@ async function fetchFromSever (path, cb) {
           hostname,
           path,
           codebaseRoot: info.root,
-          codebaseId: info.id
+          codebaseId: info.id,
+          isNestedCodebase: info.is_nested != "0",
         }
         resolve(filecache[ path ])
       }).fail(function (errorReason) {

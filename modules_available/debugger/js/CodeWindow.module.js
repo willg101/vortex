@@ -86,6 +86,10 @@ $(document).on('keypress', '.bp-expression-input', function (e) {
   }
 })
 
+$(document).on('click', '.nested-codebase-indicator', function() {
+  vTheme.showModal('Nested Codebases', render('debugger.nested_codebases_modal'));
+});
+
 // Update how a breakpoint from the currently showing file is displayed
 subscribe('breakpoint-state-change', function (e) {
   var file = File.stripScheme(getCurrentFileShowing())
@@ -341,6 +345,12 @@ async function showFile (filename, line, cb, skipCache, scrollTop, noClearActive
     }
   } else {
     currentCodebase = {}
+  }
+
+  if (data.isNestedCodebase) {
+    $('.nested-codebase-indicator').show();
+  } else {
+    $('.nested-codebase-indicator').hide();
   }
 
   var text = data.contents

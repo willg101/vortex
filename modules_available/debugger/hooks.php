@@ -19,7 +19,7 @@ function debugger_provide_windows()
         [
             'title'     => 'Code',
             'id'        => 'code',
-            'secondary' => '<span id="filename"></span>',
+            'secondary' => '<span id="filename"></span> <i data-modal-role="open" style="display: none" class="nested-codebase-indicator fa fa-code-branch"></i>',
             'icon'      => 'code',
             'content'   => render('code_window'),
         ],
@@ -155,28 +155,31 @@ function debugger_ws_maintenance_api()
 function debugger_find_codebase_root($file)
 {
     $parent_dir = $file;
+    $root       = [];
     do {
         $parent_dir  = dirname($parent_dir);
         $git_dir     = "$parent_dir/.git";
         $config_file = "$git_dir/config";
         if (is_dir($git_dir) && is_readable($config_file)) {
             $config_parsed = parse_ini_file("$config_file", true);
-            return [
-                'root' => $parent_dir,
-                'id'  => $config_parsed[ 'remote origin' ][ 'url' ],
+            $root = [
+                'root'      => $parent_dir,
+                'id'        => $config_parsed[ 'remote origin' ][ 'url' ],
+                'is_nested' => !!$root,
             ];
         }
 
         $vortex_file = "$parent_dir/.vortex-codebase";
-        if (is_readable($vortex_file)) {
+        if (is_readable($vortex_file)) { // The first .vortex-codebase file that we find
             return [
-                'root' => $parent_dir,
-                'id'  => trim(file_get_contents($vortex_file)),
+                'root'      => $parent_dir,
+                'id'        => trim(file_get_contents($vortex_file)),
+                'is_nested' => false,
             ];
         }
     } while ($parent_dir != '/');
 
-    return [];
+    return $root;
 }
 
 /**
