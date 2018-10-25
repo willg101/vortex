@@ -156,8 +156,18 @@ function debugger_find_codebase_root($file)
 {
     $parent_dir = $file;
     $root       = [];
+    $visited    = [];
     do {
         $parent_dir  = dirname($parent_dir);
+        if ( !empty( $visited[ $parent_dir ] ) )
+        {
+            break; // Don't visit the same directory twice (avoids infinite loops in certain edge cases)
+        }
+        else
+        {
+            $visited[ $parent_dir ] = true;
+        }
+
         $git_dir     = "$parent_dir/.git";
         $config_file = "$git_dir/config";
         if (is_dir($git_dir) && is_readable($config_file)) {
