@@ -1,0 +1,138 @@
+@import "@{defaults}";
+
+.help-text-rot,
+.general-help-text
+{
+	kbd
+	{
+		display: inline-block;
+		padding: 3px 6px;
+		background: @lighter-gray;
+		text-shadow: none;
+		color: @dark-gray;
+		border-radius: 3px;
+		box-shadow: 0 0 5px @dark-gray;
+	}
+}
+
+.general-help-text
+{
+	position: absolute;
+	height: 50%;
+	max-width: 500px;
+	margin: auto;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	color: @toolbar-fg;
+	text-shadow: 0 0 5px @toolbar-bg, 0 0 5px @toolbar-bg, 0 0 10px @toolbar-bg, 0 0 30px @toolbar-bg;
+	text-align: center;
+
+	kbd
+	{
+		position: relative;
+	}
+
+	h2
+	{
+		margin: 0;
+	}
+}
+
+.help-text-rot
+{
+	.transition();
+	position: absolute;
+	color: @toolbar-fg;
+	text-shadow: 0 0 10px @toolbar-bg, 0 0 10px @toolbar-bg, 0 0 20px @toolbar-bg, 0 0 30px @toolbar-bg, 0 0 40px @toolbar-bg, 0 0 20px @toolbar-bg;
+	z-index: 99999;
+
+	kbd
+	{
+		position: absolute;
+		bottom: -2px;
+	}
+
+	&.help-hidden
+	{
+		opacity: .01;
+	}
+
+	&:before
+	{
+		position: absolute;
+		bottom: 0;
+		height: 1px;
+		width: ~"calc(100% + 10px)";
+		content: " ";
+		background: @toolbar-fg;
+		box-shadow: 0 0 5px @toolbar-bg;
+	}
+
+	&:after
+	{
+		@dot-diameter: 5px;
+		position: absolute;
+		content: " ";
+		background: @toolbar-fg;
+		width: @dot-diameter;
+		height: @dot-diameter;
+		bottom: -2px;
+		border-radius: @dot-diameter;
+	}
+
+	@angle: 45deg;
+	@initial-size: 1.2;
+
+	&.left
+	{
+		text-align: right;
+		transform: rotate(@angle) scale(1);
+		&:before
+		{
+			right: 0;
+		}
+
+		&:after
+		{
+			left: -10px;
+		}
+
+		kbd
+		{
+			left: ~"calc(100% + 10px)";
+		}
+
+		&.help-hidden
+		{
+			transform: rotate(@angle) scale(@initial-size);
+			opacity: .01;
+		}
+	}
+
+	&.right
+	{
+		&.help-hidden
+		{
+			transform: rotate(-@angle) scale(@initial-size);
+			opacity: .01;
+		}
+
+		&:before
+		{
+			left: 0;
+		}
+
+		&:after
+		{
+			right: -10px;
+		}
+
+		kbd
+		{
+			right: ~"calc(100% + 10px)";
+		}
+
+		transform: rotate(-@angle) scale(1);
+	}
+}
