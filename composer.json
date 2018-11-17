@@ -8,7 +8,8 @@
         "sentry/sentry": "^1.8",
         "oyejorge/less.php": "v1.7.0.14",
         "ratchet/pawl":"^0.3",
-        "filp/whoops": "^2.2"
+        "filp/whoops": "^2.2",
+        "symfony/http-foundation": "^4.1"
     },
     "autoload": {
         "psr-4": { "Vortex\\": "src/Vortex" },
