@@ -17,7 +17,7 @@ function vue_boot()
  * @brief
  *	Renders the Debugger page
  */
-function vue_render_with_layout_engine()
+function vue_render_with_layout_engine($url, $options, $response)
 {
     $layouts = fire_hook('provide_layouts');
     fire_hook('alter_layouts', $layouts);
@@ -37,10 +37,10 @@ function vue_render_with_layout_engine()
         }
     }
 
-    echo render('new_layout', [
+    $response->setContent(render('new_layout', [
         'layouts' => $layouts_rendered,
         'windows' => $windows_rendered,
-    ]);
+    ]));
 }
 
 /**

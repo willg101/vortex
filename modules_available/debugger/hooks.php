@@ -137,9 +137,9 @@ function debugger_ws_maintenance_api()
                 $conn->close();
                 if ($parsed = json_decode($msg, true)) {
                     db_query('DELETE FROM maintenance_tokens;');
-                    send_json($parsed);
+                    send_json($parsed); // TODO: Use response object
                 } else {
-                    send_json([ 'error' => $msg ]);
+                    send_json([ 'error' => $msg ]); // TODO: Use response object
                 }
             });
         });
@@ -229,7 +229,7 @@ function debugger_alter_js_options(&$data)
  *
  * @param string $path The request path
  */
-function debugger_file_api($path)
+function debugger_file_api($path, $options, $response, Request $request)
 {
     require_method('GET');
 
@@ -242,14 +242,14 @@ function debugger_file_api($path)
         $info[ 'contents' ] = file_get_contents($file);
         send_json($info);
     } else { // List the directory's contents for the client
-        $response = [];
+        $response_data = [];
         $contents = glob("$file/*");
 
         foreach ($contents as $item) {
             $is_file = is_file($item);
             if (!$is_file || client_can_view_file($item)) {
-                if (input('view') == 'jstree') {
-                    $response[] = [
+                if ($request->query->get('view') == 'jstree') {
+                    $response_data[] = [
                         'text' => basename($item),
                         'icon' => $is_file ? 'fa fa-file-code-o code' : 'fa fa-folder folder',
                         'children' => !$is_file,
@@ -259,7 +259,7 @@ function debugger_file_api($path)
                         ],
                     ];
                 } else {
-                    $response[] = [
+                    $response_data[] = [
                         'name'     => basename($item),
                         'fullpath' => $item,
                         'is_dir'   => !$is_file,
@@ -268,7 +268,8 @@ function debugger_file_api($path)
             }
         }
 
-        send_json($response);
+        $response->setContent(json_encode($response_data));
+        $response->headers->set('Content-Type', 'application/json');
     }
 }
 
@@ -288,10 +289,10 @@ function debugger_recent_files_api($path)
     exec("find $dirs -type f -regextype sed -regex '.*\.\($extensions\)' -printf '%T@ %p\n' | sort -n | tail -n $n_files | cut -f2- -d\" \"", $files);
     $files = array_filter(array_map('trim', $files));
 
-    $response = [];
+    $response_data = [];
     foreach ($files as $item) {
         if (client_can_view_file($item)) {
-            array_unshift($response, [
+            array_unshift($response_data, [
                 'name'     => basename($item),
                 'fullpath' => $item,
                 'is_dir'   => false,
@@ -299,7 +300,8 @@ function debugger_recent_files_api($path)
         }
     }
 
-    send_json($response);
+    $response->setContent(json_encode($response_data));
+    $response->headers->set('Content-Type', 'application/json');
 }
 
 function debugger_provide_console_commands($data)
@@ -379,7 +381,7 @@ function debugger_before_debugger_detach($data)
  */
 function debugger_validate_php_syntax($snippet)
 {
-    $snippet = escapeshellarg("<?php $snippet ?>");
+    $snippet = escapeshellarg("<?php $snippet");
     exec("echo $snippet | php -l > /dev/null 2>&1", $_, $status);
     return $status === 0;
 }

@@ -21,9 +21,9 @@ function login_preboot()
 /**
  * Implements hook_boot
  */
-function login_boot()
+function login_boot($data)
 {
-    login_try_one_time_login();
+    login_try_one_time_login($data['request']);
 
     if (!any_users_exist()) {
         if (!IS_AJAX_REQUEST) {
@@ -84,21 +84,22 @@ function login_postpone_session_expiration()
     }
 }
 
-function login_handle_invite_user_api($url)
+function login_handle_invite_user_api($url, $options, $response, $request)
 {
-    $url   = explode('/', $url);
+    $url   = explode('/', $request->getPathInfo());
     $email = $url[ 3 ];
     header('Content-Type: text/plain');
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        header("HTTP/1.1 400 Bad request");
-        echo "'$email' is not a valid email address.";
+        $response->setContent("'$email' is not a valid email address.");
+        $response->addHeader("HTTP/1.1 400 Bad request");
+
     } elseif (login_load_account($email)) {
-        header("HTTP/1.1 400 Bad request");
-        echo "An account is already associated with the email address '$email'.";
+        $response->setContent("An account is already associated with the email address '$email'.");
+        $response->addHeader("HTTP/1.1 400 Bad request");
     } else {
         login_invite_user($email);
-        echo "An invitation to create an account has been sent to '$email'.";
+        $response->setContent("An invitation to create an account has been sent to '$email'.");
     }
     exit;
 }
@@ -134,14 +135,14 @@ function login_verify_otlt($otlt, $tid)
     return false;
 }
 
-function login_handle_new_password_api()
+function login_handle_new_password_api($path, $options, $request)
 {
     require_method('POST');
 
-    $otlt          = input('otlt');
-    $tid           = input('tid');
-    $password      = input('password1');
-    $password_conf = input('password1');
+    $otlt          = $request->request->get('otlt');
+    $tid           = $request->request->get('tid');
+    $password      = $request->request->get('password1');
+    $password_conf = $request->request->get('password1');
 
     if (login_verify_otlt($otlt, $tid)) {
         $account = db_query('
@@ -159,35 +160,30 @@ function login_handle_new_password_api()
             ':id' => $account[ 'id' ],
         ]);
         db_query('DELETE FROM login_tokens where user_id = :user_id', [ ':user_id' => $account[ 'id' ] ]);
-        send_json([
-            'success' => true,
-        ]);
+        $response->setContent(json_encode([ 'success' => true ]));
+        $response->headers->set('Content-Type', 'application/json');
     } else {
         error_response('Invalid credentials', 401, 'Unauthorized');
     }
 }
 
-function login_try_one_time_login()
+function login_try_one_time_login($request)
 {
-    $otlt = input('otlt');
-    $tid  = input('tid');
+    $otlt = $request->query->get('otlt');
+    $tid  = $request->query->get('tid');
     if (login_verify_otlt($otlt, $tid)) {
-        echo render('reset_password', [ 'otlt' => $otlt, 'tid' => $tid ]);
-        exit;
+        $response->setContent(render('reset_password', [ 'otlt' => $otlt, 'tid' => $tid ]));
     }
 
-    $it  = input('it');
-    $iid = input('iid');
+    $it  = $request->query->get('it');
+    $iid = $request->query->get('iid');
     if ($_SERVER[ 'REQUEST_METHOD' ] == 'GET' && login_verify_it($it, $iid)) {
-        echo render('login_page', [ 'mode' => 'create', 'it' => $it, 'iid' => $iid ]);
-        exit;
+        $response->setContent(render('login_page', [ 'mode' => 'create', 'it' => $it, 'iid' => $iid ]));
     }
 }
 
-function login_verify_it($it = false, $iid = false)
+function login_verify_it($it, $iid)
 {
-    $it  = $it  ?: input('it');
-    $iid = $iid ?: input('iid');
     if ($it && $iid) {
         $record = db_query('SELECT * FROM invitation_tokens WHERE id = :id AND expires > CURRENT_TIMESTAMP', [ ':id' => $iid ]);
         $it_hash = array_get($record, '0.token');
@@ -226,23 +222,23 @@ function login_handle_logout()
     }
 
     if (IS_AJAX_REQUEST) {
-        echo 'Logout successful';
+        $response->setContent('Logout successful');
     } else {
-        header('Location: ' . base_path());
+        $response->headers->set('Location: ' . base_path());
     }
 }
 
-function login_handle_account_creation_api()
+function login_handle_account_creation_api($url, $options, $response, $request)
 {
     require_method('POST');
-    if (!login_verify_it() && any_users_exist() && !dpoh_session_id_is_valid()) {
+    if (!login_verify_it($request->request->get('it'), $request->request->get('iid')) && any_users_exist() && !dpoh_session_id_is_valid()) {
         error_response('You cannot anonymously create a new account', 401, 'Unauthorized');
     }
 
-    $username      = input('username');
-    $email         = input('email');
-    $password      = input('password1');
-    $password_conf = input('password2');
+    $username      = $request->request->get('username');
+    $email         = $request->request->get('email');
+    $password      = $request->request->get('password1');
+    $password_conf = $request->request->get('password2');
 
     if (!($username && $password && $password_conf && $email)) {
         error_response('Some required information is missing.');
@@ -279,13 +275,15 @@ function login_handle_reset_password_api($url)
         $headers[] = 'MIME-Version: 1.0';
         $headers[] = 'Content-type: text/html; charset=iso-8859-1';
         mail($account[ 'email' ], 'Vortex | Password Reset', $message, implode("\r\n", $headers));
-        send_json([ 'success' => true ]);
+        $response->setContent(json_encode([ 'success' => true ]));
+        $response->headers->set('Content-Type', 'application/json');
     }
 }
 
 function login_handle_list_users_api()
 {
-    send_json(db_query('SELECT id, email, username FROM users'));
+    $response->setContent(json_encode(db_query('SELECT id, email, username FROM users')));
+    $response->headers->set('Content-Type', 'application/json');
 }
 
 function login_create_account($username, $email, $password)
@@ -322,7 +320,8 @@ function login_handle_delete_account_api($url)
     $url  = explode('/', $url);
     $user = $url[ 2 ];
     try {
-        send_json(login_delete_account($user));
+        $response->setContent(json_encode(login_delete_account($user)));
+        $response->headers->set('Content-Type', 'application/json');
     } catch (LoginException $e) {
         error_response('That account does not exist', 404, 'Not found');
     }
@@ -405,17 +404,18 @@ function user($key = null)
         : $user;
 }
 
-function login_handle_login()
+function login_handle_login($url, $options, $response, $request)
 {
     require_method('POST');
 
     $result = false;
-    $username = input('username');
-    $password = input('password');
+    $username = $request->request->get('username');
+    $password = $request->request->get('password');
     if ($username && $password) {
         $result = login_user($username, $password);
     }
-    send_json([ 'login_result' => $result ]);
+    $response->setContent(json_encode(login_delete_account($user)));
+    $response->headers->set('Content-Type', 'application/json');
 }
 
 function login_clear_expired_sessions_and_tokens()

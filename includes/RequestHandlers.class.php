@@ -2,6 +2,9 @@
 
 namespace Dpoh;
 
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 /**
  * @brief
  *	Delegate incoming HTTP requests to the proper handlers
@@ -125,12 +128,9 @@ class RequestHandlers
      * @return bool
      *	Indicates whether the request was handled or not
      */
-    public function handle($url = null)
+    public function handle(Request $request, Response $response)
     {
-        if (!isset($url)) {
-            $url = request_path();
-        }
-        $url = $this->normalize($url);
+        $url = $this->normalize($request->getPathInfo());
 
         $this->sortHandlers();
 
@@ -142,10 +142,12 @@ class RequestHandlers
                     'pattern'  =>  $handler[ 'pattern' ],
                     'options'  => &$handler[ 'options' ],
                     'callback' => &$handler[ 'callback' ],
+                    'request'  => $request,
+                    'response' => $response,
                 ];
                 fire_hook('preprocess_request', $data);
 
-                $handler[ 'callback' ]($url, $handler[ 'options' ]);
+                $handler[ 'callback' ]($url, $handler[ 'options' ], $response, $request);
                 $handled = true;
 
                 fire_hook('postprocess_request', $data);

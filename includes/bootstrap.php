@@ -3,6 +3,8 @@
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use \Monolog\Handler\ErrorLogHandler;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @brief
@@ -22,14 +24,14 @@ use \Monolog\Handler\ErrorLogHandler;
  *
  * @return string|NULL
  */
-function bootstrap()
+function bootstrap(Request $request, Response $response)
 {
     date_default_timezone_set(settings('timezone'));
-    $boot_vars = [];
+    $boot_vars = [ 'request' => $request, 'response' => $response ];
     fire_hook('preboot', $boot_vars);
     fire_hook('boot', $boot_vars, true);
 
-    if (!request_handlers()->handle()) {
+    if (!request_handlers()->handle($request, $response)) {
         throw new HttpException("Page not found: " . request_path(), [ 'HTTP/1.1 404 Not found' ]);
     }
 }

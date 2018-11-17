@@ -1,5 +1,8 @@
 <?php /* dpoh: ignore */
 
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 define('DPOH_ROOT', __DIR__);
 define('IS_AJAX_REQUEST', !empty($_SERVER['HTTP_X_REQUESTED_WITH']));
 
@@ -23,4 +26,8 @@ require_once 'includes/security.php';
 require_once 'includes/stylesheets.php';
 require_once 'includes/templates.php';
 
-bootstrap();
+$request = Request::createFromGlobals();
+$response = new Response('', Response::HTTP_OK, ['content-type' => 'text/html']);
+bootstrap($request, $response);
+$response->prepare($request);
+$response->send();
