@@ -1,7 +1,7 @@
 <?php /* dpoh: ignore */
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Vortex\Response;
 
 define('DPOH_ROOT', __DIR__);
 define('IS_AJAX_REQUEST', !empty($_SERVER['HTTP_X_REQUESTED_WITH']));
@@ -27,7 +27,7 @@ require_once 'includes/stylesheets.php';
 require_once 'includes/templates.php';
 
 $request = Request::createFromGlobals();
-$response = new Response('', Response::HTTP_OK, ['content-type' => 'text/html']);
+$response = new Response;
 bootstrap($request, $response);
 $response->prepare($request);
 $response->send();

@@ -32,7 +32,7 @@ function bootstrap(Request $request, Response $response)
     fire_hook('boot', $boot_vars, true);
 
     if (!request_handlers()->handle($request, $response)) {
-        throw new HttpException("Page not found: " . request_path(), [ 'HTTP/1.1 404 Not found' ]);
+        throw new HttpException("Page not found: " . $request->getPathInfo(), [ 'HTTP/1.1 404 Not found' ]);
     }
 }
 
