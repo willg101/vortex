@@ -4,7 +4,7 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use \Monolog\Handler\ErrorLogHandler;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Vortex\Response;
 
 /**
  * @brief
