@@ -3,7 +3,7 @@
 namespace Dpoh;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Vortex\Response;
 
 /**
  * @brief
@@ -123,7 +123,8 @@ class RequestHandlers
      * ]
      * @endcode
      *
-     * @param string $url OPTIONAL. When omitted, retrieves the URL from `request_path()`
+     * @param Symfony\Component\HttpFoundation\Request $request
+     * @param Vortex\Response $response
      *
      * @return bool
      *	Indicates whether the request was handled or not
