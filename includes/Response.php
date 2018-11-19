@@ -1,6 +1,7 @@
 <?php
 namespace Vortex;
 
+use BadMethodCallException;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class Response {
@@ -20,7 +21,7 @@ class Response {
             $this->symfony_response->setContent($content);
         } else {
             $this->symfony_response->setContent(json_encode($content));
-            $response->headers->set('Content-Type', 'application/json');
+            $this->symfony_response->headers->set('Content-Type', 'application/json');
         }
         return $this;
     }
