@@ -1,9 +1,8 @@
 <?php
 
-namespace Dpoh;
+namespace Vortex;
 
 use Symfony\Component\HttpFoundation\Request;
-use Vortex\Response;
 
 /**
  * @brief
@@ -123,15 +122,14 @@ class RequestHandlers
      * ]
      * @endcode
      *
-     * @param Symfony\Component\HttpFoundation\Request $request
-     * @param Vortex\Response $response
+     * @param Vortex\App $app
      *
      * @return bool
      *	Indicates whether the request was handled or not
      */
-    public function handle(Request $request, Response $response)
+    public function handle($app)
     {
-        $url = $this->normalize($request->getPathInfo());
+        $url = $this->normalize($app->request->getPathInfo());
 
         $this->sortHandlers();
 
@@ -143,15 +141,14 @@ class RequestHandlers
                     'pattern'  =>  $handler[ 'pattern' ],
                     'options'  => &$handler[ 'options' ],
                     'callback' => &$handler[ 'callback' ],
-                    'request'  => $request,
-                    'response' => $response,
+                    'app'      =>  $app,
                 ];
-                fire_hook('preprocess_request', $data);
+                $app->fireHook('preprocess_request', $data);
 
-                $handler[ 'callback' ]($url, $handler[ 'options' ], $response, $request);
+                $handler[ 'callback' ]($app, $handler[ 'options' ]);
                 $handled = true;
 
-                fire_hook('postprocess_request', $data);
+                $app->fireHook('postprocess_request', $data);
                 break;
             }
         }
