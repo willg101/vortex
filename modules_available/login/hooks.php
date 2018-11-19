@@ -23,7 +23,7 @@ function login_preboot()
  */
 function login_boot($data)
 {
-    login_try_one_time_login($data['request']);
+    login_try_one_time_login($data['request'], $data['response']);
 
     if (!any_users_exist()) {
         if (!IS_AJAX_REQUEST) {
@@ -135,7 +135,7 @@ function login_verify_otlt($otlt, $tid)
     return false;
 }
 
-function login_handle_new_password_api($path, $options, $request)
+function login_handle_new_password_api($path, $options, $response, $request)
 {
     require_method('POST');
 
@@ -151,34 +151,33 @@ function login_handle_new_password_api($path, $options, $request)
 			WHERE login_tokens.id = :tid', [ ':tid' => $tid ])[ 0 ];
 
         if ($password != $password_conf) {
-            error_response('Passwords do not match');
+            $response->setContent('Passwords do not match')->setStatusCode(400);
         } elseif (!$password) {
-            error_response('Password cannot be empty');
+            $response->setContent('Password cannot be empty')->setStatusCode(400);
         }
         db_query('UPDATE users SET password = :pw WHERE id = :id', [
             ':pw' => login_hash_password($password),
             ':id' => $account[ 'id' ],
         ]);
         db_query('DELETE FROM login_tokens where user_id = :user_id', [ ':user_id' => $account[ 'id' ] ]);
-        $response->setContent(json_encode([ 'success' => true ]));
-        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent([ 'success' => true ]);
     } else {
-        error_response('Invalid credentials', 401, 'Unauthorized');
+        $response->setContent('Invalid credentials')->setStatusCode(401);
     }
 }
 
-function login_try_one_time_login($request)
+function login_try_one_time_login($request, $response)
 {
     $otlt = $request->query->get('otlt');
     $tid  = $request->query->get('tid');
     if (login_verify_otlt($otlt, $tid)) {
-        $response->setContent(render('reset_password', [ 'otlt' => $otlt, 'tid' => $tid ]));
+        $response->setContent(render('reset_password', [ 'otlt' => $otlt, 'tid' => $tid ]))->sendAndTerminate();
     }
 
     $it  = $request->query->get('it');
     $iid = $request->query->get('iid');
     if ($_SERVER[ 'REQUEST_METHOD' ] == 'GET' && login_verify_it($it, $iid)) {
-        $response->setContent(render('login_page', [ 'mode' => 'create', 'it' => $it, 'iid' => $iid ]));
+        $response->setContent(render('login_page', [ 'mode' => 'create', 'it' => $it, 'iid' => $iid ]))->sendAndTerminate();
     }
 }
 
@@ -210,7 +209,7 @@ function login_ws_connection_opened($data)
     }
 }
 
-function login_handle_logout()
+function login_handle_logout($url, $options, $response)
 {
     if (dpoh_session_id_is_valid()) {
         $session_id = array_get($_COOKIE, 'dpoh_session_id');
@@ -218,7 +217,7 @@ function login_handle_logout()
         setcookie('dpoh_session_id', '', 1);
         setcookie('dpoh_session_token', '', 1);
     } else {
-        return error_response('You are not currently logged in', 401, 'Unauthorized');
+        $response->setContent('You are not currently logged in')->setStatusCode(401);
     }
 
     if (IS_AJAX_REQUEST) {
@@ -232,7 +231,7 @@ function login_handle_account_creation_api($url, $options, $response, $request)
 {
     require_method('POST');
     if (!login_verify_it($request->request->get('it'), $request->request->get('iid')) && any_users_exist() && !dpoh_session_id_is_valid()) {
-        error_response('You cannot anonymously create a new account', 401, 'Unauthorized');
+        $response->setContent('You cannot anonymously create a new account')->setStatusCode(401);
     }
 
     $username      = $request->request->get('username');
@@ -241,17 +240,17 @@ function login_handle_account_creation_api($url, $options, $response, $request)
     $password_conf = $request->request->get('password2');
 
     if (!($username && $password && $password_conf && $email)) {
-        error_response('Some required information is missing.');
+        $response->setContent('Some required information is missing.')->setStatusCode(400);
     } elseif ($password != $password_conf) {
-        error_response('Passwords do not match');
+        $response->setContent('Passwords do not match')->setStatusCode(400);
     } elseif (login_load_account($username)) {
-        error_response('That username is already in use');
+        $response->setContent('That username is already in use.')->setStatusCode(400);
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        error_response('Invalid email address');
+        $response->setContent('Invalid email address.')->setStatusCode(400);
+    } else {
+       login_create_account($username, $email, $password);
+       login_user($username);
     }
-
-    login_create_account($username, $email, $password);
-    login_user($username);
 }
 
 function login_handle_reset_password_api($url)
@@ -261,7 +260,7 @@ function login_handle_reset_password_api($url)
     $url  = explode('/', $url);
     $user = $url[ 2 ];
     if (!($account = login_load_account($user))) {
-        error_response('That account does not exist', 404, 'Not found');
+        $response->setContent('That account does not exist')->setStatusCode(404);
     } else {
         $token = get_random_token(20);
         db_query('INSERT INTO login_tokens (token, user_id, expires) VALUES (:token, :user_id, :expires)', [
@@ -313,7 +312,7 @@ function login_delete_account($username_or_id)
     }
 }
 
-function login_handle_delete_account_api($url)
+function login_handle_delete_account_api($url, $options, $response)
 {
     require_method('POST');
 
@@ -323,7 +322,7 @@ function login_handle_delete_account_api($url)
         $response->setContent(json_encode(login_delete_account($user)));
         $response->headers->set('Content-Type', 'application/json');
     } catch (LoginException $e) {
-        error_response('That account does not exist', 404, 'Not found');
+        $response->setContent('That account does not exist')->setStatusCode(404);
     }
 }
 

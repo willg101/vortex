@@ -120,7 +120,7 @@ function validate_maintenance_token($token)
  * This API is used to work with the socket server, even for clients that do not currently have a
  * websocket connection.
  */
-function debugger_ws_maintenance_api()
+function debugger_ws_maintenance_api($url, $options, $response)
 {
     $action = array_get($_POST, 'action');
 
@@ -133,13 +133,13 @@ function debugger_ws_maintenance_api()
         $ss_host = settings('socket_server.host');
         $ss_port = settings('socket_server.ws_port');
         Ratchet\Client\connect("ws://$ss_host:$ss_port/?$params")->then(function ($conn) {
-            $conn->on('message', function ($msg) use ($conn) {
+            $conn->on('message', function ($msg) use ($conn, $response) {
                 $conn->close();
                 if ($parsed = json_decode($msg, true)) {
                     db_query('DELETE FROM maintenance_tokens;');
-                    send_json($parsed); // TODO: Use response object
+                    $response->setContent($parsed)->sendAndTerminate();
                 } else {
-                    send_json([ 'error' => $msg ]); // TODO: Use response object
+                    $response->setContent(['error' => $msg])->sendAndTerminate();
                 }
             });
         });
@@ -233,14 +233,14 @@ function debugger_file_api($path, $options, $response, Request $request)
 {
     require_method('GET');
 
-    // Strip off the leadin 'file/' from the path and check if the corresponding file exists
+    // Strip off the leading 'file/' from the path and check if the corresponding file exists
     $file = '/' . (array_get(explode('/', $path, 2), 1, ''));
     if (!is_readable($file)) {
-        error_response("$file does not exist", 404, 'Not found');
+        $response->setContent("$file does not exist")->setStatuysCode(404);
     } elseif (is_file($file)) { // Send the file's contents to the client
         $info = debugger_find_codebase_root($file);
         $info[ 'contents' ] = file_get_contents($file);
-        send_json($info);
+        $response->setContent($info);
     } else { // List the directory's contents for the client
         $response_data = [];
         $contents = glob("$file/*");
@@ -268,8 +268,7 @@ function debugger_file_api($path, $options, $response, Request $request)
             }
         }
 
-        $response->setContent(json_encode($response_data));
-        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent($response_data);
     }
 }
 
@@ -300,8 +299,7 @@ function debugger_recent_files_api($path)
         }
     }
 
-    $response->setContent(json_encode($response_data));
-    $response->headers->set('Content-Type', 'application/json');
+    $response->setContent($response_data);
 }
 
 function debugger_provide_console_commands($data)
