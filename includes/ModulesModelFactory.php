@@ -1,5 +1,7 @@
 <?php namespace Vortex;
 
+use InvalidArgumentException;
+
 class ModulesModelFactory {
     public const MODEL_NAME = 'modules';
 
