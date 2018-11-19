@@ -6,7 +6,7 @@ require_once __DIR__ . '/../includes/files.php';
 use Vortex\ModulesModelFactory;
 use PHPUnit\Framework\TestCase;
 
-final class ModelsTest extends TestCase
+final class ModulesModelFactorysTest extends TestCase
 {
     public function testLoadModules(): void {
         $modules_dir = exec('mktemp -d');
