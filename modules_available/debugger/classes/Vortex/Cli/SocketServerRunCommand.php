@@ -2,6 +2,8 @@
 
 namespace Vortex\Cli;
 
+define( 'DPOH_ROOT', __DIR__ . '/../../../../' );
+
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -21,7 +23,6 @@ require_once 'includes/bootstrap.php';
 require_once 'includes/http.php';
 require_once 'includes/exceptions.php';
 require_once 'includes/files.php';
-require_once 'includes/models.php';
 require_once 'includes/templates.php';
 
 class SocketServerRunCommand extends Command
@@ -37,6 +38,9 @@ class SocketServerRunCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $vortex_app = new App(DPOH_ROOT . '/modules_available', DPOH_ROOT . '/settings-global.ini');
+        App::setInstance($vortex_app);
+        date_default_timezone_set( $vortex_app->settings->get( 'timezone' ) );
         $bridge = new ConnectionBridge;
 
         logger()->info('Creating socket servers');

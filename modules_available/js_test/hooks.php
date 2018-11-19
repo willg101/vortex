@@ -3,9 +3,9 @@
 define('JS_TEST_JASMINE_VERSION', '3.0.0');
 define('JS_TEST_PATH_TRIGGER', 'js-test');
 
-function js_test_boot()
+function js_test_boot($vars)
 {
-    request_handlers()->register(JS_TEST_PATH_TRIGGER, 'js_test_run');
+    $vars['request_handlers']->register(JS_TEST_PATH_TRIGGER, 'js_test_run');
 }
 
 function js_test_run()

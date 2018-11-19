@@ -21,13 +21,12 @@ require_once 'includes/files.php';
 require_once 'includes/html.php';
 require_once 'includes/http.php';
 require_once 'includes/javascript.php';
-require_once 'includes/models.php';
 require_once 'includes/security.php';
 require_once 'includes/stylesheets.php';
 require_once 'includes/templates.php';
 
-$request = Request::createFromGlobals();
-$response = new Response;
-bootstrap($request, $response);
-$response->prepare($request);
-$response->send();
+$app = new App(__DIR__ . '/modules_enabled', __DIR__ . '/settings-global.ini');
+App::setInstance($app);
+bootstrap($app);
+$app->response->prepare($app->request);
+$app->response->send();

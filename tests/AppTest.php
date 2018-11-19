@@ -13,7 +13,7 @@ final class AppTest extends TestCase
 {
     /**
      * Run this in a separate process to ensure nothing has set the default instance
-     * @testInSeparateProcess
+     * @runInSeparateProcess
      */
     public function testGetInstanceBeforeSetInstance(): void {
         $this->expectException(LogicException::class);

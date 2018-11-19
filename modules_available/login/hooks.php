@@ -23,29 +23,30 @@ function login_preboot()
 /**
  * Implements hook_boot
  */
-function login_boot($data)
+function login_boot($vars)
 {
-    login_try_one_time_login($data['request'], $data['response']);
+    login_try_one_time_login($vars['app']);
 
     if (!any_users_exist()) {
         if (!IS_AJAX_REQUEST) {
-            echo render('login_page', [ 'mode' => 'create' ]);
-            exit;
+            App::get('response')
+                ->setContent(render('login_page', [ 'mode' => 'create' ]))
+                ->sendAndTerminate();
         }
     } elseif (!dpoh_session_id_is_valid()) {
-        request_handlers()->register('login', 'login_handle_login');
+        $vars['request_handlers']->register('login', 'login_handle_login');
     } else {
         login_postpone_session_expiration();
 
-        request_handlers()->register('logout', 'login_handle_logout');
-        request_handlers()->register('api/users/list', 'login_handle_list_users_api');
-        request_handlers()->register('api/users/invite/%', 'login_handle_invite_user_api');
-        request_handlers()->register('api/users/%/remove', 'login_handle_delete_account_api');
+        $vars['request_handlers']->register('logout', 'login_handle_logout');
+        $vars['request_handlers']->register('api/users/list', 'login_handle_list_users_api');
+        $vars['request_handlers']->register('api/users/invite/%', 'login_handle_invite_user_api');
+        $vars['request_handlers']->register('api/users/%/remove', 'login_handle_delete_account_api');
     }
 
-    request_handlers()->register('api/create-account', 'login_handle_account_creation_api');
-    request_handlers()->register('api/reset-password', 'login_handle_new_password_api');
-    request_handlers()->register('api/users/%/reset-password', 'login_handle_reset_password_api');
+    $vars['request_handlers']->register('api/create-account', 'login_handle_account_creation_api');
+    $vars['request_handlers']->register('api/reset-password', 'login_handle_new_password_api');
+    $vars['request_handlers']->register('api/users/%/reset-password', 'login_handle_reset_password_api');
 
     login_clear_expired_sessions_and_tokens();
 }
@@ -86,24 +87,26 @@ function login_postpone_session_expiration()
     }
 }
 
-function login_handle_invite_user_api($url, $options, $response, $request)
+/**
+ * @param Vortex\App $app
+ */
+function login_handle_invite_user_api(App $app)
 {
-    $url   = explode('/', $request->getPathInfo());
+    $url   = explode('/', $app->request->getPathInfo());
     $email = $url[ 3 ];
     header('Content-Type: text/plain');
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $response->setContent("'$email' is not a valid email address.");
-        $response->addHeader("HTTP/1.1 400 Bad request");
+        $app->response->setContent("'$email' is not a valid email address.");
+        $app->response->addHeader("HTTP/1.1 400 Bad request");
 
     } elseif (login_load_account($email)) {
-        $response->setContent("An account is already associated with the email address '$email'.");
-        $response->addHeader("HTTP/1.1 400 Bad request");
+        $app->response->setContent("An account is already associated with the email address '$email'.");
+        $app->response->addHeader("HTTP/1.1 400 Bad request");
     } else {
         login_invite_user($email);
-        $response->setContent("An invitation to create an account has been sent to '$email'.");
+        $app->response->setContent("An invitation to create an account has been sent to '$email'.");
     }
-    exit;
 }
 
 function login_invite_user($email)
@@ -137,14 +140,17 @@ function login_verify_otlt($otlt, $tid)
     return false;
 }
 
-function login_handle_new_password_api($path, $options, $response, $request)
+/**
+ * @param Vortex\App $app
+ */
+function login_handle_new_password_api(App $app)
 {
     require_method('POST');
 
-    $otlt          = $request->request->get('otlt');
-    $tid           = $request->request->get('tid');
-    $password      = $request->request->get('password1');
-    $password_conf = $request->request->get('password1');
+    $otlt          = $app->request->request->get('otlt');
+    $tid           = $app->request->request->get('tid');
+    $password      = $app->request->request->get('password1');
+    $password_conf = $app->request->request->get('password1');
 
     if (login_verify_otlt($otlt, $tid)) {
         $account = db_query('
@@ -153,33 +159,36 @@ function login_handle_new_password_api($path, $options, $response, $request)
 			WHERE login_tokens.id = :tid', [ ':tid' => $tid ])[ 0 ];
 
         if ($password != $password_conf) {
-            $response->setContent('Passwords do not match')->setStatusCode(400);
+            $app->response->setContent('Passwords do not match')->setStatusCode(400);
         } elseif (!$password) {
-            $response->setContent('Password cannot be empty')->setStatusCode(400);
+            $app->response->setContent('Password cannot be empty')->setStatusCode(400);
         }
         db_query('UPDATE users SET password = :pw WHERE id = :id', [
             ':pw' => login_hash_password($password),
             ':id' => $account[ 'id' ],
         ]);
         db_query('DELETE FROM login_tokens where user_id = :user_id', [ ':user_id' => $account[ 'id' ] ]);
-        $response->setContent([ 'success' => true ]);
+        $app->response->setContent([ 'success' => true ]);
     } else {
-        $response->setContent('Invalid credentials')->setStatusCode(401);
+        $app->response->setContent('Invalid credentials')->setStatusCode(401);
     }
 }
 
-function login_try_one_time_login($request, $response)
+/**
+ * @param Vortex\App $app
+ */
+function login_try_one_time_login(App $app)
 {
-    $otlt = $request->query->get('otlt');
-    $tid  = $request->query->get('tid');
+    $otlt = $app->request->query->get('otlt');
+    $tid  = $app->request->query->get('tid');
     if (login_verify_otlt($otlt, $tid)) {
         $response->setContent(render('reset_password', [ 'otlt' => $otlt, 'tid' => $tid ]))->sendAndTerminate();
     }
 
-    $it  = $request->query->get('it');
-    $iid = $request->query->get('iid');
+    $it  = $app->request->query->get('it');
+    $iid = $app->request->query->get('iid');
     if ($_SERVER[ 'REQUEST_METHOD' ] == 'GET' && login_verify_it($it, $iid)) {
-        $response->setContent(render('login_page', [ 'mode' => 'create', 'it' => $it, 'iid' => $iid ]))->sendAndTerminate();
+        $app->response->setContent(render('login_page', [ 'mode' => 'create', 'it' => $it, 'iid' => $iid ]))->sendAndTerminate();
     }
 }
 
@@ -211,7 +220,10 @@ function login_ws_connection_opened($data)
     }
 }
 
-function login_handle_logout($url, $options, $response)
+/**
+ * @param Vortex\App $app
+ */
+function login_handle_logout(App $app)
 {
     if (dpoh_session_id_is_valid()) {
         $session_id = array_get($_COOKIE, 'dpoh_session_id');
@@ -219,50 +231,56 @@ function login_handle_logout($url, $options, $response)
         setcookie('dpoh_session_id', '', 1);
         setcookie('dpoh_session_token', '', 1);
     } else {
-        $response->setContent('You are not currently logged in')->setStatusCode(401);
+        $app->response->setContent('You are not currently logged in')->setStatusCode(401);
     }
 
     if (IS_AJAX_REQUEST) {
-        $response->setContent('Logout successful');
+        $app->response->setContent('Logout successful');
     } else {
-        $response->headers->set('Location: ' . base_path());
+        $app->response->headers->set('Location: ' . base_path());
     }
 }
 
-function login_handle_account_creation_api($url, $options, $response, $request)
+/**
+ * @param Vortex\App $app
+ */
+function login_handle_account_creation_api(App $app)
 {
     require_method('POST');
-    if (!login_verify_it($request->request->get('it'), $request->request->get('iid')) && any_users_exist() && !dpoh_session_id_is_valid()) {
-        $response->setContent('You cannot anonymously create a new account')->setStatusCode(401);
+    if (!login_verify_it($app->request->request->get('it'), $app->request->request->get('iid')) && any_users_exist() && !dpoh_session_id_is_valid()) {
+        $app->response->setContent('You cannot anonymously create a new account')->setStatusCode(401);
     }
 
-    $username      = $request->request->get('username');
-    $email         = $request->request->get('email');
-    $password      = $request->request->get('password1');
-    $password_conf = $request->request->get('password2');
+    $username      = $app->request->request->get('username');
+    $email         = $app->request->request->get('email');
+    $password      = $app->request->request->get('password1');
+    $password_conf = $app->request->request->get('password2');
 
     if (!($username && $password && $password_conf && $email)) {
-        $response->setContent('Some required information is missing.')->setStatusCode(400);
+        $app->response->setContent('Some required information is missing.')->setStatusCode(400);
     } elseif ($password != $password_conf) {
-        $response->setContent('Passwords do not match')->setStatusCode(400);
+        $app->response->setContent('Passwords do not match')->setStatusCode(400);
     } elseif (login_load_account($username)) {
-        $response->setContent('That username is already in use.')->setStatusCode(400);
+        $app->response->setContent('That username is already in use.')->setStatusCode(400);
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $response->setContent('Invalid email address.')->setStatusCode(400);
+        $app->response->setContent('Invalid email address.')->setStatusCode(400);
     } else {
        login_create_account($username, $email, $password);
        login_user($username);
     }
 }
 
-function login_handle_reset_password_api($url)
+/**
+ * @param Vortex\App $app
+ */
+function login_handle_reset_password_api(App $app)
 {
     require_method('POST');
 
     $url  = explode('/', $url);
     $user = $url[ 2 ];
     if (!($account = login_load_account($user))) {
-        $response->setContent('That account does not exist')->setStatusCode(404);
+        $app->response->setContent('That account does not exist')->setStatusCode(404);
     } else {
         $token = get_random_token(20);
         db_query('INSERT INTO login_tokens (token, user_id, expires) VALUES (:token, :user_id, :expires)', [
@@ -276,15 +294,17 @@ function login_handle_reset_password_api($url)
         $headers[] = 'MIME-Version: 1.0';
         $headers[] = 'Content-type: text/html; charset=iso-8859-1';
         mail($account[ 'email' ], 'Vortex | Password Reset', $message, implode("\r\n", $headers));
-        $response->setContent(json_encode([ 'success' => true ]));
-        $response->headers->set('Content-Type', 'application/json');
+        $app->response->setContent(json_encode([ 'success' => true ]));
+        $app->response->headers->set('Content-Type', 'application/json');
     }
 }
 
-function login_handle_list_users_api()
+/**
+ * @param Vortex\App $app
+ */
+function login_handle_list_users_api(App $app)
 {
-    $response->setContent(json_encode(db_query('SELECT id, email, username FROM users')));
-    $response->headers->set('Content-Type', 'application/json');
+    $app->response->setContent(db_query('SELECT id, email, username FROM users'));
 }
 
 function login_create_account($username, $email, $password)
@@ -314,17 +334,19 @@ function login_delete_account($username_or_id)
     }
 }
 
-function login_handle_delete_account_api($url, $options, $response)
+/**
+ * @param Vortex\App $app
+ */
+function login_handle_delete_account_api(App $app)
 {
     require_method('POST');
 
     $url  = explode('/', $url);
     $user = $url[ 2 ];
     try {
-        $response->setContent(json_encode(login_delete_account($user)));
-        $response->headers->set('Content-Type', 'application/json');
+        $app->response->setContent(login_delete_account($user));
     } catch (LoginException $e) {
-        $response->setContent('That account does not exist')->setStatusCode(404);
+        $app->response->setContent('That account does not exist')->setStatusCode(404);
     }
 }
 
@@ -405,18 +427,22 @@ function user($key = null)
         : $user;
 }
 
-function login_handle_login($url, $options, $response, $request)
+/**
+ * @param Vortex\App $app
+ */
+function login_handle_login(App $app)
 {
     require_method('POST');
 
     $result = false;
-    $username = $request->request->get('username');
-    $password = $request->request->get('password');
+    $username = $app->request->request->get('username');
+    $password = $app->request->request->get('password');
     if ($username && $password) {
-        $result = login_user($username, $password);
+        login_user($username, $password);
+         $app->response->setContent(['login_result' => true]);
+    } else {
+        $app->response->setStatusCode(403);
     }
-    $response->setContent(json_encode(login_delete_account($user)));
-    $response->headers->set('Content-Type', 'application/json');
 }
 
 function login_clear_expired_sessions_and_tokens()

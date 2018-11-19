@@ -41,7 +41,7 @@ function vue_render_with_layout_engine(App $app)
         }
     }
 
-    $response->setContent(render('new_layout', [
+    $app->response->setContent(render('new_layout', [
         'layouts' => $layouts_rendered,
         'windows' => $windows_rendered,
     ]));

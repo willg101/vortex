@@ -59,11 +59,11 @@ function debugger_render_preprocess(&$data)
  * @brief
  *	Implements hook_boot(). Adds request handlers for the files and config APIs
  */
-function debugger_boot()
+function debugger_boot($vars)
 {
-    request_handlers()->register('/file/', 'debugger_file_api');
-    request_handlers()->register('/recent_files/', 'debugger_recent_files_api');
-    request_handlers()->register('/ws_maintenance/', 'debugger_ws_maintenance_api');
+    $vars['request_handlers']->register('/file/', 'debugger_file_api');
+    $vars['request_handlers']->register('/recent_files/', 'debugger_recent_files_api');
+    $vars['request_handlers']->register('/ws_maintenance/', 'debugger_ws_maintenance_api');
 }
 
 /**
@@ -118,10 +118,12 @@ function validate_maintenance_token($token)
  * @brief
  *	Handle requests to the ws maintenance API.
  *
+ * @param Vortex\App $app
+ *
  * This API is used to work with the socket server, even for clients that do not currently have a
  * websocket connection.
  */
-function debugger_ws_maintenance_api($url, $options, $response)
+function debugger_ws_maintenance_api(App $app)
 {
     $action = array_get($_POST, 'action');
 
@@ -134,13 +136,13 @@ function debugger_ws_maintenance_api($url, $options, $response)
         $ss_host = settings('socket_server.host');
         $ss_port = settings('socket_server.ws_port');
         Ratchet\Client\connect("ws://$ss_host:$ss_port/?$params")->then(function ($conn) {
-            $conn->on('message', function ($msg) use ($conn, $response) {
+            $conn->on('message', function ($msg) use ($conn, $app) {
                 $conn->close();
                 if ($parsed = json_decode($msg, true)) {
                     db_query('DELETE FROM maintenance_tokens;');
-                    $response->setContent($parsed)->sendAndTerminate();
+                    $app->response->setContent($parsed)->sendAndTerminate();
                 } else {
-                    $response->setContent(['error' => $msg])->sendAndTerminate();
+                    $app->response->setContent(['error' => $msg])->sendAndTerminate();
                 }
             });
         });
@@ -228,20 +230,20 @@ function debugger_alter_js_options(&$data)
  * @brief
  *	Request handler for the files API; sends the contents of a file to the client
  *
- * @param string $path The request path
+ * @param Vortex\App $app
  */
-function debugger_file_api($path, $options, $response, Request $request)
+function debugger_file_api(App $app)
 {
     require_method('GET');
 
     // Strip off the leading 'file/' from the path and check if the corresponding file exists
     $file = '/' . (array_get(explode('/', $path, 2), 1, ''));
     if (!is_readable($file)) {
-        $response->setContent("$file does not exist")->setStatuysCode(404);
+        $app->response->setContent("$file does not exist")->setStatuysCode(404);
     } elseif (is_file($file)) { // Send the file's contents to the client
         $info = debugger_find_codebase_root($file);
         $info[ 'contents' ] = file_get_contents($file);
-        $response->setContent($info);
+        $app->response->setContent($info);
     } else { // List the directory's contents for the client
         $response_data = [];
         $contents = glob("$file/*");
@@ -249,7 +251,7 @@ function debugger_file_api($path, $options, $response, Request $request)
         foreach ($contents as $item) {
             $is_file = is_file($item);
             if (!$is_file || client_can_view_file($item)) {
-                if ($request->query->get('view') == 'jstree') {
+                if ($app->request->query->get('view') == 'jstree') {
                     $response_data[] = [
                         'text' => basename($item),
                         'icon' => $is_file ? 'fa fa-file-code-o code' : 'fa fa-folder folder',
@@ -269,7 +271,7 @@ function debugger_file_api($path, $options, $response, Request $request)
             }
         }
 
-        $response->setContent($response_data);
+        $app->response->setContent($response_data);
     }
 }
 
@@ -277,8 +279,10 @@ function debugger_file_api($path, $options, $response, Request $request)
  * @brief
  *	Request handler for the files API; sends the client a list of the most recently edited files
  *	within the "watched" directories
+ *
+ * @param Vortex\App $app
  */
-function debugger_recent_files_api($path)
+function debugger_recent_files_api(App $app)
 {
     require_method('GET');
 
@@ -300,7 +304,7 @@ function debugger_recent_files_api($path)
         }
     }
 
-    $response->setContent($response_data);
+    $app->response->setContent($response_data);
 }
 
 function debugger_provide_console_commands($data)

@@ -5,6 +5,7 @@ use Monolog\Handler\StreamHandler;
 use \Monolog\Handler\ErrorLogHandler;
 use Symfony\Component\HttpFoundation\Request;
 use Vortex\Response;
+use Vortex\RequestHandlers;
 use Vortex\App;
 
 /**
@@ -22,18 +23,18 @@ use Vortex\App;
  *		MUCS, avoid altering MUCS at or after this stage.
  *
  * @throws FatalConfigError
- *
- * @return string|NULL
+ * @throws HttpException
  */
-function bootstrap(Request $request, Response $response)
+function bootstrap(App $app)
 {
-    date_default_timezone_set(settings('timezone'));
-    $boot_vars = [ 'request' => $request, 'response' => $response ];
-    fire_hook('preboot', $boot_vars);
-    fire_hook('boot', $boot_vars, true);
+    date_default_timezone_set($app->settings->get('timezone'));
+    $request_handlers = new RequestHandlers;
+    $boot_vars = [ 'request_handlers' => $request_handlers, 'app' => $app ];
+    $app->fireHook('preboot', $boot_vars);
+    $app->fireHook('boot', $boot_vars, true);
 
-    if (!request_handlers()->handle($request, $response)) {
-        throw new HttpException("Page not found: " . $request->getPathInfo(), [ 'HTTP/1.1 404 Not found' ]);
+    if (!$request_handlers->handle($app)) {
+        throw new HttpException("Page not found: " . $app->request->getPathInfo(), [ 'HTTP/1.1 404 Not found' ]);
     }
 }
 
@@ -52,7 +53,7 @@ function logger()
     if (!$logger) {
         $handler = null;
         $label   = '';
-        $log_level = settings('log_level');
+        $log_level = App::get('settings')->get('log_level');
         $log_level = constant(Logger::class . "::$log_level");
         if (php_sapi_name() == 'cli') {
             $label   = 'cli';
