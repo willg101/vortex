@@ -1,5 +1,7 @@
 <?php
 
+use Vortex\App;
+
 /**
  * @brief
  *	Generates the link tags for including each required CSS file (this DOES NOT include or consider
@@ -12,7 +14,7 @@ function build_css_requirements()
     $result = [];
 
     $included_external_assets = [];
-    foreach (modules()->get() as $module) {
+    foreach (App::get('modules')->get() as $module) {
         foreach ($module[ 'settings' ][ 'external_css' ] as $css_file) {
             if (empty($included_external_assets[ $css_file ])) {
                 array_unshift($result, '<link rel="stylesheet" href="' . $css_file . '">');
@@ -39,7 +41,7 @@ function build_less_requirements()
 {
     $result = [];
 
-    foreach (modules()->get() as $module_name => $module) {
+    foreach (App::get('modules')->get() as $module_name => $module) {
         if (count($module[ 'less' ])) {
             foreach ($module[ 'less' ] as $less_file) {
                 // Get the input file's basename and strip off the extension
@@ -68,7 +70,7 @@ function compile_less($input_file, $output_prefix)
         $request_timestamp = time();
     }
 
-    $less_output_dir = settings('less_output_dir');
+    $less_output_dir = App::get('settings')->get('less_output_dir');
 
     if ($clear) {
         $contents = glob($less_output_dir . '/cached-*');
@@ -84,7 +86,7 @@ function compile_less($input_file, $output_prefix)
         . without_file_extension($input_file) . '.css';
 
     $less = new Less_Parser();
-    $less->ModifyVars(settings('less_variables'));
+    $less->ModifyVars(App::get('settings')->get('less_variables'));
     $less->parseFile($input_file);
     file_put_contents_safe($output_file, $less->getCss());
     return $output_file;

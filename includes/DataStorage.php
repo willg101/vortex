@@ -96,7 +96,7 @@ class DataStorage
             'old_value' => $this->get($key),
             'new_value' => &$value,
         ];
-        fire_hook($this->generateHookName('change'), $data);
+        App::fireHook($this->generateHookName('change'), $data);
         return $this->commitChange($key, $value);
     }
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 use Symfony\Component\Console\Application;
+use Vortex\App as VortexApp;
 
 define( 'DPOH_ROOT', __DIR__ );
 
@@ -26,5 +27,5 @@ $whoops->register();
 
 $application = new Application();
 $data = [ 'application' => $application ];
-fire_hook( 'provide_console_commands', $data );
+$vortex_app->fireHook( 'provide_console_commands', $data );
 $application->run();

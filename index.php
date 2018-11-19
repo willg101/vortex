@@ -1,7 +1,7 @@
 <?php /* dpoh: ignore */
 
 use Symfony\Component\HttpFoundation\Request;
-use Vortex\Response;
+use Vortex\App;
 
 define('DPOH_ROOT', __DIR__);
 define('IS_AJAX_REQUEST', !empty($_SERVER['HTTP_X_REQUESTED_WITH']));

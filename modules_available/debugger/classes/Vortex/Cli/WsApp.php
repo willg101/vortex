@@ -5,6 +5,7 @@ namespace Vortex\Cli;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use Exception;
+use Vortex\App;
 
 class WsApp implements MessageComponentInterface
 {
@@ -109,7 +110,7 @@ class WsApp implements MessageComponentInterface
             'connection' => $conn,
             'bridge'     => $this->bridge,
         ];
-        fire_hook('ws_connection_opened', $data);
+        App::fireHook('ws_connection_opened', $data);
     }
 
     public function onClose(ConnectionInterface $conn)
@@ -122,7 +123,7 @@ class WsApp implements MessageComponentInterface
             'connection' => $conn,
             'bridge'     => $this->bridge,
         ];
-        fire_hook('ws_connection_closed', $data);
+        App::fireHook('ws_connection_closed', $data);
 
         $this->bridge->clearWsConnection($conn);
     }
@@ -140,7 +141,7 @@ class WsApp implements MessageComponentInterface
             'bridge'     => $this->bridge,
             'abort'      => strpos($msg, 'X-') === 0, // By default, don't forward messages beginning with 'X-'
         ];
-        fire_hook('ws_message_received', $data);
+        App::fireHook('ws_message_received', $data);
 
         if (!$data[ 'abort' ] && $data[ 'message' ]) {
             $this->bridge->sendToDbg($data[ 'message' ]);

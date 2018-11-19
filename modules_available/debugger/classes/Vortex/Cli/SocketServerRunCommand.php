@@ -13,6 +13,7 @@ use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use Ratchet\Server\IoServer;
 use Monolog\Handler\StreamHandler;
+use Vortex\App;
 
 require_once 'includes/arrays.php';
 require_once 'includes/database.php';
@@ -41,8 +42,8 @@ class SocketServerRunCommand extends Command
         logger()->info('Creating socket servers');
 
         $loop = EventLoopFactory::create();
-        $dbg  = new SocketServer('0.0.0.0:' . settings('socket_server.de_port'), $loop);
-        $ws   = new SocketServer('0.0.0.0:' . settings('socket_server.ws_port'), $loop);
+        $dbg  = new SocketServer('0.0.0.0:' . App::get('settings')->get('socket_server.de_port'), $loop);
+        $ws   = new SocketServer('0.0.0.0:' . App::get('settings')->get('socket_server.ws_port'), $loop);
 
         $wsStack = new HttpServer(
             new WsServer(

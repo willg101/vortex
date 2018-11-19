@@ -24,6 +24,10 @@ class App {
         static::$default_instance = null;
     }
 
+    public static function get($str) {
+        return static::getInstance()->$str;
+    }
+
     protected $modules;
     protected $settings;
     protected $request;
@@ -70,5 +74,26 @@ class App {
 
     public function __set($key, $value) {
         throw new LogicException("Cannot set '$key' on an instance of " . get_called_class());
+    }
+
+    public function fireHook($hook_name, array &$data = []) {
+        $results = [];
+        $this_val = isset($this) && $this instanceof self ? $this : static::getInstance();
+        foreach ($this_val->modules->get() as $module_name => $module_info) {
+            if (empty($module_info['hook_implementations'])) {
+                continue;
+            } else {
+                require_once $module_info['hook_implementations'];
+            }
+
+            $function_name = $module_name . '_' . $hook_name;
+            if (function_exists($function_name)) {
+                $current_result = $function_name($data);
+                if ($current_result !== null) {
+                    $results[ $module_name ] = $current_result;
+                }
+            }
+        }
+        return $results;
     }
 }

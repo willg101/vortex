@@ -1,5 +1,7 @@
 <?php
 
+use Vortex\App;
+
 class LoginException extends Exception
 {
 }

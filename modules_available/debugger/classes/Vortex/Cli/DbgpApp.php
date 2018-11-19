@@ -5,6 +5,7 @@ namespace Vortex\Cli;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use Exception;
+use Vortex\App;
 
 class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHandler
 {
@@ -90,7 +91,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
             'connection' => $conn,
             'id'         => $id,
         ];
-        fire_hook('dbg_connection_queued', $data);
+        App::fireHook('dbg_connection_queued', $data);
         $this->bridge->sendToWs($this->getQueueAsXml());
     }
 
@@ -137,7 +138,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
                 'connection' => $conn,
                 'bridge'     => $this->bridge,
             ];
-            fire_hook('dbg_connection_closed', $data);
+            App::fireHook('dbg_connection_closed', $data);
 
             logger()->debug("Removing callback bridge");
             $this->bridge->clearDbgConnection($conn);
@@ -208,7 +209,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
             'abort'      => false,
             'bridge'     => $this->bridge,
         ];
-        fire_hook('dbg_message_received', $data);
+        App::fireHook('dbg_message_received', $data);
         if (!$data[ 'abort' ] && $data[ 'message' ]) {
             $this->bridge->sendToWs($data[ 'message' ], true);
         }
@@ -256,7 +257,7 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
             'connection' => $conn,
             'id'         => $cid,
         ];
-        fire_hook('before_debugger_detach', $data);
+        App::fireHook('before_debugger_detach', $data);
     }
 
     /**
@@ -312,6 +313,6 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
             'connection' => $conn,
             'bridge'     => $this->bridge,
         ];
-        fire_hook('dbg_connection_opened', $data);
+        App::fireHook('dbg_connection_opened', $data);
     }
 }

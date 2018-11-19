@@ -35,6 +35,54 @@ final class AppTest extends TestCase
         App::getInstance();
     }
 
+    public function testGet(): void {
+        $instance = new App([], []);
+        App::setInstance($instance);
+        $this->assertSame($instance->request, App::get('request'));
+        $this->assertSame($instance->response, App::get('response'));
+        $this->assertSame($instance->modules, App::get('modules'));
+        $this->assertSame($instance->settings, App::get('settings'));
+    }
+
+    /**
+     * We'll run this in a separate process because we define functions in this test
+     * @runInSeperateProcess
+     */
+    function testFireHook(): void {
+        # No modules defined
+        $a1 = new App([], []);
+        $data = [ 'foo' => 'bar' ];
+        $data_prev = $data;
+        $this->assertEquals([], $a1->fireHook('biz', $data));
+        $this->assertEquals($data_prev, $data);
+
+        # One module defined, does not implement hooks
+        $a2 = new App([ 'foo' => [ 'hook_implementations' => false ] ], []);
+        $this->assertEquals([], $a2->fireHook('biz', $data));
+        $this->assertEquals($data_prev, $data);
+
+        # One module defined, does implement hooks
+        $a3 = new App([ 'foo__' => [ 'hook_implementations' => __FILE__ ] ], []);
+        function foo___biz(&$data) {
+            $data[ 'foo___biz' ] = true;
+            return 'foo___biz';
+        }
+        $this->assertEquals([ 'foo__' => 'foo___biz' ], $a3->fireHook('biz', $data));
+        $this->assertEquals([ 'foo___biz' => true, 'foo' => 'bar' ], $data);
+
+        # Two modules defined, both implement hooks
+        $a3 = new App([
+            'foo__' => [ 'hook_implementations' => __FILE__ ],
+            'bar__' => [ 'hook_implementations' => __FILE__ ],
+        ], []);
+        function bar___biz(&$data) {
+            $data[ 'bar___biz' ] = true;
+            return 'bar___biz';
+        }
+        $this->assertEquals([ 'foo__' => 'foo___biz', 'bar__' => 'bar___biz' ], $a3->fireHook('biz', $data));
+        $this->assertEquals([ 'foo___biz' => true, 'bar___biz' => true, 'foo' => 'bar' ], $data);
+    }
+
     public function testContructorWithArrays(): void {
         if (!defined('DPOH_ROOT')) {
             define('DPOH_ROOT', dirname(__DIR__));

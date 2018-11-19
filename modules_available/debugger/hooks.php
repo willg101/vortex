@@ -5,6 +5,7 @@ define('DEBUGGER_N_MOST_RECENT_FILES', 10);
 use Vortex\Cli\SocketServerStartCommand;
 use Vortex\Cli\SocketServerRunCommand;
 use Vortex\Cli\DbgpApp;
+use Vortex\App;
 
 function debugger_provide_windows()
 {
@@ -327,11 +328,11 @@ function debugger_ws_message_received(&$data)
             logger()->warning("Ignoring improperly formatted X-glob command: $data[message]", $args);
         }
     } elseif (preg_match('/^X-ctrl:stop /', $data[ 'message' ])) {
-        fire_hook('stop_socket_server');
+        App::fireHook('stop_socket_server');
         logger()->info("Received stop command; killing server");
         exit('stop');
     } elseif (preg_match('/^X-ctrl:restart /', $data[ 'message' ])) {
-        fire_hook('restart_socket_server');
+        App::fireHook('restart_socket_server');
         logger()->info("Received restart command; restarting server");
         exit('restart');
     } elseif (preg_match('/^X-ctrl:peek_queue /', $data[ 'message' ])) {
