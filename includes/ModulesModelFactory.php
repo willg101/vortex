@@ -1,6 +1,4 @@
 <?php namespace Vortex;
-require_once 'DataStorage.class.php';
-use Dpoh\DataStorage;
 
 class ModulesModelFactory {
     public const MODEL_NAME = 'modules';

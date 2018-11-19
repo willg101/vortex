@@ -7,7 +7,7 @@ use Vortex\SettingsModelFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Vortex\Response;
-use Dpoh\DataStorage;
+use Vortex\DataStorage;
 
 final class AppTest extends TestCase
 {
@@ -39,7 +39,7 @@ final class AppTest extends TestCase
         if (!defined('DPOH_ROOT')) {
             define('DPOH_ROOT', dirname(__DIR__));
         }
- 
+
         $modules  = [ 'foo' => 'bar' ];
         $settings = [ 'biz' => 'baz' ];
         $a1 = new App($modules, $settings);

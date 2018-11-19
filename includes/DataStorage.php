@@ -1,6 +1,6 @@
 <?php
 
-namespace Dpoh;
+namespace Vortex;
 
 /**
  * @brief

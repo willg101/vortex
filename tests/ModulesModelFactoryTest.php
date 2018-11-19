@@ -4,7 +4,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/../includes/files.php';
 
 use Vortex\ModulesModelFactory;
+use Vortex\DataStorage;
 use PHPUnit\Framework\TestCase;
+
 
 final class ModulesModelFactorysTest extends TestCase
 {
@@ -13,15 +15,15 @@ final class ModulesModelFactorysTest extends TestCase
 
         # No modules enabled
         $modules = ModulesModelFactory::create($modules_dir);
-        $this->assertTrue($modules instanceof Dpoh\DataStorage);
+        $this->assertTrue($modules instanceof DataStorage);
         $this->assertTrue(empty($modules->get()));
 
         # 1 (empty) module enabled
         mkdir("$modules_dir/foo");
         $modules = ModulesModelFactory::create($modules_dir);
-        $this->assertTrue($modules instanceof Dpoh\DataStorage);
+        $this->assertTrue($modules instanceof DataStorage);
         $modules_array = $modules->get();
-        $expected_modules = [ 
+        $expected_modules = [
             'foo' => [
                 'js'                   => [],
                 'css'                  => [],
@@ -65,7 +67,7 @@ final class ModulesModelFactorysTest extends TestCase
         }
         $expected_modules[ 'bar' ] = $expected_bar;
         $modules = ModulesModelFactory::create($modules_dir);
-        $this->assertTrue($modules instanceof Dpoh\DataStorage);
+        $this->assertTrue($modules instanceof DataStorage);
         $modules_array = $modules->get();
         $this->assertEquals($expected_modules, $modules_array);
     }

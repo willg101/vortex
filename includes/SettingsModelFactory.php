@@ -1,7 +1,5 @@
 <?php namespace Vortex;
-require_once 'DataStorage.class.php';
 
-use Dpoh\DataStorage;
 use InvalidArgumentException;
 use UnexpectedValueException;
 

@@ -4,10 +4,7 @@ namespace Vortex;
 
 use LogicException;
 use InvalidArgumentException;
-use Dpoh\DataStorage;
 use Symfony\Component\HttpFoundation\Request;
-
-require_once __DIR__ . '/../includes/DataStorage.class.php';
 
 class App {
     protected static $default_instance;
