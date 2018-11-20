@@ -1,5 +1,7 @@
 <?php
 
+use Vortex\App;
+
 function base_url()
 {
     return sprintf(
@@ -86,8 +88,7 @@ function get_user_ip()
 {
     static $ip;
     if ($ip === null) {
-        $all_headers = getallheaders();
-        $ip = array_get($all_headers, 'X-Forwarded-For', $_SERVER[ 'REMOTE_ADDR' ]);
+        $ip = App::get('request')->headers->get('X-Forwarded-For') ?: App::get('request')->server->get('REMOTE_ADDR');
     }
     return $ip;
 }
