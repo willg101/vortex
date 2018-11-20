@@ -12,7 +12,7 @@
         "symfony/http-foundation": "^4.1"
     },
     "autoload": {
-        "psr-4": { "Vortex\\": "includes/" },
+        "psr-4": { "Vortex\\": "includes/", "Vortex\\Testing\\" : "tests/support" },
         "files" : [ "vendor/oyejorge/less.php/lessc.inc.php", "vendor/paragonie/random_compat/lib/random.php" ],
         "classmap" : [ "modules_available" ]
     },
