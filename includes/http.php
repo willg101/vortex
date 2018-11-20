@@ -3,16 +3,6 @@
 use Vortex\App;
 use Vortex\Exceptions\HttpException;
 
-function base_url()
-{
-    return sprintf(
-        "%s://%s%s",
-        isset($_SERVER[ 'HTTPS' ]) && $_SERVER[ 'HTTPS' ] != 'off' ? 'https' : 'http',
-        $_SERVER[ 'SERVER_NAME' ],
-        base_path()
-    );
-}
-
 /**
  * AN EXCERPT COPIED FROM DRUPAL 7 CORE, `conf_init()`
  *
@@ -29,7 +19,7 @@ function base_path()
     if (!isset($base_path)) {
         // $_SERVER['SCRIPT_NAME'] can, in contrast to $_SERVER['PHP_SELF'], not
         // be modified by a visitor.
-        if ($dir = rtrim(dirname($_SERVER[ 'SCRIPT_NAME' ]), '\/')) {
+        if ($dir = rtrim(dirname(App::get('request')->server->get('SCRIPT_NAME')), '\/')) {
             $base_path = $dir;
             $base_path .= '/';
         } else {
@@ -38,6 +28,16 @@ function base_path()
     }
 
     return $base_path;
+}
+
+function base_url()
+{
+    return sprintf(
+        "%s://%s%s",
+        App::get('request')->server->get('HTTPS') != 'off' ? 'https' : 'http',
+        App::get('request')->server->get('SERVER_NAME'),
+        base_path()
+    );
 }
 
 /**
@@ -55,7 +55,8 @@ function require_method($methods)
 
     $methods = array_map('strtoupper', $methods);
 
-    if (in_array($_SERVER[ 'REQUEST_METHOD' ], $methods)) {
+    $actual_method = App::get('request')->server->get('REQUEST_METHOD');
+    if (in_array($actual_method, $methods)) {
         return;
     } else {
         $method_list = implode(', ', $methods);
@@ -63,7 +64,7 @@ function require_method($methods)
             'HTTP/1.1 405 Not allowed',
             "Allow: $method_list",
         ];
-        throw new HttpException("Method '$_SERVER[REQUEST_METHOD]' not allowed. "
+        throw new HttpException("Method '$actual_method' not allowed. "
             . "Allowed methods: $method_list", $headers);
     }
 }
@@ -76,6 +77,9 @@ function parse_cookie_str($str)
 {
     $cookies = [];
     foreach (explode('; ', $str) as $raw_cookie) {
+        if (!($raw_cookie = trim($raw_cookie))) {
+            continue;
+        }
         preg_match('/^(?P<key>.*?)=(?P<value>.*?)$/i', trim($raw_cookie), $matches);
         $cookies[ trim($matches[ 'key' ]) ]  = urldecode($matches[ 'value' ]);
     }
@@ -89,7 +93,16 @@ function get_user_ip()
 {
     static $ip;
     if ($ip === null) {
-        $ip = App::get('request')->headers->get('X-Forwarded-For') ?: App::get('request')->server->get('REMOTE_ADDR');
+        if ($proxy_list = App::get('request')->headers->get('X-Forwarded-For')) {
+            $ips = array_filter(preg_split('/\s*,\s*/', $proxy_list));
+            if ($ips) {
+                $ip = array_shift($ips);
+            }
+        }
+
+        if (!$ip) {
+            $ip = App::get('request')->server->get('REMOTE_ADDR');
+        }
     }
     return $ip;
 }
