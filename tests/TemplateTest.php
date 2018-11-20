@@ -70,11 +70,11 @@ final class TemplatesTest extends TestCase
      */
     public function testRenderWithHookAlterations(): void {
         $dir = exec('mktemp -d');
- 
+
         $template_file_foo = "$dir/foobar.tpl.php";
         $GLOBALS['foo_test_render__file'] = $template_file_foo;
         file_put_contents($template_file_foo, '<?php echo $preprocess ?> ** <?php echo $process ?>');
- 
+
         $template_file_bar = "$dir/foobar_bar.tpl.php";
         $GLOBALS['bar_test_render__file'] = $template_file_bar;
         file_put_contents($template_file_bar, '((bar)) ');
@@ -102,7 +102,7 @@ final class TemplatesTest extends TestCase
             $data['vars']['process'] = 'Processed';
 
             // Replace modules' implementations of this template
-            $data['implementations']['foo_test_render__']['file'] = $GLOBALS['foo_test_render__file']; 
+            $data['implementations']['foo_test_render__']['file'] = $GLOBALS['foo_test_render__file'];
             $data['implementations']['bar_test_render__']['file'] = $GLOBALS['bar_test_render__file'];
 
             // Re-order the implementations

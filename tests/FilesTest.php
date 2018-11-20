@@ -55,7 +55,7 @@ final class FilesTest extends TestCase
         $this->assertTrue(client_can_view_file("$dir/a/b/file_without_extension"));
         $this->assertTrue(client_can_view_file("$dir/c"));
     }
-    
+
     public function testClientCanViewFileNegative(): void {
         $dir = exec('mktemp -d');
         mkdir("$dir/a");
@@ -75,7 +75,7 @@ final class FilesTest extends TestCase
         $this->assertFalse(client_can_view_file("$dir/a/b/file.disallowed"));
         $this->assertFalse(client_can_view_file("$dir/c.allowed"));
     }
-    
+
     public function testRecursiveFileScanNoFiles(): void {
         $dir = exec('mktemp -d');
         // No symlinks
@@ -85,7 +85,7 @@ final class FilesTest extends TestCase
         symlink($dir, "$dir/cycle");
         $this->assertEquals([], recursive_file_scan('foo', $dir));
     }
-    
+
     public function testRecursiveFileScanNoSubdirs(): void {
         $dir = exec('mktemp -d');
         file_put_contents("$dir/a.foo", '');
@@ -101,7 +101,7 @@ final class FilesTest extends TestCase
         symlink($dir, "$dir/cycle");
         $this->assertEquals(["$dir/a.foo", "$dir/b.foo"], recursive_file_scan('foo', $dir));
     }
-    
+
     public function testRecursiveFileScanWithSubdirs(): void {
         $dir = exec('mktemp -d');
         mkdir("$dir/a");
@@ -128,7 +128,7 @@ final class FilesTest extends TestCase
         symlink("$dir/a/1", "$dir/cycle");
         $this->assertEquals(["$dir/a/1/x.foo", "$dir/a/2/x.foo", "$dir/a/2/y.foo"], recursive_file_scan('foo', $dir));
     }
-    
+
     public function testWithoutFileExtension(): void {
         $this->assertEquals('foobar', without_file_extension('foobar'));
         $this->assertEquals('foobar', without_file_extension('/var/foobar'));

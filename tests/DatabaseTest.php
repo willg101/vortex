@@ -18,7 +18,7 @@ final class DatabaseTest extends TestCase
         $db_file_def = exec('mktemp --suffix=.db');
         $db_file_alt = exec('mktemp --suffix=.db');
         $app = new App([], [
-            'database' => [ 
+            'database' => [
                 'default' => $db_file_def,
                 'alt' => $db_file_alt,
             ]

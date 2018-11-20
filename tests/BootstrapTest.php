@@ -80,7 +80,7 @@ final class BootstrapTest extends TestCase
         ], ['log_level' => 'INFO']);
         App::setInstance($app);
         function bootstrap_bar4___init_logger(&$data) {
-            $data['handler'] = new StreamHandler(__DIR__ . '/../logs/' . __FUNCTION__. '.log', $log_level); 
+            $data['handler'] = new StreamHandler(__DIR__ . '/../logs/' . __FUNCTION__. '.log', $log_level);
         }
         $log_file = __DIR__ . '/../logs/bootstrap_bar4___init_logger.log';
         @unlink($log_file);
