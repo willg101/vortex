@@ -49,14 +49,14 @@ final class AppTest extends TestCase
      * @runInSeperateProcess
      */
     function testFireHook(): void {
-        # No modules defined
+        // No modules defined
         $a1 = new App([], []);
         $data = [ 'foo' => 'bar' ];
         $data_prev = $data;
         $this->assertEquals([], $a1->fireHook('biz', $data));
         $this->assertEquals($data_prev, $data);
 
-        # One module defined, does not implement hooks
+        // One module defined, does not implement hooks
         $a2 = new App([ 'foo' => [ 'hook_implementations' => false ] ], []);
         $this->assertEquals([], $a2->fireHook('biz', $data));
         $this->assertEquals($data_prev, $data);
@@ -70,7 +70,7 @@ final class AppTest extends TestCase
         $this->assertEquals([ 'foo__' => 'foo___biz' ], $a3->fireHook('biz', $data));
         $this->assertEquals([ 'foo___biz' => true, 'foo' => 'bar' ], $data);
 
-        # Two modules defined, both implement hooks
+        // Two modules defined, both implement hooks
         $a3 = new App([
             'foo__' => [ 'hook_implementations' => __FILE__ ],
             'bar__' => [ 'hook_implementations' => __FILE__ ],
