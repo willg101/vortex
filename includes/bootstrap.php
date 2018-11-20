@@ -56,6 +56,9 @@ function logger()
         $handler = null;
         $label   = '';
         $log_level = App::get('settings')->get('log_level');
+        if (!$log_level) {
+            throw new FatalConfigException('`log_level` is not defined in your settings.');
+        }
         $log_level = constant(Logger::class . "::$log_level");
         if (php_sapi_name() == 'cli') {
             $label   = 'cli';
@@ -74,7 +77,7 @@ function logger()
 
         if (!$data[ 'logger' ]) {
             $logger = new Logger("Vortex Logger ($data[label])");
-            $logger->pushHandler($handler);
+            $logger->pushHandler($data['handler']);
         } else {
             $logger = $data[ 'logger' ];
         }
