@@ -59,7 +59,7 @@ function render($name, $vars = [])
 
     App::fireHook('render_preprocess', $data);
     App::fireHook('render_process', $data);
-    usort($data[ 'implementations' ], function ($a, $b) {
+    uasort($data[ 'implementations' ], function ($a, $b) {
         return $a[ 'weight' ] - $b[ 'weight' ];
     });
 
@@ -119,6 +119,7 @@ function get_template_implementations($template_name, $use_cache = true)
 {
     static $cache;
     if ($cache === null || !$use_cache) {
+        $cache = [];
         foreach (App::get('modules')->get() as $module_name => $module) {
             foreach ($module[ 'templates' ] as $file) {
                 $key = without_file_extension($file);
