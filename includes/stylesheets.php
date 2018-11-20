@@ -88,6 +88,6 @@ function compile_less($input_file, $output_prefix)
     $less = new Less_Parser();
     $less->ModifyVars(App::get('settings')->get('less_variables'));
     $less->parseFile($input_file);
-    file_put_contents_safe($output_file, $less->getCss());
+    file_put_contents($output_file, $less->getCss());
     return $output_file;
 }
