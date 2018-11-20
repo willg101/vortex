@@ -1,10 +1,7 @@
 <?php
 
 use Vortex\App;
-
-class DatabaseException extends Exception
-{
-}
+use Vortex\Exceptions\DatabaseException;
 
 /**
  * @brief
