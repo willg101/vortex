@@ -50,10 +50,6 @@ final class SettingsModelFactoryTest extends TestCase
         $settings_model = SettingsModelFactory::create($settings_file);
     }
 
-    /**
-     * We'll run this in a separate process due to the use of posix_setuid()
-     * @runInSeparateProcess
-     */
     public function testLoadSettingsThrowsForUnreadableFile(): void {
         $settings_file = exec('mktemp --suffix=.ini');
         exec('chmod 600 ' . escapeshellarg($settings_file));
@@ -61,8 +57,8 @@ final class SettingsModelFactoryTest extends TestCase
         // Become a non-root user
         posix_setuid(1);
         $settings_model = SettingsModelFactory::create($settings_file);
-    }
         posix_setuid(0);
+    }
 
     public function testLoadSettingsThrowsForWrongFormat(): void {
         $settings_file = exec('mktemp --suffix=.abc');
