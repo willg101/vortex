@@ -27,8 +27,7 @@ class Response {
     }
 
     public function sendAndTerminate() {
-        $this->symfony_response->send();
-        exit;
+        throw new SendAndTerminateException($this);
     }
 
     public function getSymfonyResponse() {

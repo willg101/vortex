@@ -62,6 +62,7 @@ final class SettingsModelFactoryTest extends TestCase
         posix_setuid(1);
         $settings_model = SettingsModelFactory::create($settings_file);
     }
+        posix_setuid(0);
 
     public function testLoadSettingsThrowsForWrongFormat(): void {
         $settings_file = exec('mktemp --suffix=.abc');

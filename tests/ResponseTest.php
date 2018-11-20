@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use Vortex\Response;
+use Vortex\SendAndTerminateException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
@@ -62,21 +63,14 @@ final class ResponseTest extends TestCase
     }
 
     public function testSendAndTerminate(): void {
-        $autoloader = __DIR__ . '/../vendor/autoload.php';
-        $response_class = Response::class;
-        $test_code = <<<EOF
-        require_once "$autoloader";
-        use $response_class;
-        \$r = new Response;
-        \$r->setContent("foo");
-        \$r->sendAndTerminate();
-        exit(1); // Should not reach this point
-EOF;
-        $output = [];
-        $exit_code = -1;
-        exec("php -r '$test_code'", $output, $exit_code);
-        $this->assertEquals(implode('\n', $output), 'foo');
-        $this->assertEquals($exit_code, 0);
+        try {
+            $r = new Response;
+            $r->setContent("foo");
+            $r->sendAndTerminate();
+            $this->fail(Response::class . '::sendAndTerminate should throw');
+        } catch (SendAndTerminateException $e) {
+            $this->assertSame($e->response, $r);
+        }
     }
 
     public function testMagicCallToExistingMethod(): void {
