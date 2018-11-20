@@ -48,7 +48,7 @@ function process_asset_path($file_name) {
     if (strpos($file_name, DPOH_ROOT) === 0) {
         $file_name = substr($file_name, mb_strlen(DPOH_ROOT));
         $file_name = base_path() . $file_name;
-        $file_name = preg_replace('#^/+#', '/', $file_name);
+        $file_name = preg_replace('#/+#', '/', $file_name);
     }
     return $file_name;
 }
