@@ -31,7 +31,7 @@ function bootstrap(App $app)
     $request_handlers = new RequestHandlers;
     $boot_vars = [ 'request_handlers' => $request_handlers, 'app' => $app ];
     $app->fireHook('preboot', $boot_vars);
-    $app->fireHook('boot', $boot_vars, true);
+    $app->fireHook('boot', $boot_vars);
 
     if (!$request_handlers->handle($app)) {
         throw new HttpException("Page not found: " . $app->request->getPathInfo(), [ 'HTTP/1.1 404 Not found' ]);
