@@ -23,7 +23,7 @@ function build_css_requirements()
         }
 
         foreach ($module[ 'css' ] as $css_file) {
-            $result[] = '<link rel="stylesheet" href="' . base_path() . $css_file . '"/>';
+            $result[] = '<link rel="stylesheet" href="' . base_path() . $css_file . '">';
         }
     }
 
@@ -47,7 +47,7 @@ function build_less_requirements()
                 // Get the input file's basename and strip off the extension
                 $less_file_plain = without_file_extension($less_file);
                 $output          = compile_less($less_file, $module_name);
-                $result[]        = '<link rel="stylesheet" href="' . $output . '"/>';
+                $result[]        = '<link rel="stylesheet" href="' . $output . '">';
             }
         }
     }
