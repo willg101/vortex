@@ -7,4 +7,6 @@ mv /var/www/html-prev/vortex /var/www/html
 cd /var/www/html
 composer install
 
+mkdir -p storage/db storage/css
+
 vendor/bin/phpunit --bootstrap vendor/autoload.php tests/
