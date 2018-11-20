@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Vortex\Response;
 use Vortex\RequestHandlers;
 use Vortex\App;
+use Vortex\Exceptions\HttpException;
+use Vortex\Exceptions\FatalConfigException;
 
 /**
  * @brief
@@ -22,8 +24,7 @@ use Vortex\App;
  *	- boot: Perform initialization tasks. So that other modules can safely make decisions based on
  *		MUCS, avoid altering MUCS at or after this stage.
  *
- * @throws FatalConfigError
- * @throws HttpException
+ * @throws Vortex\Exceptions\HttpException
  */
 function bootstrap(App $app)
 {
@@ -45,6 +46,7 @@ function bootstrap(App $app)
  *	(or monolog-compatible) logger instance
  *
  * @return Monolog\Logger
+ * @throws Vortex\Exceptions\FatalConfigException
  */
 function logger()
 {

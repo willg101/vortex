@@ -1,6 +1,7 @@
 <?php
 
 use Vortex\App;
+use Vortex\Exceptions\HttpException;
 
 function base_url()
 {
