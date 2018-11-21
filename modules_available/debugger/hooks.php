@@ -6,6 +6,7 @@ use Vortex\Cli\SocketServerStartCommand;
 use Vortex\Cli\SocketServerRunCommand;
 use Vortex\Cli\DbgpApp;
 use Vortex\App;
+use Vortex\Exceptions\DatabaseException;
 
 function debugger_provide_windows()
 {
