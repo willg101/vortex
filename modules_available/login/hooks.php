@@ -92,17 +92,14 @@ function login_postpone_session_expiration()
  */
 function login_handle_invite_user_api(App $app)
 {
-    $url   = explode('/', $app->request->getPathInfo());
+    $url   = explode('/', trim($app->request->getPathInfo(), '/'));
     $email = $url[ 3 ];
     header('Content-Type: text/plain');
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $app->response->setContent("'$email' is not a valid email address.");
-        $app->response->addHeader("HTTP/1.1 400 Bad request");
-
+        $app->response->setContent("'$email' is not a valid email address.")->setStatusCode(400);
     } elseif (login_load_account($email)) {
-        $app->response->setContent("An account is already associated with the email address '$email'.");
-        $app->response->addHeader("HTTP/1.1 400 Bad request");
+        $app->response->setContent("An account is already associated with the email address '$email'.")->setStatusCode(400);
     } else {
         login_invite_user($email);
         $app->response->setContent("An invitation to create an account has been sent to '$email'.");
