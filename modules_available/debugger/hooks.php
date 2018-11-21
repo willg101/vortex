@@ -140,7 +140,9 @@ function debugger_ws_maintenance_api(App $app)
                 $conn->close();
                 if ($parsed = json_decode($msg, true)) {
                     db_query('DELETE FROM maintenance_tokens;');
-                    $app->response->setContent($parsed)->sendAndTerminate();
+                    header('Content-Type: application/json');
+                    echo $msg;
+                    exit; // TODO: Why doesn't this work as expected with Vortex\Response?
                 } else {
                     $app->response->setContent(['error' => $msg])->sendAndTerminate();
                 }
