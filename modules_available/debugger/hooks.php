@@ -133,8 +133,8 @@ function debugger_ws_maintenance_api(App $app)
             'security_token' => $token,
             'action'         => 'commandeer',
         ]);
-        $ss_host = settings('socket_server.host');
-        $ss_port = settings('socket_server.ws_port');
+        $ss_host = $app->settings->get('socket_server.host');
+        $ss_port = $app->settings->get('socket_server.ws_port');
         Ratchet\Client\connect("ws://$ss_host:$ss_port/?$params")->then(function ($conn) {
             $conn->on('message', function ($msg) use ($conn, $app) {
                 $conn->close();
