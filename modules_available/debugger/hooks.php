@@ -125,7 +125,7 @@ function validate_maintenance_token($token)
  */
 function debugger_ws_maintenance_api(App $app)
 {
-    $action = array_get($_POST, 'action');
+    $action = $app->request->request->get('action', '');
 
     if ($action == 'commandeer') {
         $token = make_maintenance_token();
