@@ -475,6 +475,14 @@ services:
       - shared_storage:/var/www/html/storage
 $volumes
 
+  mail:
+    build:
+      context: ./mail
+    stop_signal: SIGKILL
+    # From the official tianon/exim4 documentation (2018-11-21):
+    # > Also, it's worth noting that Exim is grumpy about signals here (possibly this pid1 issue),
+    # > so you'll have to just docker kill the container to stop it, unfortunately.
+
   socket_server:
     build:
       context: ./socket_server
