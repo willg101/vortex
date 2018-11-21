@@ -277,7 +277,7 @@ function login_handle_reset_password_api(App $app)
 {
     require_method('POST');
 
-    $url  = explode('/', $url);
+    $url  = explode('/', trim($app->request->getPathInfo(), '/'));
     $user = $url[ 2 ];
     if (!($account = login_load_account($user))) {
         $app->response->setContent('That account does not exist')->setStatusCode(404);
