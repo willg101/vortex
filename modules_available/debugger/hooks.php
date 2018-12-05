@@ -289,8 +289,8 @@ function debugger_recent_files_api(App $app)
 {
     require_method('GET');
 
-    $extensions = implode('\|', settings('allowed_extensions'));
-    $dirs = implode(' ', array_map('escapeshellarg', settings('recent_dirs')));
+    $extensions = implode('\|', $app->settings->get('allowed_extensions'));
+    $dirs = implode(' ', array_map('escapeshellarg', $app->settings->get('recent_dirs')));
     $n_files = DEBUGGER_N_MOST_RECENT_FILES;
     $files = [];
     exec("find $dirs -type f -regextype sed -regex '.*\.\($extensions\)' -printf '%T@ %p\n' | sort -n | tail -n $n_files | cut -f2- -d\" \"", $files);
