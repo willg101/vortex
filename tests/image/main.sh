@@ -9,4 +9,4 @@ composer install
 
 mkdir -p storage/db storage/css
 
-vendor/bin/phpunit --bootstrap vendor/autoload.php tests/
+vendor/bin/phpunit --config tests/phpunit.xml

@@ -9,7 +9,7 @@ trait TestsRequests {
     protected $most_recent_response;
 
     public function sendRequest(...$args) {
-        if (!defined('DPOH_ROOT')) define('DPOH_ROOT', __DIR__ . '/../');
+        if (!defined('DPOH_ROOT')) define('DPOH_ROOT', __FILE__ . '/ll/../../');
         if (!defined('IS_AJAX_REQUEST')) define('IS_AJAX_REQUEST', false);
         require_once DPOH_ROOT . '/includes/bootstrap.php';
         require_once DPOH_ROOT . '/includes/database.php';

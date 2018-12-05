@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../includes/files.php';
+require_once __DIR__ . '/../../includes/files.php';
 
 use Vortex\SettingsModelFactory;
 use PHPUnit\Framework\TestCase;

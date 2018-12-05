@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../includes/javascript.php';
-require_once __DIR__ . '/../includes/http.php';
-require_once __DIR__ . '/../includes/arrays.php';
+require_once __DIR__ . '/../../includes/javascript.php';
+require_once __DIR__ . '/../../includes/http.php';
+require_once __DIR__ . '/../../includes/arrays.php';
 
 use PHPUnit\Framework\TestCase;
 use Vortex\App;

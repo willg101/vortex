@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../includes/bootstrap.php';
-require_once __DIR__ . '/../includes/arrays.php';
+require_once __DIR__ . '/../../includes/bootstrap.php';
+require_once __DIR__ . '/../../includes/arrays.php';
 
 use PHPUnit\Framework\TestCase;
 use Vortex\App;
@@ -80,9 +80,9 @@ final class BootstrapTest extends TestCase
         ], ['log_level' => 'INFO']);
         App::setInstance($app);
         function bootstrap_bar4___init_logger(&$data) {
-            $data['handler'] = new StreamHandler(__DIR__ . '/../logs/' . __FUNCTION__. '.log', $log_level);
+            $data['handler'] = new StreamHandler(__DIR__ . '/../../logs/' . __FUNCTION__. '.log', $log_level);
         }
-        $log_file = __DIR__ . '/../logs/bootstrap_bar4___init_logger.log';
+        $log_file = __DIR__ . '/../../logs/bootstrap_bar4___init_logger.log';
         @unlink($log_file);
         logger()->info('bizbaz');
         $log_output = file_get_contents($log_file);

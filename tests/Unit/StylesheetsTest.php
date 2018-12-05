@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../includes/stylesheets.php';
-require_once __DIR__ . '/../includes/http.php';
-require_once __DIR__ . '/../includes/arrays.php';
-require_once __DIR__ . '/../includes/files.php';
+require_once __DIR__ . '/../../includes/stylesheets.php';
+require_once __DIR__ . '/../../includes/http.php';
+require_once __DIR__ . '/../../includes/arrays.php';
+require_once __DIR__ . '/../../includes/files.php';
 
 use PHPUnit\Framework\TestCase;
 use Vortex\App;

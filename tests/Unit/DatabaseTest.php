@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../includes/arrays.php';
-require_once __DIR__ . '/../includes/database.php';
+require_once __DIR__ . '/../../includes/arrays.php';
+require_once __DIR__ . '/../../includes/database.php';
 
 use PHPUnit\Framework\TestCase;
 use Vortex\App;
