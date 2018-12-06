@@ -11,13 +11,9 @@ function tryLogin (e) {
     action: 'login'
   },
   function (data) {
-    if (data.login_result) {
-      $('#login_form_container').addClass('small')
-      location.reload()
-    } else {
-      shakeForm()
-    }
-  })
+    $('#login_form_container').addClass('small')
+    location.reload()
+  }).fail(shakeForm);
 }
 
 subscribe('attempt-connection', function (e) {

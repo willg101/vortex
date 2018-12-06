@@ -431,12 +431,10 @@ function login_handle_login(App $app)
 {
     require_method('POST');
 
-    $result = false;
     $username = $app->request->request->get('username');
     $password = $app->request->request->get('password');
-    if ($username && $password) {
-        login_user($username, $password);
-         $app->response->setContent(['login_result' => true]);
+    if ($username && $password && login_user($username, $password)) {
+        $app->response->setContent(['login_result' => true]);
     } else {
         $app->response->setStatusCode(403);
     }
