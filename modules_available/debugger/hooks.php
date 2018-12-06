@@ -240,9 +240,10 @@ function debugger_file_api(App $app)
     require_method('GET');
 
     // Strip off the leading 'file/' from the path and check if the corresponding file exists
+    $path = trim(preg_replace('#/+#', '/', $app->request->getPathInfo()), '/');
     $file = '/' . (array_get(explode('/', $path, 2), 1, ''));
     if (!is_readable($file)) {
-        $app->response->setContent("$file does not exist")->setStatuysCode(404);
+        $app->response->setContent("$file does not exist")->setStatusCode(404);
     } elseif (is_file($file)) { // Send the file's contents to the client
         $info = debugger_find_codebase_root($file);
         $info[ 'contents' ] = file_get_contents($file);
