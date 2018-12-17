@@ -1,40 +1,52 @@
+; Enumerate the directories on the *host* that will be visible to Vortex.
+; The directories listed here should contain the source code you want to debug. If they do not,
+; Vortex will still be functional, but you will not be able to view your code prior to starting a
+; debug session.
 allowed_directories[] = /srv
 
-; log_level: INFO, ERROR, DEBUG, etc.
-log_level = DEBUG
-
-; File types that the file finder will show
-; DO NOT treat this like as a security feature; it is ONLY intended to decrease clutter
+; Specify the file extensions that the file finder will show.
+; DO NOT treat this as a security feature; it is ONLY intended to decrease clutter.
 allowed_extensions[] = php
 allowed_extensions[] = inc
 allowed_extensions[] = module
 allowed_extensions[] = ""
 
-; Timezone MUST be set
+; Name one or more directories to include in the file finder's 'recently edited' listing.
+; Each directory listed here must also be listed under allowed_directories, or have one of its
+; parent directories listed under allowed_directories; if it's not, then files changed within that
+; directory will effectively be ignored by Vortex.
+recent_dirs[] = /srv
+
+; Choose one of the following: INFO, ERROR, DEBUG, etc.
+log_level = DEBUG
+
+; Specify your timezone (you'll encounter fatal errors otherwise)
 timezone = America/Detroit
 
-; OPTIONAL. Specify a port to expose the app on. When omitted, an open port is automatically
-; selected. This value ONLY takes effect when spinning up Vortex.
-; http_port = 8080
-
-; The hostname and web socket port of the socket server (bridge). The ws port is NOT published on
-; the host.
-socket_server[host]    = socket_server
-socket_server[ws_port] = 3001
+; Choose a port to listen for incoming debug connections on.
 ; Port 9000 is standard for DBGp. This port is published on the host.
 socket_server[de_port] = 9000
 
-; One or more directories to include in the file finder's 'recently edited listing'
-recent_dirs[] = /srv
+; Optionally specify a port to expose the web app on.
+; When omitted, an open port is automatically selected. This value ONLY takes effect when spinning
+; up Vortex. DO NOT change it while Vortex is running.
+; http_port = 8080
 
-; JavaScript dependencies required by Vortex core
+; List the hostname and web socket (ws) port of the socket server (bridge).
+; Note that the ws port is NOT published on the host. It is not recommended that you change these
+; values.
+socket_server[host]    = socket_server
+socket_server[ws_port] = 3001
+
+; List the JavaScript dependencies for Vortex core (it's not recommended that you change these
+; values)
 core_js[] = //ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js
 core_js[] = //code.jquery.com/ui/1.12.1/jquery-ui.js
 core_js[] = //cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.min.js
 core_js[] = js/core.js
 
-; Directory to store compiled LESS stylesheets
+; Directory to store compiled LESS stylesheets (it's not recommended that you change this value)
 less_output_dir = storage/css
 
-; SQLite databases used by Vortex
+; SQLite databases used by Vortex (it's not recommended that you change this value)
 database[default] = storage/db/vortex.db
