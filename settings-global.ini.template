@@ -1,7 +1,5 @@
 allowed_directories[] = /srv
 
-tree_root = /srv
-
 ; log_level: INFO, ERROR, DEBUG, etc.
 log_level = DEBUG
 

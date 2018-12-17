@@ -17,7 +17,6 @@ final class SettingsModelFactoryTest extends TestCase
         $settings_array = $settings_model->get();
         $expected_settings = [
             'allowed_directories' => [],
-            'tree_root' => '/dev/null',
             'less_variables' => [
                 'defaults' =>  "~'" . DPOH_ROOT . "/less/defaults'",
             ],
@@ -30,12 +29,11 @@ final class SettingsModelFactoryTest extends TestCase
             define('DPOH_ROOT', dirname(__DIR__));
         }
         $settings_file = exec('mktemp --suffix=.ini');
-        file_put_contents($settings_file, "allowed_directories[] = ./\ntree_root = ./\nlorem = ipsum");
+        file_put_contents($settings_file, "allowed_directories[] = ./\nlorem = ipsum");
         $settings_model = SettingsModelFactory::create($settings_file);
         $settings_array = $settings_model->get();
         $expected_settings = [
             'allowed_directories' => [ getcwd() ],
-            'tree_root' => getcwd(),
             'less_variables' => [
                 'defaults' =>  "~'" . DPOH_ROOT . "/less/defaults'",
             ],

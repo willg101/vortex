@@ -39,7 +39,6 @@ class SettingsModelFactory {
     protected function getDefaultSettings() {
         return [
             'allowed_directories' => [],
-            'tree_root' => '/dev/null',
             'less_variables' => [
                 'defaults' =>  "~'" . DPOH_ROOT . "/less/defaults'",
             ],
@@ -55,7 +54,6 @@ class SettingsModelFactory {
     }
 
     protected function processSettings(array $settings) {
-        $settings[ 'tree_root' ] = realpath($settings[ 'tree_root' ]);
         foreach ($settings[ 'allowed_directories' ] as &$dir) {
             $dir = realpath($dir);
         }
