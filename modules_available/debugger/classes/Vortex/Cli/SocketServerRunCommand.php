@@ -17,13 +17,13 @@ use Ratchet\Server\IoServer;
 use Monolog\Handler\StreamHandler;
 use Vortex\App;
 
-require_once DPOH_ROOT . 'includes/arrays.php';
-require_once DPOH_ROOT . 'includes/database.php';
-require_once DPOH_ROOT . 'includes/bootstrap.php';
-require_once DPOH_ROOT . 'includes/http.php';
-require_once DPOH_ROOT . 'includes/exceptions.php';
-require_once DPOH_ROOT . 'includes/files.php';
-require_once DPOH_ROOT . 'includes/templates.php';
+require_once DPOH_ROOT . '/includes/arrays.php';
+require_once DPOH_ROOT . '/includes/database.php';
+require_once DPOH_ROOT . '/includes/bootstrap.php';
+require_once DPOH_ROOT . '/includes/http.php';
+require_once DPOH_ROOT . '/includes/exceptions.php';
+require_once DPOH_ROOT . '/includes/files.php';
+require_once DPOH_ROOT . '/includes/templates.php';
 
 class SocketServerRunCommand extends Command
 {
