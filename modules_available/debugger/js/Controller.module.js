@@ -142,7 +142,7 @@ subscribe('apply-default-layout-settings', function (e) {
 
 subscribe('alter-settings-quick-actions', function (e) {
   e.items.unshift({
-    content: 'Restart socket bridge',
+    content: 'Restart socket server',
     attr: {
       'data-command': 'X-ctrl:restart'
     }
