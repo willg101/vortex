@@ -59,8 +59,9 @@ var commandArgsConversion = {
   transaction: 'i',
   pattern: 'p',
   maxData: 'm',
+  state: 's',
 
-  session: 'Xs'
+  session: 'Xs',
 }
 
 function translateArgs (argsObject) {

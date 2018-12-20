@@ -350,6 +350,9 @@ function debugger_ws_message_received(&$data)
         $data[ 'bridge' ]->sendToWs('<wsserver session-status-change=neutral status="alert" type="detach_queued_session" session_id="' . $match[ 'id' ] . '">');
     } elseif (preg_match('/^X-ctrl:switch_session -s (?<id>' . $cid_prefix . '\d+) /', $data[ 'message' ], $match)) {
         $data[ 'bridge' ]->switchSession($match[ 'id' ]);
+    } elseif (preg_match('/^X-ctrl:new_sessions -s ([\'"])(?<state>enable|disable)\1/', $data[ 'message' ], $match)) {
+        logger()->debug("Client requested that we $match[state] new sessions");
+        $data[ 'bridge' ]->setNewSessionsAllowedFlag($match[ 'state' ] == 'enable');
     } elseif (preg_match('/\s+-Xs (?<id>' . $cid_prefix . '\d+)/', $data[ 'message' ], $match)) {
         $dbg_conn = $data[ 'bridge' ]->getDbgConnection();
         if ($dbg_conn && Vortex\Cli\DbgpApp::getConnectionId($dbg_conn) != $match[ 'id' ]) {

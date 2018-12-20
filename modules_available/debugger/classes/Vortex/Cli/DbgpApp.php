@@ -120,10 +120,10 @@ class DbgpApp implements MessageComponentInterface, DbgpConnectionQueueEventHand
         $name = "debug connection $cid";
         logger()->debug("Connection opened: $name");
 
-        if ($this->bridge->hasWsConnection()) {
+        if ($this->bridge->isQueueable()) {
             $this->queue->push($conn, $cid);
         } else {
-            logger()->debug("We don't have a websocket client; dropping $name");
+            logger()->debug("We don't have a websocket client (or the websocket client is not allowing new sessions); dropping $name");
             $conn->close();
         }
     }

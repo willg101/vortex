@@ -9,6 +9,11 @@ var steppedInto = false
 var afterSteppedInto = false
 var allowReconnect = true
 
+function sendAllowNewSessionsFlag() {
+  let cb = $('#toggle_connections')
+  Debugger.command('X-ctrl:new_sessions', {state : cb.prop('checked') ? 'enable' : 'disable' })
+}
+
 /**
  * @brief
  *  Document.ready handler
@@ -48,6 +53,7 @@ subscribe('connection-status-changed', function (e) {
     // left the page and has now returned or lost their connection and has now regained it
     Debugger.command('status')
     wasConnected = true
+    sendAllowNewSessionsFlag()
   }
 })
 
@@ -70,6 +76,12 @@ subscribe('server-info', function (e) {
     allowReconnect = false
     WsClient.getConnection().close()
   }
+})
+
+$(document).on('click', '#toggle_connections_button', function () {
+  let cb = $('#toggle_connections')
+  cb.prop('checked', !cb.prop('checked'))
+  sendAllowNewSessionsFlag()
 })
 
 $(document).on('click', '.commandeer-btn', function () {
