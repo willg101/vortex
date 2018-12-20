@@ -7,6 +7,9 @@ use Vortex\Cli\SocketServerRunCommand;
 use Vortex\Cli\DbgpApp;
 use Vortex\App;
 use Vortex\Exceptions\DatabaseException;
+use PhpParser\NodeTraverser;
+use PhpParser\ParserFactory;
+use Vortex\BreakpointResolution\BreakpointCandidateFinder;
 
 function debugger_provide_windows()
 {
@@ -63,8 +66,34 @@ function debugger_render_preprocess(&$data)
 function debugger_boot($vars)
 {
     $vars['request_handlers']->register('/file/', 'debugger_file_api');
+    $vars['request_handlers']->register('/get_breakpoint_candidates/', 'debugger_breakpoint_candidates_api');
     $vars['request_handlers']->register('/recent_files/', 'debugger_recent_files_api');
     $vars['request_handlers']->register('/ws_maintenance/', 'debugger_ws_maintenance_api');
+}
+
+/**
+ * @brief
+ *	Get a list of breakpoint candidates for the given code
+ *
+ * @param string $code
+ *
+ * @return array
+ *  An indexed array of line numbers
+ */
+function get_line_breakpoint_candidates_for_code($code) {
+    static $traverser, $candidate_finder, $parser;
+    if (!$traverser) {
+        $traverser        = new NodeTraverser;
+        $candidate_finder = new BreakpointCandidateFinder;
+        $traverser->addVisitor($candidate_finder);
+
+        $parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
+    }
+
+    $ast = $parser->parse($code);
+    $candidate_finder->clear();
+    $traverser->traverse($ast);
+    return $candidate_finder->getLines();
 }
 
 /**
@@ -247,6 +276,7 @@ function debugger_file_api(App $app)
     } elseif (is_file($file)) { // Send the file's contents to the client
         $info = debugger_find_codebase_root($file);
         $info[ 'contents' ] = file_get_contents($file);
+        $info[ 'breakpointCandidates' ] = get_line_breakpoint_candidates_for_code($info[ 'contents' ]);
         $app->response->setContent($info);
     } else { // List the directory's contents for the client
         $response_data = [];
@@ -309,6 +339,18 @@ function debugger_recent_files_api(App $app)
     }
 
     $app->response->setContent($response_data);
+}
+
+function debugger_breakpoint_candidates_api(App $app) {
+    require_method('POST');
+
+    $file_data = $app->request->request->get('code');
+    try {
+        $breakpoint_candidates = get_line_breakpoint_candidates_for_code($file_data);
+        $app->response->setContent([ 'breakpointCandidates' => $breakpoint_candidates ]);
+    } catch (Exception $e) {
+        $app->response->setContent([ 'error' => $e ]);
+    }
 }
 
 function debugger_provide_console_commands($data)

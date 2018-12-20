@@ -27,8 +27,11 @@ async function fetchFromSever (path, cb) {
     }
 
     var message = await Debugger.command('source', { file: path })
+    // TODO: Cache this to improve performance
+    var bcPromise = $.post(makeUrl('get_breakpoint_candidates'), {code: message.parsed.fileContents || ''});
     var hostname = await hostnamePromise
     var codebaseRoot = await LanguageAbstractor.getCodebaseRoot(path)
+    var bc = await bcPromise;
 
     if (message.jqMessage.find(' > error[code=100]').length) {
       message.parsed.fileContents = false
@@ -39,6 +42,7 @@ async function fetchFromSever (path, cb) {
       filecache[ path ] = {
         contents,
         hostname,
+        breakpointCandidates: bc.breakpointCandidates || [],
         path,
         codebaseRoot: codebaseRoot.root,
         codebaseId: codebaseRoot.id,
@@ -53,6 +57,7 @@ async function fetchFromSever (path, cb) {
         info.hostname = hostname
         filecache[ path ] = {
           contents: info.contents,
+          breakpointCandidates: info.breakpointCandidates,
           hostname,
           path,
           codebaseRoot: info.root,
