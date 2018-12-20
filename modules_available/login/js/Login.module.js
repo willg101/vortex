@@ -4,7 +4,7 @@ function tryLogin (e) {
   if (e.type == 'keypress' && e.which != 13) {
     return
   }
-
+  $('#login_form_container').addClass('validating');
   $.post(makeUrl('login'), {
     username: $('[name=username]').val(),
     password: $('[name=password]').val(),
@@ -158,6 +158,6 @@ function userIsLoggedIn () {
 }
 
 function shakeForm () {
-  $('#login_form_container').removeClass('shake')
+  $('#login_form_container').removeClass('shake validating')
   setTimeout(() => $('#login_form_container').addClass('shake'), 30)
 }
