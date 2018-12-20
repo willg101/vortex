@@ -1,5 +1,19 @@
 @import "@{defaults}";
 
+.help-showing
+{
+	&:after
+	{
+		content: "";
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		position: absolute;
+		background: rgba(0,0,0,0.7);
+	}
+}
+
 .help-text-rot,
 .general-help-text
 {
@@ -25,7 +39,6 @@
 	right: 0;
 	bottom: 0;
 	color: @toolbar-fg;
-	text-shadow: 0 0 5px @toolbar-bg, 0 0 5px @toolbar-bg, 0 0 10px @toolbar-bg, 0 0 30px @toolbar-bg;
 	text-align: center;
 
 	kbd
@@ -44,7 +57,6 @@
 	.transition();
 	position: absolute;
 	color: @toolbar-fg;
-	text-shadow: 0 0 10px @toolbar-bg, 0 0 10px @toolbar-bg, 0 0 20px @toolbar-bg, 0 0 30px @toolbar-bg, 0 0 40px @toolbar-bg, 0 0 20px @toolbar-bg;
 	z-index: 99999;
 
 	kbd

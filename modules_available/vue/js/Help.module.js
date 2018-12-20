@@ -5,7 +5,7 @@ function showHelp() {
     hideHelp()
     return
   }
-  $('#layout_in_use').css('filter','blur(5px)')
+  $('#layout_in_use').addClass('help-showing')
   var width = $(window).width()
   var maxHelpWidth = { right : 0, left : 0 }
   var added = $()
@@ -38,7 +38,7 @@ function showHelp() {
 }
 
 function hideHelp() {
-  $('#layout_in_use').css('filter','')
+  $('#layout_in_use').removeClass('help-showing')
   $('.general-help-text').remove()
   $(".help-text-rot").each( function(i) {
     setTimeout( () => $( this ).addClass( 'help-hidden' ).one( 'transitionend', () => $(this).remove() ), 30 * i )
