@@ -17,7 +17,6 @@ var currentFile = false
 var Range = ace.require('ace/range').Range
 var commandStopwatchTimeout
 var currentCodebase = {}
-var currentBreakpointCandidates = []
 
 subscribe('vortex-init', function () {
   // We'll get all sorts of errors if the element we need isn't available...
@@ -386,13 +385,6 @@ async function showFile (filename, line, cb, skipCache, scrollTop, noClearActive
 
   if (typeof cb === 'function') {
     cb(filename, line, text)
-  }
-
-  currentBreakpointCandidates.forEach(line => editor.getSession().removeGutterDecoration(line - 1, 'breakpoint-candidate'))
-  currentBreakpointCandidates = []
-  if (data.breakpointCandidates && data.breakpointCandidates.length) {
-    data.breakpointCandidates.forEach( bp => editor.getSession().addGutterDecoration(bp - 1, 'breakpoint-candidate') );
-    currentBreakpointCandidates = data.breakpointCandidates
   }
 
   editor.session.setScrollTop(scrollTop)
