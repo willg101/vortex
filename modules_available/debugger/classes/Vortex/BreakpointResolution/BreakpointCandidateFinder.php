@@ -15,7 +15,6 @@ use PhpParser\Node\Stmt\While_;
 use PhpParser\Node\Stmt\Break_;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\AssignOp;
-use PhpParser\Node\Expr\AssignRef;
 use PhpParser\Node\Expr\PostInc;
 use PhpParser\Node\Expr\PreInc;
 use PhpParser\Node\Expr\PostDec;
@@ -100,7 +99,6 @@ class BreakpointCandidateFinder extends NodeVisitorAbstract {
             }
         } elseif ($node instanceof Assign
                || $node instanceof AssignOp
-               || $node instanceof AssignRef
                || $node instanceof PostInc
                || $node instanceof PostDec
                || $node instanceof PreInc

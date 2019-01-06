@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 final class SuggestLineBreakpointsForCodeTest extends TestCase
 {
     protected function assertBreakpoints($code) {
-        $actual = get_line_breakpoint_candidates_for_code($code);
+        $actual = suggest_line_breakpoints_for_code($code);
         sort($actual); // We sort these because our array of expected lines will be in sorted order
                        // and we want to verify the values in the two arrays are the same; order
                        // is meaningless in this context.
@@ -190,12 +190,6 @@ final class SuggestLineBreakpointsForCodeTest extends TestCase
                 ;                       // Break
             break
 
-                ;                       // Break');
-
-        $this->assertBreakpoints('<?php
-            $t =& $a;                   // Break
-            $t =&
-                $b
                 ;                       // Break');
 
         $this->assertBreakpoints('<?php
