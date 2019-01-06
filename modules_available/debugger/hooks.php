@@ -276,6 +276,7 @@ function debugger_file_api(App $app)
     } elseif (is_file($file)) { // Send the file's contents to the client
         $info = debugger_find_codebase_root($file);
         $info[ 'contents' ] = file_get_contents($file);
+        $info[ 'breakpointCandidates' ] = get_line_breakpoint_candidates_for_code($info[ 'contents' ]);
         $app->response->setContent($info);
     } else { // List the directory's contents for the client
         $response_data = [];
