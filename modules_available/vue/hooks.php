@@ -1,5 +1,7 @@
 <?php
 
+use Vortex\App;
+
 class LayoutConflictException extends Exception
 {
 };
@@ -8,19 +10,21 @@ class LayoutConflictException extends Exception
  * @brief
  *	Implements hook_boot
  */
-function vue_boot()
+function vue_boot($vars)
 {
-    request_handlers()->register('', 'vue_render_with_layout_engine', [ 'access' => 'authenticated_only' ]);
+    $vars['request_handlers']->register('/', 'vue_render_with_layout_engine', [ 'access' => 'authenticated_only' ]);
 }
 
 /**
  * @brief
  *	Renders the Debugger page
+ *
+ * @param Vortex\App $app
  */
-function vue_render_with_layout_engine()
+function vue_render_with_layout_engine(App $app)
 {
-    $layouts = fire_hook('provide_layouts');
-    fire_hook('alter_layouts', $layouts);
+    $layouts = $app->fireHook('provide_layouts');
+    $app->fireHook('alter_layouts', $layouts);
     $layouts_rendered = '';
     foreach ($layouts as $module_layouts) {
         foreach ($module_layouts as $layout) {
@@ -28,8 +32,8 @@ function vue_render_with_layout_engine()
         }
     }
 
-    $windows = fire_hook('provide_windows');
-    fire_hook('alter_windows', $windows);
+    $windows = $app->fireHook('provide_windows');
+    $app->fireHook('alter_windows', $windows);
     $windows_rendered = '';
     foreach ($windows as $module_windows) {
         foreach ($module_windows as $window) {
@@ -37,10 +41,10 @@ function vue_render_with_layout_engine()
         }
     }
 
-    echo render('new_layout', [
+    $app->response->setContent(render('new_layout', [
         'layouts' => $layouts_rendered,
         'windows' => $windows_rendered,
-    ]);
+    ]));
 }
 
 /**

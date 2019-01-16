@@ -2,6 +2,8 @@
 
 namespace Vortex\Cli;
 
+define('DPOH_ROOT', __DIR__ . '/../../../../../');
+
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,15 +15,15 @@ use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use Ratchet\Server\IoServer;
 use Monolog\Handler\StreamHandler;
+use Vortex\App;
 
-require_once 'includes/arrays.php';
-require_once 'includes/database.php';
-require_once 'includes/bootstrap.php';
-require_once 'includes/http.php';
-require_once 'includes/exceptions.php';
-require_once 'includes/files.php';
-require_once 'includes/models.php';
-require_once 'includes/templates.php';
+require_once DPOH_ROOT . '/includes/arrays.php';
+require_once DPOH_ROOT . '/includes/database.php';
+require_once DPOH_ROOT . '/includes/bootstrap.php';
+require_once DPOH_ROOT . '/includes/http.php';
+require_once DPOH_ROOT . '/includes/exceptions.php';
+require_once DPOH_ROOT . '/includes/files.php';
+require_once DPOH_ROOT . '/includes/templates.php';
 
 class SocketServerRunCommand extends Command
 {
@@ -36,13 +38,16 @@ class SocketServerRunCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $vortex_app = new App(DPOH_ROOT . '/modules_available', DPOH_ROOT . '/settings-global.ini');
+        App::setInstance($vortex_app);
+        date_default_timezone_set( $vortex_app->settings->get( 'timezone' ) );
         $bridge = new ConnectionBridge;
 
         logger()->info('Creating socket servers');
 
         $loop = EventLoopFactory::create();
-        $dbg  = new SocketServer('0.0.0.0:' . settings('socket_server.de_port'), $loop);
-        $ws   = new SocketServer('0.0.0.0:' . settings('socket_server.ws_port'), $loop);
+        $dbg  = new SocketServer('0.0.0.0:' . App::get('settings')->get('socket_server.de_port'), $loop);
+        $ws   = new SocketServer('0.0.0.0:' . App::get('settings')->get('socket_server.ws_port'), $loop);
 
         $wsStack = new HttpServer(
             new WsServer(

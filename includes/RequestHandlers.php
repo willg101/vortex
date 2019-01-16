@@ -1,6 +1,8 @@
 <?php
 
-namespace Dpoh;
+namespace Vortex;
+
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @brief
@@ -120,17 +122,14 @@ class RequestHandlers
      * ]
      * @endcode
      *
-     * @param string $url OPTIONAL. When omitted, retrieves the URL from `request_path()`
+     * @param Vortex\App $app
      *
      * @return bool
      *	Indicates whether the request was handled or not
      */
-    public function handle($url = null)
+    public function handle($app)
     {
-        if (!isset($url)) {
-            $url = request_path();
-        }
-        $url = $this->normalize($url);
+        $url = $this->normalize($app->request->getPathInfo());
 
         $this->sortHandlers();
 
@@ -142,13 +141,14 @@ class RequestHandlers
                     'pattern'  =>  $handler[ 'pattern' ],
                     'options'  => &$handler[ 'options' ],
                     'callback' => &$handler[ 'callback' ],
+                    'app'      =>  $app,
                 ];
-                fire_hook('preprocess_request', $data);
+                $app->fireHook('preprocess_request', $data);
 
-                $handler[ 'callback' ]($url, $handler[ 'options' ]);
+                $handler[ 'callback' ]($app, $handler[ 'options' ]);
                 $handled = true;
 
-                fire_hook('postprocess_request', $data);
+                $app->fireHook('postprocess_request', $data);
                 break;
             }
         }

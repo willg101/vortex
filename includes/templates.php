@@ -1,5 +1,7 @@
 <?php
 
+use Vortex\App;
+
 /**
  * @brief
  *	Process and inject variables into all implementations of a template, and render each
@@ -55,9 +57,9 @@ function render($name, $vars = [])
         'implementations' => get_template_implementations($name),
     ];
 
-    fire_hook('render_preprocess', $data);
-    fire_hook('render_process', $data);
-    usort($data[ 'implementations' ], function ($a, $b) {
+    App::fireHook('render_preprocess', $data);
+    App::fireHook('render_process', $data);
+    uasort($data[ 'implementations' ], function ($a, $b) {
         return $a[ 'weight' ] - $b[ 'weight' ];
     });
 
@@ -69,7 +71,7 @@ function render($name, $vars = [])
             'template' => $name,
             'module'   => $module_name,
         ];
-        fire_hook('render_postprocess', $postprocess);
+        App::fireHook('render_postprocess', $postprocess);
         $html .= $postprocess[ 'rendered' ];
     }
     return $html;
@@ -117,7 +119,8 @@ function get_template_implementations($template_name, $use_cache = true)
 {
     static $cache;
     if ($cache === null || !$use_cache) {
-        foreach (modules()->get() as $module_name => $module) {
+        $cache = [];
+        foreach (App::get('modules')->get() as $module_name => $module) {
             foreach ($module[ 'templates' ] as $file) {
                 $key = without_file_extension($file);
                 if (!isset($cache[ $key ])) {

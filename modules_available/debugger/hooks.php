@@ -5,6 +5,8 @@ define('DEBUGGER_N_MOST_RECENT_FILES', 10);
 use Vortex\Cli\SocketServerStartCommand;
 use Vortex\Cli\SocketServerRunCommand;
 use Vortex\Cli\DbgpApp;
+use Vortex\App;
+use Vortex\Exceptions\DatabaseException;
 
 function debugger_provide_windows()
 {
@@ -58,11 +60,11 @@ function debugger_render_preprocess(&$data)
  * @brief
  *	Implements hook_boot(). Adds request handlers for the files and config APIs
  */
-function debugger_boot()
+function debugger_boot($vars)
 {
-    request_handlers()->register('/file/', 'debugger_file_api');
-    request_handlers()->register('/recent_files/', 'debugger_recent_files_api');
-    request_handlers()->register('/ws_maintenance/', 'debugger_ws_maintenance_api');
+    $vars['request_handlers']->register('/file/', 'debugger_file_api');
+    $vars['request_handlers']->register('/recent_files/', 'debugger_recent_files_api');
+    $vars['request_handlers']->register('/ws_maintenance/', 'debugger_ws_maintenance_api');
 }
 
 /**
@@ -117,12 +119,14 @@ function validate_maintenance_token($token)
  * @brief
  *	Handle requests to the ws maintenance API.
  *
+ * @param Vortex\App $app
+ *
  * This API is used to work with the socket server, even for clients that do not currently have a
  * websocket connection.
  */
-function debugger_ws_maintenance_api()
+function debugger_ws_maintenance_api(App $app)
 {
-    $action = array_get($_POST, 'action');
+    $action = $app->request->request->get('action', '');
 
     if ($action == 'commandeer') {
         $token = make_maintenance_token();
@@ -130,16 +134,18 @@ function debugger_ws_maintenance_api()
             'security_token' => $token,
             'action'         => 'commandeer',
         ]);
-        $ss_host = settings('socket_server.host');
-        $ss_port = settings('socket_server.ws_port');
+        $ss_host = $app->settings->get('socket_server.host');
+        $ss_port = $app->settings->get('socket_server.ws_port');
         Ratchet\Client\connect("ws://$ss_host:$ss_port/?$params")->then(function ($conn) {
-            $conn->on('message', function ($msg) use ($conn) {
+            $conn->on('message', function ($msg) use ($conn, $app) {
                 $conn->close();
                 if ($parsed = json_decode($msg, true)) {
                     db_query('DELETE FROM maintenance_tokens;');
-                    send_json($parsed);
+                    header('Content-Type: application/json');
+                    echo $msg;
+                    exit; // TODO: Why doesn't this work as expected with Vortex\Response?
                 } else {
-                    send_json([ 'error' => $msg ]);
+                    $app->response->setContent(['error' => $msg])->sendAndTerminate();
                 }
             });
         });
@@ -227,29 +233,30 @@ function debugger_alter_js_options(&$data)
  * @brief
  *	Request handler for the files API; sends the contents of a file to the client
  *
- * @param string $path The request path
+ * @param Vortex\App $app
  */
-function debugger_file_api($path)
+function debugger_file_api(App $app)
 {
     require_method('GET');
 
-    // Strip off the leadin 'file/' from the path and check if the corresponding file exists
+    // Strip off the leading 'file/' from the path and check if the corresponding file exists
+    $path = trim(preg_replace('#/+#', '/', $app->request->getPathInfo()), '/');
     $file = '/' . (array_get(explode('/', $path, 2), 1, ''));
     if (!is_readable($file)) {
-        error_response("$file does not exist", 404, 'Not found');
+        $app->response->setContent("$file does not exist")->setStatusCode(404);
     } elseif (is_file($file)) { // Send the file's contents to the client
         $info = debugger_find_codebase_root($file);
         $info[ 'contents' ] = file_get_contents($file);
-        send_json($info);
+        $app->response->setContent($info);
     } else { // List the directory's contents for the client
-        $response = [];
+        $response_data = [];
         $contents = glob("$file/*");
 
         foreach ($contents as $item) {
             $is_file = is_file($item);
             if (!$is_file || client_can_view_file($item)) {
-                if (input('view') == 'jstree') {
-                    $response[] = [
+                if ($app->request->query->get('view') == 'jstree') {
+                    $response_data[] = [
                         'text' => basename($item),
                         'icon' => $is_file ? 'fa fa-file-code-o code' : 'fa fa-folder folder',
                         'children' => !$is_file,
@@ -259,7 +266,7 @@ function debugger_file_api($path)
                         ],
                     ];
                 } else {
-                    $response[] = [
+                    $response_data[] = [
                         'name'     => basename($item),
                         'fullpath' => $item,
                         'is_dir'   => !$is_file,
@@ -268,7 +275,7 @@ function debugger_file_api($path)
             }
         }
 
-        send_json($response);
+        $app->response->setContent($response_data);
     }
 }
 
@@ -276,22 +283,24 @@ function debugger_file_api($path)
  * @brief
  *	Request handler for the files API; sends the client a list of the most recently edited files
  *	within the "watched" directories
+ *
+ * @param Vortex\App $app
  */
-function debugger_recent_files_api($path)
+function debugger_recent_files_api(App $app)
 {
     require_method('GET');
 
-    $extensions = implode('\|', settings('allowed_extensions'));
-    $dirs = implode(' ', array_map('escapeshellarg', settings('recent_dirs')));
+    $extensions = implode('\|', $app->settings->get('allowed_extensions'));
+    $dirs = implode(' ', array_map('escapeshellarg', $app->settings->get('recent_dirs')));
     $n_files = DEBUGGER_N_MOST_RECENT_FILES;
     $files = [];
     exec("find $dirs -type f -regextype sed -regex '.*\.\($extensions\)' -printf '%T@ %p\n' | sort -n | tail -n $n_files | cut -f2- -d\" \"", $files);
     $files = array_filter(array_map('trim', $files));
 
-    $response = [];
+    $response_data = [];
     foreach ($files as $item) {
         if (client_can_view_file($item)) {
-            array_unshift($response, [
+            array_unshift($response_data, [
                 'name'     => basename($item),
                 'fullpath' => $item,
                 'is_dir'   => false,
@@ -299,7 +308,7 @@ function debugger_recent_files_api($path)
         }
     }
 
-    send_json($response);
+    $app->response->setContent($response_data);
 }
 
 function debugger_provide_console_commands($data)
@@ -327,11 +336,11 @@ function debugger_ws_message_received(&$data)
             logger()->warning("Ignoring improperly formatted X-glob command: $data[message]", $args);
         }
     } elseif (preg_match('/^X-ctrl:stop /', $data[ 'message' ])) {
-        fire_hook('stop_socket_server');
+        App::fireHook('stop_socket_server');
         logger()->info("Received stop command; killing server");
         exit('stop');
     } elseif (preg_match('/^X-ctrl:restart /', $data[ 'message' ])) {
-        fire_hook('restart_socket_server');
+        App::fireHook('restart_socket_server');
         logger()->info("Received restart command; restarting server");
         exit('restart');
     } elseif (preg_match('/^X-ctrl:peek_queue /', $data[ 'message' ])) {
@@ -341,6 +350,9 @@ function debugger_ws_message_received(&$data)
         $data[ 'bridge' ]->sendToWs('<wsserver session-status-change=neutral status="alert" type="detach_queued_session" session_id="' . $match[ 'id' ] . '">');
     } elseif (preg_match('/^X-ctrl:switch_session -s (?<id>' . $cid_prefix . '\d+) /', $data[ 'message' ], $match)) {
         $data[ 'bridge' ]->switchSession($match[ 'id' ]);
+    } elseif (preg_match('/^X-ctrl:new_sessions -s ([\'"])(?<state>enable|disable)\1/', $data[ 'message' ], $match)) {
+        logger()->debug("Client requested that we $match[state] new sessions");
+        $data[ 'bridge' ]->setNewSessionsAllowedFlag($match[ 'state' ] == 'enable');
     } elseif (preg_match('/\s+-Xs (?<id>' . $cid_prefix . '\d+)/', $data[ 'message' ], $match)) {
         $dbg_conn = $data[ 'bridge' ]->getDbgConnection();
         if ($dbg_conn && Vortex\Cli\DbgpApp::getConnectionId($dbg_conn) != $match[ 'id' ]) {
@@ -379,7 +391,7 @@ function debugger_before_debugger_detach($data)
  */
 function debugger_validate_php_syntax($snippet)
 {
-    $snippet = escapeshellarg("<?php $snippet ?>");
+    $snippet = escapeshellarg("<?php $snippet");
     exec("echo $snippet | php -l > /dev/null 2>&1", $_, $status);
     return $status === 0;
 }

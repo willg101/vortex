@@ -1,127 +1,7 @@
 <?php
 
-/**
- * @brief
- *	A convenience method for getting request parameters regardless of the request type (POST/GET)
- *
- * @param string $key     The key of the item to look up; may be given in "dot" notation
- * @param mixed  $default The value to return if no data exists for the value at $key
- *
- * @throws HttpException when the request method is not POST or GET
- *
- * @return mixed
- */
-function input($key, $default = null)
-{
-    static $request_data;
-    if ($request_data === null) {
-        if ($_SERVER[ 'REQUEST_METHOD' ] === 'POST') {
-            $request_data = $_POST;
-        } elseif ($_SERVER[ 'REQUEST_METHOD' ] === 'GET') {
-            $request_data = $_GET;
-        } else {
-            throw new HttpException('Unsupported request method');
-        }
-    }
-
-    return trim(array_get($request_data, $key, $default));
-}
-
-function base_url()
-{
-    return sprintf(
-        "%s://%s%s",
-        isset($_SERVER[ 'HTTPS' ]) && $_SERVER[ 'HTTPS' ] != 'off' ? 'https' : 'http',
-        $_SERVER[ 'SERVER_NAME' ],
-        base_path()
-    );
-}
-
-/**
- * @brief
- *	Sends a JSON-encoded error response to the client and ends the response (i.e., exits)
- *
- * @param string $message      The message to include in the JSON
- * @param int    $code         OPTIONAL. Default is 400. The status code to use
- * @param string $http_message OPTIONAL. Default is 'Bad Request'
- */
-function error_response($message, $code = 400, $http_message = 'Bad Request')
-{
-    header("HTTP/1.1 $code $http_message");
-    header("Content-Type: application/json;charset=utf-8");
-    echo json_encode([
-        'error' => $message,
-    ]);
-    exit;
-}
-
-/**
- * COPIED FROM DRUPAL 7 CORE
- *
- * Returns the requested URL path of the page being viewed.
- *
- * Examples:
- * - http://example.com/node/306 returns "node/306".
- * - http://example.com/drupalfolder/node/306 returns "node/306" while
- *	 base_path() returns "/drupalfolder/".
- * - http://example.com/path/alias (which is a path alias for node/306) returns
- *	 "path/alias" as opposed to the internal path.
- * - http://example.com/index.php returns an empty string (meaning: front page).
- * - http://example.com/index.php?page=1 returns an empty string.
- *
- * @return
- *	 The requested Drupal URL path
- */
-function request_path()
-{
-    static $path;
-
-    if (isset($path)) {
-        return $path;
-    }
-
-    if (isset($_GET['q']) && is_string($_GET['q'])) {
-        // This is a request with a ?q=foo/bar query string. $_GET['q'] is
-        // overwritten in drupal_path_initialize(), but request_path() is called
-        // very early in the bootstrap process, so the original value is saved in
-        // $path and returned in later calls.
-        $path = $_GET['q'];
-    } elseif (isset($_SERVER['REQUEST_URI'])) {
-        // This request is either a clean URL, or 'index.php', or nonsense.
-        // Extract the path from REQUEST_URI.
-        $request_path = strtok($_SERVER['REQUEST_URI'], '?');
-        $base_path_len = strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '\/'));
-        // Unescape and strip $base_path prefix, leaving q without a leading slash.
-        $path = substr(urldecode($request_path), $base_path_len + 1);
-        // If the path equals the script filename, either because 'index.php' was
-        // explicitly provided in the URL, or because the server added it to
-        // $_SERVER['REQUEST_URI'] even when it wasn't provided in the URL (some
-        // versions of Microsoft IIS do this), the front page should be served.
-        if ($path == basename($_SERVER['PHP_SELF'])) {
-            $path = '';
-        }
-    } else {
-        // This is the front page.
-        $path = '';
-    }
-
-    // Under certain conditions Apache's RewriteRule directive prepends the value
-    // assigned to $_GET['q'] with a slash. Moreover we can always have a trailing
-    // slash in place, hence we need to normalize $_GET['q'].
-    $path = trim($path, '/');
-
-    return $path;
-}
-
-function send_json($data, $die = true)
-{
-    header("Content-Type: application/json; charset=utf-8");
-    echo json_encode($data);
-
-    if ($die) {
-        die;
-    }
-}
+use Vortex\App;
+use Vortex\Exceptions\HttpException;
 
 /**
  * AN EXCERPT COPIED FROM DRUPAL 7 CORE, `conf_init()`
@@ -139,7 +19,7 @@ function base_path()
     if (!isset($base_path)) {
         // $_SERVER['SCRIPT_NAME'] can, in contrast to $_SERVER['PHP_SELF'], not
         // be modified by a visitor.
-        if ($dir = rtrim(dirname($_SERVER[ 'SCRIPT_NAME' ]), '\/')) {
+        if ($dir = rtrim(dirname(App::get('request')->server->get('SCRIPT_NAME')), '\/')) {
             $base_path = $dir;
             $base_path .= '/';
         } else {
@@ -148,6 +28,16 @@ function base_path()
     }
 
     return $base_path;
+}
+
+function base_url()
+{
+    return sprintf(
+        "%s://%s%s",
+        App::get('request')->server->get('HTTPS') != 'off' ? 'https' : 'http',
+        App::get('request')->server->get('SERVER_NAME'),
+        base_path()
+    );
 }
 
 /**
@@ -165,7 +55,8 @@ function require_method($methods)
 
     $methods = array_map('strtoupper', $methods);
 
-    if (in_array($_SERVER[ 'REQUEST_METHOD' ], $methods)) {
+    $actual_method = App::get('request')->server->get('REQUEST_METHOD');
+    if (in_array($actual_method, $methods)) {
         return;
     } else {
         $method_list = implode(', ', $methods);
@@ -173,7 +64,7 @@ function require_method($methods)
             'HTTP/1.1 405 Not allowed',
             "Allow: $method_list",
         ];
-        throw new HttpException("Method '$_SERVER[REQUEST_METHOD]' not allowed. "
+        throw new HttpException("Method '$actual_method' not allowed. "
             . "Allowed methods: $method_list", $headers);
     }
 }
@@ -186,6 +77,9 @@ function parse_cookie_str($str)
 {
     $cookies = [];
     foreach (explode('; ', $str) as $raw_cookie) {
+        if (!($raw_cookie = trim($raw_cookie))) {
+            continue;
+        }
         preg_match('/^(?P<key>.*?)=(?P<value>.*?)$/i', trim($raw_cookie), $matches);
         $cookies[ trim($matches[ 'key' ]) ]  = urldecode($matches[ 'value' ]);
     }
@@ -199,8 +93,16 @@ function get_user_ip()
 {
     static $ip;
     if ($ip === null) {
-        $all_headers = getallheaders();
-        $ip = array_get($all_headers, 'X-Forwarded-For', $_SERVER[ 'REMOTE_ADDR' ]);
+        if ($proxy_list = App::get('request')->headers->get('X-Forwarded-For')) {
+            $ips = array_filter(preg_split('/\s*,\s*/', $proxy_list));
+            if ($ips) {
+                $ip = array_shift($ips);
+            }
+        }
+
+        if (!$ip) {
+            $ip = App::get('request')->server->get('REMOTE_ADDR');
+        }
     }
     return $ip;
 }

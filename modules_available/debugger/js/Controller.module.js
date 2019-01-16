@@ -8,6 +8,12 @@ var wasConnected = true
 var steppedInto = false
 var afterSteppedInto = false
 var allowReconnect = true
+var restartRequested = 1
+
+function sendAllowNewSessionsFlag() {
+  let cb = $('#toggle_connections')
+  Debugger.command('X-ctrl:new_sessions', {state : cb.prop('checked') ? 'enable' : 'disable' })
+}
 
 /**
  * @brief
@@ -31,7 +37,11 @@ subscribe('connection-status-changed', function (e) {
     PageTitle.updateState({ status: 'disconnected' })
     setTimeout(WsClient.openConnection, reconnectDelayMs)
     if (wasConnected) {
-      vTheme.notify('error', 'No websocket connection is available')
+      if (restartRequested) {
+        vTheme.notify('info', 'Websocket server restarting...', {timeOut: 0, extendedTimeOut:0})
+      } else {
+        vTheme.notify('error', 'No websocket connection is available')
+      }
     }
     wasConnected = false
   } else if (e.status == 'no-exclusive-access') {
@@ -41,13 +51,16 @@ subscribe('connection-status-changed', function (e) {
         '<button class="btn-block btn text-btn commandeer-btn">Use Vortex in this tab</button>', '',
       { extendedTimeOut: 0, timeOut: 0 })
     }
+    restartRequested = false
     wasConnected = false
   } else if (e.status == 'connected') {
     PageTitle.updateState({ status: 'waiting' })
     // Probe for an existing session; allows us to pick up where we left off if the user
     // left the page and has now returned or lost their connection and has now regained it
     Debugger.command('status')
+    restartRequested = false
     wasConnected = true
+    sendAllowNewSessionsFlag()
   }
 })
 
@@ -70,6 +83,12 @@ subscribe('server-info', function (e) {
     allowReconnect = false
     WsClient.getConnection().close()
   }
+})
+
+$(document).on('click', '#toggle_connections_button', function () {
+  let cb = $('#toggle_connections')
+  cb.prop('checked', !cb.prop('checked'))
+  sendAllowNewSessionsFlag()
 })
 
 $(document).on('click', '.commandeer-btn', function () {
@@ -142,9 +161,15 @@ subscribe('apply-default-layout-settings', function (e) {
 
 subscribe('alter-settings-quick-actions', function (e) {
   e.items.unshift({
-    content: 'Restart socket bridge',
+    content: 'Restart socket server',
     attr: {
       'data-command': 'X-ctrl:restart'
     }
   })
+})
+
+subscribe('before-send', function(e) {
+  if (e.alterData.command == 'X-ctrl:restart') {
+    restartRequested = true
+  }
 })

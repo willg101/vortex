@@ -14,6 +14,11 @@ class ConnectionBridge
     protected $ws_connection;
 
     /**
+     * @var bool
+     */
+    protected $ws_client_allows_new_sessions;
+
+    /**
      * Connection to debugger engine
      *
      * @var Ratchet\ConnectionInterface
@@ -59,6 +64,7 @@ class ConnectionBridge
 
     public function setWsConnection(ConnectionInterface $conn)
     {
+        $this->ws_client_allows_new_sessions = true;
         $this->ws_connection = $conn;
     }
 
@@ -176,5 +182,15 @@ class ConnectionBridge
     public function switchSession($cid)
     {
         $this->dbg_app && $this->dbg_app->switchSession($cid, $this->dbg_connection);
+    }
+
+    public function setNewSessionsAllowedFlag($new_value)
+    {
+        $this->ws_client_allows_new_sessions = !!$new_value;
+    }
+
+    public function isQueueable()
+    {
+        return $this->hasWsConnection() && $this->ws_client_allows_new_sessions;
     }
 }

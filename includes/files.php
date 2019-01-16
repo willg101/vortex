@@ -1,5 +1,7 @@
 <?php
 
+use Vortex\App;
+
 /**
  * @brief
  *	Determines if the client can access the given file/directory based on the current config (this
@@ -14,7 +16,7 @@ function client_can_access_path($path)
     // Resolve symlinks, '..', etc.
     $path = realpath($path) . '/';
 
-    foreach (settings('allowed_directories') as $allowed_dir) {
+    foreach (App::get('settings')->get('allowed_directories') as $allowed_dir) {
         // Prevent /a/b/cdef from matching the path /a/b/c
         if (strpos($path, $allowed_dir . '/') === 0) {
             return true;
@@ -36,45 +38,15 @@ function client_can_access_path($path)
  */
 function client_can_view_file($file_name)
 {
+    $file_name       = realpath($file_name);
     $file_name       = preg_replace('#^.*?://#', '', $file_name);
-    $extension_regex = implode('|', array_map('preg_quote', settings('allowed_extensions')));
+    $extension_regex = implode('|', array_map('preg_quote', App::get('settings')->get('allowed_extensions')));
 
     return client_can_access_path($file_name)
         && is_file($file_name)
         && (preg_match("/\.($extension_regex)$/", $file_name)
-            || (in_array('', settings('allowed_extensions'))
-                && preg_match('/^\./', basename($file_name))));
-}
-
-/**
- * @brief
- *	Aquires a lock for a write, and then writes a file
- *
- * @note
- *	Source: http://stackoverflow.com/questions/5695145
- *
- * @param string $file_name
- * @param string $data_to_save
- */
-function file_put_contents_safe($file_name, $data_to_save)
-{
-    if ($fp = fopen($file_name, 'w')) {
-        $start_time = microtime(true);
-        do {
-            $can_write = flock($fp, LOCK_EX);
-            // If lock not obtained sleep for 0 - 100 milliseconds, to avoid collision and CPU load
-            if (!$can_write) {
-                usleep(round(rand(0, 100) * 1000));
-            }
-        } while ((!$can_write) and ((microtime(true) - $start_time) < 5));
-
-        // File was locked so now we can store information
-        if ($can_write) {
-            fwrite($fp, $data_to_save);
-            flock($fp, LOCK_UN);
-        }
-        fclose($fp);
-    }
+            || (in_array('', App::get('settings')->get('allowed_extensions'))
+                && !preg_match('/^\./', basename($file_name))));
 }
 
 /**
@@ -93,11 +65,11 @@ function file_put_contents_safe($file_name, $data_to_save)
 function recursive_file_scan($extension, $dir, &$dirs_seen = [])
 {
     // Account for symlink cycles
-    $real_path = realpath($dir);
-    if (isset($dirs_seen[ $real_path ])) {
+    $dir = realpath($dir);
+    if (isset($dirs_seen[ $dir ])) {
         return [];
     } else {
-        $dirs_seen[ $real_path ] = true;
+        $dirs_seen[ $dir ] = true;
     }
 
     $result            = [];

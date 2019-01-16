@@ -1,0 +1,43 @@
+@import "@{defaults}";
+
+.auditor-record
+{
+    p&
+    {
+        margin: 0;
+        background: @subtle-highlight;
+    }
+
+    padding: @spacing-sm;
+
+    h2,h3
+    {
+        font-size: 1rem;
+        margin: 0;
+        color: @blue;
+    }
+
+    h3
+    {
+        font-weight: normal;
+    }
+
+    table
+    {
+        font-family: @monospace-font;
+        margin-bottom: @spacing-sm;
+        border-collapse: collapse;
+
+        tr:first-child
+        {
+            background: @window-text-color;
+            color: @window-bg;
+        }
+
+        td
+        {
+            border: 1px solid @window-text-color;
+            padding: @spacing-sm / 2;
+        }
+    }
+}

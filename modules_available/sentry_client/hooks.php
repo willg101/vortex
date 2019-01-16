@@ -43,10 +43,10 @@ function sentry_get_client($set_client = null)
     return $client;
 }
 
-function sentry_client_boot()
+function sentry_client_boot($vars)
 {
     $data = [
         'client' => sentry_get_client(),
     ];
-    fire_hook('provide_sentry_context', $data);
+    $vars['app']->fireHook('provide_sentry_context', $data);
 }

@@ -1,2 +1,3 @@
+<span data-help-text="Allow new sessions" data-keybinding-default="~;" data-keybinding-id="toggle-allow-new-sessions" class="session-indicator" id="toggle_connections_button"><i class="fas fa-power-off"></i> <input checked=checked type="checkbox" id="toggle_connections"/><label></label></span>
 <span data-help-text="Switch session" class="inactive session-indicator" id="connection_queue_indicator"><i class="fa fa-plug"></i> <span class="n">0</span></span>
 <span data-help-text="Settings" class="session-indicator" id="settings_toolbar"><i class="fa fa-cog"></i> <i class="fa fa-caret-down"></i></span>

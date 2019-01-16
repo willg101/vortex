@@ -1,8 +1,7 @@
 <?php
 
-class DatabaseException extends Exception
-{
-}
+use Vortex\App;
+use Vortex\Exceptions\DatabaseException;
 
 /**
  * @brief
@@ -17,7 +16,7 @@ function db($connection = 'default')
     static $connections = [];
 
     if (empty($connections[ $connection ])) {
-        if (!($filename = settings("database.$connection"))) {
+        if (!($filename = App::get('settings')->get("database.$connection"))) {
             throw new DatabaseException("The database '$connection' is not configured");
         }
         $connections[ $connection ] = new PDO("sqlite:$filename");
