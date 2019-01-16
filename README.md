@@ -1,7 +1,7 @@
 # Vortex PHP Debugger
 A self-hosted, in-browser PHP debugger | __[https://debug-my.website](https://debug-my.website)__
 
-![image](https://debug-my.website/beta/img/vortex_screenshot.png)
+![image](https://debug-my.website/img/vortex_screenshot.png)
 
 ## Features
 
@@ -20,7 +20,7 @@ tl;dr:
 1. Navigate to Vortex's docker/ directory and then execute `./spin-up`
 1. If necessary, adjust your firewall settings to allow traffic to the ports that Vortex is listening on (http and debugger engine).
 
-See the [full installation guide](https://debug-my.website/beta/installation-guide.html#php-config) for more information on configuring PHP with Xdebug.
+See the [full installation guide](https://debug-my.website/installation-guide.html#php-config) for more information on configuring PHP with Xdebug.
 
 ## Bugs
 
