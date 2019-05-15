@@ -443,6 +443,29 @@ function build_application( ValidationResult $config )
 	return !$status;
 }
 
+function install_dependencies_with_composer()
+{
+    $exit_status = 0;
+    exec('which composer', $output, $exit_status);
+    if ($exit_status) {
+        echo 'Cannot find `composer`; installing now...' . "\n";
+        install_composer();
+    }
+    exec('cd ' . __DIR__ . '/..; composer install');
+}
+
+function install_composer()
+{
+    $exit_status = 0;
+    copy('https://getcomposer.org/installer', __DIR__ . '/composer-setup.php');
+    exec('php composer-setup.php --install-dir=bin --filename=composer', $op, $exit_status);
+    if ($exit_status) {
+        throw new RuntimeException('Failed to install composer. Details: ' . implode("\n", $op));
+    }
+    unlink(__DIR__ . '/composer-setup.php');
+    putenv('PATH=' . __DIR__ . '/bin:' . getenv('PATH'));
+}
+
 /**
  * @param ValidationResult $result
  */
@@ -503,6 +526,7 @@ EOF;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 validate_requirements();
+install_dependencies_with_composer();
 $config = validate_configuration();
 if ( !build_application( $config ) )
 {
