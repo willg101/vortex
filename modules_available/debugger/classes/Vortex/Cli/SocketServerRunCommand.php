@@ -38,7 +38,7 @@ class SocketServerRunCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $vortex_app = new App(DPOH_ROOT . '/modules_available', DPOH_ROOT . '/settings-global.ini');
+        $vortex_app = new App(DPOH_ROOT . '/modules_enabled', DPOH_ROOT . '/settings-global.ini');
         App::setInstance($vortex_app);
         date_default_timezone_set( $vortex_app->settings->get( 'timezone' ) );
         $bridge = new ConnectionBridge;
