@@ -1,7 +1,7 @@
 # Vortex PHP Debugger
-A self-hosted, in-browser PHP debugger | __[https://debug-my.website](https://debug-my.website)__
+A self-hosted, in-browser PHP debugger | __[http://debug-my.website](http://debug-my.website)__
 
-![image](https://debug-my.website/img/vortex_screenshot.png)
+![image](http://debug-my.website/img/vortex_screenshot.png)
 
 ## Features
 
