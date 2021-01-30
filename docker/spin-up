@@ -510,7 +510,7 @@ $volumes
     build:
       context: ./socket_server
     ports:
-      - $de_port:9000
+      - $de_port:$de_port
     volumes:
       - ..:/var/www/html
       - shared_storage:/var/www/html/storage

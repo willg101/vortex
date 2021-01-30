@@ -24,8 +24,8 @@ log_level = DEBUG
 timezone = America/Detroit
 
 ; Choose a port to listen for incoming debug connections on.
-; Port 9000 is standard for DBGp. This port is published on the host.
-socket_server[de_port] = 9000
+; Port 9003 is standard for DBGp. This port is published on the host.
+socket_server[de_port] = 9003
 
 ; Optionally specify a port to expose the web app on.
 ; When omitted, an open port is automatically selected. This value ONLY takes effect when spinning
