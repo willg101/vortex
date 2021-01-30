@@ -28,4 +28,5 @@ Vortex is currently in Beta. Please help make Vortex better by opening an issue 
 
 -------
 
-Copyright Will Groenendyk, 2020. Licensed under [AGPL 3.0](https://github.com/willg101/vortex/blob/master/LICENSE).
+
+Copyright Will Groenendyk, 2021. Licensed under [AGPL 3.0](https://github.com/willg101/vortex/blob/master/LICENSE).
