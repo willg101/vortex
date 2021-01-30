@@ -1,7 +1,7 @@
 # Vortex PHP Debugger
-A self-hosted, in-browser PHP debugger | __[https://debug-my.website](https://debug-my.website)__
+A self-hosted, in-browser PHP debugger | __[http://debug-my.website](http://debug-my.website)__
 
-![image](https://debug-my.website/img/vortex_screenshot.png)
+![image](http://debug-my.website/img/vortex_screenshot.png)
 
 ## Features
 
@@ -27,5 +27,6 @@ See the [full installation guide](https://debug-my.website/installation-guide.ht
 Vortex is currently in Beta. Please help make Vortex better by opening an issue whenever you encounter a new bug.
 
 -------
+
 
 Copyright Will Groenendyk, 2021. Licensed under [AGPL 3.0](https://github.com/willg101/vortex/blob/master/LICENSE).
