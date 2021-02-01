@@ -290,6 +290,7 @@ function updateBreakpointDisplay (breakpoint) {
       break
 
     case 'removed' :
+    case 'moving' :
       // Do nothing (and do not enter `default` case)
       break
 
