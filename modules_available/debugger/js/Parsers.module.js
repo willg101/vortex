@@ -121,6 +121,7 @@ var responseParsers = {
   breakpoint_remove: parseBreakpointAddRemove,
   breakpoint_get: parseBreakpoints,
   breakpoint_list: parseBreakpoints,
+  breakpoint_resolved: parseBreakpoints,
 
   step_into: parseContinuationCommand,
   step_over: parseContinuationCommand,

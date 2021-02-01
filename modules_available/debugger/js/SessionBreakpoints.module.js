@@ -14,6 +14,19 @@ class Breakpoint {
   get id () { return this.info.id }
   get expression () { return this.info.expression }
   get file () { return this.info.file }
+  set line (n) {
+    if (n == this.info.line || n == this.info.movingToLine) {
+      return;
+    }
+    this.info.movingToLine = n;
+    let prevState   = this.state;
+    this.info.state = 'moving';
+    this.triggerStateChange();
+    this.info.line  = n;
+    this.info.state = prevState;
+    this.triggerStateChange();
+    delete this.info.movingToLine;
+  }
   get line () { return this.info.line }
   get state () { return this.info.state }
   get type () { return this.expression ? 'conditional' : 'line' }
@@ -76,24 +89,70 @@ class Breakpoint {
 
 class SessionBreakpoints {
   constructor () {
-    this.allBreakpoints = {}
+    this.breakpointsById = {}
+    this.breakpointsByFile = {}
+    this.pendingResolution = {};
     subscribe('session-status-changed', (e) => {
       if (e.status == 'active') {
         this.importFromDebuggerEngine()
       } else {
         this.apply(bp => bp.goOffline())
+        this.breakpointsById = {};
       }
     })
+
+    subscribe('breakpoint-state-change', e => {
+      if (e.breakpoint.state != 'removed'
+        && e.breakpoint.state != 'moving'
+        && e.breakpoint.id
+        && this.breakpointsByFile[ e.breakpoint.file ]
+        && this.breakpointsByFile[ e.breakpoint.file ][ e.breakpoint.line ])
+      {
+        if (!this.breakpointsById[e.breakpoint.id]) {
+           this.breakpointsById[e.breakpoint.id]
+            = this.breakpointsByFile[ e.breakpoint.file ][ e.breakpoint.line ];
+        }
+
+        if (this.pendingResolution[ e.breakpoint.id ]
+          && this.pendingResolution[ e.breakpoint.id ] != this.breakpointsById[e.breakpoint.id].line) {
+          let prevLine = this.breakpointsById[e.breakpoint.id].line;
+
+          this.breakpointsById[e.breakpoint.id].line = this.pendingResolution[ e.breakpoint.id ];
+          this.breakpointsByFile[ e.breakpoint.file ][ e.breakpoint.line ]
+            = this.breakpointsByFile[ e.breakpoint.file ][ prevLine ];
+
+          delete this.pendingResolution[ e.breakpoint.id ];
+          delete this.breakpointsByFile[ e.breakpoint.file ][ prevLine ];
+        }
+      }
+    });
+
+    subscribe('notification-received', (e) => {
+      if (e.jqMessage.is('[name=breakpoint_resolved]')) {
+        (e.parsed.line || []).forEach(bp => {
+          let resolvedLine = bp.lineno;
+          if (this.breakpointsById[ bp.id ]) {
+            let prevLine = this.breakpointsById[ bp.id ].line;
+            let file     = this.breakpointsById[ bp.id ].file;
+            this.breakpointsById[ bp.id ].line = resolvedLine;
+            delete this.breakpointsByFile[ file ][ prevLine ];
+            this.breakpointsByFile[ file ][ resolvedLine ] = this.breakpointsById[ bp.id ];
+          } else {
+            this.pendingResolution[ bp.id ] = resolvedLine;
+          }
+        });
+      }
+    });
   }
 
   listForFile (filename) {
-    return this.allBreakpoints[ filename ] || []
+    return this.breakpointsByFile[ filename ] || []
   }
 
   apply (func) {
-    for (let file in this.allBreakpoints) {
-      for (let line in this.allBreakpoints[ file ]) {
-        func(this.allBreakpoints[ file ][ line ])
+    for (let file in this.breakpointsByFile) {
+      for (let line in this.breakpointsByFile[ file ]) {
+        func(this.breakpointsByFile[ file ][ line ])
       }
     }
   }
@@ -121,15 +180,16 @@ class SessionBreakpoints {
         filename = realPathToCrp[ filename ]
       }
 
-      this.allBreakpoints[ filename ] = this.allBreakpoints[ filename ] || {}
-      if (this.allBreakpoints[ filename ][ bp.lineno ]) {
-        this.allBreakpoints[ filename ][ bp.lineno ].info.state = 'confirmed'
-        this.allBreakpoints[ filename ][ bp.lineno ].info.id = bp.id
+      this.breakpointsByFile[ filename ] = this.breakpointsByFile[ filename ] || {}
+      if (this.breakpointsByFile[ filename ][ bp.lineno ]) {
+        this.breakpointsByFile[ filename ][ bp.lineno ].info.state = 'confirmed'
+        this.breakpointsByFile[ filename ][ bp.lineno ].info.id = bp.id
       } else {
-        this.allBreakpoints[ filename ][ bp.lineno ] = new Breakpoint(filename, bp.lineno,
+        this.breakpointsByFile[ filename ][ bp.lineno ] = new Breakpoint(filename, bp.lineno,
           bp.expression || bp.expression_element, bp.id)
       }
-      this.allBreakpoints[ filename ][ bp.lineno ].triggerStateChange()
+      this.breakpointsById[ bp.id ] = this.breakpointsByFile[ filename ][ bp.lineno ];
+      this.breakpointsByFile[ filename ][ bp.lineno ].triggerStateChange()
     }
     let linePromises = breakpoints.parsed.line.map(importEach)
     let conditionalPromises = breakpoints.parsed.conditional.map(importEach)
@@ -139,7 +199,7 @@ class SessionBreakpoints {
   }
 
   toggle (file, line, expression) {
-    if (this.allBreakpoints[ file ] && this.allBreakpoints[ file ][ line ]) {
+    if (this.breakpointsByFile[ file ] && this.breakpointsByFile[ file ][ line ]) {
       this.del(file, line)
     } else {
       this.create(file, line, expression)
@@ -147,24 +207,24 @@ class SessionBreakpoints {
   }
 
   del (file, line) {
-    if (!this.allBreakpoints[ file ] || !this.allBreakpoints[ file ][ line ]) {
+    if (!this.breakpointsByFile[ file ] || !this.breakpointsByFile[ file ][ line ]) {
       return
     }
-    this.allBreakpoints[ file ][ line ].removeFromDebugger()
-    delete this.allBreakpoints[ file ][ line ]
+    this.breakpointsByFile[ file ][ line ].removeFromDebugger()
+    delete this.breakpointsByFile[ file ][ line ]
   }
 
   create (file, line, expression) {
-    if (!this.allBreakpoints[ file ]) {
-      this.allBreakpoints[ file ] = {}
+    if (!this.breakpointsByFile[ file ]) {
+      this.breakpointsByFile[ file ] = {}
     }
-    if (!this.allBreakpoints[ file ][ line ]) {
-      this.allBreakpoints[ file ][ line ] = new Breakpoint(file, line, expression)
+    if (!this.breakpointsByFile[ file ][ line ]) {
+      this.breakpointsByFile[ file ][ line ] = new Breakpoint(file, line, expression)
     }
   }
 
   get (file, line) {
-    return ( this.allBreakpoints[ file ] && this.allBreakpoints[ file ][ line ] ) || null
+    return ( this.breakpointsByFile[ file ] && this.breakpointsByFile[ file ][ line ] ) || null
   }
 }
 

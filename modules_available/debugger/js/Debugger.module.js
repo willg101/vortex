@@ -149,6 +149,8 @@ function determineMessageType (message) {
     return 'init'
   } else if (message.is('response[command]')) {
     return 'debugger_command:' + message.filter('response:first').attr('command')
+  } else if (message.is('notify[name]')) {
+    return 'debugger_notification:' + message.filter('notify:first').attr('name')
   } else if (message.is('wsserver')) {
     return 'server_info'
   }
@@ -158,19 +160,19 @@ function determineMessageType (message) {
  * @brief
  *  A message processor for WsClient
  */
-function processMessage (type, message, processed) {
-  if (!type.match(/^(init$|server_info$|debugger_command:)/)) {
+function processMessage (messageType, message, processed) {
+  if (!messageType.match(/^(init$|server_info$|debugger_command:|debugger_notification:)/)) {
     return
   }
 
-  type = type.replace(/^debugger_command:/, '')
+  let contentType = messageType.replace(/^(debugger_command|debugger_notification):/, '')
 
   // Wrap the XML message in a jQuery in order to examinine it more easily, and then discard
   // info we don't need, such as the XML declaration
   var jqResponseElement = null
   message.each(function (i, el) {
     el = $(el)
-    if (el.is('[command],init,[status]')) {
+    if (el.is('[command],init,[status],notify')) {
       jqResponseElement = el
       return false
     }
@@ -185,25 +187,27 @@ function processMessage (type, message, processed) {
   var sessionEnded = jqResponseElement.is('[status=session_end]')
 
   if (!jqResponseElement.is('[session-status-change=neutral]')) {
-    setActiveSessionStatus(!(isStopping || isStopped || sessionEnded), type == 'init')
+    setActiveSessionStatus(!(isStopping || isStopped || sessionEnded), messageType == 'init')
   }
 
   // The type of data for 'session-init' and 'response-received' events is nearly identical,
   // so we build it now
   $.extend(processed, {
     jqMessage: jqResponseElement,
-    parsed: responseParsers[ type ] ? responseParsers[ type ](jqResponseElement) : {},
+    parsed: responseParsers[ contentType ] ? responseParsers[ contentType ](jqResponseElement) : {},
     isStopping: isStopping,
     isStopped: isStopped,
     sessionEnded: sessionEnded
   })
 
   // Publish the appropriate type of event
-  if (type == 'init') {
+  if (messageType == 'init') {
     publish('session-init', processed)
-  } else if (type == 'server_info') {
+  } else if (messageType == 'server_info') {
     publish('server-info', processed)
-  } else {
+  } else if (messageType.startsWith('debugger_notification:')) {
+    publish('notification-received', processed)
+  } else if (messageType.startsWith('debugger_command:')) {
     publish('response-received', processed)
   }
 }

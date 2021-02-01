@@ -105,6 +105,8 @@ subscribe('session-status-changed', function (e) {
     Debugger.command('feature_set', { name: 'max_data', value: 2048 })
     Debugger.command('feature_set', { name: 'max_children', value: 128 })
     Debugger.command('feature_set', { name: 'max_depth', value: 1 })
+    Debugger.command('feature_set', { name: 'resolved_breakpoints', value: 1})
+    Debugger.command('feature_set', { name: 'notify_ok', value: 1 })
     Debugger.command('status')
   } else if (allowReconnect) {
     PageTitle.updateState({ status: (WsClient.isConnected() ? 'waiting' : 'disconnected') })
