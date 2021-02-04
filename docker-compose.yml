@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  web:
+    image: php:7.4-apache
+    restart: always
+    ports:
+      - 38383:80
+    volumes:
+      - ./htdocs:/var/www/html
+      - ./000-default.conf:/etc/apache2/sites-enabled/000-default.conf:ro
+

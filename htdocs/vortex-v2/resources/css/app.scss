@@ -1,0 +1,40 @@
+/* #####################################################################################
+ * Resets
+ * #####################################################################################*/
+html, body { position: relative; width: 100vw; height: 100vh; overflow: hidden; margin: 0; }
+
+/* #####################################################################################
+ * Utility
+ * #####################################################################################*/
+.d-flex { display: flex; }
+.d-block { display: block; }
+.d-inline-block { display: inline-block; }
+
+.flex-row { flex-direction: row; }
+.flex-column { flex-direction: column; }
+.flex-grow-0 { flex-grow: 0; }
+.flex-grow-1 { flex-grow: 1; }
+
+.relative { position: relative; }
+
+$size-pcts: 0, 25, 50, 75, 100;
+@each $size in $size-pcts {
+  .h-#{$size} { height: $size * 1%; }
+  .mh-#{$size} { max-height: $size * 1%; }
+  .w-#{$size} { width: $size * 1%; }
+  .mw-#{$size} { max-width: $size * 1%; }
+}
+
+/* #####################################################################################
+ * Colors
+ * #####################################################################################*/
+$color-scheme: (
+  "dark": #444,
+  "light": #CCC,
+);
+
+@each $name, $color in $color-scheme {
+  .bg-#{$name} { background-color: $color }
+  .fg-#{$name} { color: $color }
+}
+
