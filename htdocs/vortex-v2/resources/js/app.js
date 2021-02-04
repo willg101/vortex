@@ -2,19 +2,29 @@ require('./bootstrap');
 
 import Vue from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
+import Toolbar from './views/toolbar.vue'
+
+import { EventBus } from './event_bus.js'
 
 Vue.component('splitpanes', Splitpanes);
 Vue.component('pane', Pane);
+Vue.component('toolbar', Toolbar);
 
 // Vue application
 const app = new Vue({
   el: '#app',
   data: {
   },
+  created() {
+    EventBus.$on('debug-command', e => {
+      console.log('debug-command', e.id)
+    });
+  },
   template: `
   <div class="app-wrapper relative h-100 w-100 d-flex flex-column">
-    <div class="flex-grow-0 bg-dark fg-light">Toolbar</div>
+    <div class="flex-grow-0">
+      <toolbar></toolbar>
+    </div>
     <div class="flex-grow-1 relative h-100">
       <splitpanes class="default-theme relative h-100">
         <pane min-size="20">1</pane>

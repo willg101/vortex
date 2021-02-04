@@ -25,6 +25,29 @@ $size-pcts: 0, 25, 50, 75, 100;
   .mw-#{$size} { max-width: $size * 1%; }
 }
 
+$spacing-levels: (
+  "1": 5px,
+  "2": 10px,
+  "3": 15px,
+  "4": 25px,
+);
+$directions: (
+  "t": "top",
+  "r": "right",
+  "b": "bottom",
+  "l": "left",
+);
+@each $level, $size in $spacing-levels {
+  .p-#{$level} { padding: $size; }
+  .m-#{$level} { margin: $size; }
+
+  @each $name, $direction in $directions {
+  .p#{$name}-#{$level} { padding-#{$direction}: $size; }
+  .m#{$name}-#{$level} { margin-#{$direction}: $size; }
+  }
+}
+
+
 /* #####################################################################################
  * Colors
  * #####################################################################################*/
