@@ -2,7 +2,8 @@ version: '3.4'
 
 services:
   web:
-    image: php:7.4-apache
+    build:
+      context: ./container/web
     restart: always
     ports:
       - 38383:80
