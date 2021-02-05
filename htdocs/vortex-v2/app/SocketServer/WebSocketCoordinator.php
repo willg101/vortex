@@ -9,6 +9,12 @@ use Ratchet\Wamp\WampServerInterface;
  * to that topic will receive the message/event from the publisher
  */
 class WebSocketCoordinator implements WampServerInterface {
+    protected $subscribedTopics = [];
+
+    public function onSubscribe(Conn $conn, $topic) {
+        $this->subscribedTopics[$topic->getId()] = $topic;
+    }
+
     public function onPublish(Conn $conn, $topic, $event, array $exclude, array $eligible) {
         $topic->broadcast($event);
     }
@@ -18,10 +24,16 @@ class WebSocketCoordinator implements WampServerInterface {
     }
 
     // No need to anything, since WampServer adds and removes subscribers to Topics automatically
-    public function onSubscribe(Conn $conn, $topic) {}
     public function onUnSubscribe(Conn $conn, $topic) {}
 
     public function onOpen(Conn $conn) {}
     public function onClose(Conn $conn) {}
     public function onError(Conn $conn, \Exception $e) {}
+
+    public function onExtMesg($msg) {
+        $parsed = json_decode($msg);
+        if ($parsed && is_string($parsed->cat) && isset($this->subscribedTopics[$parsed->cat])) {
+            $this->subscribedTopics[$parsed->cat]->broadcast(json_decode($msg));
+        }
+    }
 }

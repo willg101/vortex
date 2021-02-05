@@ -38,7 +38,7 @@ class SocketServerStart extends Command
      */
     public function handle()
     {
-//        $loop = \React\EventLoop\Factory::create();
+        $loop = \React\EventLoop\Factory::create();
 //        $wsc  = new WebSocketCoordinator;
 //
 //        $webSock = new \React\Socket\Server('0.0.0.0:7003', $loop); // Binding to 0.0.0.0 means remotes can connect
@@ -53,9 +53,17 @@ class SocketServerStart extends Command
 //            $webSock
 //        );
 //
-//        $loop->run();
-           $server = new \Ratchet\App('vortex-v2.wgroenen.dart.ccel.org', 7003, '0.0.0.0');
-           $server->route('/pubsub', new WebSocketCoordinator);
+        //        $loop->run();
+
+        // Listen for the web server to make a ZeroMQ push after an ajax request
+           $wsc = new WebSocketCoordinator;
+           $context = new \React\ZMQ\Context($loop);
+           $pull = $context->getSocket(\ZMQ::SOCKET_PULL);
+           $pull->bind('tcp://127.0.0.1:5555'); // Binding to 127.0.0.1 means the only client that can connect is itself
+           $pull->on('message', [$wsc, 'onExtMesg']);
+
+           $server = new \Ratchet\App('vortex-v2.wgroenen.dart.ccel.org', 7003, '0.0.0.0', $loop);
+           $server->route('/pubsub', $wsc);
            $server->run();
     }
 }

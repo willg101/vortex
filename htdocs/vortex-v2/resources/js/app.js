@@ -11,7 +11,7 @@ Vue.component('toolbar', Toolbar);
 
 window.conn = new ab.Session('ws://vortex-v2.wgroenen.dart.ccel.org/pubsub',
     function() {
-        conn.subscribe('kittensCategory', function(topic, data) {
+        conn.subscribe('general', function(topic, data) {
             // This is where you would add the new article to the DOM (beyond the scope of this tutorial)
             console.log('New article published to category "' + topic + '" : ' + data.title);
         });
