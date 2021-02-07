@@ -20,7 +20,7 @@ class WebSocketCoordinator implements WampServerInterface {
     }
 
     public function onCall(Conn $conn, $id, $topic, array $params) {
-        $conn->callError($id, $topic, 'RPC not supported on this demo');
+        $conn->callResult($id, $params);
     }
 
     // No need to anything, since WampServer adds and removes subscribers to Topics automatically

@@ -9,7 +9,7 @@ Vue.component('splitpanes', Splitpanes);
 Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
 
-window.conn = new ab.Session('ws://vortex-v2.wgroenen.dart.ccel.org/pubsub',
+window.conn = new ab.Session('wss://vortex-v2.wgroenen.dart.ccel.org/pubsub',
     function() {
         conn.subscribe('general', function(topic, data) {
             // This is where you would add the new article to the DOM (beyond the scope of this tutorial)
