@@ -43,10 +43,13 @@ class SocketServerStart extends Command
     {
         $loop = \React\EventLoop\Factory::create();
         
-        $dbgp_ss = new SocketServer('0.0.0.0:55455', $loop);
-        $dbgp_app = new IoServer(new DbgpApp, $dbgp_ss, $loop);
-
         $wsc = new WebSocketCoordinator;
+        $dbgp    = new DbgpApp($wsc);
+        $dbgp_ss = new SocketServer('0.0.0.0:55455', $loop);
+        $dbgp_app = new IoServer($dbgp, $dbgp_ss, $loop);
+
+        $wsc->setDebugApp($dbgp);
+
         $server = new \Ratchet\App('vortex-v2.wgroenen.dart.ccel.org', 7003, '0.0.0.0', $loop);
         $server->route('/pubsub', $wsc);
         $server->run();
