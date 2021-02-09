@@ -11,6 +11,17 @@ use Ratchet\Server\IoServer;
 class SocketServerStart extends Command
 {
     /**
+     * @brief
+     *	Crash loop protection: Don't bring the socket server back up if we start it up more than
+     *	TIGHT_LOOP_KILL_THRESHOLD times in TIGHT_LOOP_KILL_SAMPLE_WINDOW_SECONDS seconds.
+     *
+     * @var TIGHT_LOOP_KILL_THRESHOLD             integer
+     * @var TIGHT_LOOP_KILL_SAMPLE_WINDOW_SECONDS integer
+     */
+    const TIGHT_LOOP_KILL_THRESHOLD             = 10;
+    const TIGHT_LOOP_KILL_SAMPLE_WINDOW_SECONDS = 1;
+
+    /**
      * The name and signature of the console command.
      *
      * @var string
@@ -41,17 +52,24 @@ class SocketServerStart extends Command
      */
     public function handle()
     {
-        $loop = \React\EventLoop\Factory::create();
-        
-        $wsc = new WebSocketCoordinator;
-        $dbgp    = new DbgpApp($wsc);
-        $dbgp_ss = new SocketServer('0.0.0.0:55455', $loop);
-        $dbgp_app = new IoServer($dbgp, $dbgp_ss, $loop);
+        $samples = array_fill(0, static::TIGHT_LOOP_KILL_THRESHOLD, 0);
+        while (true) {
+            $least_recent_sample = array_shift($samples);
+            $now = microtime(true);
+            $samples[] = $now;
+            if ($now - $least_recent_sample < static::TIGHT_LOOP_KILL_SAMPLE_WINDOW_SECONDS) {
+                logger()->warn("Potential infinite loop - killing in 3 seconds");
+                sleep(3);
+                exit(1);
+            }
 
-        $wsc->setDebugApp($dbgp);
-
-        $server = new \Ratchet\App('vortex-v2.wgroenen.dart.ccel.org', 7003, '0.0.0.0', $loop);
-        $server->route('/pubsub', $wsc);
-        $server->run();
+            $cmd_output = [];
+            $last_line = exec(__DIR__ . '/../../../artisan socket-server:run', $cmd_output, $status);
+            logger()->info("socket-server:run exited with exit status $status", $cmd_output);
+            if ($last_line == 'stop') {
+                exit($status);
+            }
+        }
     }
 }
+
