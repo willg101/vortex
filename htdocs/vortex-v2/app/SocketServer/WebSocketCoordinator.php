@@ -24,12 +24,20 @@ class WebSocketCoordinator implements WampServerInterface {
 
     public function onCall(Conn $conn, $id, $topic, array $params) {
         if ($debug_conn = $this->dbgp_app->getConn($topic->getId())) {
-            $debug_conn->sendCommand(
-                $params['command'],
-                $params['args'] ?? [],
-                $params['extra_data'] ?? '',
-                function ($data) use ($conn, $id) { $conn->callResult($id, $data); }
-            );
+            if (empty($params['command']) || !is_string($params['command'])) {
+                $conn->callError(
+                    $id,
+                    'debug-connection/invalid-format',
+                    "Missing or invalid command name"
+                );
+            } else {
+                $debug_conn->sendCommand(
+                    $params['command'],
+                    $params['args'] ?? [],
+                    $params['extra_data'] ?? '',
+                    function ($data) use ($conn, $id) { $conn->callResult($id, $data); }
+                );
+            }
         } else {
             $conn->callError(
                 $id,

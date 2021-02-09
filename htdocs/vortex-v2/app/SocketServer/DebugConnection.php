@@ -16,6 +16,7 @@ class DebugConnection
     protected $_tid;
     protected $_callbacks;
     protected $_handle_notification;
+    protected $_message_buffer;
 
     public function __construct($conn, $handle_notification)
     {
@@ -44,7 +45,6 @@ class DebugConnection
         $tid = $this->_tid++;
         if ($handle_response) {
             $this->_callbacks[$tid] = $handle_response;
-            $handle_response([$tid]);
         }
         $full_command = "$command -i $tid";
 
@@ -69,10 +69,39 @@ class DebugConnection
 
     public function handleMessage($msg)
     {
-        ($this->_handle_notification)($msg);
+        $this->_message_buffer .= $msg;
+        $this->checkBufferForFullMessages();
     }
 
     public function handleError($e)
     {
+    }
+
+    protected function checkBufferForFullMessages()
+    {
+        $msg_pieces = explode("\0", trim($this->_message_buffer));
+        while (count($msg_pieces) > 1) {
+            if (mb_strlen($msg_pieces[1]) === (int) $msg_pieces[0]) {
+                $this->handleFullMessage($msg_pieces[1]);
+                array_shift($msg_pieces);
+                array_shift($msg_pieces);
+            } else {
+                break;
+            }
+        }
+        $this->_message_buffer = implode("\0", $msg_pieces);
+    }
+
+    public function handleFullMessage(string $msg)
+    {
+        if (preg_match('/transaction_id="(?P<tid>[^"]+)"/', $msg, $match)) {
+            $tid = $match['tid'];
+            if (isset($this->_callbacks[$tid])) {
+                $this->_callbacks[$tid]($msg);
+                unset($this->_callbacks[$tid]);
+            }
+        } else {
+            ($this->_handle_notification)($msg);
+        }
     }
 }
