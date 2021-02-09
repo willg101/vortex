@@ -124,7 +124,7 @@ class DebugConnection
 
         $out['_children'] = [];
         foreach ($xml->children() as $child) {
-            $out['_children'][$child->getName()] = $this->deserializeXml($xml);
+            $out['_children'][$child->getName()] = $this->deserializeXml($child);
         }
 
         return $out;

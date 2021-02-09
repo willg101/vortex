@@ -23,11 +23,32 @@ class WebSocketCoordinator implements WampServerInterface {
     }
 
     public function onCall(Conn $conn, $id, $topic, array $params) {
-        if ($debug_conn = $this->dbgp_app->getConn($topic->getId())) {
+        $topic_parsed = explode('/', trim($topic, '/'));
+        $topic_parsed_count = count($topic_parsed);
+        if ($topic_parsed[0] == 'debug' && $topic_parsed_count == 2) {
+            $this->handleDebugCall($conn, $id, $topic_parsed[1], $params);
+        } elseif ($topic_parsed[0] == 'control' && $topic_parsed_count == 2) {
+            $this->handleControlCall($conn, $id, $topic_parsed[1], $params);
+        } else {
+            $conn->callError($id, 'invalid-topic', "Topic '$topic' is malformed or not supported");
+        }
+    }
+
+    protected function handleControlCall(Conn $conn, $id, $command, array $params) {
+        switch ($command) {
+            case 'stop': echo "\nstop"; exit;
+            case 'restart': exit;
+            default: 
+                $conn->callError($id, 'control/invalid-command', "Command '$command' is not supported");
+        }
+    }
+
+    protected function handleDebugCall(Conn $conn, $id, $connection_id, array $params) {
+        if ($debug_conn = $this->dbgp_app->getConn($connection_id)) {
             if (empty($params['command']) || !is_string($params['command'])) {
                 $conn->callError(
                     $id,
-                    'debug-connection/invalid-format',
+                    'debug/invalid-format',
                     "Missing or invalid command name"
                 );
             } else {
@@ -41,8 +62,8 @@ class WebSocketCoordinator implements WampServerInterface {
         } else {
             $conn->callError(
                 $id,
-                'debug-connection/invalid-id',
-                "Debug connection '" . $topic->getId() . "' does not exist"
+                'debug/invalid-id',
+                "Debug connection '$connection_id' does not exist"
             );
         }
     }
