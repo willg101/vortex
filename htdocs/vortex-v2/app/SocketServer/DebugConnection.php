@@ -94,14 +94,39 @@ class DebugConnection
 
     public function handleFullMessage(string $msg)
     {
-        if (preg_match('/transaction_id="(?P<tid>[^"]+)"/', $msg, $match)) {
-            $tid = $match['tid'];
+        $msg_parsed = $this->deserializeXml($msg) ?: $msg;
+
+        if ($msg_parsed['transaction_id'] ?? null) {
+            $tid = $msg_parsed['transaction_id'];
             if (isset($this->_callbacks[$tid])) {
-                $this->_callbacks[$tid]($msg);
+                $this->_callbacks[$tid]($msg_parsed);
                 unset($this->_callbacks[$tid]);
             }
         } else {
-            ($this->_handle_notification)($msg);
+            ($this->_handle_notification)($msg_parsed);
         }
+    }
+
+    public function deserializeXml($xml)
+    {
+        if (is_string($xml)) {
+            $xml = simplexml_load_string($xml);
+        }
+        if (!$xml) {
+            return [];
+        }
+        $out = ((array) $xml->attributes())['@attributes'];
+        $out['_tag'] = $xml->getName();
+        $out['_value'] = (string) $xml;
+        if (($out['encoding'] ?? null) == 'base64') {
+            $out['_value'] = base64_decode($out['_value']);
+        }
+
+        $out['_children'] = [];
+        foreach ($xml->children() as $child) {
+            $out['_children'][$child->getName()] = $this->deserializeXml($xml);
+        }
+
+        return $out;
     }
 }
