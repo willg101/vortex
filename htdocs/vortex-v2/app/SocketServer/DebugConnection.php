@@ -9,6 +9,7 @@ class DebugConnection
 {
     protected $host;
     protected $file;
+    protected $language;
     protected $time;
 
     // Disallow public read access to fields starting with '_'
@@ -24,8 +25,7 @@ class DebugConnection
         $this->_conn = $conn;
         $this->_handle_notification = $handle_notification;
         $this->time = time();
-        $this->file = ''; // TODO
-        $this->host = ''; // TODO
+        $this->host = $conn->remoteAddress;
     }
 
     public function __get($key)
@@ -103,6 +103,10 @@ class DebugConnection
                 unset($this->_callbacks[$tid]);
             }
         } else {
+            if ($msg_parsed['_tag'] == 'init') {
+                $this->file     = $msg_parsed['fileuri'];
+                $this->language = $msg_parsed['language'];
+            }
             ($this->_handle_notification)($msg_parsed);
         }
     }

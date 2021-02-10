@@ -46,5 +46,22 @@ class DbgpApp implements MessageComponentInterface
     {
         return $this->wrapped_connections[$cid] ?? null;
     }
+
+    public function listConnections()
+    {
+        $out = [];
+
+        foreach ($this->wrapped_connections as $cid => $conn) {
+            $out[$cid] = [
+                'cid'      => $cid,
+                'file'     => $conn->file,
+                'host'     => $conn->host,
+                'time'     => $conn->time,
+                'language' => $conn->language,
+            ];
+        }
+
+        return $out;
+    }
 }
 

@@ -13,6 +13,12 @@ use App\Exceptions\MalformedDebugCommandException;
 class WebSocketCoordinator implements WampServerInterface {
     protected $subscribedTopics = [];
     protected $dbgp_app         = null;
+    protected $focus_tracker    = null;
+
+    public function __construct(...$args)
+    {
+        $this->focus_tracker = new FocusTracker;
+    }
 
     public function onSubscribe(Conn $conn, $topic) {
         $this->subscribedTopics[$topic->getId()] = $topic;
@@ -34,12 +40,47 @@ class WebSocketCoordinator implements WampServerInterface {
         }
     }
 
-    protected function handleControlCall(Conn $conn, $id, $command, array $params) {
+    protected function handleControlCall(Conn $ws_conn, $id, $command, array $params) {
         switch ($command) {
-            case 'stop': echo "\nstop"; exit;
-            case 'restart': exit;
-            default: 
-                $conn->callError($id, 'control/invalid-command', "Command '$command' is not supported");
+            case 'stop':
+                $ws_conn->callResult($id, ['status' => 'stopping...']);
+                echo "\nstop";
+                exit;
+
+            case 'restart':
+                $ws_conn->callResult($id, ['status' => 'restarting...']);
+                exit;
+
+            case 'list-debug-connections':
+                $dc = $this->dbgp_app->listConnections();
+                $dc = $this->focus_tracker->processDebugConnectionList($dc);
+                $ws_conn->callResult($id, $dc);
+                break;
+
+            case 'claim-focus':
+                // TODO: No need to use FocusTracker, just use $this->subscribedTopics
+                $debug_connection_id = $params['connection_id'] ?? null;
+                if (!$debug_connection_id) {
+                    $ws_conn->callError(
+                        $id,
+                        'control/claim-focus/invalid-format',
+                        "Missing or invalid 'connection_id' param"
+                    );
+                } elseif (!$this->dbgp_app->getConn($debug_connection_id)) {
+                    $ws_conn->callError(
+                        $id,
+                        'control/claim-focus/invalid-id',
+                        "Debug connection '$params[connection_id]' does not exist"
+                    );
+                } else {
+                    $this->focus_tracker->focus($ws_conn, $debug_connection_id);
+                    $ws_conn->callResult($id, ['status' => 'ok']);
+                    $this->broadcast('general', 'focus_status_changed');
+                }
+                break;
+
+            default:
+                $ws_conn->callError($id, 'control/invalid-command', "Command '$command' is not supported");
         }
     }
 
@@ -71,8 +112,14 @@ class WebSocketCoordinator implements WampServerInterface {
     // No need to anything, since WampServer adds and removes subscribers to Topics automatically
     public function onUnSubscribe(Conn $conn, $topic) {}
 
-    public function onOpen(Conn $conn) {}
-    public function onClose(Conn $conn) {}
+    public function onOpen(Conn $conn) {
+        $conn->event('general', [
+            'ws_id' => $conn->resourceId,
+        ]);
+    }
+    public function onClose(Conn $conn) {
+        $this->focus_tracker->disconnect($conn);
+    }
     public function onError(Conn $conn, \Exception $e) {}
 
     public function onExtMesg($msg) {
@@ -92,7 +139,15 @@ class WebSocketCoordinator implements WampServerInterface {
     public function onNotificationReceived($msg) {
         $this->subscribedTopics['general']->broadcast($msg);
     }
+
     public function setDebugApp($dbgp_app) {
         $this->dbgp_app = $dbgp_app;
+    }
+
+    protected function broadcast($topic, $msg)
+    {
+        if (isset($this->subscribedTopics[$topic])) {
+            $this->subscribedTopics[$topic]->broadcast($msg);
+        }
     }
 }
