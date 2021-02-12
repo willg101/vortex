@@ -52,9 +52,7 @@ class WebSocketCoordinator implements WampServerInterface {
                 exit;
 
             case 'list-debug-connections':
-                $dc = $this->dbgp_app->listConnections();
-                $dc = $this->focus_tracker->processDebugConnectionList($dc);
-                $ws_conn->callResult($id, $dc);
+                $ws_conn->callResult($id, $this->getDebugConnections());
                 break;
 
             case 'claim-focus':
@@ -75,7 +73,7 @@ class WebSocketCoordinator implements WampServerInterface {
                 } else {
                     $this->focus_tracker->focus($ws_conn, $debug_connection_id);
                     $ws_conn->callResult($id, ['status' => 'ok']);
-                    $this->broadcast('general', 'focus_status_changed');
+                    $this->broadcaseDebugConnectionChanged();
                 }
                 break;
 
@@ -113,7 +111,7 @@ class WebSocketCoordinator implements WampServerInterface {
     public function onUnSubscribe(Conn $conn, $topic) {}
 
     public function onOpen(Conn $conn) {
-        $conn->event('general', [
+        $conn->event('control/hello', [
             'ws_id' => $conn->resourceId,
         ]);
     }
@@ -131,17 +129,26 @@ class WebSocketCoordinator implements WampServerInterface {
 
     public function onDebugConnectionOpened($cid)
     {
-        if (isset($this->subscribedTopics['general'])) {
-            $this->subscribedTopics['general']->broadcast($cid);
-        }
+        $this->broadcaseDebugConnectionChanged();
     }
 
     public function onNotificationReceived($msg) {
-        $this->subscribedTopics['general']->broadcast($msg);
+        $this->broadcast('debug/notification', $msg);
     }
 
     public function setDebugApp($dbgp_app) {
         $this->dbgp_app = $dbgp_app;
+    }
+
+    protected function broadcaseDebugConnectionChanged()
+    {
+        $this->broadcast('control/debug-connections-changed', $this->getDebugConnections());
+    }
+
+    protected function getDebugConnections()
+    {
+        $dc = $this->dbgp_app->listConnections();
+        return $this->focus_tracker->processDebugConnectionList($dc);
     }
 
     protected function broadcast($topic, $msg)

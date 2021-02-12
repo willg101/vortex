@@ -58,6 +58,8 @@ class DbgpApp implements MessageComponentInterface
                 'host'     => $conn->host,
                 'time'     => $conn->time,
                 'language' => $conn->language,
+                'codebase_id' => $conn->codebase_id,
+                'codebase_root' => $conn->codebase_root
             ];
         }
 
