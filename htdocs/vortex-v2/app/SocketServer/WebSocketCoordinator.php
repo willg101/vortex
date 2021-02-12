@@ -73,7 +73,7 @@ class WebSocketCoordinator implements WampServerInterface {
                 } else {
                     $this->focus_tracker->focus($ws_conn, $debug_connection_id);
                     $ws_conn->callResult($id, ['status' => 'ok']);
-                    $this->broadcaseDebugConnectionChanged();
+                    $this->broadcastDebugConnectionChanged();
                 }
                 break;
 
@@ -129,7 +129,7 @@ class WebSocketCoordinator implements WampServerInterface {
 
     public function onDebugConnectionOpened($cid)
     {
-        $this->broadcaseDebugConnectionChanged();
+        $this->broadcastDebugConnectionChanged();
     }
 
     public function onNotificationReceived($msg) {
@@ -140,7 +140,7 @@ class WebSocketCoordinator implements WampServerInterface {
         $this->dbgp_app = $dbgp_app;
     }
 
-    protected function broadcaseDebugConnectionChanged()
+    protected function broadcastDebugConnectionChanged()
     {
         $this->broadcast('control/debug-connections-changed', $this->getDebugConnections());
     }

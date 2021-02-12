@@ -4,31 +4,13 @@ import Vue from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import Toolbar from './views/toolbar.vue'
 import { EventBus } from './event_bus.js'
+import WampConnection from './WampConnection.js'
 
 Vue.component('splitpanes', Splitpanes);
 Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
 
-let reconnectInterval = null;
-function doConnect() {
-  console.warn('Attmpting WAMP connection...');
-  window.conn = new ab.Session('wss://vortex-v2.wgroenen.dart.ccel.org/pubsub',
-      function() {
-          clearInterval(reconnectInterval);
-          conn.subscribe('general', function(topic, data) {
-              // This is where you would add the new article to the DOM (beyond the scope of this tutorial)
-              console.log('New article published to category "' + topic, data);
-          });
-      },
-      function() {
-        clearInterval(reconnectInterval);
-        console.warn('WebSocket connection closed; reconnecting in 2 seconds...');
-        reconnectInterval = setInterval(doConnect, 2000);
-      },
-      {'skipSubprotocolCheck': true}
-  );
-}
-doConnect();
+window.conn = new WampConnection('wss://' + location.hostname + '/pubsub', 2);
 
 // Vue application
 const app = new Vue({
