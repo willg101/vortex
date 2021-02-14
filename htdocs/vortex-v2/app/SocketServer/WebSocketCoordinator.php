@@ -31,8 +31,8 @@ class WebSocketCoordinator implements WampServerInterface {
     public function onCall(Conn $conn, $id, $topic, array $params) {
         $topic_parsed = explode('/', trim($topic, '/'));
         $topic_parsed_count = count($topic_parsed);
-        if ($topic_parsed[0] == 'debug' && $topic_parsed_count == 2) {
-            $this->handleDebugCall($conn, $id, $topic_parsed[1], $params);
+        if ($topic_parsed[0] == 'debug' && $topic_parsed_count == 3) {
+            $this->handleDebugCall($conn, $id, $topic_parsed[1], $topic_parsed[2], $params);
         } elseif ($topic_parsed[0] == 'control' && $topic_parsed_count == 2) {
             $this->handleControlCall($conn, $id, $topic_parsed[1], $params);
         } else {
@@ -82,20 +82,38 @@ class WebSocketCoordinator implements WampServerInterface {
         }
     }
 
-    protected function handleDebugCall(Conn $conn, $id, $connection_id, array $params) {
+    protected function handleDebugCall(Conn $conn, $id, $connection_id, $call_category, array $params) {
         if ($debug_conn = $this->dbgp_app->getConn($connection_id)) {
-            if (empty($params['command']) || !is_string($params['command'])) {
-                $conn->callError(
-                    $id,
-                    'debug/invalid-format',
-                    "Missing or invalid command name"
+            if ($call_category == 'command') {
+                if (empty($params['command']) || !is_string($params['command'])) {
+                    $conn->callError(
+                        $id,
+                        'debug/command/invalid-format',
+                        "Missing or invalid command name"
+                    );
+                } else {
+                    $debug_conn->sendCommand(
+                        $params['command'],
+                        $params['args'] ?? [],
+                        $params['extra_data'] ?? '',
+                        function ($data) use ($conn, $id) { $conn->callResult($id, $data); }
+                    );
+                }
+            } elseif ($call_category == 'meta') {
+                // TODO: differentiate between different meta calls
+                $a = new PhpAbstractions;
+                $a->getRecentFiles(
+                    $params['max_files'],
+                    $params['codebase_root'], // TODO: Consider using $debug_conn->codebase_root
+                    $params['excluded_dirs'],
+                    $debug_conn,
+                    function ($data) use ($conn, $id) { $conn->callResult($id, $data); }
                 );
             } else {
-                $debug_conn->sendCommand(
-                    $params['command'],
-                    $params['args'] ?? [],
-                    $params['extra_data'] ?? '',
-                    function ($data) use ($conn, $id) { $conn->callResult($id, $data); }
+                $conn->callError(
+                    $id,
+                    'debug/invalid-call-category',
+                    "Unsupported call category: '$call_category'"
                 );
             }
         } else {
