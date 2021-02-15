@@ -101,11 +101,10 @@ class WebSocketCoordinator implements WampServerInterface {
                 }
             } elseif ($call_category == 'meta') {
                 // TODO: differentiate between different meta calls
-                $a = new PhpAbstractions;
-                $a->getRecentFiles(
+                app(PhpAbstractions::class)->getRecentFiles(
                     $params['max_files'],
-                    $params['codebase_root'], // TODO: Consider using $debug_conn->codebase_root
-                    $params['excluded_dirs'],
+                    $debug_conn->codebase_root,
+                    $params['excluded_dirs'] ?? null,
                     $debug_conn,
                     function ($data) use ($conn, $id) { $conn->callResult($id, $data); }
                 );

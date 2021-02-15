@@ -20,7 +20,15 @@ function($max_files, $codebase_root, $excluded_dirs){
             }
         }
     };
-    $scan = function($codebase_root, $excluded_dirs, $excluded_dirs_prefix = null) use (&$scan, $check_if_recently_edited) {
+    $load_excluded_dirs_config = function($codebase_root) {
+        $rc_file = "$codebase_root/.vortexrc";
+        if (is_file($rc_file) && is_readable($rc_file)) {
+            $parsed = parse_ini_file($rc_file, true);
+            return $parsed['recent_files']['excluded_dirs'] ?? [];
+        }
+    };
+    $scan = function($codebase_root, $excluded_dirs, $excluded_dirs_prefix = null) use (&$scan, $check_if_recently_edited, $load_excluded_dirs_config) {
+        $excluded_dirs = $excluded_dirs ?? $load_excluded_dirs_config($codebase_root);
         $excluded_dirs_prefix = $excluded_dirs_prefix ?? $codebase_root;
         $subdirs = [];
         if ($dir = opendir($codebase_root)) {

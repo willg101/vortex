@@ -8,7 +8,7 @@ class PhpAbstractions {
     public function getRecentFiles(
         int $max_files,
         string $codebase_root,
-        array $excluded_dirs,
+        ?array $excluded_dirs,
         DebugConnection $dc,
         callable $callback
     )
@@ -41,6 +41,6 @@ class PhpAbstractions {
             $args_str .= ($args_str ? ', ' : '') . var_export($arg, true);
         }
         $fragment_prepared = "return ($fragment_raw)($args_str);";
-        $dc->advancedEval($fragment_prepared, $callback);
+        $dc->advancedEval($fragment_prepared, function($data) use ($callback, $fragment_prepared) { $data['fp'] = $fragment_prepared; $callback($data); });
     }
 }
