@@ -1,6 +1,6 @@
 <template>
   <div class="bg-dark fg-light p-1">
-    <i v-for="button in buttons.left" :class="'d-inline-block mr-2 fa-fw fas fa-' + button.icon" @click="buttonClicked(button)"></i> 
+    <span v-for="button in buttons.left" class="d-inline-block mr-2" @click="buttonClicked(button)"><span class="iconify" :data-icon="'mdi:' + button.icon"></span></span>
   </div>
 </template>
 
@@ -13,11 +13,12 @@ export default {
       buttons: {
         left: [
           { id: 'run',       icon: 'play' },
-          { id: 'stop',      icon: 'window-close' },
-          { id: 'detach',    icon: 'unlink' },
-          { id: 'step_into', icon: 'level-down-alt' },
-          { id: 'step_over', icon: 'step-forward' },
-          { id: 'step_out',  icon: 'level-up-alt' },
+          { id: 'stop',      icon: 'close-octagon' },
+          { id: 'detach',    icon: 'link-variant-remove' },
+          { id: 'step_forward', icon: 'step-forward' },
+          { id: 'step_into', icon: 'debug-step-into' },
+          { id: 'step_over', icon: 'debug-step-over' },
+          { id: 'step_out',  icon: 'debug-step-out' },
         ],
         right: {
         }

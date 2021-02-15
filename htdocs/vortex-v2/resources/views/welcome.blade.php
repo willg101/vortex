@@ -8,7 +8,7 @@
         <title>Vortex | Connecting...</title>
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" />
+        <script src="//code.iconify.design/1/1.0.7/iconify.min.js"></script>
         <link href="{{ mix('css/app.css') }}" rel="stylesheet">
         <link href="https://unpkg.com/splitpanes/dist/splitpanes.css" rel="stylesheet">
 
