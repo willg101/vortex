@@ -44,7 +44,7 @@ class SocketServerRun extends Command
     public function handle()
     {
         $loop = \React\EventLoop\Factory::create();
-        
+
         $wsc = new WebSocketCoordinator;
         $dbgp    = new DbgpApp($wsc);
         $dbgp_ss = new SocketServer('0.0.0.0:55455', $loop);
