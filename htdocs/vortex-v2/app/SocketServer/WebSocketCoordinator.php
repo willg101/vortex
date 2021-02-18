@@ -144,11 +144,6 @@ class WebSocketCoordinator implements WampServerInterface {
         }
     }
 
-    public function onDebugConnectionOpened($cid)
-    {
-        $this->broadcastDebugConnectionChanged();
-    }
-
     public function onNotificationReceived($msg) {
         $this->broadcast('debug/notification', $msg);
     }
@@ -157,7 +152,7 @@ class WebSocketCoordinator implements WampServerInterface {
         $this->dbgp_app = $dbgp_app;
     }
 
-    protected function broadcastDebugConnectionChanged()
+    public function broadcastDebugConnectionChanged()
     {
         $this->broadcast('control/debug-connections-changed', $this->getDebugConnections());
     }

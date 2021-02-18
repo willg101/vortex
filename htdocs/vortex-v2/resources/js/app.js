@@ -10,16 +10,43 @@ Vue.component('splitpanes', Splitpanes);
 Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
 
-window.conn = new WampConnection('wss://' + location.hostname + '/pubsub', 2);
+window.conn = new WampConnection('wss://' + location.hostname + '/pubsub', 2, EventBus);
+
+function formatUnixTime(unixTimeSeconds) {
+  let unixTimeMilliseconds = unixTimeSeconds * 1000;
+  let date = new Date(unixTimeMilliseconds);
+  let hours = date.getHours();
+  let minutes = "0" + date.getMinutes();
+  let seconds = "0" + date.getSeconds();
+  let amPm = (hours > 11) ? 'pm' : 'am';
+  hours -= (hours > 12) ? 12 : 0;
+  hours = (hours == 0 )? 12 : hours;
+  return `${hours}:${minutes.substr(-2)}:${seconds.substr(-2)} ${amPm}`;
+}
 
 // Vue application
 const app = new Vue({
   el: '#app',
-  data: {
+  data: function () {
+    return {
+      debug_connections: {}
+    };
+  },
+  computed: {
+    conn_times_formatted: function() {
+      let out = {};
+      for (let cid in this.debug_connections) {
+        out[cid] = formatUnixTime(this.debug_connections[cid].time);
+      }
+      return out;
+    },
   },
   created() {
     EventBus.$on('debug-command', e => {
       console.log('debug-command', e.id)
+    });
+    EventBus.$on('debug-connections-changed', e => {
+      this.debug_connections = e.connections;
     });
   },
   template: `
@@ -29,7 +56,11 @@ const app = new Vue({
     </div>
     <div class="flex-grow-1 relative h-100">
       <splitpanes class="default-theme relative h-100">
-        <pane min-size="20">1</pane>
+        <pane min-size="20">
+          <ul>
+            <li v-for="conn in debug_connections"><b>{{ conn.file }}</b> | {{ conn.codebase_id }} on {{ conn.host }} ({{ conn_times_formatted[conn.cid] }})</li>
+          </ul>
+        </pane>
         <pane>
           <splitpanes horizontal>
             <pane>2</pane>

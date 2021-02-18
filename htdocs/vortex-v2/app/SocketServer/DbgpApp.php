@@ -20,14 +20,19 @@ class DbgpApp implements MessageComponentInterface
     public function onOpen(ConnectionInterface $conn)
     {
         $cid = $conn->resourceId;
-        $this->wrapped_connections[$cid] = new DebugConnection($conn, [$this->wsc, 'onNotificationReceived']);
-        $this->wsc->onDebugConnectionOpened($cid);
+        $this->wrapped_connections[$cid] = new DebugConnection(
+            $conn,
+            [$this->wsc, 'onNotificationReceived'],
+            [$this->wsc, 'broadcastDebugConnectionChanged']
+        );
+        $this->wsc->broadcastDebugConnectionChanged();
     }
 
     public function onClose(ConnectionInterface $conn)
     {
         $cid = $conn->resourceId;
         unset($this->wrapped_connections[$cid]);
+        $this->wsc->broadcastDebugConnectionChanged();
     }
 
     public function onMessage(ConnectionInterface $conn, $msg)

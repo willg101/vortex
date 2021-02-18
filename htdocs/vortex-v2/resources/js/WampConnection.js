@@ -1,6 +1,7 @@
 export default class WampConnection {
-  constructor(uri, reconnectDelaySeconds) {
+  constructor(uri, reconnectDelaySeconds, eventBus) {
     this.uri = uri;
+    this.eventBus = eventBus;
     this.reconnectDelay = 1000 * reconnectDelaySeconds;
     this.connect();
   }
@@ -15,7 +16,9 @@ export default class WampConnection {
           });
           this.connection.subscribe('control/hello', (t, d) => this.ws_id = d.ws_id);
           this.connection.subscribe('debug/notification', (t, d) => console.log(t, d));
-          this.connection.subscribe('control/debug-connections-changed', (t, d) => this.debug_connections = d);
+          this.connection.subscribe('control/debug-connections-changed', (t, d) => {
+            this.eventBus.$emit('debug-connections-changed', { connections: d })
+          });
         },
         () => {
           clearInterval(this.reconnectInterval);
@@ -33,7 +36,10 @@ export default class WampConnection {
   }
   refreshDebugConnectionList() {
     this.connection.call('control/list-debug-connections')
-      .promise.then(data => this.debug_connections = data);
+      .promise.then(data => this.eventBus.$emit(
+        'debug-connections-changed',
+        { connections: data }
+      ));
   }
   focusOnDebugConnection(cid) {
     this.connection.call('control/claim-focus', {'connection_id' : cid});
