@@ -6,9 +6,11 @@ export default class WampConnection {
     this.connect();
   }
   connect() {
+    this.eventBus.$emit('wamp-connection-status-changed', { status: 'connecting' });
     console.log(`Initiating WAMP connection to ${this.uri}...`);
     this.connection = new ab.Session(this.uri,
         () => {
+          this.eventBus.$emit('wamp-connection-status-changed', { status: 'connected' });
           clearInterval(this.reconnectInterval);
           this.refreshDebugConnectionList();
           this.connection.subscribe('general', function(topic, data) {
@@ -17,10 +19,11 @@ export default class WampConnection {
           this.connection.subscribe('control/hello', (t, d) => this.ws_id = d.ws_id);
           this.connection.subscribe('debug/notification', (t, d) => console.log(t, d));
           this.connection.subscribe('control/debug-connections-changed', (t, d) => {
-            this.eventBus.$emit('debug-connections-changed', { connections: d })
+            this.broadcastConnectionsUpdated(d);
           });
         },
         () => {
+          this.eventBus.$emit('wamp-connection-status-changed', { status: 'reconnecting' });
           clearInterval(this.reconnectInterval);
           console.warn(`WebSocket connection closed; reconnecting in ${this.reconnectDelay}ms...`);
           this.reconnectInterval = setInterval(() => this.connect(), this.reconnectDelay);
@@ -36,10 +39,13 @@ export default class WampConnection {
   }
   refreshDebugConnectionList() {
     this.connection.call('control/list-debug-connections')
-      .promise.then(data => this.eventBus.$emit(
-        'debug-connections-changed',
-        { connections: data }
-      ));
+      .promise.then(data => this.broadcastConnectionsUpdated(data));
+  }
+  broadcastConnectionsUpdated(conns) {
+    if (conns.error && conns.error == "NO_CONNECTIONS") {
+      conns = {};
+    }
+    this.eventBus.$emit('debug-connections-changed', { connections: conns });
   }
   focusOnDebugConnection(cid) {
     this.connection.call('control/claim-focus', {'connection_id' : cid});

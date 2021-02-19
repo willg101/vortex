@@ -10,8 +10,6 @@ Vue.component('splitpanes', Splitpanes);
 Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
 
-window.conn = new WampConnection('wss://' + location.hostname + '/pubsub', 2, EventBus);
-
 function formatUnixTime(unixTimeSeconds) {
   let unixTimeMilliseconds = unixTimeSeconds * 1000;
   let date = new Date(unixTimeMilliseconds);
@@ -29,7 +27,8 @@ const app = new Vue({
   el: '#app',
   data: function () {
     return {
-      debug_connections: {}
+      debug_connections: {},
+      wamp_connection_status: '',
     };
   },
   computed: {
@@ -48,6 +47,15 @@ const app = new Vue({
     EventBus.$on('debug-connections-changed', e => {
       this.debug_connections = e.connections;
     });
+    EventBus.$on('wamp-connection-status-changed', e => {
+      this.wamp_connection_status = e.status;
+    });
+    this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', 2, EventBus);
+  },
+  methods: {
+    onRestartServerClicked: function(e) {
+      this.wamp_conn.restartSocketServer();
+    },
   },
   template: `
   <div class="app-wrapper relative h-100 w-100 d-flex flex-column">
@@ -68,7 +76,10 @@ const app = new Vue({
             <pane>4</pane>
           </splitpanes>
         </pane>
-        <pane>5</pane>
+        <pane>
+          Connection status: {{ wamp_connection_status }}<br>
+          <button @click="onRestartServerClicked">Restart Socket Server</button>
+        </pane>
       </splitpanes>
     </div>
   </div>`
