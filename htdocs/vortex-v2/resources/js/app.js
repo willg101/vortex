@@ -50,7 +50,7 @@ const app = new Vue({
     EventBus.$on('wamp-connection-status-changed', e => {
       this.wamp_connection_status = e.status;
     });
-    this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', 2, EventBus);
+    //this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', 2, EventBus);
   },
   methods: {
     onRestartServerClicked: function(e) {
