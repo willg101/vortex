@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\SocketServer\WebSocketCoordinator;
 use App\SocketServer\DbgpApp;;
+use App\SocketServer\RouterManagementClient;
 use React\Socket\Server as SocketServer;
 use Ratchet\Server\IoServer;
 
@@ -51,12 +52,6 @@ class SocketServerRun extends Command
     {
         $loop = \React\EventLoop\Factory::create();
 
-        /*
-
-        $server = new \Ratchet\App('vortex-v2.wgroenen.dart.ccel.org', 7003, '0.0.0.0', $loop);
-        $server->route('/pubsub', $wsc);
-        $server->run();
-        */
         $wsc = new WebSocketCoordinator;
 
         $dbgp    = new DbgpApp($wsc);
@@ -65,52 +60,16 @@ class SocketServerRun extends Command
 
         $wsc->setDebugApp($dbgp);
 
-$router = new Router($loop);
+        $router = new Router($loop);
 
-$transportProvider = new RatchetTransportProvider("0.0.0.0", 7003);
-$router->addTransportProvider($transportProvider);
-$router->start(false);
+        $transportProvider = new RatchetTransportProvider("0.0.0.0", 7003);
+        $router->addTransportProvider($transportProvider);
+        $router->start(false);
 
-$client = new Client("realm1", $loop);
-$client->addTransportProvider(new PawlTransportProvider("ws://127.0.0.1:7003/"));
-$client->on('open', function (ClientSession $session) {
-
-    // 1) subscribe to a topic
-    $onevent = function ($args) {
-        echo "Event {$args[0]}\n";
-    };
-    $session->subscribe('com.myapp.hello', $onevent);
-
-    // 2) publish an event
-    $session->publish('com.myapp.hello', ['Hello, world from PHP!!!'], [], ["acknowledge" => true])->then(
-        function () {
-            echo "Publish Acknowledged!\n";
-        },
-        function ($error) {
-            // publish failed
-            echo "Publish Error {$error}\n";
-        }
-    );
-
-    // 3) register a procedure for remoting
-    $add2 = function ($args) {
-        return $args[0] + $args[1];
-    };
-    $session->register('com.myapp.add2', $add2);
-
-    // 4) call a remote procedure
-    $session->call('com.myapp.add2', [2, 3])->then(
-        function ($res) {
-            echo "Result: {$res}\n";
-        },
-        function ($error) {
-            echo "Call Error: {$error}\n";
-        }
-    );
-});
-
-
-$client->start(false);
-
-$loop->run();    }
+        $transport_provider = new PawlTransportProvider("ws://127.0.0.1:7003/");
+        $client1 = new RouterManagementClient("realm1", $loop);
+        $client1->addTransportProvider($transport_provider);
+        $client1->start(false);
+        $loop->run();
+    }
 }
