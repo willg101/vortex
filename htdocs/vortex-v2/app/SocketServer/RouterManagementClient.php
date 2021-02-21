@@ -12,14 +12,12 @@ class RouterManagementClient extends Client
         Log::info('Received stop command from wamp peer');
         echo "\nstop";
         exit;
-
     }
 
     public function handleRestart()
     {
         Log::info('Received restart command from wamp peer');
         exit;
-
     }
 
     /**
