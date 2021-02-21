@@ -65,7 +65,7 @@ class SocketServerStart extends Command
 
             $cmd_output = [];
             $last_line = exec(__DIR__ . '/../../../artisan socket-server:run', $cmd_output, $status);
-            logger()->info("socket-server:run exited with exit status $status", $cmd_output);
+            logger()->info("socket-server:run exited with exit status $status: \n\n " .implode("\n", $cmd_output));
             if ($last_line == 'stop') {
                 exit($status);
             }
