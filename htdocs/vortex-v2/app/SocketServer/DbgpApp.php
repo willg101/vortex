@@ -12,7 +12,7 @@ class DbgpApp implements MessageComponentInterface
 {
     protected $change_handler;
     protected $notification_handler;
-    protected $wrapped_connections;
+    protected $wrapped_connections = [];
 
     public function setChangeHandler(callable $handler)
     {

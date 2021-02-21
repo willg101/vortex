@@ -36,19 +36,21 @@ class DebugConnectionsClient extends Client
 
     public function onConnectionsChanged($description)
     {
-        $this->session->publish('vortex.debug_connections.change', [], [
-            'description' => $description,
-            'connections' => $this->listConnections(),
-        ]);
+        $this->session->publish('vortex.debug_connections.change', [], $this->listConnections($description));
     }
 
-    public function listConnections()
+    public function listConnections($description = ['status' => 'list'])
     {
         $out = $this->dbgp->listConnections();
         foreach ($out as $cid => &$info) {
             $info['wamp_session'] = $this->wamp_dbgp_pairs['dbgp'][$cid] ?? null;
         }
-        return $out;
+        return ['description' => $description, 'connections' => $out];
+    }
+
+    public function handleCallList()
+    {
+        return $this->listConnections();
     }
 
     public function updatingPairing(string $dbgp_cid, string $wamp_cid)
@@ -112,7 +114,7 @@ class DebugConnectionsClient extends Client
      */
     public function onSessionStart($session, $transport)
     {
-        $session->register('vortex.debug_connections.list', [$this, 'listConnections']);
+        $session->register('vortex.debug_connections.list', [$this, 'handleCallList']);
         
         $session->subscribe('wamp.metaevent.session.on_join',  [$this, 'onWampSessionJoin']);
         $session->subscribe('wamp.metaevent.session.on_leave',  [$this, 'onWampSessionLeave']);

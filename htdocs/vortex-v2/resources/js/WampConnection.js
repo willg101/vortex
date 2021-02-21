@@ -1,54 +1,44 @@
 export default class WampConnection {
-  constructor(uri, reconnectDelaySeconds, eventBus) {
+  constructor(uri, eventBus) {
     this.uri = uri;
     this.eventBus = eventBus;
-    this.reconnectDelay = 1000 * reconnectDelaySeconds;
     this.connect();
   }
   connect() {
     this.eventBus.$emit('wamp-connection-status-changed', { status: 'connecting' });
     console.log(`Initiating WAMP connection to ${this.uri}...`);
-    this.connection = new ab.Session(this.uri,
-        () => {
-          this.eventBus.$emit('wamp-connection-status-changed', { status: 'connected' });
-          clearInterval(this.reconnectInterval);
-          this.refreshDebugConnectionList();
-          this.connection.subscribe('general', function(topic, data) {
-            console.log('Event in "' + topic + '"', data);
-          });
-          this.connection.subscribe('control/hello', (t, d) => this.ws_id = d.ws_id);
-          this.connection.subscribe('debug/notification', (t, d) => console.log(t, d));
-          this.connection.subscribe('control/debug-connections-changed', (t, d) => {
-            this.broadcastConnectionsUpdated(d);
-          });
-        },
-        () => {
-          this.eventBus.$emit('wamp-connection-status-changed', { status: 'reconnecting' });
-          clearInterval(this.reconnectInterval);
-          console.warn(`WebSocket connection closed; reconnecting in ${this.reconnectDelay}ms...`);
-          this.reconnectInterval = setInterval(() => this.connect(), this.reconnectDelay);
-        },
-        {'skipSubprotocolCheck': true}
-    );
+    this.connection = new autobahn.Connection({url: this.uri, realm: 'realm1'});
+    this.connection.onopen = session => {
+      this.eventBus.$emit('wamp-connection-status-changed', { status: 'connected' });
+      this.refreshDebugConnectionList();
+      session.subscribe('vortex.debug_connections.change', (args, kwargs) => {
+        this.broadcastConnectionsUpdated(kwargs.connections);
+      });
+    };
+    this.connection.onclose = () => {
+      let status = this.connection.isRetrying ? 'reconnecting' : 'disconnected';
+      this.eventBus.$emit('wamp-connection-status-changed', { status });
+    };
+    this.connection.open();
+  }
+  call(...args) {
+    return this.connection.session.call(...args);
   }
   restartSocketServer() {
-    this.connection.call('control/restart');
+    this.call('vortex.management.restart');
   }
   stopSocketServer() {
-    this.connection.call('control/stop');
+    this.call('vortex.management.stop');
   }
   refreshDebugConnectionList() {
-    this.connection.call('control/list-debug-connections')
-      .promise.then(data => this.broadcastConnectionsUpdated(data));
+    this.call('vortex.debug_connections.list')
+      .then(data => this.broadcastConnectionsUpdated(data.connections));
   }
   broadcastConnectionsUpdated(conns) {
-    if (conns.error && conns.error == "NO_CONNECTIONS") {
-      conns = {};
-    }
     this.eventBus.$emit('debug-connections-changed', { connections: conns });
   }
   focusOnDebugConnection(cid) {
-    this.connection.call('control/claim-focus', {'connection_id' : cid});
+    this.connection.call('vortex.debug_connections.pair', [], {'wamp_cid' : this.session.id, 'dbgp_cid' : cid});
   }
 }
 // vim: shiftwidth=2 tabstop=2
