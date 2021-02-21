@@ -6,15 +6,22 @@ use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use Exception;
 use Log;
+use Thruway\ClientSession;
 
 class DbgpApp implements MessageComponentInterface
 {
-    protected $wsc;
+    protected $change_handler;
+    protected $notification_handler;
     protected $wrapped_connections;
 
-    public function __construct(WebSocketCoordinator $wsc)
+    public function setChangeHandler(callable $handler)
     {
-        $this->wsc = $wsc;
+        $this->change_handler = $handler;
+    }
+
+    public function setNotificationHandler(callable $handler)
+    {
+        $this->notification_handler = $handler;
     }
 
     public function onOpen(ConnectionInterface $conn)
@@ -22,17 +29,17 @@ class DbgpApp implements MessageComponentInterface
         $cid = $conn->resourceId;
         $this->wrapped_connections[$cid] = new DebugConnection(
             $conn,
-            [$this->wsc, 'onNotificationReceived'],
-            [$this->wsc, 'broadcastDebugConnectionChanged']
+            $this->change_handler,
+            $this->notification_handler
         );
-        $this->wsc->broadcastDebugConnectionChanged();
+        $this->notifyChange('open', $cid);
     }
 
     public function onClose(ConnectionInterface $conn)
     {
         $cid = $conn->resourceId;
         unset($this->wrapped_connections[$cid]);
-        $this->wsc->broadcastDebugConnectionChanged();
+        $this->notifyChange('close', $cid);
     }
 
     public function onMessage(ConnectionInterface $conn, $msg)
@@ -70,5 +77,9 @@ class DbgpApp implements MessageComponentInterface
 
         return $out;
     }
-}
 
+    protected function notifyChange(string $status, string $cid)
+    {
+        ($this->change_handler)(['status' => $status, 'cid' => $cid]);
+    }
+}

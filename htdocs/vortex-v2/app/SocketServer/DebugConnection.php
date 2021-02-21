@@ -18,16 +18,16 @@ class DebugConnection
     protected $_conn;
     protected $_tid;
     protected $_callbacks;
-    protected $_notify_ready;
-    protected $_handle_notification;
+    protected $_broadcast_state_change;
+    protected $_broadcast_notification_msg;
     protected $_message_buffer;
 
-    public function __construct($conn, $handle_notification, $notify_ready)
+    public function __construct($conn, $broadcast_state_change, $broadcast_notification_msg)
     {
         $this->_tid  = 1;
         $this->_conn = $conn;
-        $this->_handle_notification = $handle_notification;
-        $this->_notify_ready = $notify_ready;;
+        $this->_broadcast_notification_msg = $broadcast_notification_msg;
+        $this->_broadcast_state_change = $broadcast_state_change;
         $this->time = time();
         $this->host = $conn->remoteAddress;
     }
@@ -114,7 +114,7 @@ EOF;
             foreach ($data['_children'][0]['_children'] ?? [] as $child) {
                 $this->{$child['name']} = $child['_value'];
             }
-            ($this->_notify_ready)();
+            ($this->_broadcast_state_change)('ready');
         });
     }
 
@@ -147,10 +147,11 @@ EOF;
             if ($msg_parsed['_tag'] == 'init') {
                 $this->file     = $msg_parsed['fileuri'];
                 $this->language = $msg_parsed['language'];
-                ($this->_notify_ready)();
+                ($this->_broadcast_state_change)('ready');
+                
                 $this->identifyCodeBase();
             }
-            ($this->_handle_notification)($msg_parsed);
+            ($this->_broadcast_notification_msg)($this->cid, $msg_parsed);
         }
     }
 

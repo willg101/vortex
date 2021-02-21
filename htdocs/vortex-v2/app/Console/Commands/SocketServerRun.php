@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\SocketServer\WebSocketCoordinator;
 use App\SocketServer\DbgpApp;;
 use App\SocketServer\RouterManagementClient;
+use App\SocketServer\DebugConnectionsClient;
 use React\Socket\Server as SocketServer;
 use Ratchet\Server\IoServer;
 
@@ -66,10 +67,14 @@ class SocketServerRun extends Command
         $router->addTransportProvider($transportProvider);
         $router->start(false);
 
-        $transport_provider = new PawlTransportProvider("ws://127.0.0.1:7003/");
-        $client1 = new RouterManagementClient("realm1", $loop);
-        $client1->addTransportProvider($transport_provider);
-        $client1->start(false);
+        $router_mgmt_client = new RouterManagementClient("realm1", $loop);
+        $router_mgmt_client->addTransportProvider(new PawlTransportProvider("ws://127.0.0.1:7003/"));
+        $router_mgmt_client->start(false);
+
+        $debug_conns_client = new DebugConnectionsClient($dbgp, "realm1", $loop);
+        $debug_conns_client->addTransportProvider(new PawlTransportProvider("ws://127.0.0.1:7003/"));
+        $debug_conns_client->start(false);
+
         $loop->run();
     }
 }
