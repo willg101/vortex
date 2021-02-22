@@ -53,13 +53,9 @@ class SocketServerRun extends Command
     {
         $loop = \React\EventLoop\Factory::create();
 
-        $wsc = new WebSocketCoordinator;
-
-        $dbgp    = new DbgpApp($wsc);
+        $dbgp    = new DbgpApp;
         $dbgp_ss = new SocketServer('0.0.0.0:55455', $loop);
         $dbgp_app = new IoServer($dbgp, $dbgp_ss, $loop);
-
-        $wsc->setDebugApp($dbgp);
 
         $router = new Router($loop);
 
