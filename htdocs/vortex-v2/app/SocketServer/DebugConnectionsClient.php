@@ -7,6 +7,7 @@ use Log;
 use RuntimeException;
 use Thruway\WampErrorException;
 use React\EventLoop\LoopInterface;
+use React\Promise\Deferred;
 
 class DebugConnectionsClient extends Client
 {
@@ -108,6 +109,27 @@ class DebugConnectionsClient extends Client
         $this->breakPairing('wamp', $cid);
     }
 
+    public function handleListRecentFiles($args, $kwargs)
+    {
+        if (empty($kwargs->dbgp_cid)) {
+            throw new WampErrorException('Missing dbgp_cid param');
+        } elseif (!($dbgp_conn = $this->dbgp->getConn($kwargs->dbgp_cid))) {
+            throw new WampErrorException('Invalid dbgp_cid param: ' . $kwargs->dbgp_cid);
+        }
+
+        $deferred = new Deferred;
+
+        app(PhpAbstractions::class)->getRecentFiles(
+            $params['max_files'] ?? null,
+            $dbgp_conn->codebase_root,
+            $params['excluded_dirs'] ?? null,
+            $dbgp_conn,
+            function ($data) use ($deferred) { $deferred->resolve($data); }
+        );
+
+        return $deferred->promise();
+    }
+
     /**
      * @param \Thruway\ClientSession $session
      * @param \Thruway\Transport\TransportInterface $transport
@@ -120,6 +142,7 @@ class DebugConnectionsClient extends Client
         $session->subscribe('wamp.metaevent.session.on_leave',  [$this, 'onWampSessionLeave']);
 
         $session->register('vortex.debug_connection.pair', [$this, 'pairWampWithDbgp']);
+        $session->register('vortex.debug_connection.list_recent_files', [$this, 'handleListRecentFiles']);
 //        $session->register('vortex.debug-connection.list-recent-files', [$this, 'listRecentFiles']);
     }
 }

@@ -148,7 +148,7 @@ EOF;
                 $this->file     = $msg_parsed['fileuri'];
                 $this->language = $msg_parsed['language'];
                 ($this->_broadcast_state_change)('ready');
-                
+                $this->configureConnection();
                 $this->identifyCodeBase();
             }
             ($this->_broadcast_notification_msg)($this->cid, $msg_parsed);
@@ -176,5 +176,11 @@ EOF;
         }
 
         return $out;
+    }
+
+    public function configureConnection()
+    {
+        $this->sendCommand('feature_set', ['n' => 'max_depth', 'v' => 5]);
+        $this->sendCommand('feature_set', ['n' => 'resolved_breakpoints', 'v' => 1]);
     }
 }

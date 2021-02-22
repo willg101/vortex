@@ -3,21 +3,26 @@
 namespace App\SocketServer;
 
 class PhpAbstractions {
+    const DEFAULT_MAX_RECENT_FILES = 10;
+
     protected $raw_fragments = [];
 
     public function getRecentFiles(
-        int $max_files,
+        ?int $max_files,
         string $codebase_root,
         ?array $excluded_dirs,
         DebugConnection $dc,
         callable $callback
     )
     {
+        $max_files = $max_files ?? static::DEFAULT_MAX_RECENT_FILES;
         $this->evalCodeFragment(
             'find_recent_files',
             [$max_files, $codebase_root, $excluded_dirs],
             $dc,
-            $callback
+            function($data) use($callback) {
+                $callback($data['_children'][0]['_children'] ?? []);
+            }
         );
     }
 

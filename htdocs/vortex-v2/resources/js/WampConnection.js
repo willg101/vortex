@@ -38,7 +38,10 @@ export default class WampConnection {
     this.eventBus.$emit('debug-connections-changed', { connections: conns });
   }
   pair(dbgp_cid) {
-    this.call('vortex.debug_connection.pair', [], {'wamp_cid' : this.connection.session.id, 'dbgp_cid' : dbgp_cid});
+    return this.call('vortex.debug_connection.pair', [], {'wamp_cid' : this.connection.session.id, 'dbgp_cid' : dbgp_cid});
+  }
+  listRecentFiles(dbgp_cid) {
+    return this.call('vortex.debug_connection.list_recent_files', [], {'dbgp_cid' : dbgp_cid});
   }
 }
 // vim: shiftwidth=2 tabstop=2

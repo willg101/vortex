@@ -30,6 +30,7 @@ const app = new Vue({
       debug_connections: {},
       wamp_connection_status: '',
       session_id : '',
+      recent_files: [],
     };
   },
   computed: {
@@ -63,7 +64,10 @@ const app = new Vue({
       this.wamp_conn.restartSocketServer();
     },
     onPairDbgpSessionClicked: function(dbgp_cid) {
+      this.recent_files = [];
       this.wamp_conn.pair(dbgp_cid);
+      this.wamp_conn.listRecentFiles(dbgp_cid)
+        .then(recent_files => this.recent_files = recent_files);
     },
   },
   template: `
@@ -86,7 +90,11 @@ const app = new Vue({
         </pane>
         <pane>
           <splitpanes horizontal>
-            <pane>2</pane>
+            <pane>
+              <ul>
+                <li v-for="file in recent_files.args">{{ file._children[0]._value }}</li>
+              </ul>
+            </pane>
             <pane>3</pane>
             <pane>4</pane>
           </splitpanes>
