@@ -29,6 +29,7 @@ const app = new Vue({
     return {
       debug_connections: {},
       wamp_connection_status: '',
+      session_id : '',
     };
   },
   computed: {
@@ -49,12 +50,20 @@ const app = new Vue({
     });
     EventBus.$on('wamp-connection-status-changed', e => {
       this.wamp_connection_status = e.status;
+      if (e.session_id) {
+        this.session_id = e.session_id;
+      } else {
+        this.session_id = '';
+      }
     });
     this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', EventBus);
   },
   methods: {
     onRestartServerClicked: function(e) {
       this.wamp_conn.restartSocketServer();
+    },
+    onPairDbgpSessionClicked: function(dbgp_cid) {
+      this.wamp_conn.pair(dbgp_cid);
     },
   },
   template: `
@@ -66,7 +75,13 @@ const app = new Vue({
       <splitpanes class="default-theme relative h-100">
         <pane min-size="20">
           <ul>
-            <li v-for="conn in debug_connections"><b>{{ conn.file }}</b> | {{ conn.codebase_id }} on {{ conn.host }} ({{ conn_times_formatted[conn.cid] }})</li>
+            <li v-for="conn in debug_connections">
+              <b>{{ conn.file }}</b>
+              |
+              {{ conn.codebase_id }} on {{ conn.host }}
+              ({{ conn_times_formatted[conn.cid] }})
+              <button @click="onPairDbgpSessionClicked(conn.cid)" :disabled="conn.wamp_session == session_id">Pair</button>
+              </li>
           </ul>
         </pane>
         <pane>
