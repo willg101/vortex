@@ -11,7 +11,8 @@
         <script src="//code.iconify.design/1/1.0.7/iconify.min.js"></script>
         <link href="{{ mix('css/app.css') }}" rel="stylesheet">
         <link href="https://unpkg.com/splitpanes/dist/splitpanes.css" rel="stylesheet">
-
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@500&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
     </head>
     <body>

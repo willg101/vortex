@@ -65,13 +65,15 @@ class DbgpApp implements MessageComponentInterface
 
         foreach ($this->wrapped_connections as $cid => $conn) {
             $out[$cid] = [
-                'cid'      => $cid,
-                'file'     => $conn->file,
-                'host'     => $conn->host,
-                'time'     => $conn->time,
-                'language' => $conn->language,
-                'codebase_id' => $conn->codebase_id,
-                'codebase_root' => $conn->codebase_root
+                'cid'           => $cid,
+                'initial_file'  => $conn->initial_file,
+                'host'          => $conn->host,
+                'time'          => $conn->time,
+                'language'      => $conn->language,
+                'codebase_id'   => $conn->codebase_id,
+                'codebase_root' => $conn->codebase_root,
+                'current_file'  => $conn->current_file,
+                'current_line'  => $conn->current_line,
             ];
         }
 

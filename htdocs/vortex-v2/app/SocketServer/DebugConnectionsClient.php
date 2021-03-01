@@ -109,6 +109,30 @@ class DebugConnectionsClient extends Client
         $this->breakPairing('wamp', $cid);
     }
 
+    public function handleSendCommand($args, $kwargs)
+    {
+        if (empty($kwargs->dbgp_cid)) {
+            throw new WampErrorException('Missing dbgp_cid param');
+        } elseif (!($dbgp_conn = $this->dbgp->getConn($kwargs->dbgp_cid))) {
+            throw new WampErrorException('Invalid dbgp_cid param: ' . $kwargs->dbgp_cid);
+        } elseif (empty($kwargs->command) || !is_string($kwargs->command)) {
+            throw new WampErrorException('Missing or invalid command name');
+        }
+
+        // TODO: Validate other args
+
+        $deferred = new Deferred;
+
+        $dbgp_conn->sendCommand(
+            $kwargs->command, 
+            (array) ($kwargs->args ?? []),
+            $kwargs->extra_data ?? '',
+            function ($data) use ($deferred) { $deferred->resolve($data); }
+        );
+
+        return $deferred->promise();
+    }
+
     public function handleListRecentFiles($args, $kwargs)
     {
         if (empty($kwargs->dbgp_cid)) {
@@ -143,6 +167,6 @@ class DebugConnectionsClient extends Client
 
         $session->register('vortex.debug_connection.pair', [$this, 'pairWampWithDbgp']);
         $session->register('vortex.debug_connection.list_recent_files', [$this, 'handleListRecentFiles']);
-//        $session->register('vortex.debug-connection.list-recent-files', [$this, 'listRecentFiles']);
+        $session->register('vortex.debug_connection.send_command', [$this, 'handleSendCommand']);
     }
 }

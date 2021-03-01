@@ -6,9 +6,18 @@ import Toolbar from './views/toolbar.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
 
+import { PrismEditor as PrismEditorLocal } from './vue-prism-editor.js';
+
+// import highlighting library (you can use any library you want just return html string)
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/themes/prism-dark.css'; // import syntax highlighting styles
+
 Vue.component('splitpanes', Splitpanes);
 Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
+Vue.component('pel', PrismEditorLocal);
 
 function formatUnixTime(unixTimeSeconds) {
   let unixTimeMilliseconds = unixTimeSeconds * 1000;
@@ -27,6 +36,7 @@ const app = new Vue({
   el: '#app',
   data: function () {
     return {
+      code: "let foo = 'a';\nvar bar = 'ffff';",
       debug_connections: {},
       wamp_connection_status: '',
       session_id : '',
@@ -34,6 +44,23 @@ const app = new Vue({
     };
   },
   computed: {
+    current_line : function() {
+      return this.debug_connections[this.dbgp_cid]
+        && this.debug_connections[this.dbgp_cid].current_line
+        || null;
+    },
+    current_file : function() {
+      return this.debug_connections[this.dbgp_cid]
+        && this.debug_connections[this.dbgp_cid].current_line
+        || null;
+    },
+    line_classes: function() {
+      let out = {};
+      if (this.current_line) {
+        out[this.current_line] = [ 'current' ];
+      }
+      return out;
+    },
     conn_times_formatted: function() {
       let out = {};
       for (let cid in this.debug_connections) {
@@ -41,10 +68,24 @@ const app = new Vue({
       }
       return out;
     },
+    dbgp_cid: function() {
+      for (let cid in this.debug_connections) {
+        if (this.debug_connections[cid].wamp_session == this.session_id) {
+          return cid;
+        }
+      }
+      return null;
+    }
   },
   created() {
     EventBus.$on('debug-command', e => {
-      console.log('debug-command', e.id)
+      //console.log('debug-command', e.id)
+      if (this.dbgp_cid) {
+        this.wamp_conn.sendContinuationCommand(this.dbgp_cid, e.id)
+          .then(data => {
+            this.showFile();
+          });
+      }
     });
     EventBus.$on('debug-connections-changed', e => {
       this.debug_connections = e.connections;
@@ -60,14 +101,23 @@ const app = new Vue({
     this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', EventBus);
   },
   methods: {
+    showFile(uri) {
+      this.wamp_conn.source(this.dbgp_cid, uri).then(data => {
+        this.code = data._value;
+      });
+    },
+    highlighter(code) {
+      return highlight(code, languages.js); 
+      // languages.<insert language> to return html with markup
+    },
     onRestartServerClicked: function(e) {
       this.wamp_conn.restartSocketServer();
     },
     onPairDbgpSessionClicked: function(dbgp_cid) {
       this.recent_files = [];
-      this.wamp_conn.pair(dbgp_cid);
+      this.wamp_conn.pair(dbgp_cid).then(data => console.log(data))
       this.wamp_conn.listRecentFiles(dbgp_cid)
-        .then(recent_files => this.recent_files = recent_files);
+        .then(recent_files => {this.recent_files = recent_files; this.showFile()})
     },
   },
   template: `
@@ -80,7 +130,7 @@ const app = new Vue({
         <pane min-size="20">
           <ul>
             <li v-for="conn in debug_connections">
-              <b>{{ conn.file }}</b>
+              <b>{{ conn.initial_file }}</b>
               |
               {{ conn.codebase_id }} on {{ conn.host }}
               ({{ conn_times_formatted[conn.cid] }})
@@ -95,8 +145,9 @@ const app = new Vue({
                 <li v-for="file in recent_files.args">{{ file._children[0]._value }}</li>
               </ul>
             </pane>
-            <pane>3</pane>
-            <pane>4</pane>
+            <pane>  <pel class="my-editor" :line-classes="line_classes" v-model="code" :highlight="highlighter" line-numbers></pel>
+            </pane>
+            <pane>({{ dbgp_cid }})</pane>
           </splitpanes>
         </pane>
         <pane>

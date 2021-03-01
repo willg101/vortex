@@ -9,6 +9,10 @@ export default class WampConnection {
     console.log(`Initiating WAMP connection to ${this.uri}...`);
     this.connection = new autobahn.Connection({url: this.uri, realm: 'realm1'});
     this.connection.onopen = session => {
+      // ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
+      // TODO: DEBUGGING CODE. REMOVE
+      window._session = session;
+      // ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
       this.eventBus.$emit('wamp-connection-status-changed', { status: 'connected', session_id : session.id });
       this.refreshDebugConnectionList();
       session.subscribe('vortex.debug_connections.change', (args, kwargs) => {
@@ -42,6 +46,19 @@ export default class WampConnection {
   }
   listRecentFiles(dbgp_cid) {
     return this.call('vortex.debug_connection.list_recent_files', [], {'dbgp_cid' : dbgp_cid});
+  }
+  sendContinuationCommand(dbgp_cid, command) {
+    if (!command.match(/^(run|step_over|step_into|step_out|stop|detach)$/)) {
+      throw new Error(`Invalid continuation command: '${command}'`);
+    }
+    return this.call('vortex.debug_connection.send_command', [], {command, dbgp_cid});
+  }
+  source(dbgp_cid, file_uri) {
+    let args = {};
+    if (file_uri) {
+      args.f = file_uri;
+    }
+    return this.call('vortex.debug_connection.send_command', [], {dbgp_cid, command: 'source', args});
   }
 }
 // vim: shiftwidth=2 tabstop=2

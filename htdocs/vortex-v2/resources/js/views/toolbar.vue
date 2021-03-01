@@ -15,7 +15,6 @@ export default {
           { id: 'run',       icon: 'play' },
           { id: 'stop',      icon: 'close-octagon' },
           { id: 'detach',    icon: 'link-variant-remove' },
-          { id: 'step_forward', icon: 'step-forward' },
           { id: 'step_into', icon: 'debug-step-into' },
           { id: 'step_over', icon: 'debug-step-over' },
           { id: 'step_out',  icon: 'debug-step-out' },

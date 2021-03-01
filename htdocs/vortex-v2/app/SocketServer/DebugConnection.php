@@ -8,11 +8,13 @@ use App\Exceptions\MalformedDebugCommandException;
 class DebugConnection
 {
     protected $host;
-    protected $file;
+    protected $initial_file;
     protected $language;
     protected $time;
     protected $codebase_id;
     protected $codebase_root;
+    protected $current_line;
+    protected $current_file;
 
     // Disallow public read access to fields starting with '_'
     protected $_conn;
@@ -89,7 +91,7 @@ class DebugConnection
 
     public function identifyCodeBase()
     {
-        $file = $this->file;
+        $file = $this->initial_file;
         $code = <<<"EOF"
             if (strpos('$file', 'file://') === 0) {
                 \$parts = explode('/', substr('$file', 7));
@@ -112,7 +114,9 @@ class DebugConnection
 EOF;
         $this->advancedEval($code, function($data) {
             foreach ($data['_children'][0]['_children'] ?? [] as $child) {
-                $this->{$child['name']} = $child['_value'];
+                if (in_array($child['name'] ?? null, ['codebase_root', 'codebase_id'])) {
+                    $this->{$child['name']} = $child['_value'];
+                }
             }
             ($this->_broadcast_state_change)('ready');
         });
@@ -137,6 +141,8 @@ EOF;
     {
         $msg_parsed = $this->deserializeXml($msg) ?: $msg;
 
+        $this->skimDataFromMessage($msg_parsed);
+
         if ($msg_parsed['transaction_id'] ?? null) {
             $tid = $msg_parsed['transaction_id'];
             if (isset($this->_callbacks[$tid])) {
@@ -144,23 +150,17 @@ EOF;
                 unset($this->_callbacks[$tid]);
             }
         } else {
-            if ($msg_parsed['_tag'] == 'init') {
-                $this->file     = $msg_parsed['fileuri'];
-                $this->language = $msg_parsed['language'];
-                ($this->_broadcast_state_change)('ready');
-                $this->configureConnection();
-                $this->identifyCodeBase();
-            }
             ($this->_broadcast_notification_msg)($this->cid, $msg_parsed);
         }
     }
 
-    public function deserializeXml($xml)
+    public function deserializeXml($xml, ?array $namespaces = null)
     {
         if (is_string($xml)) {
             $xml = simplexml_load_string($xml);
+            $namespaces = $xml->getNamespaces(true);
         }
-        if (!$xml) {
+        if ((!is_object($xml) && !$xml) || (is_object($xml) && !$xml->attributes())) {
             return [];
         }
         $out = ((array) $xml->attributes())['@attributes'];
@@ -172,10 +172,44 @@ EOF;
 
         $out['_children'] = [];
         foreach ($xml->children() as $child) {
-            $out['_children'][] = $this->deserializeXml($child);
+            $out['_children'][] = $this->deserializeXml($child, $namespaces);
+        }
+        foreach ($namespaces as $ns) {
+            foreach ($xml->children($ns) as $child) {
+                $out['_children'][] = $this->deserializeXml($child, $namespaces);
+            }
         }
 
         return $out;
+    }
+
+    protected function skimDataFromMessage(array $msg): void
+    {
+        if ($msg['_tag'] == 'init') {
+            $this->initial_file = $msg['fileuri'];
+            $this->language = $msg['language'];
+            ($this->_broadcast_state_change)('ready');
+            $this->configureConnection();
+            $this->identifyCodeBase();
+            $this->sendCommand('step_into');
+        }
+
+        $position_changed = false;
+        if ($updated_line = ($msg['_children'][0]['lineno'] ?? null)) {
+            if ($updated_line != $this->current_line) {
+                $this->current_line = $updated_line;
+                $position_changed = true;
+            }
+        }
+        if ($updated_file = ($msg['_children'][0]['filename'] ?? null)) {
+            if ($updated_file != $this->current_file) {
+                $this->current_file = $updated_file;
+                $position_changed = true;
+            }
+        }
+        if ($position_changed) {
+            ($this->_broadcast_state_change)('ready');
+        }
     }
 
     public function configureConnection()

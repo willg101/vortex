@@ -22,6 +22,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.2",
     "autobahn": "^20.9.2",
+    "prismjs": "^1.23.0",
     "splitpanes": "^2.3.6",
     "vue": "^2.6.12"
   }
