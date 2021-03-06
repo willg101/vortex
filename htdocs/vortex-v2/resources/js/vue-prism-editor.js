@@ -66,6 +66,11 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
       });
     }
   },
+  updated() {
+    if (this.$refs.current_line) {
+      this.$refs.current_line.scrollIntoViewIfNeeded(true);
+    }
+  },
   computed: {
     isEmpty: function isEmpty() {
       return this.codeData.length === 0;
@@ -128,31 +133,18 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
       attrs: {
         'aria-hidden': 'true'
       }
-    }, [lineNumberWidthCalculator, Array.from(Array(this.lineNumbersCount).keys()).map(function (_, index) {
-      return h('div', {
-        attrs: {
-          "class": 'prism-editor__line-number token comment ' + (_this3.lineClasses[index + 1] || []).join(' ')
-        }
-      }, "" + ++index);
+    }, [lineNumberWidthCalculator, Array.from(Array(this.lineNumbersCount).keys()).map((_, index) => {
+      let opts = { attrs : {
+        "class": 'prism-editor__line-number token comment ' + (_this3.lineClasses[index + 1] || []).join(' ')
+      }};
+      if (this.lineClasses[index + 1] && this.lineClasses[index + 1].indexOf('current') >= 0) {
+        console.log('adding ref');
+        opts['ref'] = 'current_line';
+      }
+      return h('div', opts, "" + ++index);
     })]);
     var textarea = h('textarea', {
       ref: 'textarea',
-      on: {
-        input: this.handleChange,
-        keydown: this.handleKeyDown,
-        click: function click($event) {
-          _this3.$emit('click', $event);
-        },
-        keyup: function keyup($event) {
-          _this3.$emit('keyup', $event);
-        },
-        focus: function focus($event) {
-          _this3.$emit('focus', $event);
-        },
-        blur: function blur($event) {
-          _this3.$emit('blur', $event);
-        }
-      },
       staticClass: 'prism-editor__textarea',
       "class": {
         'prism-editor__textarea--empty': this.isEmpty

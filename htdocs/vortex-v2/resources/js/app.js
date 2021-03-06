@@ -5,11 +5,11 @@ import { Splitpanes, Pane } from 'splitpanes'
 import Toolbar from './views/toolbar.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
+import CodeViewer from './views/code-viewer.vue'
 
 import { PrismEditor as PrismEditorLocal } from './vue-prism-editor.js';
 
 // import highlighting library (you can use any library you want just return html string)
-import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism-dark.css'; // import syntax highlighting styles
@@ -17,7 +17,8 @@ import 'prismjs/themes/prism-dark.css'; // import syntax highlighting styles
 Vue.component('splitpanes', Splitpanes);
 Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
-Vue.component('pel', PrismEditorLocal);
+Vue.component('prism-editor-local', PrismEditorLocal);
+Vue.component('code-viewer', CodeViewer);
 
 function formatUnixTime(unixTimeSeconds) {
   let unixTimeMilliseconds = unixTimeSeconds * 1000;
@@ -46,12 +47,12 @@ const app = new Vue({
   computed: {
     current_line : function() {
       return this.debug_connections[this.dbgp_cid]
-        && this.debug_connections[this.dbgp_cid].current_line
-        || null;
+        && Number.parseInt(this.debug_connections[this.dbgp_cid].current_line)
+        || 0;
     },
     current_file : function() {
       return this.debug_connections[this.dbgp_cid]
-        && this.debug_connections[this.dbgp_cid].current_line
+        && this.debug_connections[this.dbgp_cid].current_fill
         || null;
     },
     line_classes: function() {
@@ -106,10 +107,6 @@ const app = new Vue({
         this.code = data._value;
       });
     },
-    highlighter(code) {
-      return highlight(code, languages.js); 
-      // languages.<insert language> to return html with markup
-    },
     onRestartServerClicked: function(e) {
       this.wamp_conn.restartSocketServer();
     },
@@ -145,7 +142,8 @@ const app = new Vue({
                 <li v-for="file in recent_files.args">{{ file._children[0]._value }}</li>
               </ul>
             </pane>
-            <pane>  <pel class="my-editor" :line-classes="line_classes" v-model="code" :highlight="highlighter" line-numbers></pel>
+            <pane>
+              <code-viewer :current_line="current_line" :code="code"></code-viewer>
             </pane>
             <pane>({{ dbgp_cid }})</pane>
           </splitpanes>
