@@ -53,6 +53,28 @@ export default class WampConnection {
     }
     return this.call('vortex.debug_connection.send_command', [], {command, dbgp_cid});
   }
+  addLineBreakpoint(dbgp_cid, file, line, expression) {
+    let type = expression ? 'conditional' : 'line';
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'breakpoint_set',
+      dbgp_cid,
+      args : {
+        t: type,
+        f: file,
+        n: line,
+      },
+      extra_data: expression,
+    });
+  }
+  removeLineBreakpoint(dbgp_cid, bpid) {
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'breakpoint_remove',
+      dbgp_cid,
+      args : {
+        d: bpid,
+      },
+    });
+  }
   source(dbgp_cid, file_uri) {
     let args = {};
     if (file_uri) {

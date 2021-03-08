@@ -89,6 +89,9 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
     this.styleLineNumbers();
   },
   methods: {
+    onLineNumberClicked(line) {
+      this.$emit('line-clicked', {line}); // TODO use bus
+    },
     setLineNumbersHeight: function setLineNumbersHeight() {
       this.lineNumbersHeight = getComputedStyle(this.$refs.pre).height;
     },
@@ -134,11 +137,13 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
         'aria-hidden': 'true'
       }
     }, [lineNumberWidthCalculator, Array.from(Array(this.lineNumbersCount).keys()).map((_, index) => {
-      let opts = { attrs : {
-        "class": 'prism-editor__line-number token comment ' + (_this3.lineClasses[index + 1] || []).join(' ')
-      }};
+      let opts = {
+        on: { click: e => this.onLineNumberClicked(index, e.which) },
+        attrs : {
+          "class": 'prism-editor__line-number token comment ' + (_this3.lineClasses[index + 1] || []).join(' ')
+        }
+      };
       if (this.lineClasses[index + 1] && this.lineClasses[index + 1].indexOf('current') >= 0) {
-        console.log('adding ref');
         opts['ref'] = 'current_line';
       }
       return h('div', opts, "" + ++index);

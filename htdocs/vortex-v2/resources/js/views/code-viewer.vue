@@ -1,5 +1,5 @@
 <template>
-  <prism-editor-local :line-classes="line_classes" :code="code" :highlight="highlighter" line-numbers></prism-editor-local>
+  <prism-editor-local @line-clicked="e => this.$emit('line-clicked', e)" :line-classes="line_classes" :code="code" :highlight="highlighter" line-numbers></prism-editor-local>
 </template>
 
 <script>
@@ -16,12 +16,22 @@ export default {
       type: String,
       default: "",
     },
+    breakpoints: {
+      type: Object,
+      default: () => {}
+    },
   },
   computed: {
     line_classes: function() {
       let out = {};
       if (this.current_line) {
         out[this.current_line] = [ 'current' ];
+      }
+      for (let line in this.breakpoints) {
+        if (! out[line]) {
+          out[line] = [];
+        }
+        out[line].push('breakpoint-line');
       }
       return out;
     },

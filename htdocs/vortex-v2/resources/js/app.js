@@ -42,9 +42,14 @@ const app = new Vue({
       wamp_connection_status: '',
       session_id : '',
       recent_files: [],
+      line_breakpoints: {},
+      all_breakpoints: {},
     };
   },
   computed: {
+    file_breakpoints: function() {
+      return this.line_breakpoints[this.current_file] || {};
+    },
     current_line : function() {
       return this.debug_connections[this.dbgp_cid]
         && Number.parseInt(this.debug_connections[this.dbgp_cid].current_line)
@@ -52,15 +57,8 @@ const app = new Vue({
     },
     current_file : function() {
       return this.debug_connections[this.dbgp_cid]
-        && this.debug_connections[this.dbgp_cid].current_fill
+        && this.debug_connections[this.dbgp_cid].current_file
         || null;
-    },
-    line_classes: function() {
-      let out = {};
-      if (this.current_line) {
-        out[this.current_line] = [ 'current' ];
-      }
-      return out;
     },
     conn_times_formatted: function() {
       let out = {};
@@ -102,6 +100,28 @@ const app = new Vue({
     this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', EventBus);
   },
   methods: {
+    onLineClicked(e) {
+      if (this.dbgp_cid) {
+        let file = this.current_file;
+        if (this.line_breakpoints[file] && this.line_breakpoints[file][e.line]) {
+          let bpid = this.line_breakpoints[file][e.line].id;
+          this.wamp_conn.removeLineBreakpoint(this.dbgp_cid, bpid)
+            .then(() => {
+              this.$delete(this.line_breakpoints[file], e.line)
+              this.$delete(this.all_breakpoints, bpid);
+            });
+        } else {
+          this.wamp_conn.addLineBreakpoint(this.dbgp_cid, file, e.line)
+            .then(data => {
+              if (!this.line_breakpoints[file]) {
+                this.$set(this.line_breakpoints, file, {});
+              }
+              this.$set(this.line_breakpoints[file], e.line, { id: data.id });
+              this.$set(this.all_breakpoints, data.id , { type: 'line' });
+            });
+        }
+      }
+    },
     showFile(uri) {
       this.wamp_conn.source(this.dbgp_cid, uri).then(data => {
         this.code = data._value;
@@ -143,7 +163,7 @@ const app = new Vue({
               </ul>
             </pane>
             <pane>
-              <code-viewer :current_line="current_line" :code="code"></code-viewer>
+              <code-viewer @line-clicked="onLineClicked" :breakpoints="file_breakpoints"  :current_line="current_line" :code="code"></code-viewer>
             </pane>
             <pane>({{ dbgp_cid }})</pane>
           </splitpanes>

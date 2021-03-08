@@ -67,6 +67,10 @@ $color-scheme: (
  * Code Display
  * #####################################################################################*/
 
+.prism-editor__line-number.breakpoint-line {
+    background-color: #63C;
+    color: #333;
+}
 .prism-editor__line-number.current {
     background-color: #3C6;
     color: #333;

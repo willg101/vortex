@@ -195,16 +195,18 @@ EOF;
         }
 
         $position_changed = false;
-        if ($updated_line = ($msg['_children'][0]['lineno'] ?? null)) {
-            if ($updated_line != $this->current_line) {
-                $this->current_line = $updated_line;
-                $position_changed = true;
+        if (preg_match('/^(run|step_|stop|detach)/', $msg['command'] ?? '')) {
+            if ($updated_line = ($msg['_children'][0]['lineno'] ?? null)) {
+                if ($updated_line != $this->current_line) {
+                    $this->current_line = $updated_line;
+                    $position_changed = true;
+                }
             }
-        }
-        if ($updated_file = ($msg['_children'][0]['filename'] ?? null)) {
-            if ($updated_file != $this->current_file) {
-                $this->current_file = $updated_file;
-                $position_changed = true;
+            if ($updated_file = ($msg['_children'][0]['filename'] ?? null)) {
+                if ($updated_file != $this->current_file) {
+                    $this->current_file = $updated_file;
+                    $position_changed = true;
+                }
             }
         }
         if ($position_changed) {
