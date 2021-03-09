@@ -150,7 +150,7 @@ EOF;
                 unset($this->_callbacks[$tid]);
             }
         } else {
-            ($this->_broadcast_notification_msg)($this->cid, $msg_parsed);
+            ($this->_broadcast_notification_msg)($this->_conn->resourceId, $msg_parsed);
         }
     }
 
@@ -218,5 +218,6 @@ EOF;
     {
         $this->sendCommand('feature_set', ['n' => 'max_depth', 'v' => 5]);
         $this->sendCommand('feature_set', ['n' => 'resolved_breakpoints', 'v' => 1]);
+        $this->sendCommand('feature_set', ['n' => 'notify_ok', 'v' => 1]);
     }
 }

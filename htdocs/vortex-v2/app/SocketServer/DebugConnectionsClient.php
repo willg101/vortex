@@ -32,7 +32,7 @@ class DebugConnectionsClient extends Client
 
     public function onNotificationReceived($cid, $msg)
     {
-        $this->session->publish('vortex.debug-connection.notifications.' . $cid, [], $msg);
+        $this->session->publish('vortex.debug_connection.notifications.' . $cid, [], $msg);
     }
 
     public function onConnectionsChanged($description)

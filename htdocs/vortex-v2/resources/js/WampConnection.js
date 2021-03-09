@@ -28,6 +28,9 @@ export default class WampConnection {
   call(...args) {
     return this.connection.session.call(...args);
   }
+  subscribe(...args) {
+    return this.connection.session.subscribe(...args);
+  }
   restartSocketServer() {
     this.call('vortex.management.restart');
   }
@@ -42,7 +45,14 @@ export default class WampConnection {
     this.eventBus.$emit('debug-connections-changed', { connections: conns });
   }
   pair(dbgp_cid) {
-    return this.call('vortex.debug_connection.pair', [], {'wamp_cid' : this.connection.session.id, 'dbgp_cid' : dbgp_cid});
+    return this.call('vortex.debug_connection.pair',[], {
+      'wamp_cid' : this.connection.session.id,
+      'dbgp_cid' : dbgp_cid
+    }).then(() => {
+      this.subscribe(
+        'vortex.debug_connection.notifications.' + dbgp_cid,
+        (_, msg) => this.eventBus.$emit('debugger-engine-notification', { msg }))
+    });
   }
   listRecentFiles(dbgp_cid) {
     return this.call('vortex.debug_connection.list_recent_files', [], {'dbgp_cid' : dbgp_cid});
