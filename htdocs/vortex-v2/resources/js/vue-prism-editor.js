@@ -1,8 +1,17 @@
 import Vue from 'vue';
 import { EventBus } from './event_bus.js'
+import { highlight, languages } from 'prismjs/components/prism-core';
 
 var PrismEditor = /*#__PURE__*/Vue.extend({
   props: {
+    breakpoints: {
+      type: Object,
+      default: () => {}
+    },
+    current_line: {
+      type: Number,
+      default: 0,
+    },
     lineNumbers: {
       type: Boolean,
       "default": false
@@ -11,17 +20,9 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
       type: Boolean,
       "default": true
     },
-    lineClasses: {
-      type: Object,
-      "default": () => {},
-    },
     code: {
       type: String,
       "default": ''
-    },
-    highlight: {
-      type: Function,
-      required: true
     },
     placeholder: {
       type: String,
@@ -73,6 +74,19 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
     }
   },
   computed: {
+    lineClasses: function() {
+      let out = {};
+      if (this.current_line) {
+        out[this.current_line] = [ 'current' ];
+      }
+      for (let line in this.breakpoints) {
+        if (! out[line]) {
+          out[line] = [];
+        }
+        out[line].push('breakpoint-line');
+      }
+      return out;
+    },
     isEmpty: function isEmpty() {
       return this.codeData.length === 0;
     },
@@ -92,6 +106,10 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
   methods: {
     onLineNumberClicked(line) {
       EventBus.$emit('line-clicked', {line});
+    },
+    highlight(code) {
+      return highlight(code, languages.js);
+      // languages.<insert language> to return html with markup
     },
     setLineNumbersHeight: function setLineNumbersHeight() {
       this.lineNumbersHeight = getComputedStyle(this.$refs.pre).height;

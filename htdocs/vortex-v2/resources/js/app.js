@@ -5,9 +5,7 @@ import { Splitpanes, Pane } from 'splitpanes'
 import Toolbar from './views/toolbar.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
-import CodeViewer from './views/code-viewer.vue'
-
-import { PrismEditor as PrismEditorLocal } from './vue-prism-editor.js';
+import { PrismEditor as CodeViewer } from './vue-prism-editor.js';
 
 // import highlighting library (you can use any library you want just return html string)
 import 'prismjs/components/prism-clike';
@@ -17,7 +15,6 @@ import 'prismjs/themes/prism-dark.css'; // import syntax highlighting styles
 Vue.component('splitpanes', Splitpanes);
 Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
-Vue.component('prism-editor-local', PrismEditorLocal);
 Vue.component('code-viewer', CodeViewer);
 
 function formatUnixTime(unixTimeSeconds) {
@@ -164,7 +161,7 @@ const app = new Vue({
               </ul>
             </pane>
             <pane>
-              <code-viewer :breakpoints="file_breakpoints"  :current_line="current_line" :code="code"></code-viewer>
+              <code-viewer :line-numbers=true :breakpoints="file_breakpoints"  :current_line="current_line" :code="code"></code-viewer>
             </pane>
             <pane>({{ dbgp_cid }})</pane>
           </splitpanes>
