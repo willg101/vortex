@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import { EventBus } from './event_bus.js'
 
 var PrismEditor = /*#__PURE__*/Vue.extend({
   props: {
@@ -90,7 +91,7 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
   },
   methods: {
     onLineNumberClicked(line) {
-      this.$emit('line-clicked', {line}); // TODO use bus
+      EventBus.$emit('line-clicked', {line});
     },
     setLineNumbersHeight: function setLineNumbersHeight() {
       this.lineNumbersHeight = getComputedStyle(this.$refs.pre).height;

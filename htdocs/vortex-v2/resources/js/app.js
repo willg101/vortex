@@ -89,6 +89,7 @@ const app = new Vue({
     EventBus.$on('debug-connections-changed', e => {
       this.debug_connections = e.connections;
     });
+    EventBus.$on('line-clicked', e => this.onLineClicked(e));
     EventBus.$on('wamp-connection-status-changed', e => {
       this.wamp_connection_status = e.status;
       if (e.session_id) {
@@ -163,7 +164,7 @@ const app = new Vue({
               </ul>
             </pane>
             <pane>
-              <code-viewer @line-clicked="onLineClicked" :breakpoints="file_breakpoints"  :current_line="current_line" :code="code"></code-viewer>
+              <code-viewer :breakpoints="file_breakpoints"  :current_line="current_line" :code="code"></code-viewer>
             </pane>
             <pane>({{ dbgp_cid }})</pane>
           </splitpanes>

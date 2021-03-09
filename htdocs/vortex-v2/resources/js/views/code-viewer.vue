@@ -1,9 +1,8 @@
 <template>
-  <prism-editor-local @line-clicked="e => this.$emit('line-clicked', e)" :line-classes="line_classes" :code="code" :highlight="highlighter" line-numbers></prism-editor-local>
+  <prism-editor-local :line-classes="line_classes" :code="code" :highlight="highlighter" line-numbers></prism-editor-local>
 </template>
 
 <script>
-import { EventBus } from '../event_bus.js'
 import { highlight, languages } from 'prismjs/components/prism-core';
 
 export default {
