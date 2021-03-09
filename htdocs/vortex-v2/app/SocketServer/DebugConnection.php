@@ -175,6 +175,9 @@ EOF;
             $out['_children'][] = $this->deserializeXml($child, $namespaces);
         }
         foreach ($namespaces as $ns) {
+            if ($ns == 'urn:debugger_protocol_v1') {
+                continue; // TODO: Investigate why this prevents duplication
+            }
             foreach ($xml->children($ns) as $child) {
                 $out['_children'][] = $this->deserializeXml($child, $namespaces);
             }

@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.2",
+    "@jamescoyle/vue-icon": "^0.1.0",
+    "@mdi/js": "^5.9.55",
     "autobahn": "^20.9.2",
     "prismjs": "^1.23.0",
     "splitpanes": "^2.3.6",

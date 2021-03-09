@@ -3,6 +3,7 @@ require('./bootstrap');
 import Vue from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import Toolbar from './views/toolbar.vue'
+import TreeView from './views/tree_view.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
 import { PrismEditor as CodeViewer } from './vue-prism-editor.js';
@@ -16,6 +17,7 @@ Vue.component('splitpanes', Splitpanes);
 Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
 Vue.component('code-viewer', CodeViewer);
+Vue.component('tree-view', TreeView);
 
 function formatUnixTime(unixTimeSeconds) {
   let unixTimeMilliseconds = unixTimeSeconds * 1000;
@@ -41,6 +43,7 @@ const app = new Vue({
       recent_files: [],
       line_breakpoints: {},
       all_breakpoints: {},
+      context: {},
     };
   },
   computed: {
@@ -80,6 +83,7 @@ const app = new Vue({
         this.wamp_conn.sendContinuationCommand(this.dbgp_cid, e.id)
           .then(data => {
             this.showFile();
+            this.updateContext();
           });
       }
     });
@@ -150,6 +154,11 @@ const app = new Vue({
         this.code = data._value;
       });
     },
+    updateContext(context_id, depth) {
+      this.wamp_conn.getContext(this.dbgp_cid, context_id, depth).then(data => {
+        this.context = data._children;
+      })
+    },
     onRestartServerClicked: function(e) {
       this.wamp_conn.restartSocketServer();
     },
@@ -157,7 +166,11 @@ const app = new Vue({
       this.recent_files = [];
       this.wamp_conn.pair(dbgp_cid).then(data => console.log(data))
       this.wamp_conn.listRecentFiles(dbgp_cid)
-        .then(recent_files => {this.recent_files = recent_files; this.showFile()})
+        .then(recent_files => {
+          this.recent_files = recent_files;
+          this.showFile();
+          this.updateContext();
+        })
     },
   },
   template: `
@@ -188,7 +201,7 @@ const app = new Vue({
             <pane>
               <code-viewer :line-numbers=true :breakpoints="file_breakpoints"  :current_line="current_line" :code="code"></code-viewer>
             </pane>
-            <pane>({{ dbgp_cid }})</pane>
+            <pane><tree-view :context=context ></tree-view></pane>
           </splitpanes>
         </pane>
         <pane>

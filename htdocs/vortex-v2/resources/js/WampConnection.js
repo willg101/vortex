@@ -92,5 +92,19 @@ export default class WampConnection {
     }
     return this.call('vortex.debug_connection.send_command', [], {dbgp_cid, command: 'source', args});
   }
+  getContext(dbgp_cid, depth, context_id) {
+    let args = {};
+    if (depth) {
+      args.d = depth;
+    }
+    if (context_id) {
+      args.c = context_id;
+    }
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'context_get',
+      dbgp_cid,
+      args
+    });
+  }
 }
 // vim: shiftwidth=2 tabstop=2
