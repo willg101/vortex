@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     highlighter(code) {
-      return highlight(code, languages.js); 
+      return highlight(code, languages.js);
       // languages.<insert language> to return html with markup
     },
   }
