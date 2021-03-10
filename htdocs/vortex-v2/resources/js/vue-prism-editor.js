@@ -32,7 +32,8 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
   data: function data() {
     return {
       lineNumbersHeight: '20px',
-      codeData: ''
+      codeData: '',
+      scroll_adjustment_queued: false,
     };
   },
   watch: {
@@ -43,8 +44,16 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
           this.codeData = '';
         } else {
           this.codeData = newVal;
+          this.$nextTick(function () {
+            this.scroll_adjustment_queued = true;
+          });
         }
-      }
+      },
+    },
+    current_line(newVal) {
+      this.$nextTick(function () {
+        this.scroll_adjustment_queued = !!(this.scroll_adjustment_queued || newVal);
+      });
     },
     content: {
       immediate: true,
@@ -69,8 +78,9 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
     }
   },
   updated() {
-    if (this.$refs.current_line) {
+    if (this.$refs.current_line && this.scroll_adjustment_queued) {
       this.$refs.current_line.scrollIntoViewIfNeeded(true);
+      this.scroll_adjustment_queued = false;
     }
   },
   computed: {
