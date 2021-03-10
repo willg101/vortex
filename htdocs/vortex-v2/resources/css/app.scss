@@ -67,16 +67,43 @@ $color-scheme: (
  * Code Display
  * #####################################################################################*/
 
-.prism-editor__line-number.breakpoint-line {
-    background-color: #63C;
-    color: #333;
-}
-.prism-editor__line-number.current {
-    background-color: #3C6;
-    color: #333;
+$prism-line-height: 1.2;
+$prism-gutter: 10px;
+
+.prism-editor-wrapper .prism-editor__line-numbers {
+    margin-right: 0;
+    .prism-editor__line-number.breakpoint-line {
+        background-color: #63C;
+        color: #FFF;
+    }
 }
 
 .prism-editor-wrapper {
     font-family: 'Source Code Pro', monospace;
     font-size: 10pt;
+}
+
+.prism-editor-wrapper .prism-editor__container {
+    padding-left: $prism-gutter;
+}
+
+.breakpoint-arrow {
+    position: absolute;
+    left: -$prism-gutter;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: #{$prism-line-height/2}em 0 #{$prism-line-height/2}em $prism-gutter - 2;
+    border-color: transparent transparent transparent #63C;
+}
+
+
+.current-line-code {
+    position: absolute;
+    width: calc(100% + #{$prism-gutter});
+    height: #{$prism-line-height}em;
+    background: #33CC6622;
+    border: 1px solid #3C6;
+    border-width: 1px 0px;
+    left: -$prism-gutter;
 }

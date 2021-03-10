@@ -102,8 +102,14 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
     },
     content: function content() {
       var result = this.highlight(this.codeData) + '<br />'; // todo: VNode support?
-
-      return result;
+      let lines = result.split('\n');
+      if (this.current_line) {
+        lines[this.current_line - 1] = '<span class="current-line-code"></span>' + lines[this.current_line - 1];
+      }
+      for (let line in this.breakpoints) {
+        lines[line - 1] = '<span class="breakpoint-arrow"></span>' + lines[line - 1];
+      }
+      return lines.join('\n');
     },
     lineNumbersCount: function lineNumbersCount() {
       var totalLines = this.codeData.split(/\r\n|\n/).length;
