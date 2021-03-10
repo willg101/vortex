@@ -128,7 +128,7 @@ const app = new Vue({
         let file = this.current_file;
         if (this.line_breakpoints[file] && this.line_breakpoints[file][e.line]) {
           let bpid = this.line_breakpoints[file][e.line].id;
-          this.wamp_conn.removeLineBreakpoint(this.dbgp_cid, bpid)
+          this.wamp_conn.removeBreakpoint(this.dbgp_cid, bpid)
             .then(() => {
               this.$delete(this.line_breakpoints[file], e.line)
               this.$delete(this.all_breakpoints, bpid);

@@ -76,7 +76,7 @@ export default class WampConnection {
       extra_data: expression,
     });
   }
-  removeLineBreakpoint(dbgp_cid, bpid) {
+  removeBreakpoint(dbgp_cid, bpid) {
     return this.call('vortex.debug_connection.send_command', [], {
       command: 'breakpoint_remove',
       dbgp_cid,
