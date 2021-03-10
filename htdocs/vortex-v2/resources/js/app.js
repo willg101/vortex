@@ -78,7 +78,6 @@ const app = new Vue({
   },
   created() {
     EventBus.$on('debug-command', e => {
-      //console.log('debug-command', e.id)
       if (this.dbgp_cid) {
         this.wamp_conn.sendContinuationCommand(this.dbgp_cid, e.id)
           .then(data => {
@@ -91,24 +90,8 @@ const app = new Vue({
       this.debug_connections = e.connections;
     });
     EventBus.$on('debugger-engine-notification', e => {
-      let msg = e.msg;
-      if (msg.name == 'breakpoint_resolved') {
-        (msg._children || []).forEach(breakpoint => {
-          let file = breakpoint.filename;
-          let old_line = this.all_breakpoints[breakpoint.id]
-            && this.all_breakpoints[breakpoint.id].line;
-          if (old_line) {
-            this.$delete(this.line_breakpoints[breakpoint.filename], old_line);
-          }
-          if (!this.line_breakpoints[file]) {
-            this.$set(this.line_breakpoints, file, {});
-          }
-          this.$set(this.all_breakpoints, breakpoint.id , { type: 'line', file, line: e.line });
-          this.$set(this.line_breakpoints[breakpoint.filename], breakpoint.lineno, { id: breakpoint.id});
-
-          // TODO: For resolved breakpoints, we can't assume they are line breakpoints
-          // TODO: re-use code between this function and $onLineClicked()
-        });
+      if (e.msg.name == 'breakpoint_resolved') {
+        (e.msg._children || []).forEach(bp => this.storeBreakpoint(bp));
       }
     });
     EventBus.$on('line-clicked', e => this.onLineClicked(e));
@@ -123,28 +106,41 @@ const app = new Vue({
     this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', EventBus);
   },
   methods: {
+    storeBreakpoint(bp) {
+      let old_lineno = this.all_breakpoints[bp.id]
+        && this.all_breakpoints[bp.id].lineno;
+      if (old_lineno) {
+        this.$delete(this.line_breakpoints[bp.filename], old_lineno);
+      }
+      if (!this.line_breakpoints[bp.filename]) {
+        this.$set(this.line_breakpoints, bp.filename, {});
+      }
+      this.$set(this.all_breakpoints, bp.id , bp);
+      this.$set(this.line_breakpoints[bp.filename], bp.lineno, { id: bp.id});
+      // TODO: For resolved breakpoints, we can't assume they are line breakpoints
+    },
     onLineClicked(e) {
       if (this.dbgp_cid) {
-        let file = this.current_file;
-        if (this.line_breakpoints[file] && this.line_breakpoints[file][e.line]) {
-          let bpid = this.line_breakpoints[file][e.line].id;
+        let filename = this.current_file;
+        if (this.line_breakpoints[filename] && this.line_breakpoints[filename][e.line]) {
+          let bpid = this.line_breakpoints[filename][e.line].id;
           this.wamp_conn.removeBreakpoint(this.dbgp_cid, bpid)
             .then(() => {
-              this.$delete(this.line_breakpoints[file], e.line)
+              this.$delete(this.line_breakpoints[filename], e.line)
               this.$delete(this.all_breakpoints, bpid);
             });
         } else {
-          this.wamp_conn.addLineBreakpoint(this.dbgp_cid, file, e.line)
+          this.wamp_conn.addLineBreakpoint(this.dbgp_cid, filename, e.line)
             .then(data => {
               if (this.all_breakpoints[data.id]) {
                 return; // Already been resolved
               }
 
-              if (!this.line_breakpoints[file]) {
-                this.$set(this.line_breakpoints, file, {});
+              if (!this.line_breakpoints[filename]) {
+                this.$set(this.line_breakpoints, filename, {});
               }
-              this.$set(this.line_breakpoints[file], e.line, { id: data.id });
-              this.$set(this.all_breakpoints, data.id , { type: 'line', file, line: e.line });
+              this.$set(this.line_breakpoints[filename], e.line, { id: data.id });
+              this.$set(this.all_breakpoints, data.id , { type: 'line', filename, line: e.line });
             });
         }
       }
@@ -152,6 +148,15 @@ const app = new Vue({
     showFile(uri) {
       this.wamp_conn.source(this.dbgp_cid, uri).then(data => {
         this.code = data._value;
+      });
+    },
+    updateBreakpoints() {
+      this.line_breakpoints = {};
+      this.all_breakpoints  = {};
+      this.wamp_conn.listBreakpoints(this.dbgp_cid).then(data => {
+        (data._children || []).forEach(bp => {
+          this.storeBreakpoint(bp);
+        });
       });
     },
     updateContext(context_id, depth) {
@@ -164,13 +169,15 @@ const app = new Vue({
     },
     onPairDbgpSessionClicked: function(dbgp_cid) {
       this.recent_files = [];
-      this.wamp_conn.pair(dbgp_cid).then(data => console.log(data))
-      this.wamp_conn.listRecentFiles(dbgp_cid)
-        .then(recent_files => {
-          this.recent_files = recent_files;
-          this.showFile();
-          this.updateContext();
-        })
+      this.wamp_conn.pair(dbgp_cid).then(() => {
+        this.updateBreakpoints();
+        this.showFile();
+        this.updateContext();
+        this.wamp_conn.listRecentFiles(dbgp_cid)
+          .then(recent_files => {
+            this.recent_files = recent_files;
+          });
+        });
     },
   },
   template: `

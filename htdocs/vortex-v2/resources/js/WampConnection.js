@@ -57,6 +57,12 @@ export default class WampConnection {
   listRecentFiles(dbgp_cid) {
     return this.call('vortex.debug_connection.list_recent_files', [], {'dbgp_cid' : dbgp_cid});
   }
+  listBreakpoints(dbgp_cid) {
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'breakpoint_list',
+      dbgp_cid
+    });
+  }
   sendContinuationCommand(dbgp_cid, command) {
     if (!command.match(/^(run|step_over|step_into|step_out|stop|detach)$/)) {
       throw new Error(`Invalid continuation command: '${command}'`);
