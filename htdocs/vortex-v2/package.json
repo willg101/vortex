@@ -26,6 +26,7 @@
     "autobahn": "^20.9.2",
     "prismjs": "^1.23.0",
     "splitpanes": "^2.3.6",
-    "vue": "^2.6.12"
+    "vue": "^2.6.12",
+    "vue-js-modal": "^2.0.0-rc.6"
   }
 }

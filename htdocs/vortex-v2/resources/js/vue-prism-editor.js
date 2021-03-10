@@ -114,8 +114,8 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
     this.styleLineNumbers();
   },
   methods: {
-    onLineNumberClicked(line) {
-      EventBus.$emit('line-clicked', {line});
+    onLineNumberClicked(line, is_secondary) {
+      EventBus.$emit('line-clicked', {line, is_secondary});
     },
     highlight(code) {
       return highlight(code, languages.js);
@@ -167,7 +167,10 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
       }
     }, [lineNumberWidthCalculator, Array.from(Array(this.lineNumbersCount).keys()).map((_, index) => {
       let opts = {
-        on: { click: e => this.onLineNumberClicked(index, e.which) },
+        on: {
+          'click': e => this.onLineNumberClicked(index, false),
+          'contextmenu': e => { e.preventDefault(); this.onLineNumberClicked(index, true)},
+        },
         attrs : {
           "class": 'prism-editor__line-number token comment ' + (_this3.lineClasses[index + 1] || []).join(' ')
         }
@@ -217,3 +220,5 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
 });
 
 export { PrismEditor };
+// vim: shiftwidth=2 tabstop=2
+

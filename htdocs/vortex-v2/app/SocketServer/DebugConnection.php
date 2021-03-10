@@ -143,6 +143,14 @@ EOF;
 
         $this->skimDataFromMessage($msg_parsed);
 
+        ///////////////////// !!!!!!! TODO !!!!!!!!!!!!! ///////////////////////////////
+        if (($msg_parsed['command'] ?? null) == 'breakpoint_remove') {
+            // Something is causing a string full of garbage to be stored in place of the
+            // expression. This string breaks wamp communications
+            $msg_parsed['_children'] = [];
+        }
+        ///////////////////// !!!!!!! TODO !!!!!!!!!!!!! ///////////////////////////////
+
         if ($msg_parsed['transaction_id'] ?? null) {
             $tid = $msg_parsed['transaction_id'];
             if (isset($this->_callbacks[$tid])) {

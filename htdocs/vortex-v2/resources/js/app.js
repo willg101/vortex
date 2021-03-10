@@ -4,9 +4,12 @@ import Vue from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import Toolbar from './views/toolbar.vue'
 import TreeView from './views/tree_view.vue'
+import BreakpointConfig from './views/dialogs/breakpoint_config.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
 import { PrismEditor as CodeViewer } from './vue-prism-editor.js';
+import VModal from 'vue-js-modal/dist/index.nocss.js'
+import 'vue-js-modal/dist/styles.css'
 
 // import highlighting library (you can use any library you want just return html string)
 import 'prismjs/components/prism-clike';
@@ -18,6 +21,7 @@ Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
 Vue.component('code-viewer', CodeViewer);
 Vue.component('tree-view', TreeView);
+Vue.use(VModal);
 
 function formatUnixTime(unixTimeSeconds) {
   let unixTimeMilliseconds = unixTimeSeconds * 1000;
@@ -106,6 +110,20 @@ const app = new Vue({
     this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', EventBus);
   },
   methods: {
+    configureBreakpoint(bpid, cb) {
+      let expression = '';
+      if (bpid && this.all_breakpoints[bpid]) {
+        try {
+          expression = this.all_breakpoints[bpid]._children[0]._value;
+        } catch (e) {
+          // pass
+        }
+      }
+      this.$modal.show(BreakpointConfig, {
+        handleUpdate: cb,
+        expression,
+      });
+    },
     storeBreakpoint(bp) {
       let old_lineno = this.all_breakpoints[bp.id]
         && this.all_breakpoints[bp.id].lineno;
@@ -116,31 +134,52 @@ const app = new Vue({
         this.$set(this.line_breakpoints, bp.filename, {});
       }
       this.$set(this.all_breakpoints, bp.id , bp);
-      this.$set(this.line_breakpoints[bp.filename], bp.lineno, { id: bp.id});
-      // TODO: For resolved breakpoints, we can't assume they are line breakpoints
+
+      if (bp.type == 'line' || bp.type == 'conditional') {
+        this.$set(this.line_breakpoints[bp.filename], bp.lineno, { id: bp.id});
+      }
+    },
+    removeBreakpoint(bpid) {
+      this.wamp_conn.removeBreakpoint(this.dbgp_cid, bpid)
+        .then(() => {
+          let bp = this.all_breakpoints[bpid];
+          if (bp.type == 'line' || bp.type == 'conditional') {
+            this.$delete(this.line_breakpoints[bp.filename], bp.lineno)
+          }
+          this.$delete(this.all_breakpoints, bpid);
+        });
     },
     onLineClicked(e) {
       if (this.dbgp_cid) {
         let filename = this.current_file;
+        if (e.is_secondary) {
+          let bpid = this.file_breakpoints[e.line] && this.file_breakpoints[e.line].id;
+          this.configureBreakpoint(bpid, updates => {
+            if(bpid) {
+              this.removeBreakpoint(bpid);
+            }
+            this.wamp_conn.addLineBreakpoint(this.dbgp_cid, filename, e.line, updates.expression)
+              .then(data => {
+                if (this.all_breakpoints[data.id]) {
+                  return; // Already been resolved
+                } else {
+                  this.storeBreakpoint(data);
+                }
+              });
+          });
+          return;
+        }
         if (this.line_breakpoints[filename] && this.line_breakpoints[filename][e.line]) {
           let bpid = this.line_breakpoints[filename][e.line].id;
-          this.wamp_conn.removeBreakpoint(this.dbgp_cid, bpid)
-            .then(() => {
-              this.$delete(this.line_breakpoints[filename], e.line)
-              this.$delete(this.all_breakpoints, bpid);
-            });
+          this.removeBreakpoint(bpid);
         } else {
           this.wamp_conn.addLineBreakpoint(this.dbgp_cid, filename, e.line)
             .then(data => {
               if (this.all_breakpoints[data.id]) {
                 return; // Already been resolved
+              } else {
+                this.storeBreakpoint(data);
               }
-
-              if (!this.line_breakpoints[filename]) {
-                this.$set(this.line_breakpoints, filename, {});
-              }
-              this.$set(this.line_breakpoints[filename], e.line, { id: data.id });
-              this.$set(this.all_breakpoints, data.id , { type: 'line', filename, line: e.line });
             });
         }
       }
