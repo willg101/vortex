@@ -45,14 +45,20 @@ const app = new Vue({
       wamp_connection_status: '',
       session_id : '',
       recent_files: [],
-      line_breakpoints: {},
       all_breakpoints: {},
       context: {},
     };
   },
   computed: {
     file_breakpoints: function() {
-      return this.line_breakpoints[this.current_file] || {};
+      let out = {};
+      for (let i in this.all_breakpoints) {
+        let bp = this.all_breakpoints[i];
+        if ((bp.type == 'line' || bp.type == 'conditional') && bp.filename == this.current_file) {
+          out[bp.lineno] = bp;
+        }
+      }
+      return out;
     },
     current_line : function() {
       return this.debug_connections[this.dbgp_cid]
@@ -125,27 +131,11 @@ const app = new Vue({
       });
     },
     storeBreakpoint(bp) {
-      let old_lineno = this.all_breakpoints[bp.id]
-        && this.all_breakpoints[bp.id].lineno;
-      if (old_lineno) {
-        this.$delete(this.line_breakpoints[bp.filename], old_lineno);
-      }
-      if (!this.line_breakpoints[bp.filename]) {
-        this.$set(this.line_breakpoints, bp.filename, {});
-      }
-      this.$set(this.all_breakpoints, bp.id , bp);
-
-      if (bp.type == 'line' || bp.type == 'conditional') {
-        this.$set(this.line_breakpoints[bp.filename], bp.lineno, { id: bp.id, type: bp.type });
-      }
+      this.$set(this.all_breakpoints, bp.id, bp);
     },
     removeBreakpoint(bpid) {
       this.wamp_conn.removeBreakpoint(this.dbgp_cid, bpid)
         .then(() => {
-          let bp = this.all_breakpoints[bpid];
-          if (bp.type == 'line' || bp.type == 'conditional') {
-            this.$delete(this.line_breakpoints[bp.filename], bp.lineno)
-          }
           this.$delete(this.all_breakpoints, bpid);
         });
     },
@@ -169,8 +159,8 @@ const app = new Vue({
           });
           return;
         }
-        if (this.line_breakpoints[filename] && this.line_breakpoints[filename][e.line]) {
-          let bpid = this.line_breakpoints[filename][e.line].id;
+        if (this.file_breakpoints[e.line]) {
+          let bpid = this.file_breakpoints[e.line].id;
           this.removeBreakpoint(bpid);
         } else {
           this.wamp_conn.addLineBreakpoint(this.dbgp_cid, filename, e.line)
@@ -190,7 +180,6 @@ const app = new Vue({
       });
     },
     updateBreakpoints() {
-      this.line_breakpoints = {};
       this.all_breakpoints  = {};
       this.wamp_conn.listBreakpoints(this.dbgp_cid).then(data => {
         (data._children || []).forEach(bp => {
