@@ -70,11 +70,17 @@ $color-scheme: (
 $prism-line-height: 1.2;
 $prism-gutter: 10px;
 
+$bp-purple: #63C;
+$bp-blue: #35E;
+
 .prism-editor-wrapper .prism-editor__line-numbers {
     margin-right: 0;
     .prism-editor__line-number.breakpoint-line {
-        background-color: #63C;
+        background-color: $bp-purple;
         color: #FFF;
+        &.conditional {
+            background-color: $bp-blue;
+        }
     }
 }
 
@@ -94,7 +100,11 @@ $prism-gutter: 10px;
     height: 0;
     border-style: solid;
     border-width: #{$prism-line-height/2}em 0 #{$prism-line-height/2}em $prism-gutter - 2;
-    border-color: transparent transparent transparent #63C;
+    border-color: transparent transparent transparent $bp-purple;
+
+    &.conditional {
+        border-color: transparent transparent transparent $bp-blue;
+    }
 }
 
 

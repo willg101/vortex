@@ -94,6 +94,7 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
           out[line] = [];
         }
         out[line].push('breakpoint-line');
+        out[line].push(this.breakpoints[line].type);
       }
       return out;
     },
@@ -107,7 +108,7 @@ var PrismEditor = /*#__PURE__*/Vue.extend({
         lines[this.current_line - 1] = '<span class="current-line-code"></span>' + lines[this.current_line - 1];
       }
       for (let line in this.breakpoints) {
-        lines[line - 1] = '<span class="breakpoint-arrow"></span>' + lines[line - 1];
+        lines[line - 1] = '<span class="breakpoint-arrow ' + this.breakpoints[line].type + '"></span>' + lines[line - 1];
       }
       return lines.join('\n');
     },

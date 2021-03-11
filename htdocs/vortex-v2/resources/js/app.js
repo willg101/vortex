@@ -136,7 +136,7 @@ const app = new Vue({
       this.$set(this.all_breakpoints, bp.id , bp);
 
       if (bp.type == 'line' || bp.type == 'conditional') {
-        this.$set(this.line_breakpoints[bp.filename], bp.lineno, { id: bp.id});
+        this.$set(this.line_breakpoints[bp.filename], bp.lineno, { id: bp.id, type: bp.type });
       }
     },
     removeBreakpoint(bpid) {
