@@ -84,7 +84,12 @@ const app = new Vue({
         }
       }
       return null;
-    }
+    },
+    connection_status: function() {
+      return (this.wamp_connection_status == 'connected' && this.dbgp_cid)
+        ? 'paired'
+        : this.wamp_connection_status;
+    },
   },
   created() {
     EventBus.$on('debug-command', e => {
@@ -98,6 +103,9 @@ const app = new Vue({
     });
     EventBus.$on('debug-connections-changed', e => {
       this.debug_connections = e.connections;
+    });
+    EventBus.$on('restart-socket-server-requested', e => {
+      this.wamp_conn.restartSocketServer();
     });
     EventBus.$on('debugger-engine-notification', e => {
       if (e.msg.name == 'breakpoint_resolved') {
@@ -192,9 +200,6 @@ const app = new Vue({
         this.context = data._children;
       })
     },
-    onRestartServerClicked: function(e) {
-      this.wamp_conn.restartSocketServer();
-    },
     onPairDbgpSessionClicked: function(dbgp_cid) {
       this.recent_files = [];
       this.wamp_conn.pair(dbgp_cid).then(() => {
@@ -211,7 +216,7 @@ const app = new Vue({
   template: `
   <div class="app-wrapper relative h-100 w-100 d-flex flex-column">
     <div class="flex-grow-0">
-      <toolbar></toolbar>
+      <toolbar :connection_status="connection_status"></toolbar>
     </div>
     <div class="flex-grow-1 relative h-100">
       <splitpanes class="default-theme relative h-100">
@@ -240,8 +245,6 @@ const app = new Vue({
           </splitpanes>
         </pane>
         <pane>
-          Connection status: {{ wamp_connection_status }}<br>
-          <button @click="onRestartServerClicked">Restart Socket Server</button>
         </pane>
       </splitpanes>
     </div>

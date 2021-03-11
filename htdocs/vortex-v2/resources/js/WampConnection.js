@@ -20,7 +20,7 @@ export default class WampConnection {
       });
     };
     this.connection.onclose = () => {
-      let status = this.connection.isRetrying ? 'reconnecting' : 'disconnected';
+      let status = this.connection.isRetrying ? 'connecting' : 'disconnected';
       this.eventBus.$emit('wamp-connection-status-changed', { status });
     };
     this.connection.open();

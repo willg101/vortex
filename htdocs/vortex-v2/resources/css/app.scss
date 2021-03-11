@@ -8,6 +8,9 @@ html, body { position: relative; width: 100vw; height: 100vh; overflow: hidden; 
 /* #####################################################################################
  * Utility
  * #####################################################################################*/
+.float-right { float: right }
+.float-left { float: left }
+
 .d-flex { display: flex; }
 .d-block { display: block; }
 .d-inline-block { display: inline-block; }
