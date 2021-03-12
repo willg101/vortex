@@ -4,10 +4,14 @@
  * Resets
  * #####################################################################################*/
 html, body { position: relative; width: 100vw; height: 100vh; overflow: hidden; margin: 0; }
-
+ul { margin: 0; }
 /* #####################################################################################
  * Utility
  * #####################################################################################*/
+.overflow-y-auto { overflow-y: auto; }
+
+.cursor-pointer { cursor: pointer }
+
 .float-right { float: right }
 .float-left { float: left }
 
@@ -21,6 +25,8 @@ html, body { position: relative; width: 100vw; height: 100vh; overflow: hidden; 
 .flex-grow-1 { flex-grow: 1; }
 
 .relative { position: relative; }
+
+.full-height-minus-bar { height: calc(100% - 28px); }
 
 $size-pcts: 0, 25, 50, 75, 100;
 @each $size in $size-pcts {
@@ -64,6 +70,12 @@ $color-scheme: (
 @each $name, $color in $color-scheme {
   .bg-#{$name} { background-color: $color }
   .fg-#{$name} { color: $color }
+}
+
+.pane-header {
+  background-color: #CCC;
+  border: 1px solid #888;
+  border-width: 1px 0;
 }
 
 /* #####################################################################################

@@ -2,7 +2,7 @@
   <ul>
     <li v-for="(item, index) in context">
       <template  v-if="item._children && item._children.length">
-        <div @click="toggleItem(index)">
+        <div @click="toggleItem(index)" class="cursor-pointer">
           <svg-icon :size="12" type="mdi" :path="is_open[index] ? open_icon : closed_icon"></svg-icon>
           <code>{{ item.name }}</code>
         </div>

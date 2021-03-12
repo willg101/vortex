@@ -4,6 +4,7 @@ import Vue from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import Toolbar from './views/toolbar.vue'
 import TreeView from './views/tree_view.vue'
+import ScopePane from './views/scope_pane.vue'
 import BreakpointConfig from './views/dialogs/breakpoint_config.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
@@ -21,6 +22,7 @@ Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
 Vue.component('code-viewer', CodeViewer);
 Vue.component('tree-view', TreeView);
+Vue.component('scope-pane', ScopePane);
 Vue.use(VModal);
 
 function formatUnixTime(unixTimeSeconds) {
@@ -218,7 +220,7 @@ const app = new Vue({
     <div class="flex-grow-0">
       <toolbar :connection_status="connection_status"></toolbar>
     </div>
-    <div class="flex-grow-1 relative h-100">
+    <div class="flex-grow-1 relative full-height-minus-bar">
       <splitpanes class="default-theme relative h-100">
         <pane min-size="20">
           <ul>
@@ -241,10 +243,12 @@ const app = new Vue({
             <pane>
               <code-viewer :line-numbers=true :breakpoints="file_breakpoints"  :current_line="current_line" :code="code"></code-viewer>
             </pane>
-            <pane><tree-view :context=context ></tree-view></pane>
           </splitpanes>
         </pane>
         <pane>
+          <div class="overflow-y-auto h-100 position-relative">
+            <scope-pane :context=context></scope-pane>
+          </div>
         </pane>
       </splitpanes>
     </div>
