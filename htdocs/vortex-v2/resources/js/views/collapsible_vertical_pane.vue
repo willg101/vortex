@@ -38,7 +38,7 @@ export default {
   },
   data() {
     return {
-      is_open: false,
+      is_open: true,
       open_icon: mdiMenuDownOutline,
       closed_icon: mdiMenuRightOutline,
     };

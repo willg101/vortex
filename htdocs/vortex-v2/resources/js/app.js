@@ -5,6 +5,7 @@ import { Splitpanes, Pane } from 'splitpanes'
 import Toolbar from './views/toolbar.vue'
 import TreeView from './views/tree_view.vue'
 import ScopePane from './views/scope_pane.vue'
+import ConnectionsPane from './views/connections_pane.vue'
 import BreakpointConfig from './views/dialogs/breakpoint_config.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
@@ -23,19 +24,8 @@ Vue.component('toolbar', Toolbar);
 Vue.component('code-viewer', CodeViewer);
 Vue.component('tree-view', TreeView);
 Vue.component('scope-pane', ScopePane);
+Vue.component('connections-pane', ConnectionsPane);
 Vue.use(VModal);
-
-function formatUnixTime(unixTimeSeconds) {
-  let unixTimeMilliseconds = unixTimeSeconds * 1000;
-  let date = new Date(unixTimeMilliseconds);
-  let hours = date.getHours();
-  let minutes = "0" + date.getMinutes();
-  let seconds = "0" + date.getSeconds();
-  let amPm = (hours > 11) ? 'pm' : 'am';
-  hours -= (hours > 12) ? 12 : 0;
-  hours = (hours == 0 )? 12 : hours;
-  return `${hours}:${minutes.substr(-2)}:${seconds.substr(-2)} ${amPm}`;
-}
 
 // Vue application
 const app = new Vue({
@@ -71,13 +61,6 @@ const app = new Vue({
       return this.debug_connections[this.dbgp_cid]
         && this.debug_connections[this.dbgp_cid].current_file
         || null;
-    },
-    conn_times_formatted: function() {
-      let out = {};
-      for (let cid in this.debug_connections) {
-        out[cid] = formatUnixTime(this.debug_connections[cid].time);
-      }
-      return out;
     },
     dbgp_cid: function() {
       for (let cid in this.debug_connections) {
@@ -115,6 +98,7 @@ const app = new Vue({
       }
     });
     EventBus.$on('line-clicked', e => this.onLineClicked(e));
+    EventBus.$on('dbgp-pair-requested', e => this.onDbgpPairRequested(e));
     EventBus.$on('wamp-connection-status-changed', e => {
       this.wamp_connection_status = e.status;
       if (e.session_id) {
@@ -202,7 +186,8 @@ const app = new Vue({
         this.context = data._children;
       })
     },
-    onPairDbgpSessionClicked: function(dbgp_cid) {
+    onDbgpPairRequested: function(e) {
+      let dbgp_cid = e.cid;
       this.recent_files = [];
       this.wamp_conn.pair(dbgp_cid).then(() => {
         this.updateBreakpoints();
@@ -223,15 +208,7 @@ const app = new Vue({
     <div class="flex-grow-1 relative full-height-minus-bar">
       <splitpanes class="default-theme relative h-100">
         <pane min-size="20">
-          <ul>
-            <li v-for="conn in debug_connections">
-              <b>{{ conn.initial_file }}</b>
-              |
-              {{ conn.codebase_id }} on {{ conn.host }}
-              ({{ conn_times_formatted[conn.cid] }})
-              <button @click="onPairDbgpSessionClicked(conn.cid)" :disabled="conn.wamp_session == session_id">Pair</button>
-              </li>
-          </ul>
+          <connections-pane :connections="debug_connections" :session_id="session_id"></connections-pane>
         </pane>
         <pane>
           <splitpanes horizontal>
