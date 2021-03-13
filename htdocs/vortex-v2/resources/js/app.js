@@ -7,6 +7,7 @@ import TreeView from './views/tree_view.vue'
 import ScopePane from './views/scope_pane.vue'
 import ConnectionsPane from './views/connections_pane.vue'
 import FilesPane from './views/files_pane.vue'
+import CallStackPane from './views/call_stack_pane.vue'
 import BreakpointConfig from './views/dialogs/breakpoint_config.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
@@ -27,6 +28,7 @@ Vue.component('tree-view', TreeView);
 Vue.component('scope-pane', ScopePane);
 Vue.component('connections-pane', ConnectionsPane);
 Vue.component('files-pane', FilesPane);
+Vue.component('call-stack-pane', CallStackPane);
 Vue.use(VModal);
 
 // Vue application
@@ -40,11 +42,19 @@ const app = new Vue({
       session_id : '',
       recent_files: [],
       all_breakpoints: {},
-      context: {},
+      context_cache: {},
       file_showing: '',
+      selected_depth: 0,
+      call_stack: {},
     };
   },
   computed: {
+    context: function() {
+      return this.dbgp_cid
+        && (this.context_cache[this.selected_depth]
+          || (this.updateContext() && {}))
+        || {};
+    },
     file_breakpoints: function() {
       let out = {};
       for (let i in this.all_breakpoints) {
@@ -57,14 +67,13 @@ const app = new Vue({
     },
     current_line : function() {
       return this.debug_connections[this.dbgp_cid]
-        && (!this.file_showing
-          || this.file_showing == this.debug_connections[this.dbgp_cid].current_file)
-        && Number.parseInt(this.debug_connections[this.dbgp_cid].current_line)
+        && this.file_showing == this.current_file
+        && parseInt(this.call_stack._children[this.selected_depth].lineno)
         || 0;
     },
     current_file : function() {
-      return (this.debug_connections[this.dbgp_cid]
-          && this.debug_connections[this.dbgp_cid].current_file)
+      return this.call_stack._children && this.call_stack._children[this.selected_depth]
+        && this.call_stack._children[this.selected_depth].filename
         || null;
     },
     dbgp_cid: function() {
@@ -96,11 +105,14 @@ const app = new Vue({
       if (this.dbgp_cid) {
         this.wamp_conn.sendContinuationCommand(this.dbgp_cid, e.id)
           .then(data => {
+            this.selected_depth = 0;
+            this.context_cache = {};
             this.updateContext();
-            this.showFile(this.current_file);
+            this.updateCallStack().then(() => this.showFile(this.current_file));
           });
       }
     });
+    EventBus.$on('set-stack-depth-requested', e => this.selected_depth = e.depth);
     EventBus.$on('debug-connections-changed', e => {
       this.debug_connections = e.connections;
     });
@@ -126,8 +138,9 @@ const app = new Vue({
     this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', EventBus);
   },
   methods: {
+    
     normalizeFilename(filename) {
-      if (!filename.match(/^\w+:\/\/\//)) {
+      if (filename && !filename.match(/^\w+:\/\/\//)) {
         filename = filename.replace(/^\/*/, 'file:///');
       }
       return filename;
@@ -204,6 +217,9 @@ const app = new Vue({
         this.file_showing = this.normalizeFilename(uri);
       });
     },
+    updateCallStack() {
+      return this.wamp_conn.getCallStack(this.dbgp_cid).then(data => this.call_stack = data);
+    },
     updateBreakpoints() {
       this.all_breakpoints  = {};
       this.wamp_conn.listBreakpoints(this.dbgp_cid).then(data => {
@@ -212,17 +228,20 @@ const app = new Vue({
         });
       });
     },
-    updateContext(context_id, depth) {
-      this.wamp_conn.getContext(this.dbgp_cid, context_id, depth).then(data => {
-        this.context = data._children;
+    updateContext(context_id) {
+      let depth = this.selected_depth;
+      this.wamp_conn.getContext(this.dbgp_cid, depth, context_id).then(data => {
+        this.$set(this.context_cache, depth, data._children);
       })
     },
     onDbgpPairRequested: function(e) {
       let dbgp_cid = e.cid;
       this.recent_files = [];
       this.wamp_conn.pair(dbgp_cid).then(() => {
+        this.selected_depth = 0;
+        this.context_cache = {};
         this.updateBreakpoints();
-        this.showFile(this.current_file);
+        this.updateCallStack().then(() => this.showFile(this.current_file));
         this.updateContext();
         this.wamp_conn.listRecentFiles(dbgp_cid)
           .then(recent_files => {
@@ -252,6 +271,7 @@ const app = new Vue({
         <pane>
           <div class="overflow-y-auto h-100 position-relative">
             <scope-pane :context=context></scope-pane>
+            <call-stack-pane :call_stack=call_stack :selected_depth="selected_depth"></call-stack-pane>
           </div>
         </pane>
       </splitpanes>

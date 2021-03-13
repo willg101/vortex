@@ -63,6 +63,12 @@ export default class WampConnection {
       dbgp_cid
     });
   }
+  getCallStack(dbgp_cid) {
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'stack_get',
+      dbgp_cid
+    });
+  }
   sendContinuationCommand(dbgp_cid, command) {
     if (!command.match(/^(run|step_over|step_into|step_out|stop|detach)$/)) {
       throw new Error(`Invalid continuation command: '${command}'`);
