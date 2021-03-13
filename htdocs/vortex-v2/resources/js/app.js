@@ -6,6 +6,7 @@ import Toolbar from './views/toolbar.vue'
 import TreeView from './views/tree_view.vue'
 import ScopePane from './views/scope_pane.vue'
 import ConnectionsPane from './views/connections_pane.vue'
+import FilesPane from './views/files_pane.vue'
 import BreakpointConfig from './views/dialogs/breakpoint_config.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
@@ -25,6 +26,7 @@ Vue.component('code-viewer', CodeViewer);
 Vue.component('tree-view', TreeView);
 Vue.component('scope-pane', ScopePane);
 Vue.component('connections-pane', ConnectionsPane);
+Vue.component('files-pane', FilesPane);
 Vue.use(VModal);
 
 // Vue application
@@ -39,6 +41,7 @@ const app = new Vue({
       recent_files: [],
       all_breakpoints: {},
       context: {},
+      file_showing: '',
     };
   },
   computed: {
@@ -46,7 +49,7 @@ const app = new Vue({
       let out = {};
       for (let i in this.all_breakpoints) {
         let bp = this.all_breakpoints[i];
-        if ((bp.type == 'line' || bp.type == 'conditional') && bp.filename == this.current_file) {
+        if ((bp.type == 'line' || bp.type == 'conditional') && bp.filename == this.file_showing) {
           out[bp.lineno] = bp;
         }
       }
@@ -54,12 +57,14 @@ const app = new Vue({
     },
     current_line : function() {
       return this.debug_connections[this.dbgp_cid]
+        && (!this.file_showing
+          || this.file_showing == this.debug_connections[this.dbgp_cid].current_file)
         && Number.parseInt(this.debug_connections[this.dbgp_cid].current_line)
         || 0;
     },
     current_file : function() {
-      return this.debug_connections[this.dbgp_cid]
-        && this.debug_connections[this.dbgp_cid].current_file
+      return (this.debug_connections[this.dbgp_cid]
+          && this.debug_connections[this.dbgp_cid].current_file)
         || null;
     },
     dbgp_cid: function() {
@@ -69,6 +74,16 @@ const app = new Vue({
         }
       }
       return null;
+    },
+    files: function() {
+      let out = {};
+      if (this.current_file) {
+        out[this.current_file] = true;
+      }
+      for (let i in this.recent_files.args) {
+        out[this.recent_files.args[i]._children[0]._value] = true;
+      }
+      return Object.keys(out);
     },
     connection_status: function() {
       return (this.wamp_connection_status == 'connected' && this.dbgp_cid)
@@ -81,8 +96,8 @@ const app = new Vue({
       if (this.dbgp_cid) {
         this.wamp_conn.sendContinuationCommand(this.dbgp_cid, e.id)
           .then(data => {
-            this.showFile();
             this.updateContext();
+            this.showFile(this.current_file);
           });
       }
     });
@@ -98,6 +113,7 @@ const app = new Vue({
       }
     });
     EventBus.$on('line-clicked', e => this.onLineClicked(e));
+    EventBus.$on('open-file-clicked', e => this.showFile(e.file));
     EventBus.$on('dbgp-pair-requested', e => this.onDbgpPairRequested(e));
     EventBus.$on('wamp-connection-status-changed', e => {
       this.wamp_connection_status = e.status;
@@ -110,6 +126,12 @@ const app = new Vue({
     this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', EventBus);
   },
   methods: {
+    normalizeFilename(filename) {
+      if (!filename.match(/^\w+:\/\/\//)) {
+        filename = filename.replace(/^\/*/, 'file:///');
+      }
+      return filename;
+    },
     configureBreakpoint(bpid, cb) {
       let expression = '';
       if (bpid && this.all_breakpoints[bpid]) {
@@ -124,7 +146,15 @@ const app = new Vue({
         expression,
       });
     },
-    storeBreakpoint(bp) {
+    storeBreakpoint(bp, optional_data = {}) {
+      for (let k in optional_data) {
+        if (typeof bp[k] == 'undefined') {
+          bp[k] = optional_data[k];
+        }
+      }
+      if (bp.filename) {
+        bp.filename = this.normalizeFilename(bp.filename);
+      }
       this.$set(this.all_breakpoints, bp.id, bp);
     },
     removeBreakpoint(bpid) {
@@ -135,7 +165,7 @@ const app = new Vue({
     },
     onLineClicked(e) {
       if (this.dbgp_cid) {
-        let filename = this.current_file;
+        let filename = this.file_showing;
         if (e.is_secondary) {
           let bpid = this.file_breakpoints[e.line] && this.file_breakpoints[e.line].id;
           this.configureBreakpoint(bpid, updates => {
@@ -147,7 +177,7 @@ const app = new Vue({
                 if (this.all_breakpoints[data.id]) {
                   return; // Already been resolved
                 } else {
-                  this.storeBreakpoint(data);
+                  this.storeBreakpoint(data, {lineno: e.line, filename, type: 'conditional'});
                 }
               });
           });
@@ -162,7 +192,7 @@ const app = new Vue({
               if (this.all_breakpoints[data.id]) {
                 return; // Already been resolved
               } else {
-                this.storeBreakpoint(data);
+                this.storeBreakpoint(data, {lineno: e.line, filename, type: 'line'});
               }
             });
         }
@@ -171,6 +201,7 @@ const app = new Vue({
     showFile(uri) {
       this.wamp_conn.source(this.dbgp_cid, uri).then(data => {
         this.code = data._value;
+        this.file_showing = this.normalizeFilename(uri);
       });
     },
     updateBreakpoints() {
@@ -191,7 +222,7 @@ const app = new Vue({
       this.recent_files = [];
       this.wamp_conn.pair(dbgp_cid).then(() => {
         this.updateBreakpoints();
-        this.showFile();
+        this.showFile(this.current_file);
         this.updateContext();
         this.wamp_conn.listRecentFiles(dbgp_cid)
           .then(recent_files => {
@@ -209,14 +240,10 @@ const app = new Vue({
       <splitpanes class="default-theme relative h-100">
         <pane min-size="20">
           <connections-pane :connections="debug_connections" :session_id="session_id"></connections-pane>
+          <files-pane :files="files"></files-pane>
         </pane>
         <pane>
           <splitpanes horizontal>
-            <pane>
-              <ul>
-                <li v-for="file in recent_files.args">{{ file._children[0]._value }}</li>
-              </ul>
-            </pane>
             <pane>
               <code-viewer :line-numbers=true :breakpoints="file_breakpoints"  :current_line="current_line" :code="code"></code-viewer>
             </pane>
