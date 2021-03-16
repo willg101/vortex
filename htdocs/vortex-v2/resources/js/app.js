@@ -115,10 +115,20 @@ const app = new Vue({
           });
       }
     });
+    EventBus.$on('fetch-additional-children', e => {
+      let depth = this.selected_depth;
+      let next_page = Math.ceil(e.property._children.length / e.property.pagesize);
+      this.wamp_conn.getValue(this.dbgp_cid, e.property.fullname, depth, next_page).then(data => {
+        this.augmentContextCache(e.path, depth, {_children: e.property._children.concat(data._children[0]._children)}); 
+//        this.$set(e.property, '_children', data._children || []);
+//        this.$set(e.property, 'value', data.value);
+      });
+
+    });
     EventBus.$on('fetch-property', e => {
       let depth = this.selected_depth;
       this.wamp_conn.getValue(this.dbgp_cid, e.property.fullname, depth).then(data => {
-        this.augmentContextCache(e.path, depth, data); 
+        this.augmentContextCache(e.path, depth, data._children[0]); 
 //        this.$set(e.property, '_children', data._children || []);
 //        this.$set(e.property, 'value', data.value);
       });

@@ -7,6 +7,7 @@
       </div>
       <ul v-if="is_open">
         <tree-node v-for="(item, index) in value._children" :value="item" :path="path.concat(index)"></tree-node>
+        <li v-if="n_additional_children" @click="loadMoreChildren"><i>+ {{ n_additional_children }} more</i></li>
       </ul>
     </template>
     <div class="no-icon" v-else>
@@ -48,7 +49,12 @@ export default {
     if (this.n_additional_children && !(this.value._children && this.value._children.length )) {
       EventBus.$emit('fetch-property', {property: this.value, path: this.path});
     }
-  }
+  },
+  methods: {
+    loadMoreChildren() {
+      EventBus.$emit('fetch-additional-children', {property: this.value, path: this.path});
+    }
+  },
 }
 </script>
 
