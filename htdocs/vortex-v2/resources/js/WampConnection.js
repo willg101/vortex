@@ -97,6 +97,16 @@ export default class WampConnection {
       },
     });
   }
+  getValue(dbgp_cid, full_name, depth) {
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'property_value',
+      dbgp_cid,
+      args : {
+        d: depth,
+        n: full_name,
+      },
+    });
+  }
   source(dbgp_cid, file_uri) {
     let args = {};
     if (file_uri) {

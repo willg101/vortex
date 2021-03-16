@@ -1,17 +1,6 @@
 <template>
   <ul>
-    <li v-for="(item, index) in context">
-      <template  v-if="item._children && item._children.length">
-        <div @click="toggleItem(index)" class="cursor-pointer">
-          <svg-icon :size="12" type="mdi" :path="is_open[index] ? open_icon : closed_icon"></svg-icon>
-          <code>{{ item.name }}</code>
-        </div>
-        <tree-view v-if="is_open[index]" :context="item._children"></tree-view>
-      </template>
-      <div class="no-icon" v-else>
-        <code>{{ item.name }}</code> : <code>{{ item._value }}</code>
-      </div>
-    </li>
+    <tree-node v-for="(item, index) in context" :value="item" :path="[index]"></tree-node>
   </ul>
 </template>
 
@@ -34,13 +23,9 @@ export default {
   props: {
     context: {
       default: () => {},
-    }
+      page_size: 32,
+    },
   },
-  methods: {
-    toggleItem(index) {
-      this.$set(this.is_open, index, !this.is_open[index]);
-    }
-  }
 }
 </script>
 

@@ -4,6 +4,7 @@ import Vue from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import Toolbar from './views/toolbar.vue'
 import TreeView from './views/tree_view.vue'
+import TreeNode from './views/tree_node.vue'
 import ScopePane from './views/scope_pane.vue'
 import ConnectionsPane from './views/connections_pane.vue'
 import FilesPane from './views/files_pane.vue'
@@ -25,6 +26,7 @@ Vue.component('pane', Pane);
 Vue.component('toolbar', Toolbar);
 Vue.component('code-viewer', CodeViewer);
 Vue.component('tree-view', TreeView);
+Vue.component('tree-node', TreeNode);
 Vue.component('scope-pane', ScopePane);
 Vue.component('connections-pane', ConnectionsPane);
 Vue.component('files-pane', FilesPane);
@@ -50,6 +52,7 @@ const app = new Vue({
   },
   computed: {
     context: function() {
+      // TODO: generate version of context with functions to automatically fetch more data
       return this.dbgp_cid
         && (this.context_cache[this.selected_depth]
           || (this.updateContext() && {}))
@@ -111,6 +114,14 @@ const app = new Vue({
             this.updateCallStack().then(() => this.showFile(this.current_file));
           });
       }
+    });
+    EventBus.$on('fetch-property', e => {
+      let depth = this.selected_depth;
+      this.wamp_conn.getValue(this.dbgp_cid, e.property.fullname, depth).then(data => {
+        this.augmentContextCache(e.path, depth, data); 
+//        this.$set(e.property, '_children', data._children || []);
+//        this.$set(e.property, 'value', data.value);
+      });
     });
     EventBus.$on('set-stack-depth-requested', e => this.selected_depth = e.depth);
     EventBus.$on('debug-connections-changed', e => {
@@ -233,6 +244,19 @@ const app = new Vue({
       this.wamp_conn.getContext(this.dbgp_cid, depth, context_id).then(data => {
         this.$set(this.context_cache, depth, data._children);
       })
+    },
+    augmentContextCache(path, depth, data) {
+      let prop = this.context_cache[depth] || {};
+      let prop_par = null;
+      path.forEach(part => {
+        if (prop && prop[part] && prop[part]._children) {
+          prop_par = prop[part];
+          prop = prop_par._children;
+        }
+      });
+      if (prop) {
+        this.$set(prop_par, '_children', data._children);
+      }
     },
     onDbgpPairRequested: function(e) {
       let dbgp_cid = e.cid;
