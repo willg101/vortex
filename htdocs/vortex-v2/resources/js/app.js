@@ -117,11 +117,12 @@ const app = new Vue({
     });
     EventBus.$on('fetch-additional-children', e => {
       let depth = this.selected_depth;
-      let next_page = Math.ceil(e.property._children.length / e.property.pagesize);
+      let next_page = (parseInt(e.property.page) || 0) + 1;
       this.wamp_conn.getValue(this.dbgp_cid, e.property.fullname, depth, next_page).then(data => {
-        this.augmentContextCache(e.path, depth, {_children: e.property._children.concat(data._children[0]._children)}); 
-//        this.$set(e.property, '_children', data._children || []);
-//        this.$set(e.property, 'value', data.value);
+        this.augmentContextCache(e.path, depth, {
+          page: next_page,
+          _children: e.property._children.concat(data._children[0]._children)
+        });
       });
 
     });
@@ -129,8 +130,6 @@ const app = new Vue({
       let depth = this.selected_depth;
       this.wamp_conn.getValue(this.dbgp_cid, e.property.fullname, depth).then(data => {
         this.augmentContextCache(e.path, depth, data._children[0]); 
-//        this.$set(e.property, '_children', data._children || []);
-//        this.$set(e.property, 'value', data.value);
       });
     });
     EventBus.$on('set-stack-depth-requested', e => this.selected_depth = e.depth);
@@ -266,6 +265,9 @@ const app = new Vue({
       });
       if (prop) {
         this.$set(prop_par, '_children', data._children);
+        if (data.page) {
+          this.$set(prop_par, 'page', data.page);
+        }
       }
     },
     onDbgpPairRequested: function(e) {
