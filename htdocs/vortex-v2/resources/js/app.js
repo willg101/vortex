@@ -9,6 +9,7 @@ import ScopePane from './views/scope_pane.vue'
 import ConnectionsPane from './views/connections_pane.vue'
 import FilesPane from './views/files_pane.vue'
 import CallStackPane from './views/call_stack_pane.vue'
+import StdStreamsPane from './views/std_streams.vue'
 import BreakpointConfig from './views/dialogs/breakpoint_config.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
@@ -31,6 +32,7 @@ Vue.component('scope-pane', ScopePane);
 Vue.component('connections-pane', ConnectionsPane);
 Vue.component('files-pane', FilesPane);
 Vue.component('call-stack-pane', CallStackPane);
+Vue.component('std-streams-pane', StdStreamsPane);
 Vue.use(VModal);
 
 // Vue application
@@ -48,6 +50,7 @@ const app = new Vue({
       file_showing: '',
       selected_depth: 0,
       call_stack: {},
+      messages: [],
     };
   },
   computed: {
@@ -142,6 +145,8 @@ const app = new Vue({
     EventBus.$on('debugger-engine-notification', e => {
       if (e.msg.name == 'breakpoint_resolved') {
         (e.msg._children || []).forEach(bp => this.storeBreakpoint(bp));
+      } else if (e.msg.type == 'stdout') {
+        this.messages.push({type: e.msg.type, time: 'now', text: e.msg._value});
       }
     });
     EventBus.$on('line-clicked', e => this.onLineClicked(e));
@@ -279,6 +284,7 @@ const app = new Vue({
         this.updateBreakpoints();
         this.updateCallStack().then(() => this.showFile(this.current_file));
         this.updateContext();
+        this.wamp_conn.enableStdinRedirection(dbgp_cid, true);
         this.wamp_conn.listRecentFiles(dbgp_cid)
           .then(recent_files => {
             this.recent_files = recent_files;
@@ -296,6 +302,7 @@ const app = new Vue({
         <pane min-size="20">
           <connections-pane :connections="debug_connections" :session_id="session_id"></connections-pane>
           <files-pane :files="files"></files-pane>
+          <std-streams-pane :messages="messages"></std-streams-pane>
         </pane>
         <pane>
           <splitpanes horizontal>
