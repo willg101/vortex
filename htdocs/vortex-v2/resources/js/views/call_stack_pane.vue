@@ -1,5 +1,5 @@
 <template>
-    <collapsible-vertical-pane :title="title">
+  <collapsible-vertical-pane :title="title">
     <div>
       <div v-for="frame in call_stack._children" :class="(selected_depth == frame.level ? '': 'no-icon') + ' frame-line'" @click="onFrameClicked(frame.level)">
         <svg-icon v-if="selected_depth == frame.level" :size="12" type="mdi" :path="selected_icon"></svg-icon>

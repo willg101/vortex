@@ -125,7 +125,6 @@ const app = new Vue({
           _children: e.property._children.concat(data._children[0]._children)
         });
       });
-
     });
     EventBus.$on('fetch-property', e => {
       let depth = this.selected_depth;
