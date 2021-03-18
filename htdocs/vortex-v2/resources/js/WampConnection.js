@@ -88,22 +88,6 @@ export default class WampConnection {
       extra_data: expression,
     });
   }
-  enableStdinRedirection(dbgp_cid, state) {
-    return this.call('vortex.debug_connection.send_command', [], {
-      command: 'stdin',
-      dbgp_cid,
-      args : {
-        c: state ? 1 : 0,
-      },
-    });
-  }
-  sendStdinPacket(dbgp_cid, data) {
-    return this.call('vortex.debug_connection.send_command', [], {
-      command: 'stdin',
-      dbgp_cid,
-      extra_data: data,
-    });
-  }
   removeBreakpoint(dbgp_cid, bpid) {
     return this.call('vortex.debug_connection.send_command', [], {
       command: 'breakpoint_remove',

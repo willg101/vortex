@@ -230,11 +230,5 @@ EOF;
         $this->sendCommand('feature_set', ['n' => 'max_depth', 'v' => 5]);
         $this->sendCommand('feature_set', ['n' => 'resolved_breakpoints', 'v' => 1]);
         $this->sendCommand('feature_set', ['n' => 'notify_ok', 'v' => 1]);
-
-        // c => 1 means 'copy the stream' (instead of redirect it)
-        $this->sendCommand('stdout', ['c' => 1]);
-
-        // stderr does not seem to work currently.
-        // $this->sendCommand('stderr', ['c' => 1]);
     }
 }
