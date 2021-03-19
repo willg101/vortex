@@ -9,7 +9,6 @@ import ScopePane from './views/scope_pane.vue'
 import ConnectionsPane from './views/connections_pane.vue'
 import FilesPane from './views/files_pane.vue'
 import CallStackPane from './views/call_stack_pane.vue'
-import InteractiveConsolePane from './views/interactive_console_pane.vue'
 import BreakpointConfig from './views/dialogs/breakpoint_config.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
@@ -32,7 +31,6 @@ Vue.component('scope-pane', ScopePane);
 Vue.component('connections-pane', ConnectionsPane);
 Vue.component('files-pane', FilesPane);
 Vue.component('call-stack-pane', CallStackPane);
-Vue.component('interactive-console-pane', InteractiveConsolePane);
 Vue.use(VModal);
 
 // Vue application
@@ -51,11 +49,6 @@ const app = new Vue({
       selected_depth: 0,
       call_stack: {},
       messages: [],
-      interactive_console: {
-        lines: [],
-        divider_symbol: Symbol('divider'),
-        prompt: '',
-      },
     };
   },
   computed: {
@@ -152,7 +145,6 @@ const app = new Vue({
       }
     });
     EventBus.$on('line-clicked', e => this.onLineClicked(e));
-    EventBus.$on('interact-send-line', e => this.sendInteractiveConsoleLine(e.text));
     EventBus.$on('open-file-clicked', e => this.showFile(e.file));
     EventBus.$on('dbgp-pair-requested', e => this.onDbgpPairRequested(e));
     EventBus.$on('wamp-connection-status-changed', e => {
@@ -166,21 +158,6 @@ const app = new Vue({
     this.wamp_conn = new WampConnection('wss://' + location.hostname + '/pubsub', EventBus);
   },
   methods: {
-    sendInteractiveConsoleLine(text) {
-      this.interactive_console.lines.push(text);
-      this.wamp_conn.sendConsoleLine(this.dbgp_cid, text).then(data => {
-        if (!data.more) {
-          this.interactive_console.lines.push(this.interactive_console.divider_symbol);
-        }
-        this.interactive_console.prompt = data.prompt;
-      });
-    },
-    initInteractiveConsole() {
-      this.$set(this.interactive_console, 'lines', []);
-      this.wamp_conn.clearConsoleInput(this.dbgp_cid).then(data => {
-        this.interactive_console.prompt = data.prompt;
-      });
-    },
     normalizeFilename(filename) {
       if (filename && !filename.match(/^\w+:\/\/\//)) {
         filename = filename.replace(/^\/*/, 'file:///');
@@ -301,7 +278,6 @@ const app = new Vue({
         this.updateBreakpoints();
         this.updateCallStack().then(() => this.showFile(this.current_file));
         this.updateContext();
-        this.initInteractiveConsole();
         this.wamp_conn.listRecentFiles(dbgp_cid)
           .then(recent_files => {
             this.recent_files = recent_files;
@@ -319,7 +295,6 @@ const app = new Vue({
         <pane min-size="20">
           <connections-pane :connections="debug_connections" :session_id="session_id"></connections-pane>
           <files-pane :files="files"></files-pane>
-          <interactive-console-pane :lines="interactive_console.lines" :divider="interactive_console.divider_symbol" :prompt="interactive_console.prompt"></interactive-console-pane>
         </pane>
         <pane>
           <splitpanes horizontal>

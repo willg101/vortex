@@ -132,19 +132,5 @@ export default class WampConnection {
       args
     });
   }
-  sendConsoleLine(dbgp_cid, line) {
-    return this.call('vortex.debug_connection.send_command', [], {
-      command: 'interact',
-      dbgp_cid,
-      extra_data: line,
-    });
-  }
-  clearConsoleInput(dbgp_cid) {
-    return this.call('vortex.debug_connection.send_command', [], {
-      command: 'interact',
-      dbgp_cid,
-      args: { mode: 0 },
-    });
-  }
 }
 // vim: shiftwidth=2 tabstop=2
