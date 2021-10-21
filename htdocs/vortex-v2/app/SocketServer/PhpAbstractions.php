@@ -9,7 +9,7 @@ class PhpAbstractions {
 
     public function getRecentFiles(
         ?int $max_files,
-        string $codebase_root,
+        ?string $codebase_root,
         ?array $excluded_dirs,
         DebugConnection $dc,
         callable $callback

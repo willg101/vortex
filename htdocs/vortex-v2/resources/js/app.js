@@ -93,7 +93,7 @@ const app = new Vue({
       if (this.current_file) {
         out[this.current_file] = true;
       }
-      for (let i in this.recent_files.args) {
+      for (let i in (this.recent_files || {}).args || []) {
         out[this.recent_files.args[i]._children[0]._value] = true;
       }
       return Object.keys(out);
@@ -134,7 +134,7 @@ const app = new Vue({
     });
     EventBus.$on('set-stack-depth-requested', e => this.selected_depth = e.depth);
     EventBus.$on('debug-connections-changed', e => {
-      this.debug_connections = e.connections;
+      this.$set(this, 'debug_connections', e.connections);
     });
     EventBus.$on('restart-socket-server-requested', e => {
       this.wamp_conn.restartSocketServer();
