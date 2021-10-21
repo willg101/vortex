@@ -86,7 +86,13 @@ class DebugConnection
     public function advancedEval($code, $callback = null)
     {
         $code = base64_encode($code);
-        $this->sendCommand('eval', [], "eval(base64_decode('$code'))", $callback);
+
+        // If we don't temporarily disable debbugging here, our nested eval will create a new debug
+        // session, which in turn will create a new debug session, and so on, until we (quite
+        // quickly) run out of memory
+        $this->sendCommand('eval', [], "ini_set('xdebug.mode', 'off')");
+        $this->sendCommand('eval', [], "eval(base64decode('$code'))", $callback);
+        $this->sendCommand('eval', [], "ini_restore('xdebug.mode')");
     }
 
     public function identifyCodeBase()
