@@ -88,6 +88,56 @@ export default class WampConnection {
       extra_data: expression,
     });
   }
+  addCallBreakpoint(dbgp_cid, fn_name) {
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'breakpoint_set',
+      dbgp_cid,
+      args : {
+        t: 'call',
+        m: fn_name,
+      },
+    });
+  }
+  addReturnBreakpoint(dbgp_cid, fn_name) {
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'breakpoint_set',
+      dbgp_cid,
+      args : {
+        t: 'return',
+        m: fn_name,
+      },
+    });
+  }
+  addExceptionBreakpoint(dbgp_cid, ex_name) {
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'breakpoint_set',
+      dbgp_cid,
+      args : {
+        t: 'exception',
+        x: ex_name,
+      },
+    });
+  }
+  addWatchBreakpoint(dbgp_cid, expr) {
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'breakpoint_set',
+      dbgp_cid,
+      args : {
+        t: 'watch',
+      },
+      extra_data: expr,
+    });
+  }
+  toggleBreakpoint(dbgp_cid, bpid, state) {
+    return this.call('vortex.debug_connection.send_command', [], {
+      command: 'breakpoint_update',
+      dbgp_cid,
+      args : {
+        d: bpid,
+        s: state,
+      },
+    }); 
+  }
   removeBreakpoint(dbgp_cid, bpid) {
     return this.call('vortex.debug_connection.send_command', [], {
       command: 'breakpoint_remove',

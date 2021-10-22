@@ -9,6 +9,7 @@ import ScopePane from './views/scope_pane.vue'
 import ConnectionsPane from './views/connections_pane.vue'
 import FilesPane from './views/files_pane.vue'
 import CallStackPane from './views/call_stack_pane.vue'
+import BreakpointPane from './views/breakpoint_pane.vue'
 import BreakpointConfig from './views/dialogs/breakpoint_config.vue'
 import { EventBus } from './event_bus.js'
 import WampConnection from './WampConnection.js'
@@ -31,6 +32,7 @@ Vue.component('scope-pane', ScopePane);
 Vue.component('connections-pane', ConnectionsPane);
 Vue.component('files-pane', FilesPane);
 Vue.component('call-stack-pane', CallStackPane);
+Vue.component('breakpoint-pane', BreakpointPane);
 Vue.use(VModal);
 
 // Vue application
@@ -145,6 +147,11 @@ const app = new Vue({
       }
     });
     EventBus.$on('line-clicked', e => this.onLineClicked(e));
+    EventBus.$on('breakpoint-toggled', e => {
+      this.wamp_conn.toggleBreakpoint(this.dbgp_cid, e.bpid, e.newState).then(data => {
+        this.all_breakpoints[e.bpid].state = data.state;
+      });
+    });
     EventBus.$on('open-file-clicked', e => this.showFile(e.file));
     EventBus.$on('dbgp-pair-requested', e => this.onDbgpPairRequested(e));
     EventBus.$on('wamp-connection-status-changed', e => {
@@ -278,6 +285,10 @@ const app = new Vue({
         this.updateBreakpoints();
         this.updateCallStack().then(() => this.showFile(this.current_file));
         this.updateContext();
+        this.wamp_conn.addCallBreakpoint(dbgp_cid, 'abc');
+        this.wamp_conn.addReturnBreakpoint(dbgp_cid, 'abc');
+        this.wamp_conn.addExceptionBreakpoint(dbgp_cid, 'DbgpException');
+        this.wamp_conn.addWatchBreakpoint(dbgp_cid, '$foobar');
         this.wamp_conn.listRecentFiles(dbgp_cid)
           .then(recent_files => {
             this.recent_files = recent_files;
@@ -307,6 +318,7 @@ const app = new Vue({
           <div class="overflow-y-auto h-100 position-relative">
             <scope-pane :context=context></scope-pane>
             <call-stack-pane :call_stack=call_stack :selected_depth="selected_depth"></call-stack-pane>
+            <breakpoint-pane :breakpoints=all_breakpoints></breakpoint-pane>
           </div>
         </pane>
       </splitpanes>
