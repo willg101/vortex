@@ -54,7 +54,7 @@ class SocketServerRun extends Command
         $loop = \React\EventLoop\Factory::create();
 
         $dbgp    = new DbgpApp;
-        $dbgp_ss = new SocketServer('0.0.0.0:55455', $loop);
+        $dbgp_ss = new SocketServer('0.0.0.0:9003', $loop);
         $dbgp_app = new IoServer($dbgp, $dbgp_ss, $loop);
 
         $router = new Router($loop);

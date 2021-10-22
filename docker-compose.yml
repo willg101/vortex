@@ -7,7 +7,7 @@ services:
     restart: always
     ports:
       - 38383:80
+      - 55455:9003
     volumes:
       - ./htdocs:/var/www/html
       - ./000-default.conf:/etc/apache2/sites-enabled/000-default.conf:ro
-
