@@ -5,7 +5,6 @@ namespace App\SocketServer;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use Exception;
-use Log;
 use Thruway\ClientSession;
 
 class DbgpApp implements MessageComponentInterface
